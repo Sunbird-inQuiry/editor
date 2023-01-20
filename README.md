@@ -154,7 +154,7 @@ ng g service question-cursor-implementation
 Now open `app.module.ts` file and import like this:
  
 ```diff
-+ import { EditorCursor } from 'collection-editor-library';
++ import { EditorCursor } from 'questionset-editor-library';
 + import { QuestionCursor } from '@project-sunbird/sunbird-quml-player';
 + import { EditorCursorImplementationService } from './editor-cursor-implementation.service';
 
@@ -177,11 +177,11 @@ For more information refer [question-cursor-implementation.service.ts](https://g
 
 ## :label: Step 5: Import the modules and components
 
-Include `CollectionEditorLibraryModule` in your app module:
+Include `QuestionsetEditorLibraryModule` in your app module:
 
 ```diff
   import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-+  import { CollectionEditorLibraryModule, EditorCursor } from '@project-sunbird/sunbird-questionset-editor';
++  import { QuestionsetEditorLibraryModule, EditorCursor } from '@project-sunbird/sunbird-questionset-editor';
   import { RouterModule } from '@angular/router';
   import { QuestionCursor } from '@project-sunbird/sunbird-quml-player';
   import { EditorCursorImplementationService } from './editor-cursor-implementation.service';
@@ -190,7 +190,7 @@ Include `CollectionEditorLibraryModule` in your app module:
    ...
 
    imports: [ 
-+      CollectionEditorLibraryModule,
++      QuestionsetEditorLibraryModule,
       BrowserAnimationsModule,
       RouterModule.forRoot([])
       ],

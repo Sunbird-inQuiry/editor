@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
 import { ConfigService } from '../../services/config/config.service';
 import { FrameworkService } from '../../services/framework/framework.service';
 import { TreeService } from '../../services/tree/tree.service';
-import { EditorCursor } from '../../collection-editor-cursor.service';
+import { EditorCursor } from '../../questionset-editor-cursor.service';
 import { filter, finalize, take, takeUntil } from 'rxjs/operators';
 import { SubMenu } from '../question-option-sub-menu/question-option-sub-menu.component';
 import { ICreationContext } from '../../interfaces/CreationContext';

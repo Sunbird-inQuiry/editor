@@ -38,7 +38,7 @@
               },
               {
                 "glob": "**/*",
-                "input": "projects/collection-editor-library/src/lib/assets",
+                "input": "projects/questionset-editor-library/src/lib/assets",
                 "output": "/assets/"
               },
               {
@@ -192,37 +192,37 @@
         }
       }
     },
-    "collection-editor-library": {
-      "root": "projects/collection-editor-library",
-      "sourceRoot": "projects/collection-editor-library/src",
+    "questionset-editor-library": {
+      "root": "projects/questionset-editor-library",
+      "sourceRoot": "projects/questionset-editor-library/src",
       "projectType": "library",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "tsConfig": "projects/collection-editor-library/tsconfig.lib.json",
-            "project": "projects/collection-editor-library/ng-package.json"
+            "tsConfig": "projects/questionset-editor-library/tsconfig.lib.json",
+            "project": "projects/questionset-editor-library/ng-package.json"
           },
           "configurations": {
             "production": {
-              "project": "projects/collection-editor-library/ng-package.prod.json",
-              "tsConfig": "projects/collection-editor-library/tsconfig.lib.prod.json"
+              "project": "projects/questionset-editor-library/ng-package.prod.json",
+              "tsConfig": "projects/questionset-editor-library/tsconfig.lib.prod.json"
             }
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "projects/collection-editor-library/src/test.ts",
-            "tsConfig": "projects/collection-editor-library/tsconfig.spec.json",
-            "karmaConfig": "projects/collection-editor-library/karma.conf.js",
+            "main": "projects/questionset-editor-library/src/test.ts",
+            "tsConfig": "projects/questionset-editor-library/tsconfig.spec.json",
+            "karmaConfig": "projects/questionset-editor-library/karma.conf.js",
             "scripts": [
               "src/assets/libs/iziToast/iziToast.min.js",
               "node_modules/jquery/dist/jquery.min.js"
             ],
             "codeCoverageExclude": [
-              "projects/collection-editor-library/src/lib/interfaces/*/*.ts"
+              "projects/questionset-editor-library/src/lib/interfaces/*/*.ts"
             ]
           }
         },
@@ -230,8 +230,8 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "projects/collection-editor-library/tsconfig.lib.json",
-              "projects/collection-editor-library/tsconfig.spec.json"
+              "projects/questionset-editor-library/tsconfig.lib.json",
+              "projects/questionset-editor-library/tsconfig.spec.json"
             ],
             "exclude": [
               "**/node_modules/**"

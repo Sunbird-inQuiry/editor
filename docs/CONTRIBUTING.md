@@ -40,7 +40,7 @@ npm install
 npm run build-lib
 ```
 
-It will create a `/dist/collection-editor-library` folder at the root directory and also copy all the required assets.
+It will create a `/dist/questionset-editor-library` folder at the root directory and also copy all the required assets.
 
 #### Starting up the sample application
 

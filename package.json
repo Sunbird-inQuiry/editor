@@ -8,9 +8,9 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "build-lib": "ng build collection-editor-library && node assets-copy.js",
-    "build-lib:prod": " ng build collection-editor-library --configuration production && node assets-copy.js",
-    "test-coverage": "ng test collection-editor-library --code-coverage=true --watch=false --sourceMap=false --browsers=ChromeHeadless"
+    "build-lib": "ng build questionset-editor-library && node assets-copy.js",
+    "build-lib:prod": " ng build questionset-editor-library --configuration production && node assets-copy.js",
+    "test-coverage": "ng test questionset-editor-library --code-coverage=true --watch=false --sourceMap=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {

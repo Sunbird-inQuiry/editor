@@ -11,7 +11,7 @@ For example:
 
 This is the main editor component that accepts some configuration based on it loads the editor.  
 
-Let's deep dive into the editor input [configuration](/projects/collection-editor-library/src/lib/interfaces/editor.ts):
+Let's deep dive into the editor input [configuration](/projects/questionset-editor-library/src/lib/interfaces/editor.ts):
 
 
 ```javascript
