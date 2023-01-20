@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "sunbird-collection-editor": {
+    "sunbird-questionset-editor": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/sunbird-collection-editor",
+            "outputPath": "dist/sunbird-questionset-editor",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -116,19 +116,19 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "sunbird-collection-editor:build",
+            "browserTarget": "sunbird-questionset-editor:build",
             "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {
-              "browserTarget": "sunbird-collection-editor:build:production"
+              "browserTarget": "sunbird-questionset-editor:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "sunbird-collection-editor:build"
+            "browserTarget": "sunbird-questionset-editor:build"
           }
         },
         "test": {
@@ -164,7 +164,7 @@
         }
       }
     },
-    "sunbird-collection-editor-e2e": {
+    "sunbird-questionset-editor-e2e": {
       "root": "e2e/",
       "projectType": "application",
       "prefix": "",
@@ -173,11 +173,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "sunbird-collection-editor:serve"
+            "devServerTarget": "sunbird-questionset-editor:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "sunbird-collection-editor:serve:production"
+              "devServerTarget": "sunbird-questionset-editor:serve:production"
             }
           }
         },
@@ -241,7 +241,7 @@
       }
     }
   },
-  "defaultProject": "sunbird-collection-editor",
+  "defaultProject": "sunbird-questionset-editor",
   "cli": {
     "analytics": false
   }
