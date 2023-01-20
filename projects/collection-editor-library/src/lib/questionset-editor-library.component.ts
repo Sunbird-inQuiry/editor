@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 @Component({
-  selector: 'lib-collection-editor-library',
+  selector: 'lib-questionset-editor-library',
   template: `
   `,
   styles: []
 })
-export class CollectionEditorLibraryComponent implements OnInit {
+export class QuestionsetEditorLibraryComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
