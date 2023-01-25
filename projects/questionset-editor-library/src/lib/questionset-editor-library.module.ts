@@ -8,7 +8,7 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { HttpClientModule } from '@angular/common/http';
 import { SanitizeHtmlPipe } from './pipes/sanitize-html.pipe';
 import { InterpolatePipe } from './pipes/interpolate.pipe';
-import { CollectionEditorLibraryComponent } from './collection-editor-library.component';
+import { QuestionsetEditorLibraryComponent } from './questionset-editor-library.component';
 import { ContentplayerPageComponent } from './components/contentplayer-page/contentplayer-page.component';
 import { EditorComponent } from './components/editor/editor.component';
 import { HeaderComponent } from './components/header/header.component';
@@ -60,7 +60,7 @@ import {TermAndConditionComponent} from './components/term-and-condition/term-an
 import { QualityParamsModalComponent } from './components/quality-params-modal/quality-params-modal.component';
 @NgModule({
   declarations: [
-    CollectionEditorLibraryComponent,
+    QuestionsetEditorLibraryComponent,
     InterpolatePipe,
     SanitizeHtmlPipe,
     ContentplayerPageComponent,
@@ -111,4 +111,4 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
   ],
   exports: [EditorComponent],
 })
-export class CollectionEditorLibraryModule {}
+export class QuestionsetEditorLibraryModule {}

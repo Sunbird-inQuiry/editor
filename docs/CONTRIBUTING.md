@@ -7,10 +7,10 @@ In this guide you will get an overview of the contribution workflow of the edito
 ## Getting started
 
 #### Fork the project
-Go to GitHub and [fork the repository](https://github.com/Sunbird-Ed/sunbird-collection-editor.git).
+Go to GitHub and [fork the repository](https://github.com/Sunbird-inQuiry/editor.git).
 The forked repository will appear in your GitHub account as 
 
-`https://github.com/<YOUR-USERNAME>/sunbird-collection-editor`
+`https://github.com/<YOUR-USERNAME>/editor`
 #### Clone the repository
 
 Now clone the forked repository to your machine. Go to your GitHub account, open the forked repository, click on the code button and then click the copy to clipboard icon.
@@ -20,12 +20,12 @@ Open a terminal and run the following git command:
 ```
 git clone "url you just copied"
 ```
-For example: `git clone https://github.com/Sunbird-Ed/sunbird-collection-editor.git`
+For example: `git clone https://github.com/Sunbird-inQuiry/editor.git`
 
 #### Go to the root directory and run the following command
 
 ```
-cd sunbird-collection-editor
+cd editor
 ```
 
 #### Install dependencies
@@ -40,7 +40,7 @@ npm install
 npm run build-lib
 ```
 
-It will create a `/dist/collection-editor-library` folder at the root directory and also copy all the required assets.
+It will create a `/dist/questionset-editor-library` folder at the root directory and also copy all the required assets.
 
 #### Starting up the sample application
 

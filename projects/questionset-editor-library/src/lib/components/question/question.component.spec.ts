@@ -7,7 +7,7 @@ import { PlayerService } from "../../services/player/player.service";
 import { EditorTelemetryService } from "../../services/telemetry/telemetry.service";
 import { EditorService } from "../../services/editor/editor.service";
 import { ToasterService } from "../../services/toaster/toaster.service";
-import { EditorCursor } from "../../collection-editor-cursor.service";
+import { EditorCursor } from "../../questionset-editor-cursor.service";
 import { TreeService } from "../../services/tree/tree.service";
 import { SuiModule } from "ng2-semantic-ui-v9";
 import { CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
