@@ -177,7 +177,3 @@
     libTelemetryInteract [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('close','click','cancel', telemetryService.telemetryPageId,  {key: 'dialog_id', value: 'review_comments'})">{{configService.labelConfig?.button_labels?.close_btn_label}}</button>
   </div>
 </sui-modal>
-
-  <lib-csv-upload *ngIf="showCsvUploadPopup" [isCreateCsv]= "isCreateCsv"  (csvUploadEmitter)= "hanndleCsvEmitter($event)" [collectionId]="collectionId">
-  </lib-csv-upload>
-

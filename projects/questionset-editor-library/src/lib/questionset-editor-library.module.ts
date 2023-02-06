@@ -42,7 +42,6 @@ import { QumlPlayerComponent } from './components/quml-player/quml-player.compon
 import { DialcodeComponent } from './components/dialcode/dialcode.component';
 import { DialcodeService } from './services/dialcode/dialcode.service';
 import { QuestionOptionSubMenuComponent } from './components/question-option-sub-menu/question-option-sub-menu.component';
-import { CsvUploadComponent } from './components/csv-upload/csv-upload.component';
 import { SliderComponent } from './components/slider/slider.component';
 import { TranslationsComponent } from './components/translations/translations.component';
 import { PublishChecklistComponent } from './components/publish-checklist/publish-checklist.component';
@@ -86,7 +85,6 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     QumlPlayerComponent,
     DialcodeComponent,
     BulkUploadComponent,
-    CsvUploadComponent,
     PublishChecklistComponent,
     QuestionOptionSubMenuComponent,
     SliderComponent,
