@@ -37,7 +37,6 @@ npm i @project-sunbird/sunbird-video-player-v9 --save
 npm i @project-sunbird/sunbird-quml-player --save
 npm i ngx-bootstrap@6.0.0 --save
 npm i ng2-cache-service --save
-npm i fine-uploader --save
 npm i ngx-chips@2.2.0 --save
 npm i epubjs --save
 npm i videojs-contrib-quality-levels --save

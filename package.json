@@ -42,7 +42,6 @@
     "export-to-csv": "^0.2.1",
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.2",
-    "fine-uploader": "^5.15.7",
     "font-awesome": "^4.7.0",
     "fs-extra": "^8.1.0",
     "gulp": "^4.0.2",

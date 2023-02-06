@@ -43,7 +43,6 @@ import { QuestionOptionSubMenuComponent } from './components/question-option-sub
 import { SliderComponent } from './components/slider/slider.component';
 import { TranslationsComponent } from './components/translations/translations.component';
 import { PublishChecklistComponent } from './components/publish-checklist/publish-checklist.component';
-import { BulkUploadComponent  } from './components/bulk-upload/bulk-upload.component';
 import { RelationalMetadataComponent } from './components/relational-metadata/relational-metadata.component';
 import { ResourceLibraryModule } from '@project-sunbird/sunbird-resource-library';
 import { AppLoaderComponent } from './components/app-loader/app-loader.component';
@@ -81,7 +80,6 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     AssetBrowserComponent,
     CollectionIconComponent,
     QumlPlayerComponent,
-    BulkUploadComponent,
     PublishChecklistComponent,
     QuestionOptionSubMenuComponent,
     SliderComponent,
