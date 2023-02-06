@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
-import { CommonFormElementsModule, DialcodeCursor } from 'common-form-elements-web-v9';
+import { CommonFormElementsModule } from 'common-form-elements-web-v9';
 import { SuiModule } from 'ng2-semantic-ui-v9';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { HttpClientModule } from '@angular/common/http';
@@ -39,8 +39,6 @@ import { CacheService } from 'ng2-cache-service';
 import { CacheStorageAbstract } from 'ng2-cache-service/dist/src/services/storage/cache-storage-abstract.service';
 import { CacheSessionStorage } from 'ng2-cache-service/dist/src/services/storage/session-storage/cache-session-storage.service';
 import { QumlPlayerComponent } from './components/quml-player/quml-player.component';
-import { DialcodeComponent } from './components/dialcode/dialcode.component';
-import { DialcodeService } from './services/dialcode/dialcode.service';
 import { QuestionOptionSubMenuComponent } from './components/question-option-sub-menu/question-option-sub-menu.component';
 import { SliderComponent } from './components/slider/slider.component';
 import { TranslationsComponent } from './components/translations/translations.component';
@@ -83,7 +81,6 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     AssetBrowserComponent,
     CollectionIconComponent,
     QumlPlayerComponent,
-    DialcodeComponent,
     BulkUploadComponent,
     PublishChecklistComponent,
     QuestionOptionSubMenuComponent,
@@ -102,8 +99,7 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
   QumlLibraryModule, CarouselModule, SunbirdEpubPlayerModule, ResourceLibraryModule, A11yModule],
   providers: [
     CacheService,
-    { provide: CacheStorageAbstract, useClass: CacheSessionStorage },
-    { provide: DialcodeCursor, useExisting: DialcodeService },
+    { provide: CacheStorageAbstract, useClass: CacheSessionStorage }
   ],
   exports: [EditorComponent],
 })

@@ -35,12 +35,6 @@
     "COMPOSITE": {
       "SEARCH": "composite/v3/search"
     },
-    "DIALCODE": {
-      "RESERVE" : "dialcode/v1/reserve/",
-      "PROCESS" : "dialcode/v1/process/status/",
-      "SEARCH"  : "dialcode/v3/search",
-      "LINK" : "collection/v3/dialcode/link/"
-    },
     "ContentPolicyUrl" : "/term-of-use.html",
     "assetProxyUrl": "/assets/public/",
     "getCategoryDefinition": "object/category/definition/v1/read?fields=objectMetadata,forms,name,label",
