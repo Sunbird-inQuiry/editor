@@ -59,7 +59,6 @@
                 (toolbarEmitter)="toolbarEventListener($event)"></lib-meta-form>
               </ng-container>
               <ng-container *ngIf="isCurrentNodeFolder === false && isCurrentNodeRoot !== true">
-                  <lib-contentplayer-page *ngIf="!isQumlPlayer"  [contentMetadata]="selectedNodeData" ></lib-contentplayer-page>
                   <lib-qumlplayer-page *ngIf="isQumlPlayer" [questionMetaData]="selectedNodeData" [questionSetHierarchy]="collectionTreeNodes?.data"
                       (toolbarEmitter)="toolbarEventListener($event)">
                     </lib-qumlplayer-page>

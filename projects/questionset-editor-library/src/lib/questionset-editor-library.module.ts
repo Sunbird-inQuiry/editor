@@ -9,7 +9,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { SanitizeHtmlPipe } from './pipes/sanitize-html.pipe';
 import { InterpolatePipe } from './pipes/interpolate.pipe';
 import { QuestionsetEditorLibraryComponent } from './questionset-editor-library.component';
-import { ContentplayerPageComponent } from './components/contentplayer-page/contentplayer-page.component';
 import { EditorComponent } from './components/editor/editor.component';
 import { HeaderComponent } from './components/header/header.component';
 import { FancyTreeComponent } from './components/fancy-tree/fancy-tree.component';
@@ -58,7 +57,6 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     QuestionsetEditorLibraryComponent,
     InterpolatePipe,
     SanitizeHtmlPipe,
-    ContentplayerPageComponent,
     EditorComponent,
     QumlplayerPageComponent,
     HeaderComponent,

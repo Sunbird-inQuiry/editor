@@ -28,11 +28,6 @@
               "src/favicon.ico",
               {
                 "glob": "**/*",
-                "input": "node_modules/@project-sunbird/sunbird-pdf-player-v9/lib/assets/",
-                "output": "/assets/"
-              },
-              {
-                "glob": "**/*",
                 "input": "node_modules/@project-sunbird/sunbird-video-player-v9/lib/assets/",
                 "output": "/assets/"
               },
@@ -60,7 +55,6 @@
               "node_modules/videojs-http-source-selector/dist/videojs-http-source-selector.css"
             ],
             "scripts": [
-              "node_modules/epubjs/dist/epub.js",
               "src/assets/libs/iziToast/iziToast.min.js",
               "node_modules/jquery/dist/jquery.min.js",
               "node_modules/jquery.fancytree/dist/jquery.fancytree-all-deps.min.js",
@@ -142,7 +136,6 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/epubjs/dist/epub.js"
             ],
             "assets": [
               "src/favicon.ico",
