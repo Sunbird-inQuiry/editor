@@ -16,7 +16,6 @@ import { MetaFormComponent } from './components/meta-form/meta-form.component';
 import { LibraryComponent } from './components/library/library.component';
 import { LibraryFilterComponent } from './components/library-filter/library-filter.component';
 import { LibraryListComponent } from './components/library-list/library-list.component';
-import { LibraryPlayerComponent } from './components/library-player/library-player.component';
 import { TemplateComponent } from './components/template/template.component';
 import { QumlplayerPageComponent } from './components/qumlplayer-page/qumlplayer-page.component';
 import { OptionsComponent } from './components/options/options.component';
@@ -67,7 +66,6 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     OptionsComponent,
     AnswerComponent,
     CkeditorToolComponent,
-    LibraryPlayerComponent,
     TemplateComponent,
     DateFormatPipe,
     TelemetryInteractDirective,
