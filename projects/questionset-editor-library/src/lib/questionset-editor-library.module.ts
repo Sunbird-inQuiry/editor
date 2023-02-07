@@ -14,7 +14,6 @@ import { HeaderComponent } from './components/header/header.component';
 import { FancyTreeComponent } from './components/fancy-tree/fancy-tree.component';
 import { MetaFormComponent } from './components/meta-form/meta-form.component';
 import { LibraryComponent } from './components/library/library.component';
-import { LibraryFilterComponent } from './components/library-filter/library-filter.component';
 import { TemplateComponent } from './components/template/template.component';
 import { QumlplayerPageComponent } from './components/qumlplayer-page/qumlplayer-page.component';
 import { OptionsComponent } from './components/options/options.component';
@@ -59,7 +58,6 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     FancyTreeComponent,
     MetaFormComponent,
     LibraryComponent,
-    LibraryFilterComponent,
     QuestionComponent,
     OptionsComponent,
     AnswerComponent,
