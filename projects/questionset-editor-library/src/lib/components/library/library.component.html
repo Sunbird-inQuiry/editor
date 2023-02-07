@@ -35,9 +35,6 @@
     </div>
   </div>
 </div>
-<div *ngIf="showSelectResourceModal">
-  <lib-resource-reorder [prevUnitSelect]= "selectedUnit" [collectionhierarcyData]="collectionhierarcyData" [collectionUnits]="collectionHierarchy" [selectedContentDetails]="selectedContent" [collectionId]="collectionId" (moveEvent)="showResourceTemplate($event)"></lib-resource-reorder>
-</div>
 
 <!--empty result -->
 <div class="result-no-found">

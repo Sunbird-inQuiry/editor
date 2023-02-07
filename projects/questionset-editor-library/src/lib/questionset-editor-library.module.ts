@@ -18,7 +18,6 @@ import { LibraryFilterComponent } from './components/library-filter/library-filt
 import { LibraryListComponent } from './components/library-list/library-list.component';
 import { LibraryPlayerComponent } from './components/library-player/library-player.component';
 import { TemplateComponent } from './components/template/template.component';
-import { ResourceReorderComponent } from './components/resource-reorder/resource-reorder.component';
 import { QumlplayerPageComponent } from './components/qumlplayer-page/qumlplayer-page.component';
 import { OptionsComponent } from './components/options/options.component';
 import { AnswerComponent } from './components/answer/answer.component';
@@ -69,7 +68,6 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     AnswerComponent,
     CkeditorToolComponent,
     LibraryPlayerComponent,
-    ResourceReorderComponent,
     TemplateComponent,
     DateFormatPipe,
     TelemetryInteractDirective,
