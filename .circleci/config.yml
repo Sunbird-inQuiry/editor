@@ -9,12 +9,12 @@ jobs:
           name: run build file
           command: /bin/bash -x build.sh ${CIRCLE_SHA1} test
   test-cases:
-    working_directory: ~/sunbird-questionset-editor
+    working_directory: ~/editor
     machine:
       image: ubuntu-2004:202010-01
     steps:
       - checkout:
-          path: ~/sunbird-questionset-editor
+          path: ~/editor
       - run:
           name: Node version
           command: 'node --version'
@@ -50,7 +50,7 @@ jobs:
           command: npm install -g sonarqube-scanner
       - run:
           name: Run sonar scanner
-          command: 'cd ~/sunbird-questionset-editor && sonar-scanner'
+          command: 'cd ~/editor && sonar-scanner'
       - run:
           name: Publish to NPM
           command: |
