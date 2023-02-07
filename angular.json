@@ -28,11 +28,6 @@
               "src/favicon.ico",
               {
                 "glob": "**/*",
-                "input": "node_modules/@project-sunbird/sunbird-video-player-v9/lib/assets/",
-                "output": "/assets/"
-              },
-              {
-                "glob": "**/*",
                 "input": "projects/questionset-editor-library/src/lib/assets",
                 "output": "/assets/"
               },
@@ -49,10 +44,7 @@
               "src/assets/lib/semantic/semantic.min.css",
               "src/assets/styles/styles.scss",
               "node_modules/font-awesome/css/font-awesome.css",
-              "node_modules/katex/dist/katex.min.css",
-              "node_modules/video.js/dist/video-js.min.css",
-              "node_modules/@project-sunbird/sunbird-video-player-v9/lib/assets/videojs.markers.min.css",
-              "node_modules/videojs-http-source-selector/dist/videojs-http-source-selector.css"
+              "node_modules/katex/dist/katex.min.css"
             ],
             "scripts": [
               "src/assets/libs/iziToast/iziToast.min.js",
@@ -64,11 +56,7 @@
               "src/assets/lib/modal.min.js",
               "src/assets/lib/semantic-ui-tree-picker.js",
               "node_modules/@project-sunbird/telemetry-sdk/index.js",
-              "node_modules/@project-sunbird/client-services/index.js",
-              "node_modules/video.js/dist/video.js",
-              "node_modules/@project-sunbird/sunbird-video-player-v9/lib/assets/videojs-markers.js",
-              "node_modules/videojs-contrib-quality-levels/dist/videojs-contrib-quality-levels.min.js",
-              "node_modules/videojs-http-source-selector/dist/videojs-http-source-selector.min.js"
+              "node_modules/@project-sunbird/client-services/index.js"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
