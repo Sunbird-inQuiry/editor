@@ -18,7 +18,6 @@ import {
   frameworkData, serverResponse} from './editor.component.spec.data';
 import { ConfigService } from '../../services/config/config.service';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { DialcodeService } from '../../services/dialcode/dialcode.service';
 import { treeData } from './../fancy-tree/fancy-tree.component.spec.data';
 import * as urlConfig from '../../services/config/url.config.json';
 import * as labelConfig from '../../services/config/label.config.json';
@@ -42,7 +41,7 @@ describe('EditorComponent', () => {
       imports: [HttpClientTestingModule, FormsModule, ReactiveFormsModule, RouterTestingModule],
       declarations: [EditorComponent, TelemetryInteractDirective],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      providers: [EditorTelemetryService, EditorService, DialcodeService, ToasterService,
+      providers: [EditorTelemetryService, EditorService, ToasterService,
         { provide: ConfigService, useValue: configStub }
       ]
     })
@@ -807,37 +806,6 @@ describe('EditorComponent', () => {
       return true;
     });
     component.submitHandler();
-    expect(component.showConfirmPopup).toEqual(true);
-  });
-
-  it('#submitHandler() should return true if showDialcode is yes', () => {
-    spyOn(component, 'validateFormStatus').and.callFake(() => {
-      return true;
-    });
-    component.toolbarConfig = {
-      showDialcode: 'yes'
-    };
-    const dialcodeService = TestBed.inject(DialcodeService);
-    spyOn(dialcodeService, 'validateUnitsDialcodes').and.callFake(() => {
-      return true;
-    });
-    component.submitHandler();
-    expect(component.showConfirmPopup).toEqual(true);
-  });
-
-  it('#submitHandler() should return true if showDialcode is yes', () => {
-    spyOn(component, 'validateFormStatus').and.callFake(() => {
-      return true;
-    });
-    component.toolbarConfig = {
-      showDialcode: 'yes'
-    };
-    const dialcodeService = TestBed.inject(DialcodeService);
-    spyOn(dialcodeService, 'validateUnitsDialcodes').and.callFake(() => {
-      return true;
-    });
-    component.submitHandler();
-    expect(dialcodeService.validateUnitsDialcodes).toHaveBeenCalled();
     expect(component.showConfirmPopup).toEqual(true);
   });
 

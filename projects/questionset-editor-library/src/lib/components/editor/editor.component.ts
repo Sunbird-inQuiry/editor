@@ -15,7 +15,6 @@ import { filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { Observable, throwError, forkJoin, Subscription, Subject, merge, of } from 'rxjs';
 import * as _ from 'lodash-es';
 import { ConfigService } from '../../services/config/config.service';
-import { DialcodeService } from '../../services/dialcode/dialcode.service';
 import { FormControl, FormGroup } from '@angular/forms';
 
 let evidenceMimeType;
@@ -97,7 +96,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   public levelsArray: any;
   constructor(private editorService: EditorService, public treeService: TreeService, private frameworkService: FrameworkService,
               private helperService: HelperService, public telemetryService: EditorTelemetryService, private router: Router,
-              private toasterService: ToasterService, private dialcodeService: DialcodeService,
+              private toasterService: ToasterService,
               public configService: ConfigService, private changeDetectionRef: ChangeDetectorRef) {
   }
 
@@ -650,9 +649,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       this.editorService.updateHierarchy()
         .pipe(map(data => _.get(data, 'result'))).subscribe(response => {
-          if (this.toolbarConfig.showDialcode === 'yes') {
-            this.dialcodeService.highlightNodeForInvalidDialCode(response, nodesModified, this.collectionId);
-          }
           if (!_.isEmpty(response.identifiers)) {
             this.treeService.replaceNodeId(response.identifiers);
           }
@@ -670,12 +666,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.validateFormStatus()) {
       this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
       return;
-    } else if (this.toolbarConfig.showDialcode === 'yes') {
-      if (this.dialcodeService.validateUnitsDialcodes()) {
-        this.showConfirmPopup = true;
-      } else {
-        this.toasterService.warning(_.get(this.configService, 'labelConfig.messages.warning.001'));
-      }
     } else {
       this.showConfirmPopup = true;
     }
