@@ -59,7 +59,6 @@
                 (toolbarEmitter)="toolbarEventListener($event)"></lib-meta-form>
               </ng-container>
               <ng-container *ngIf="isCurrentNodeFolder === false && isCurrentNodeRoot !== true">
-                  <lib-contentplayer-page *ngIf="!isQumlPlayer"  [contentMetadata]="selectedNodeData" ></lib-contentplayer-page>
                   <lib-qumlplayer-page *ngIf="isQumlPlayer" [questionMetaData]="selectedNodeData" [questionSetHierarchy]="collectionTreeNodes?.data"
                       (toolbarEmitter)="toolbarEventListener($event)">
                     </lib-qumlplayer-page>
@@ -161,9 +160,6 @@
     <lib-progress-status (assignPageEmitter)="assignPageEmitterListener($event)"></lib-progress-status>
   </ng-container>
 </ng-container>
-<ng-container *ngIf="addCollaborator">
-  <lib-manage-collaborator [addCollaborator]="addCollaborator" [collectionId]="collectionId" (modalDismissEmitter)="toggleCollaboratorModalPoup()"></lib-manage-collaborator>
-</ng-container>
 <sui-modal *ngIf="showReviewModal" [mustScroll]="true" [isClosable]="false" [transitionDuration]="0"
   [size]="'normal'" class="sb-modal bx-none overflow-modal" appBodyScroll #modal (dismissed)="showReviewModal = false;">
   <div class="sb-modal-header">
@@ -180,7 +176,3 @@
     libTelemetryInteract [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('close','click','cancel', telemetryService.telemetryPageId,  {key: 'dialog_id', value: 'review_comments'})">{{configService.labelConfig?.button_labels?.close_btn_label}}</button>
   </div>
 </sui-modal>
-
-  <lib-csv-upload *ngIf="showCsvUploadPopup" [isCreateCsv]= "isCreateCsv"  (csvUploadEmitter)= "hanndleCsvEmitter($event)" [collectionId]="collectionId">
-  </lib-csv-upload>
-

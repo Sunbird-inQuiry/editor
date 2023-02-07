@@ -132,9 +132,6 @@ config: {
       review: string[],
     },
     maxDepth: number, //Ex.: 1
-    dialcodeMinLength: number, //Ex.: 2
-    dialcodeMaxLength: number, //Ex.: 250
-    showAddCollaborator: 'boolen', // true | false
     enableBulkUpload: 'boolen',
     publicStorageAccount: 'url', //Ex.: https://dockstorage.blob.core.windows.net/
     assetConfig: object,
@@ -190,9 +187,6 @@ Description of the properties for the config:
 | `mode` |  It is `string` and that defines the mode in editor is to be loaded. **For example:** `edit / review / read / sourcingReview / orgReview`  | false | `edit` |
 | `editableFields` |  It is an `object` and that defines the mode in editor is to be loaded.  | false | `{ sourcingreview: [],       orgreview: [],       review: [], }` |
 | `maxDepth` |  It is `number` and Defines the depth to which the textbook is to be created. If the depth is 1, hierarchy should have level1 described.  | false | **For example:** `1` |
-| `dialcodeMinLength` |  It is `number` and it specifies the minimum number of characters required in an input field  | false | `2` |
-| `dialcodeMaxLength` |  It is `number` and it specifies the maximum number of characters required in an input field  | false | `250` |
-| `showAddCollaborator` |  It is `boolen` and this is to enable/disable the functionality of add collaborator in editor. If it is true add collobrorator button will be enabled and created can add the collolaborator to collaborate in textbook.  | false | `false` |
 | `assetConfig` |  It is an `object` and `assetConfig` sets the max size limit and type for image and videos to be uploaded in the editor.  **For example:** `{ "image": { "size": "1", "sizeType": "MB", "accepted": "png, jpeg" }, "video": { "size": "50", "sizeType": "MB", "accepted": "mp4, webm" } }` | false | `{}` |
 | `hierarchy` |  It is an `object` and If maxdepth is > 0 then hierarchy should have definiton of the levels. **For example:** `{ level1: { name: 'Textbook Unit', type: 'Unit', mimeType: 'application/vnd.ekstep.content-collection', contentType: 'TextBookUnit', primaryCategory: 'Textbook Unit', iconClass: 'fa fa-folder-o', children: { Content: [ 'Explanation Content', 'Learning Resource' ] } }}`  | false | `{}` |
 

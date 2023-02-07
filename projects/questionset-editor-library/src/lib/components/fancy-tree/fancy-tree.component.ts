@@ -10,7 +10,6 @@ import { HelperService } from '../../services/helper/helper.service';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { ToasterService } from '../../services/toaster/toaster.service';
 import { ConfigService } from '../../services/config/config.service';
-import {  DialcodeService } from '../../services/dialcode/dialcode.service';
 
 
 import { Subject } from 'rxjs';
@@ -60,7 +59,7 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(public treeService: TreeService, private editorService: EditorService,
               public telemetryService: EditorTelemetryService, private helperService: HelperService,
               private toasterService: ToasterService, private cdr: ChangeDetectorRef,
-              public configService: ConfigService, private dialcodeService: DialcodeService) { }
+              public configService: ConfigService) { }
   private onComponentDestroy$ = new Subject<any>();
 
   ngOnInit() {
@@ -229,7 +228,6 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
       const rootNode = this.treeService.getFirstChild();
       rootNode.setExpanded(true);
       this.eachNodeActionButton(rootNode);
-      this.dialcodeService.readExistingQrCode();
       this.treeService.nextTreeStatus('loaded');
       this.showTree = true;
     });
