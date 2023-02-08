@@ -1,12 +1,12 @@
 # Configuration Documentation
 
-Collection Editor is an angular library built with Angular version 9, and it exports some modules and components.
+Questionset Editor is an angular library built with Angular version 9, and it exports some modules and components.
 
 **Component:** `editor`
 
 For example:
 ```
-<lib-editor [editorConfig]="editorConfig" (editorEmitter)="editorEventListener($event)"></lib-editor>
+<lib-questionset-editor [editorConfig]="editorConfig" (editorEmitter)="editorEventListener($event)"></lib-questionset-editor>
 ```
 
 This is the main editor component that accepts some configuration based on it loads the editor.  
@@ -23,7 +23,7 @@ export interface IEditorConfig {
 
 ## Context - `Required`
 
-This required property from the `collectionEditorConfig` provides the context to the editor mostly in terms of the telemetry and it used these properties when the editor launch.
+This required property from the `questionSetEditorConfig` provides the context to the editor mostly in terms of the telemetry and it used these properties when the editor launch.
 
 ```javascript
 export interface Context {
@@ -84,7 +84,7 @@ Let's understand the description of the following properties:
 
 |Property Name	| Description | Required | Default Value
 |--|------------------------------------------------------------------------------------------|---|--|
-| `env` |  It is `string` and Unique environment where the event has occured **For example:** in case of collection editor its `collection_editor` | true | `collection_editor OR questionset_editor` |
+| `env` |  It is `string` and Unique environment where the event has occured **For example:** in case of questionset editor its `questionset_editor` | true |  |
 | `sid` |  It is `string` and session id of the requestor stamped by portal **For example:** `vLpZ1rFl6-sxMVHi4RrmrlHw0HsX9ggC` | true |   |
 | `did` |  It is `string` and uuid of the device, created during app installation or browser **For example:** `1d8e290dd3c2a6a9eeac58568cdef28d` | true |   |
 | `uid` |  It is `string` and Current logged in user id **For example:** `5a587cc1-e018-4859-a0a8-e842650b9d64` | true |  |
@@ -121,7 +121,7 @@ Let's understand the description of the following properties:
 
 
 ## Config - `Required`
-This required property from the `collectionEditorConfig` provides the configuration for the editor to enable/disable some functionalities.  
+This required property from the `questionSetEditorConfig` provides the configuration for the editor to enable/disable some functionalities.  
 
 ```javascript
 config: {
@@ -132,29 +132,24 @@ config: {
       review: string[],
     },
     maxDepth: number, //Ex.: 1
-    enableBulkUpload: 'boolen',
     publicStorageAccount: 'url', //Ex.: https://dockstorage.blob.core.windows.net/
     assetConfig: object,
-    objectType: 'string', //Ex.: Collection
-    primaryCategory: 'string', //Ex.: Digital Textbook
+    objectType: 'string', //Ex.: QuestionSet
+    primaryCategory: 'string', //Ex.: Practice Question Set
     isRoot: boolean, //Ex.: true
     iconClass: 'string', //Ex.: 'fa fa-book'
     children: {
-        Content: [
-          'Explanation Content',
-          'Learning Resource',
-          'eTextbook',
-          'Teacher Resource',
-          'Course Assessment'
+        Question: [
+          "Multiple Choice Question",
+          "Subjective Question"
         ]
      },
     hierarchy: {
       level1: {
         name: '', //ex: 'name of the section'
         type: '', //ex: 'Unit'
-        mimeType: 'string', //Ex.: application/vnd.ekstep.content-collection
-        contentType: 'string', //Ex.: TextBookUnit
-        primaryCategory: 'string', //ex: 'Textbook Unit'
+        mimeType: 'string', //Ex.: application/vnd.sunbird.questionset
+        primaryCategory: 'string', //ex: 'Practice Question Set'
         iconClass: 'string' //ex: 'fa fa-folder-o',
         children: {}
       },
@@ -181,87 +176,46 @@ Description of the properties for the config:
 | `isRoot` |  It is `boolen` and that defines the node is root node.  | true | `true` |
 | `objectType` |  It is `string` and that defines the object type of collection  | true |  |
 | `iconClass` |  It is `string` and that defines the icon of root node  | true | `fa fa-book` |
-| `children` |  It is an `object` and If maxdepth is 0 than children inside the root node defines the content type. **For example:** `children: { Content: [ 'Explanation Content', 'Learning Resource', 'eTextbook' ] }` | true |  |
+| `children` |  It is an `object` and If maxdepth is 0 than children inside the root node defines the content type. **For example:** `children: {Question: ["Multiple Choice Question", "Subjective Question"]}` | true |  |
 | `contentPolicyUrl` |  It is `string` and It defines where should the content policy link will be redirected.  | true | `/term-of-use.html`  |
 | `publicStorageAccount` |  It is `url` and URL of the blob storage **For example:** `https://dockstorage.blob.core.windows.net/`  | true |  |
 | `mode` |  It is `string` and that defines the mode in editor is to be loaded. **For example:** `edit / review / read / sourcingReview / orgReview`  | false | `edit` |
 | `editableFields` |  It is an `object` and that defines the mode in editor is to be loaded.  | false | `{ sourcingreview: [],       orgreview: [],       review: [], }` |
 | `maxDepth` |  It is `number` and Defines the depth to which the textbook is to be created. If the depth is 1, hierarchy should have level1 described.  | false | **For example:** `1` |
 | `assetConfig` |  It is an `object` and `assetConfig` sets the max size limit and type for image and videos to be uploaded in the editor.  **For example:** `{ "image": { "size": "1", "sizeType": "MB", "accepted": "png, jpeg" }, "video": { "size": "50", "sizeType": "MB", "accepted": "mp4, webm" } }` | false | `{}` |
-| `hierarchy` |  It is an `object` and If maxdepth is > 0 then hierarchy should have definiton of the levels. **For example:** `{ level1: { name: 'Textbook Unit', type: 'Unit', mimeType: 'application/vnd.ekstep.content-collection', contentType: 'TextBookUnit', primaryCategory: 'Textbook Unit', iconClass: 'fa fa-folder-o', children: { Content: [ 'Explanation Content', 'Learning Resource' ] } }}`  | false | `{}` |
+| `hierarchy` |  It is an `object` and If maxdepth is > 0 then hierarchy should have definiton of the levels. **For example:** `{ level1: { name: 'Section', type: 'Unit', mimeType: 'application/vnd.sunbird.questionset', primaryCategory: 'Practice Question Set', iconClass: 'fa fa-folder-o', children: {Question: ["Multiple Choice Question", "Subjective Question"]} }}`  | false | `{}` |
 
 Following are the configuration for different types of collections. 
 
-**1. Digital Textbook**
+**1. Practice Question Set**
 ```json
 {
-  "maxDepth": 2,
-  "objectType": "Collection",
-  "primaryCategory": "Digital Textbook",
-  "isRoot": true,
-  "iconClass": "fa fa-book",
-  "children": {},
-  "hierarchy": {
-    "level1": {
-      "name": "Chapter",
-      "type": "unit",
-      "mimeType": "application/vnd.ekstep.content-collection",
-      "contentType": "Textbook Unit",
-      "iconClass": "fa fa-folder-o",
-      "children": {}
+    "maxDepth": 1,
+    "addFromLibraryEnabled": true,
+    "enableAddFromLibrary": true,
+    "objectType": "QuestionSet",
+    "primaryCategory": "Practice Question Set",
+    "isRoot": true,
+    "iconClass": "fa fa-book",
+    "children": {},
+    "hierarchy": {
+        "level1": {
+            "name": "Section",
+            "type": "Unit",
+            "mimeType": "application/vnd.sunbird.questionset",
+            "primaryCategory": "Practice Question Set",
+            "iconClass": "fa fa-folder-o",
+            "children": {
+                "Question": [
+                    "Multiple Choice Question",
+                    "Subjective Question"
+                ]
+            }
+        }
     },
-    "level2": {
-      "name": "Sub-Chapter",
-      "type": "unit",
-      "mimeType": "application/vnd.ekstep.content-collection",
-      "contentType": "Textbook Unit",
-      "iconClass": "fa fa-folder-o",
-      "children": {
-        "Content": []
-      }
+    "questionSet": {
+        "maxQuestionsLimit": 10
     }
-  }
-}
-```
-
-**2. Course**
-```json
-{
-  "maxDepth": 2,
-  "objectType": "Collection",
-  "primaryCategory": "Course",
-  "isRoot": true,
-  "iconClass": "fa fa-book",
-  "children": {},
-  "hierarchy": {
-    "level1": {
-      "name": "Chapter",
-      "type": "unit",
-      "mimeType": "application/vnd.ekstep.content-collection",
-      "contentType": "Course Unit",
-      "iconClass": "fa fa-folder-o",
-      "children": {}
-    },
-    "level2": {
-      "name": "Sub-Chapter",
-      "type": "unit",
-      "mimeType": "application/vnd.ekstep.content-collection",
-      "contentType": "Course Unit",
-      "iconClass": "fa fa-folder-o",
-      "children": {
-        "Content": [
-          "Explanation Content",
-          "Learning Resource",
-          "eTextbook",
-          "Teacher Resource",
-          "Course Assessment"
-        ],
-        "QuestionSet": [
-          "Practice Question Set"
-        ]
-      }
-    }
-  }
 }
 ```
 
