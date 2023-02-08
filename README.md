@@ -31,10 +31,16 @@ npm i @project-sunbird/client-services --save
 npm i export-to-csv --save
 npm i moment --save
 npm i @project-sunbird/ckeditor-build-classic --save
+npm i @project-sunbird/sunbird-pdf-player-v9 --save
+npm i @project-sunbird/sunbird-epub-player-v9 --save
+npm i @project-sunbird/sunbird-video-player-v9 --save
 npm i @project-sunbird/sunbird-quml-player --save
 npm i ngx-bootstrap@6.0.0 --save
 npm i ng2-cache-service --save
 npm i ngx-chips@2.2.0 --save
+npm i epubjs --save
+npm i videojs-contrib-quality-levels --save
+npm i videojs-http-source-selector --save
 npm i jquery --save
 npm i express-http-proxy --save
 npm i mathjax-full --save
@@ -80,6 +86,16 @@ Now open the `angular.json` file and add the following under `architect.build.as
         ...
 +        {
 +          "glob": "**/*",
++          "input": "node_modules/@project-sunbird/sunbird-pdf-player-v9/lib/assets/",
++         "output": "/assets/"
++        },
++        {
++          "glob": "**/*",
++          "input": "node_modules/@project-sunbird/sunbird-video-player-v9/lib/assets/",
++          "output": "/assets/"
++        },
++        {
++          "glob": "**/*",
 +          "input": "node_modules/@project-sunbird/sunbird-questionset-editor/lib/assets",
 +          "output": "/assets/"
 +        },
@@ -96,9 +112,13 @@ Now open the `angular.json` file and add the following under `architect.build.as
 +        "src/assets/lib/semantic/semantic.min.css",
 +        "src/assets/styles/styles.scss",
 +        "node_modules/font-awesome/css/font-awesome.css"
++        "node_modules/video.js/dist/video-js.min.css",
++        "node_modules/@project-sunbird/sunbird-video-player-v9/lib/assets/videojs.markers.min.css",
++        "node_modules/videojs-http-source-selector/dist/videojs-http-source-selector.css"
       ],
       "scripts": [
         ...
++        "node_modules/epubjs/dist/epub.js",
 +        "src/assets/libs/iziToast/iziToast.min.js",
 +        "node_modules/jquery/dist/jquery.min.js",
 +        "node_modules/jquery.fancytree/dist/jquery.fancytree-all-deps.min.js",
@@ -107,6 +127,10 @@ Now open the `angular.json` file and add the following under `architect.build.as
 +        "src/assets/lib/modal.min.js",
 +        "src/assets/lib/semantic-ui-tree-picker.js",
 +        "node_modules/@project-sunbird/client-services/index.js"
++        "node_modules/video.js/dist/video.js",
++        "node_modules/@project-sunbird/sunbird-video-player-v9/lib/assets/videojs-markers.js",
++        "node_modules/videojs-contrib-quality-levels/dist/videojs-contrib-quality-levels.min.js",
++        "node_modules/videojs-http-source-selector/dist/videojs-http-source-selector.min.js"
       ]
     }
   }
