@@ -79,8 +79,8 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     QualityParamsModalComponent
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule.forChild([]), SuiModule,
-  CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, SunbirdPdfPlayerModule, SunbirdVideoPlayerModule,
-  QumlLibraryModule, CarouselModule, SunbirdEpubPlayerModule, ResourceLibraryModule, A11yModule],
+  CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, QumlLibraryModule,  SunbirdPdfPlayerModule, SunbirdVideoPlayerModule,
+  CarouselModule, SunbirdEpubPlayerModule, ResourceLibraryModule, A11yModule],
   providers: [
     CacheService,
     { provide: CacheStorageAbstract, useClass: CacheSessionStorage }

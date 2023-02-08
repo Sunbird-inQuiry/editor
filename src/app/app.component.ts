@@ -1,12 +1,10 @@
 import { Component } from '@angular/core';
 import { observationEditorConfig, observationRubricsEditorConfig, questionSetEditorConfig,
-  collectionEditorConfig, courseEditorConfig, questionEditorConfig,surveyEditorConfig } from './data';
+   questionEditorConfig, surveyEditorConfig } from './data';
 
 const configMapper = {
   questionSet: questionSetEditorConfig,
   question: questionEditorConfig,
-  collection : collectionEditorConfig,
-  course: courseEditorConfig,
   survey: surveyEditorConfig,
   observation: observationEditorConfig,
   rubrics: observationRubricsEditorConfig
@@ -18,7 +16,7 @@ const configMapper = {
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'Sunbird Collection Editor';
+  title = 'Sunbird Questionset Editor';
   editor: any = localStorage.getItem('editorType') || '';
   public editorConfig: any = configMapper[this.editor];
 
