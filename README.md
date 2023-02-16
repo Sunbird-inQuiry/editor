@@ -153,7 +153,7 @@ ng g service question-cursor-implementation
 Now open `app.module.ts` file and import like this:
  
 ```diff
-+ import { EditorCursor } from 'questionset-editor-library';
++ import { EditorCursor } from '@project-sunbird/sunbird-questionset-editor';
 + import { QuestionCursor } from '@project-sunbird/sunbird-quml-player';
 + import { EditorCursorImplementationService } from './editor-cursor-implementation.service';
 
