@@ -12,11 +12,11 @@
     "ng2-semantic-ui-v9": "0.0.3",
     "@angular/cdk": "11.2.13"
   },
+  "homepage": "https://github.com/Sunbird-inQuiry/editor#readme",
   "keywords": [
     "sunbird",
     "sunbird QuestionSet Editor"
   ],
-  "homepage": "https://github.com/Sunbird-inQuiry/editor#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/Sunbird-inQuiry/editor.git"
