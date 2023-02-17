@@ -128,7 +128,7 @@
        "fillComments":"Fill comments",
        "searchLibrary":"Search Library",
        "options":"Options",
-       "optionsPopupText":"Please Preview to check how layout looks.",
+       "optionsPopupText":"Please Preview to check how layout looks. Layout is responsive to the resolution of your device",
        "selectOneAns":"Select one correct answer",
        "fillThisOption":"Fill this option",
        "reduceSize":"Please reduce the size",
