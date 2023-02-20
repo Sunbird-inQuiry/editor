@@ -61,7 +61,7 @@
                 [questionPrimaryCategory]="questionPrimaryCategory"
                 [editorState]="editorState" [showFormError]="showFormError"
                 (editorDataOutput)="editorDataHandler($event)"
-                [sourcingSettings]="sourcingSettings" [mapping]="scoreMapping"
+                [sourcingSettings]="sourcingSettings" [mapping]="scoreMapping" [maxScore]="maxScore"
                 [isReadOnlyMode]="isReadOnlyMode"></lib-options>
 
               <lib-slider *ngIf="questionInteractionType === 'slider'" [editorDataInput]="sliderOptions"

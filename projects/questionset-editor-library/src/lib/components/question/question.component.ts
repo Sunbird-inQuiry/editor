@@ -634,6 +634,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   editorDataHandler(event, type?) {
     if (type === 'question') {
       this.editorState.question = event.body;
+      this.editorState.responseDeclaration = event.body.responseDeclaration
     } else if (type === 'solution') {
       this.editorState.solutions = event.body;
     } else {
@@ -778,7 +779,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     metadata.editorState.question = metadata.question;
     metadata.body = metadata.question;
     const treeNodeData = _.get(this.treeNodeData, 'data.metadata');
-    _.get(treeNodeData,'allowScoring') === 'Yes' ? '' : _.set(metadata,'responseDeclaration.response1.mapping',[]);
+    // _.get(treeNodeData,'allowScoring') === 'Yes' ? '' : _.set(metadata,'responseDeclaration.response1.mapping',[]);
 
     if (this.questionInteractionType === 'choice') {
       metadata.body = this.getMcqQuestionHtmlBody(this.editorState.question, this.editorState.templateId);
@@ -940,7 +941,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     const selectedUnitId = _.get(activeNode, 'data.id');
     this.editorService.data = {};
     this.editorService.selectedSection = selectedUnitId;
-    const metaData = this.getQuestionMetadata();
+    let metaData = this.getQuestionMetadata();
+    if (this.questionInteractionType === 'choice') {
+      metaData = _.omit(metaData, 'answer')
+    }
     this.setQuestionTypeValues(metaData);
     return {
       nodesModified: {
