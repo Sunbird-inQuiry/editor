@@ -29,12 +29,6 @@ export class AppComponent {
   setType(editorType) {
     if (editorType === 'questionSet') {
       localStorage.setItem('editorType', 'questionSet');
-    } else if (editorType === 'question') {
-      localStorage.setItem('editorType', 'question');
-    } else if (editorType === 'course') {
-      localStorage.setItem('editorType', 'course');
-    }  else if (editorType === 'collection') {
-      localStorage.setItem('editorType', 'collection');
     } else if (editorType === 'observation') {
       localStorage.setItem('editorType', 'observation');
     } else if (editorType === 'survey') {
