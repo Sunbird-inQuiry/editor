@@ -35,7 +35,9 @@ export class OptionsComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit() {
-    this.addSelectedOptions();
+    if(!_.isEmpty(this.editorState.answer)) {
+      this.addSelectedOptions();
+    }
     if (!_.isUndefined(this.editorState.templateId)) {
       this.templateType = this.editorState.templateId;
     }
@@ -51,28 +53,26 @@ export class OptionsComponent implements OnInit, OnChanges {
     this.editorDataHandler();
   }
 
-  addSelectedOptions(){
-    if(!_.isEmpty(this.editorState.answer)) {
-      if (_.isString(this.editorState.answer)) {
-        this.selectedOptions.push(_.parseInt(this.editorState.answer));
-      } else if (_.isArray(this.editorState.answer)) {
-        this.selectedOptions = this.editorState.answer;
-      }
-      if (!_.isEmpty(this.editorState.options)) {
-        _.forEach(this.editorState.options, (option, index) => {
-          if (_.includes(this.selectedOptions, index)) {
-            option['selected'] = true;
-          } else {
-            option['selected'] = false;
-          }
-        })
-      }
+  addSelectedOptions() {
+    if (_.isString(this.editorState.answer)) {
+      this.selectedOptions.push(_.parseInt(this.editorState.answer));
+    } else if (_.isArray(this.editorState.answer)) {
+      this.selectedOptions = this.editorState.answer;
+    }
+    if (!_.isEmpty(this.editorState.options)) {
+      _.forEach(this.editorState.options, (option, index) => {
+        const resindex = Number(index);
+        if (_.includes(this.selectedOptions, resindex)) {
+          option['selected'] = true;
+        } else {
+          option['selected'] = false;
+        }
+      })
     }
   }
 
   editorDataHandler(event?) {
     const body = this.prepareMcqBody(this.editorState);
-    console.log('MMCQ body', body);
     this.editorDataOutput.emit({ body, mediaobj: event ? event.mediaobj : undefined });
   }
 
@@ -117,7 +117,7 @@ export class OptionsComponent implements OnInit, OnChanges {
 
   getResponseDeclaration(editorState) {
     let questionCardinality = 'single';
-    this.getMapping();
+    this.setMapping();
     if (this.mapping.length > 1) {
       questionCardinality = 'multiple';
     }
@@ -136,10 +136,10 @@ export class OptionsComponent implements OnInit, OnChanges {
     return responseDeclaration;
   }
 
-  getMapping() {
+  setMapping() {
     if(!_.isEmpty(this.selectedOptions)) {
       this.mapping = [];
-      const scoreForEachOption = this.maxScore/this.selectedOptions.length;
+      const scoreForEachOption = _.round((this.maxScore/this.selectedOptions.length), 2);
       _.forEach(this.selectedOptions, (value) => {
         const optionMapping = {
           response: value,
@@ -152,7 +152,6 @@ export class OptionsComponent implements OnInit, OnChanges {
     } else {
       this.mapping = [];
     }
-    console.log('MMCQ this.mapping', this.mapping);
   }
 
   getInteractions(options) {
