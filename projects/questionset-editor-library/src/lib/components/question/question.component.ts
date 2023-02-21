@@ -778,7 +778,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     metadata = _.assign(metadata, this.editorState);
     metadata.editorState.question = metadata.question;
     metadata.body = metadata.question;
-    const treeNodeData = _.get(this.treeNodeData, 'data.metadata');
 
     if (this.questionInteractionType === 'choice') {
       metadata.body = this.getMcqQuestionHtmlBody(this.editorState.question, this.editorState.templateId);
