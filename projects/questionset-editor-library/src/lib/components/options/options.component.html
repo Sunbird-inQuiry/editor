@@ -27,8 +27,7 @@
             showFormError && (option.body === undefined || option.body === '')
           " class="sb-color-error fs-0-785">{{configService.labelConfig?.lbl?.fillThisOption}}</label>
         <label *ngIf="option.length > setCharacterLimit" class="ui basic red error label pt-1">
-          {{configService.labelConfig?.lbl?.reduceSize}}
-        </label>
+          {{configService.labelConfig?.lbl?.reduceSize}}</label>
       </div>
       <div class="sb-checkbox sb-checkbox-primary pl-10 mt-0 pt-0" [class.selected]="option.selected === true" *ngIf="sourcingSettings?.enforceCorrectAnswer !== false">
         <input type="checkbox" id="answer_{{ i + 1 }}" name="example" value="{{ i }}"  (click)="onOptionChange($event);"
