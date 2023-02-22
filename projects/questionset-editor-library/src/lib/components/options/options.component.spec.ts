@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { OptionsComponent } from './options.component';
-import { CUSTOM_ELEMENTS_SCHEMA, SimpleChange, SimpleChanges } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, SimpleChange } from '@angular/core';
 import { mockOptionData, nativeElement, sourcingSettingsMock } from './options.component.spec.data';
 import { ConfigService } from '../../services/config/config.service';
 import { SuiModule } from 'ng2-semantic-ui-v9';
