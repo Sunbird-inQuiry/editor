@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { OptionsComponent } from './options.component';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, SimpleChange } from '@angular/core';
 import { mockOptionData, nativeElement, sourcingSettingsMock } from './options.component.spec.data';
 import { ConfigService } from '../../services/config/config.service';
 import { SuiModule } from 'ng2-semantic-ui-v9';
@@ -68,11 +68,21 @@ describe('OptionsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('#ngOnInit() should call editorDataHandler on ngOnInit', () => {
+  it('#ngOnInit() should call addSelectedOptions and editorDataHandler on ngOnInit', () => {
     component.editorState = mockOptionData.editorOptionData;
+    spyOn(component, 'addSelectedOptions').and.callFake(() => {});
     spyOn(component, 'editorDataHandler');
     component.ngOnInit();
+    expect(component.addSelectedOptions).toHaveBeenCalled();
     expect(component.editorDataHandler).toHaveBeenCalled();
+  });
+
+  it('#ngOnInit() should not call addSelectedOptions ngOnInit', () => {
+    component.editorState = mockOptionData.editorOptionData;
+    component.editorState.answer = "";
+    spyOn(component, 'addSelectedOptions').and.callFake(() => {});
+    component.ngOnInit();
+    expect(component.addSelectedOptions).not.toHaveBeenCalled();
   });
 
   it('should not set #templateType when creating new question', () => {
@@ -89,7 +99,44 @@ describe('OptionsComponent', () => {
     expect(component.templateType).toEqual('mcq-split-grid');
   });
 
-  it('#editorDataHandler() should emit option data', () => {
+  it('ngOnChanges should not call editorDataHandler', () => {
+    spyOn(component, 'editorDataHandler').and.callFake(() => {});
+    spyOn(component, 'ngOnChanges').and.callThrough();
+    component.ngOnChanges({
+      maxScore: new SimpleChange(undefined, 1, true),
+    });
+    expect(component.editorDataHandler).not.toHaveBeenCalled();
+  });
+
+  it('ngOnChanges should call editorDataHandler', () => {
+    spyOn(component, 'editorDataHandler').and.callFake(() => {});
+    spyOn(component, 'ngOnChanges').and.callThrough();
+    component.ngOnChanges({
+      maxScore: new SimpleChange(1, 2, false),
+    });
+    expect(component.editorDataHandler).toHaveBeenCalled();
+  });
+
+  it('addSelectedOptions should set selectedOptions', () => {
+    component.selectedOptions = [];
+    component.editorState = mockOptionData.editorOptionData;
+    spyOn(component, 'addSelectedOptions').and.callThrough();
+    component.addSelectedOptions();
+    expect(component.selectedOptions.length).toEqual(1);
+  });
+
+  it('addSelectedOptions should set selectedOptions', () => {
+    component.selectedOptions = [];
+    component.editorState = mockOptionData.editorOptionData;
+    component.editorState.answer = [0,1];
+    spyOn(component, 'addSelectedOptions').and.callThrough();
+    component.addSelectedOptions();
+    expect(component.selectedOptions.length).toEqual(2);
+    expect(component.editorState.options[0]['selected']).toEqual(true);
+    expect(component.editorState.options[1]['selected']).toEqual(true);
+  });
+
+  it('#editorDataHandler() should emit option data when answer is single value', () => {
     spyOn(component, 'prepareMcqBody').and.callThrough();
     spyOn(component.editorDataOutput, 'emit').and.callThrough();
     component.editorState = mockOptionData.editorOptionData;
@@ -99,11 +146,33 @@ describe('OptionsComponent', () => {
     expect(component.editorDataOutput.emit).toHaveBeenCalled();
   });
 
-  it('#prepareMcqBody() should return expected mcq option data', () => {
+  it('#editorDataHandler() should emit option data when answer is multiple value', () => {
+    spyOn(component, 'prepareMcqBody').and.callThrough();
+    spyOn(component.editorDataOutput, 'emit').and.callThrough();
+    component.editorState = mockOptionData.editorOptionData;
+    component.editorState.answer = [0,1];
+    component.editorDataHandler();
+    component.questionPrimaryCategory='Multiselect Multiple Choice Question';
+    expect(component.prepareMcqBody).toHaveBeenCalledWith(mockOptionData.editorOptionData);
+    expect(component.editorDataOutput.emit).toHaveBeenCalled();
+  });
+
+  it('#prepareMcqBody() should return expected mcq option data for single select MCQ', () => {
+    component.maxScore = 1;
+    component.selectedOptions = [0];
     spyOn(component, 'getResponseDeclaration').and.callThrough();
     spyOn(component, 'getInteractions').and.callThrough();
     const result = component.prepareMcqBody(mockOptionData.editorOptionData);
-    // expect(mockOptionData.prepareMcqBody).toEqual(result);
+    expect(component.getResponseDeclaration).toHaveBeenCalledWith(mockOptionData.editorOptionData);
+    expect(component.getInteractions).toHaveBeenCalledWith(mockOptionData.editorOptionData.options);
+  });
+
+  it('#prepareMcqBody() should return expected mcq option data for single select MCQ', () => {
+    component.maxScore = 1;
+    component.selectedOptions = [0,1];
+    spyOn(component, 'getResponseDeclaration').and.callThrough();
+    spyOn(component, 'getInteractions').and.callThrough();
+    const result = component.prepareMcqBody(mockOptionData.editorOptionData);
     expect(component.getResponseDeclaration).toHaveBeenCalledWith(mockOptionData.editorOptionData);
     expect(component.getInteractions).toHaveBeenCalledWith(mockOptionData.editorOptionData.options);
   });
@@ -114,6 +183,25 @@ describe('OptionsComponent', () => {
     expect(component.getResponseDeclaration).toHaveBeenCalled();
     // expect(mockOptionData.prepareMcqBody.responseDeclaration).toEqual(result);
   });
+
+  it('setMapping should set the mapping for single select MCQ', () => {
+    component.mapping = [];
+    component.selectedOptions = [0];
+    component.maxScore = 1;
+    spyOn(component, 'setMapping').and.callThrough();
+    component.setMapping();
+    expect(component.mapping.length).toEqual(1);
+  });
+
+  it('setMapping should set the mapping for single select MCQ', () => {
+    component.mapping = [];
+    component.selectedOptions = [0,1];
+    component.maxScore = 1;
+    spyOn(component, 'setMapping').and.callThrough();
+    component.setMapping();
+    expect(component.mapping.length).toEqual(2);
+  });
+
 
   it('#getInteractions() should return expected response declaration', () => {
     spyOn(component,"getInteractions").and.callThrough();
@@ -147,6 +235,45 @@ describe('OptionsComponent', () => {
     ];
     component.subMenuConfig(options);
     expect(component.subMenuConfig).toHaveBeenCalledWith(options)
+  })
+
+  it('onOptionChange should set editorState.answer', () => {
+    component.selectedOptions = [];
+    component.editorState.answer = "";
+    spyOn(component, 'editorDataHandler').and.callFake(() => {});
+    spyOn(component, 'setMapping').and.callFake(() => {});
+    spyOn(component, 'onOptionChange').and.callThrough();
+    component.onOptionChange({target: {value: "0", checked: true}})
+    expect(component.selectedOptions.length).toEqual(1);
+    expect(component.editorState.answer).toEqual("0");
+    expect(component.setMapping).toHaveBeenCalled();
+    expect(component.editorDataHandler).toHaveBeenCalled();
+  })
+
+  it('onOptionChange should set editorState.answer', () => {
+    component.selectedOptions = [0];
+    component.editorState.answer = "";
+    spyOn(component, 'editorDataHandler').and.callFake(() => {});
+    spyOn(component, 'setMapping').and.callFake(() => {});
+    spyOn(component, 'onOptionChange').and.callThrough();
+    component.onOptionChange({target: {value: "1", checked: true}})
+    expect(component.selectedOptions.length).toEqual(2);
+    expect(component.editorState.answer).toEqual([0,1]);
+    expect(component.setMapping).toHaveBeenCalled();
+    expect(component.editorDataHandler).toHaveBeenCalled();
+  })
+
+  it('onOptionChange should set editorState.answer', () => {
+    component.selectedOptions = [0,1];
+    component.editorState.answer = "";
+    spyOn(component, 'editorDataHandler').and.callFake(() => {});
+    spyOn(component, 'setMapping').and.callFake(() => {});
+    spyOn(component, 'onOptionChange').and.callThrough();
+    component.onOptionChange({target: {value: "1", checked: false}})
+    expect(component.selectedOptions.length).toEqual(1);
+    expect(component.editorState.answer).toEqual("0");
+    expect(component.setMapping).toHaveBeenCalled();
+    expect(component.editorDataHandler).toHaveBeenCalled();
   })
 
   it('#setScore() should call if score is entered', () => {
