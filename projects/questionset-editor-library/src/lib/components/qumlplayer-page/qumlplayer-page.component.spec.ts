@@ -31,9 +31,16 @@ describe('QumlplayerPageComponent', () => {
     expect(component).toBeTruthy();
   });
   it('#ngOnChanges() should call initQumlPlayer', () => {
-    spyOn(component, 'initQumlPlayer');
+    component.questionMetaData = {data: {metadata: {}}};
+    spyOn(component, 'initQumlPlayer').and.callFake(() => {});
     component.ngOnChanges();
     expect(component.initQumlPlayer).toHaveBeenCalled();
+  });
+  it('#ngOnChanges() should not call initQumlPlayer', () => {
+    component.questionMetaData = {};
+    spyOn(component, 'initQumlPlayer').and.callFake(() => {});
+    component.ngOnChanges();
+    expect(component.initQumlPlayer).not.toHaveBeenCalled();
   });
   it('#initQumlPlayer() should set prevQuestionId', () => {
     component.showPlayerPreview = false;

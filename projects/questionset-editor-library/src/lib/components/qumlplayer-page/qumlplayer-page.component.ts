@@ -24,7 +24,9 @@ export class QumlplayerPageComponent implements OnChanges {
               private treeService: TreeService) { }
 
   ngOnChanges() {
-    this.initQumlPlayer();
+    if (_.has(this.questionMetaData, 'data.metadata')) {
+      this.initQumlPlayer();
+    }
   }
 
   initQumlPlayer() {
