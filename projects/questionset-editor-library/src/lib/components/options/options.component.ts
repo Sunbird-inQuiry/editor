@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, EventEmitter, Output, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, Output, ViewEncapsulation, OnChanges, SimpleChanges } from '@angular/core';
 import * as _ from 'lodash-es';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { ConfigService } from '../../services/config/config.service';
@@ -10,13 +10,14 @@ import { EditorService } from '../../services/editor/editor.service';
   templateUrl: './options.component.html',
   styleUrls: ['./options.component.scss'],
 })
-export class OptionsComponent implements OnInit {
+export class OptionsComponent implements OnInit, OnChanges {
   @Input() editorState: any;
   @Input() showFormError;
   @Input() sourcingSettings;
   @Input() questionPrimaryCategory;
   @Input() mapping = [];
   @Input() isReadOnlyMode;
+  @Input() maxScore;
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
   public setCharacterLimit = 160;
   public setImageLimit = 1;
@@ -25,6 +26,7 @@ export class OptionsComponent implements OnInit {
   hints = [];
   showSubMenu:boolean=false;
   parentMeta: any;
+  selectedOptions = [];
   constructor(
     public telemetryService: EditorTelemetryService,
     public configService: ConfigService,
@@ -33,6 +35,9 @@ export class OptionsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    if(!_.isEmpty(this.editorState.answer)) {
+      this.addSelectedOptions();
+    }
     if (!_.isUndefined(this.editorState.templateId)) {
       this.templateType = this.editorState.templateId;
     }
@@ -41,6 +46,31 @@ export class OptionsComponent implements OnInit {
     if(!_.isUndefined(this.editorService.editorConfig.config.renderTaxonomy)){
       this.parentMeta = this.treeService.getFirstChild().data.metadata;
       this.showSubMenu=true;
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges){
+    if (!_.isUndefined(changes.maxScore.previousValue) && !_.isNaN(changes.maxScore.currentValue)) {
+      this.setMapping();
+      this.editorDataHandler();
+    }
+  }
+
+  addSelectedOptions() {
+    if (_.isString(this.editorState.answer)) {
+      this.selectedOptions.push(_.parseInt(this.editorState.answer));
+    } else if (_.isArray(this.editorState.answer)) {
+      this.selectedOptions = this.editorState.answer;
+    }
+    if (!_.isEmpty(this.editorState.options)) {
+      _.forEach(this.editorState.options, (option, index) => {
+        const resindex = Number(index);
+        if (_.includes(this.selectedOptions, resindex)) {
+          option['selected'] = true;
+        } else {
+          option['selected'] = false;
+        }
+      })
     }
   }
 
@@ -53,14 +83,26 @@ export class OptionsComponent implements OnInit {
     let metadata: any;
     const correctAnswer = editorState.answer;
     let resindex;
-    const options = _.map(editorState.options, (opt, key) => {
-      resindex = Number(key);
-      if (Number(correctAnswer) === key) {
-        return { answer: true, value: { body: opt.body, value: resindex } };
-      } else {
-        return { answer: false, value: { body: opt.body, value: resindex } };
-      }
-    });
+    let options;
+    if (_.isString(correctAnswer)) {
+      options = _.map(editorState.options, (opt, key) => {
+        resindex = Number(key);
+        if (_.parseInt(correctAnswer) === resindex) {
+          return { answer: true, value: { body: opt.body, value: resindex } };
+        } else {
+          return { answer: false, value: { body: opt.body, value: resindex } };
+        }
+      });
+    } else if (_.isArray(correctAnswer) && !_.isEmpty(correctAnswer)) {
+      options = _.map(editorState.options, (opt, key) => {
+        resindex = Number(key);
+        if (_.includes(correctAnswer, resindex)) {
+          return { answer: true, value: { body: opt.body, value: resindex } };
+        } else {
+          return { answer: false, value: { body: opt.body, value: resindex } };
+        }
+      });
+    }
     metadata = {
       templateId: this.templateType,
       name: this.questionPrimaryCategory || 'Multiple Choice Question',
@@ -77,19 +119,41 @@ export class OptionsComponent implements OnInit {
   }
 
   getResponseDeclaration(editorState) {
+    let questionCardinality = 'single';
+    if (this.mapping.length > 1) {
+      questionCardinality = 'multiple';
+    }
     const responseDeclaration = {
       response1: {
-        maxScore: 1,
-        cardinality: 'single',
+        maxScore: this.maxScore,
+        cardinality: questionCardinality,
         type: 'integer',
         correctResponse: {
           value: editorState.answer,
-          outcomes: { SCORE: 1 },
+          outcomes: { SCORE: this.maxScore },
         },
         mapping: this.mapping,
       },
     };
     return responseDeclaration;
+  }
+
+  setMapping() {
+    if(!_.isEmpty(this.selectedOptions)) {
+      this.mapping = [];
+      const scoreForEachOption = _.round((this.maxScore/this.selectedOptions.length), 2);
+      _.forEach(this.selectedOptions, (value) => {
+        const optionMapping = {
+          response: value,
+          outcomes: {
+            score: scoreForEachOption,
+          },
+        }
+        this.mapping.push(optionMapping)
+      })
+    } else {
+      this.mapping = [];
+    }
   }
 
   getInteractions(options) {
@@ -134,6 +198,26 @@ export class OptionsComponent implements OnInit {
         },
       ];
     });
+  }
+
+  onOptionChange(event) {
+    const optionIndex = _.parseInt(event.target.value);
+      if(event.target.checked === true && !_.includes(this.selectedOptions, optionIndex)) {
+        this.selectedOptions.push(optionIndex);
+      } else if(event.target.checked === false) {
+        _.remove(this.selectedOptions, (n) => {
+          return n === optionIndex;
+        });
+      }
+      if (this.selectedOptions.length === 1) {
+        this.editorState.answer = _.toString(this.selectedOptions[0]);
+      } else if(this.selectedOptions.length > 1) {
+        this.editorState.answer = this.selectedOptions;
+      } else {
+        this.editorState.answer = undefined;
+      }
+      this.setMapping();
+      this.editorDataHandler();
   }
 
   setScore(value, scoreIndex) {
