@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, EventEmitter, Output, ViewEncapsulation, OnChanges } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, Output, ViewEncapsulation, OnChanges, SimpleChange, SimpleChanges } from '@angular/core';
 import * as _ from 'lodash-es';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { ConfigService } from '../../services/config/config.service';
@@ -49,8 +49,11 @@ export class OptionsComponent implements OnInit, OnChanges {
     }
   }
 
-  ngOnChanges(){
-    this.editorDataHandler();
+  ngOnChanges(changes: SimpleChanges){
+    if (!_.isUndefined(changes.maxScore.previousValue) && !_.isNaN(changes.maxScore.currentValue)) {
+      this.setMapping();
+      this.editorDataHandler();
+    }
   }
 
   addSelectedOptions() {
@@ -117,7 +120,6 @@ export class OptionsComponent implements OnInit, OnChanges {
 
   getResponseDeclaration(editorState) {
     let questionCardinality = 'single';
-    this.setMapping();
     if (this.mapping.length > 1) {
       questionCardinality = 'multiple';
     }
@@ -214,6 +216,7 @@ export class OptionsComponent implements OnInit, OnChanges {
       } else {
         this.editorState.answer = undefined;
       }
+      this.setMapping();
       this.editorDataHandler();
   }
 
