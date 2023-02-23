@@ -26,7 +26,7 @@ npm i ng2-semantic-ui-v9 --save
 npm i ngx-infinite-scroll --save
 npm i lodash-es --save
 npm i jquery.fancytree --save
-npm i angular2-uuid --save
+npm i uuid --save
 npm i @project-sunbird/client-services --save
 npm i export-to-csv --save
 npm i moment --save
@@ -36,7 +36,6 @@ npm i @project-sunbird/sunbird-epub-player-v9 --save
 npm i @project-sunbird/sunbird-video-player-v9 --save
 npm i @project-sunbird/sunbird-quml-player --save
 npm i ngx-bootstrap@6.0.0 --save
-npm i ng2-cache-service --save
 npm i ngx-chips@2.2.0 --save
 npm i epubjs --save
 npm i videojs-contrib-quality-levels --save
