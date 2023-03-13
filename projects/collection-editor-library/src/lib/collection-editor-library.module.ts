@@ -40,6 +40,11 @@ import { DialcodeService } from './services/dialcode/dialcode.service';
 import { CsvUploadComponent } from './components/csv-upload/csv-upload.component';
 import { ManageCollaboratorComponent } from './components/manage-collaborator/manage-collaborator.component';
 import { PublishChecklistComponent } from './components/publish-checklist/publish-checklist.component';
+import { BulkUploadComponent  } from './components/bulk-upload/bulk-upload.component';
+import { RelationalMetadataComponent } from './components/relational-metadata/relational-metadata.component';
+import { ResourceLibraryModule } from '@project-sunbird/sunbird-resource-library';
+import { AppLoaderComponent } from './components/app-loader/app-loader.component';
+import { A11yModule } from '@angular/cdk/a11y';
 @NgModule({
   declarations: [CollectionEditorLibraryComponent, ContentplayerPageComponent, EditorComponent, QumlplayerPageComponent,
     HeaderComponent, FancyTreeComponent, MetaFormComponent, LibraryComponent, LibraryFilterComponent, LibraryListComponent,
@@ -49,7 +54,7 @@ import { PublishChecklistComponent } from './components/publish-checklist/publis
     QumlPlayerComponent, DialcodeComponent, CsvUploadComponent, ManageCollaboratorComponent, PublishChecklistComponent,],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule.forChild([]), SuiModule,
   CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, SunbirdPdfPlayerModule, SunbirdVideoPlayerModule,
-  QumlLibraryModule, CarouselModule],
+  QumlLibraryModule, CarouselModule, SunbirdEpubPlayerModule, ResourceLibraryModule, A11yModule],
   providers: [
     CacheService,
     { provide: CacheStorageAbstract, useClass: CacheSessionStorage },

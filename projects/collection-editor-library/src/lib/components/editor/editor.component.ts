@@ -662,6 +662,12 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.updateTreeNodeData();
       this.buttonLoaders.previewButtonLoader = false;
       this.showPreview = true;
+      setTimeout(() => {
+        const element: any = document.querySelector('#previewPlayerContainer');
+        if (element) {
+          element.focus();
+        }
+      }, 500);
     }, error => {
       this.buttonLoaders.previewButtonLoader = false;
       this.toasterService.error(_.get(error, 'error.params.errmsg'));
@@ -782,7 +788,26 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       return throwError(this.editorService.apiErrorHandling(error, errInfo));
     })).subscribe((res) => {
       const selectedtemplateDetails = res.result.objectCategoryDefinition;
-      const catMetaData = selectedtemplateDetails.objectMetadata;
+      this.editorService.selectedChildren['label']=selectedtemplateDetails.label;
+      const selectedTemplateFormFields = _.get(selectedtemplateDetails, 'forms.create.properties');
+      if (!_.isEmpty(selectedTemplateFormFields)) {
+        const questionCategoryConfig = selectedTemplateFormFields;
+        questionCategoryConfig.forEach(field => {
+          if (field.code === 'evidenceMimeType') {
+            evidenceMimeType = field.range;
+            field.options = this.setEvidence;
+            field.range = null;
+          }
+        });
+        this.leafFormConfig = questionCategoryConfig;
+      }
+
+      const catMetaData = _.get(selectedtemplateDetails, 'objectMetadata');
+      this.sourcingSettings = _.get(catMetaData, 'config.sourcingSettings') || {};
+      !_.isUndefined(this.editorConfig.config.renderTaxonomy) ? (this.questionComponentInput.config ={maximumOptions:_.get(catMetaData, 'config.maximumOptions')}) : '' ;
+      if (!_.has(this.sourcingSettings, 'enforceCorrectAnswer')) {
+        this.sourcingSettings.enforceCorrectAnswer = true;
+      }
       if (_.isEmpty(_.get(catMetaData, 'schema.properties.interactionTypes.items.enum'))) {
         // this.toasterService.error(this.resourceService.messages.emsg.m0026);
         this.editorService.selectedChildren = {
@@ -844,6 +869,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         const selectedtemplateDetails = res.result.objectCategoryDefinition;
         this.editorService.selectedChildren['label']=selectedtemplateDetails.label;
         const selectedTemplateFormFields = _.get(selectedtemplateDetails, 'forms.create.properties');
+        this.questionComponentInput.config ={maximumOptions:_.get(selectedtemplateDetails, 'objectMetadata.config.maximumOptions')}
         if (!_.isEmpty(selectedTemplateFormFields)) {
           const questionCategoryConfig = selectedTemplateFormFields;
           questionCategoryConfig.forEach(field => {
