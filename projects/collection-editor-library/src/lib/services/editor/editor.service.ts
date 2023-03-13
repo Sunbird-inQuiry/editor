@@ -26,6 +26,14 @@ export class EditorService {
   private _editorMode = 'edit';
   public showLibraryPage: EventEmitter<number> = new EventEmitter();
   public contentsCount = 0;
+  templateList = [];
+  parentIdentifier: any;
+  branchingLogic = {};
+  selectedSection: any;
+  optionsLength: any;
+  selectedPrimaryCategory: any;
+  leafParentIdentifier: any;
+  questionIds = [];
   constructor(public treeService: TreeService, private toasterService: ToasterService,
               public configService: ConfigService, private telemetryService: EditorTelemetryService,
               private publicDataService: PublicDataService, private dataService: DataService, public httpClient: HttpClient) {
@@ -247,6 +255,26 @@ export class EditorService {
     return this.publicDataService.patch(req);
   }
 
+  addResourceToQuestionset(collection, unitIdentifier, contentId) {
+    const children: any[] = _.isArray(contentId) ? contentId : [contentId];
+    let req = {
+      url: _.get(this.configService.urlConFig, 'URLS.QuestionSet.ADD'),
+      data: {
+        request: {
+          questionset: {
+            rootId: collection,
+            collectionId: unitIdentifier,
+            children
+          }
+        }
+      }
+    };
+    if (collection === unitIdentifier) {
+      req = _.omit(req, 'data.request.questionset.collectionId');
+    }
+    return this.publicDataService.patch(req);
+  }
+
   public getQuestionStream$() {
     return this.questionStream$;
   }
@@ -255,26 +283,55 @@ export class EditorService {
     this.questionStream$.next(value);
   }
 
-  async getMaxScore() {
-    const rootNode = this.treeService.getFirstChild();
-    const metadata = _.get(rootNode, 'data.metadata');
-    const questionIds = this.getContentChildrens();
-    if (metadata.shuffle) {
-      if (metadata.maxQuestions && !_.isEmpty(questionIds) ) {
-        const { questions } =  await this.getQuestionList(_.take(questionIds, metadata.maxQuestions)).toPromise();
-        const maxScore = this.calculateMaxScore(questions);
-        return maxScore;
-      } else {
-        return questionIds.length;
+  setQuestionIds(childrens) {
+    const self = this;
+    for (const children of childrens) {
+      if (children.data.objectType === 'QuestionSet') {
+        let questionCount = 0;
+        if (children?.data?.metadata?.maxQuestions) {
+          questionCount = children.data.metadata.maxQuestions;
+        } else {
+          questionCount = children.children ?
+          children.children.length : 0;
+        }
+        if (questionCount > 0) {
+          for (let i = 0; i < questionCount; i++) {
+            if (!_.isEmpty(children, 'children')) {
+              if (children.children[i].data.objectType === 'QuestionSet') {
+                self.setQuestionIds([children.children[i]]);
+              } else {
+                if (!_.includes(this.questionIds, children.children[i].data.id)) {
+                  this.questionIds.push(children.children[i].data.id);
+                }
+              }
+            }
+          }
+        }
       }
-    } else {
-      return metadata.maxQuestions ? metadata.maxQuestions : questionIds.length;
     }
+  }
+
+  async getMaxScore() {
+    let maxScore = 0;
+    let rootNode = [];
+    this.questionIds = [];
+    const rootNodeData = this.treeService.getFirstChild();
+    if (rootNodeData.children) {
+      rootNode = [rootNodeData];
+    }
+    if (!_.isEmpty(rootNode)) {
+      this.setQuestionIds(rootNode);
+    }
+    if (!_.isEmpty(this.questionIds)) {
+      const { questions } =  await this.getQuestionList(this.questionIds).toPromise();
+      maxScore = this.calculateMaxScore(questions);
+    }
+    return maxScore;
   }
 
   calculateMaxScore(questions: Array<any>) {
    return _.reduce(questions, (sum, question) => {
-      return sum + (question.responseDeclaration ? _.get(question, 'responseDeclaration.response1.maxScore') : 1);
+      return sum + (question?.responseDeclaration?.response1?.maxScore ? _.get(question, 'responseDeclaration.response1.maxScore') : 0);
     }, 0);
   }
 
@@ -309,6 +366,37 @@ export class EditorService {
       });
     }
     return instance.data;
+  }
+
+
+ _toFlatObjFromHierarchy(data) {
+    const instance = this;
+    if (data && data.children) {
+      instance.data[data.identifier] = {
+        name: data.name,
+        children: _.map(data.children, (child) => {
+          return child.identifier;
+        }),
+        branchingLogic: data.branchingLogic
+      };
+      _.forEach(data.children, (collection) => {
+        instance._toFlatObjFromHierarchy(collection);
+      });
+    }
+    return instance.data;
+  }
+
+  getRelationalMetadataObj(data) {
+    let relationalMetadata = {};
+    _.forEach(data, (child) => {
+      if (_.get(child, 'data.metadata.relationalMetadata')) {
+        relationalMetadata = {
+          ...relationalMetadata,
+          [child.data.id]: _.get(child, 'data.metadata.relationalMetadata')
+        };
+      }
+    });
+    return relationalMetadata;
   }
 
   getCategoryDefinition(categoryName, channel, objectType?: any) {

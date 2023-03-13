@@ -71,7 +71,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     saveButtonLoader: false
   };
   constructor(
-    private questionService: QuestionService, private editorService: EditorService, public telemetryService: EditorTelemetryService,
+    private questionService: QuestionService, public editorService: EditorService, public telemetryService: EditorTelemetryService,
     public playerService: PlayerService, private toasterService: ToasterService, private treeService: TreeService,
     private frameworkService: FrameworkService, private router: Router, public configService: ConfigService, 
     private editorCursor: EditorCursor) {
@@ -125,7 +125,27 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   initialize() {
     this.editorService.fetchCollectionHierarchy(this.questionSetId).subscribe((response) => {
       this.questionSetHierarchy = _.get(response, 'result.questionSet');
-      const leafFormConfigfields = _.join(_.map(this.leafFormConfig, value => (value.code)), ',');
+      const parentId = this.editorService.parentIdentifier ? this.editorService.parentIdentifier : this.questionId;
+      //only for observation,survey,observation with rubrics 
+      if (!_.isUndefined(parentId) && !_.isUndefined(this.editorService.editorConfig.config.renderTaxonomy)) {
+        this.getParentQuestionOptions(parentId);
+        const sectionData = this.treeService.getNodeById(parentId);
+        const childerns = _.get(response, 'result.questionSet.children');
+        this.sectionPrimaryCategory = _.get(response, 'result.questionSet.primaryCategory');
+        this.selectedSectionId = _.get(sectionData, 'data.metadata.parent');
+        _.forEach(childerns, (data) => {
+          if (data.identifier === this.selectedSectionId) {
+            this.branchingLogic = data?.branchingLogic ? data?.branchingLogic : {};
+            if (_.get(data?.branchingLogic, `${this.questionId}.source[0]`)) {
+              this.isChildQuestion = true;
+              this.getParentQuestionOptions(data.branchingLogic[this.questionId].source[0]);
+              this.setCondition(data);
+            }
+          }
+        });
+      }
+      this.questionFormConfig=_.cloneDeep(this.leafFormConfig);
+      const leafFormConfigFields = _.join(_.map(this.leafFormConfig, value => (value.code)), ',');
       if (!_.isUndefined(this.questionId)) {
         this.questionService.readQuestion(this.questionId, leafFormConfigfields)
           .subscribe((res) => {
@@ -175,6 +195,11 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
               if (this.questionMetaData.media) {
                 this.mediaArr = this.questionMetaData.media;
               }
+              /** for observation and survey to show hint,tip,dependent question option. */
+              if(!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)){
+                this.subMenuConfig();
+              }
+              this.contentComment = _.get(this.creationContext, 'correctionComments');
               this.showLoader = false;
             }
           }, (err: ServerResponse) => {
@@ -193,6 +218,13 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         if (this.questionInteractionType === 'choice') {
           this.editorState = new McqForm({ question: '', options: [] }, {});
+        }
+        else if (this.questionInteractionType === 'choice') {
+          this.editorState = new McqForm({ question: '', options: [] }, {numberOfOptions: _.get(this.questionInput, 'config.numberOfOptions')});
+        }
+        /** for observation and survey to show hint,tip,dependent question option. */
+        if(!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)){
+          this.subMenuConfig();
         }
         this.showLoader = false;
       }
@@ -562,11 +594,11 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return true;
   }
   previewFormData(status) {
-    const formvalue = _.cloneDeep(this.leafFormConfig);
-    this.leafFormConfig = null;
-    _.forEach(formvalue, (formFieldCategory) => {
-      if (_.has(formFieldCategory, 'editable')) {
-        formFieldCategory.editable = status ? _.find(this.initialLeafFormConfig, { code: formFieldCategory.code }).editable : status;
+    const formConfig = _.cloneDeep(this.leafFormConfig);
+    this.questionFormConfig = null;
+    _.forEach(formConfig, (formFieldCategory) => {
+      if (_.has(formFieldCategory, 'editable') && !_.isUndefined(formFieldCategory.editable)) {
+        formFieldCategory.editable = status ? _.find(this.leafFormConfig, { code: formFieldCategory.code }).editable : status;
         formFieldCategory.default = this.childFormData[formFieldCategory.code];
       }
     });
@@ -588,6 +620,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         this.childFormData[formFieldCategory.code] = formFieldCategory.default;
       }
     });
+    this.fetchFrameWorkDetails();
+    (this.isReadOnlyMode ===true && !_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)) ? this.previewFormData(false) : this.previewFormData(true);
   }
   ngOnDestroy() {
     this.onComponentDestroy$.next();
@@ -596,3 +630,115 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 }
 
+  optionHandler(e) {
+    this.targetOption = e.target.value;
+  }
+
+
+  buildCondition(type) {
+    if(this.condition ==='default' || _.isEmpty(this.selectedOptions) ){
+      this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.038'));
+      return;
+    }
+    const questionId = this.questionId ? this.questionId : UUID.UUID();
+    const data = this.treeService.getFirstChild();
+    const hierarchyData = this.editorService.getHierarchyObj(data, '', this.selectedSectionId);
+    const sectionData = _.get(hierarchyData, `${this.selectedSectionId}`);
+    const sectionName = sectionData.name;
+    const branchingLogic = {
+      ...this.branchingLogic,
+      [this.editorService.parentIdentifier]: {
+        target: this.updateTarget(questionId),
+        preCondition: {},
+        source: []
+      },
+      [questionId]: {
+        target: [],
+        source: [this.editorService.parentIdentifier],
+        preCondition: {
+          and: [
+            {
+              [this.condition]: [
+                {
+                  var: `${this.editorService.parentIdentifier}.${this.responseVariable}.value`,
+                  type: 'responseDeclaration',
+                },
+                this.selectedOptions,
+              ],
+            },
+          ],
+        },
+      },
+  };
+    this.updateTreeCache(sectionName, branchingLogic, this.selectedSectionId);
+    const metaData = this.getQuestionMetadata();
+    this.setQuestionTypeValues(metaData);
+    const finalResult = {
+      nodesModified: {
+        [questionId]: {
+          metadata: metaData,
+          objectType: 'Question',
+          root: false,
+          isNew: this.questionId ? false : true
+        },
+        [this.selectedSectionId]: {
+          ...this.treeService.treeCache.nodesModified[this.selectedSectionId]
+        }
+      },
+      hierarchy: this.editorService.getHierarchyObj(data, questionId, this.selectedSectionId,this.editorService.parentIdentifier)
+    };
+    this.saveQuestions(finalResult, type);
+  }
+
+  updateTarget(questionId) {
+    if (!_.isEmpty(this.branchingLogic) && _.get(this.branchingLogic, `${this.editorService.parentIdentifier}.target`)) {
+      if (this.branchingLogic[this.editorService.parentIdentifier].target.includes(questionId)) {
+        return [...this.branchingLogic[this.editorService.parentIdentifier].target];
+      }
+      return [...this.branchingLogic[this.editorService.parentIdentifier].target, `${questionId}`];
+    }
+    return [`${questionId}`];
+  }
+
+  getOptions() {
+    if (this.editorService.optionsLength) {
+      this.options = [];
+      Array.from({length: this.editorService.optionsLength}, (x, i) => {
+        this.options.push({value: i, label: i});
+      });
+    }
+  }
+
+  getParentQuestionOptions(questionId) {
+    this.editorService.parentIdentifier = questionId;
+    this.questionService.readQuestion(questionId)
+    .subscribe((res) => {
+      if (res.responseCode === 'OK') {
+        const result = res.result.question;
+        if (result.interactionTypes[0] === 'choice') {
+          const numberOfOptions = result.editorState.options.length;
+          this.editorService.optionsLength = numberOfOptions;
+          this.getOptions();
+        }
+      }
+    });
+  }
+
+  updateTreeCache(sectionName, branchingLogic, selectedSection) {
+    const metadata = {
+      name: sectionName,
+      primaryCategory: this.sectionPrimaryCategory,
+      allowBranching: 'Yes',
+      branchingLogic
+    };
+    this.treeService.updateNode(metadata, selectedSection, this.sectionPrimaryCategory);
+  }
+
+  setCondition(data) {
+    const Condition = _.get(data?.branchingLogic, `${this.questionId}.preCondition.and[0]`);
+    const getCondition = Object.keys(Condition);
+    this.condition = getCondition[0];
+    this.selectedOptions = Condition[getCondition][1];
+  }
+
+}

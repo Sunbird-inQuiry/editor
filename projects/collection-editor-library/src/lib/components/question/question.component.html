@@ -9,7 +9,23 @@
           <div *ngIf="showPreview" class="br-2 b-1-100">
             <lib-quml-player [questionSetHierarchy]="questionSetHierarchy" [isSingleQuestionPreview]="true" ></lib-quml-player>
           </div>
-          <div class="py-20 px-32 sb-bg-color-primary-0 br-4 b-1-100" *ngIf="!showPreview">
+          <div style="display: flex;align-items: flex-end;justify-content: flex-end;"
+            *ngIf="showOptions || isChildQuestion ">
+            <div class="options">
+              <sui-select [(ngModel)]="condition" valueField="value" class="selection multiselect"
+              labelField="label" [placeholder]="'Select Condition'" #select [isDisabled]="isReadOnlyMode">
+                <sui-select-option [value]="{label:'Equal to',value:'eq'}"></sui-select-option>
+                <sui-select-option [value]="{label:'Not equal',value:'ne'}"></sui-select-option>
+              </sui-select>
+
+              <sui-multi-select class="selection multiselect" [(ngModel)]="selectedOptions" valueField="value"
+                labelField="label" [isSearchable]="false" #multiSelect [placeholder]="'Select options'" [isDisabled]="isReadOnlyMode" >
+                <sui-select-option *ngFor="let option of options" [value]="option">
+                </sui-select-option>
+              </sui-multi-select>
+            </div>
+          </div>
+          <div class="py-20 px-32 br-4 b-1-100" *ngIf="!showPreview" [ngClass]="{'sb-bg-color-primary-0': !isReadOnlyMode}">
             <div class="sb-field-group">
               <label class="fs-0-92 font-weight-bold">{{configService.labelConfig?.lbl?.question}}<span class="sb-required">*</span></label>
               <div class="sb-field">
@@ -98,6 +114,17 @@
                 </div>
               </div>
             </div>
+          </div>
+          <!-- <lib-translations *ngIf="showTranslation"></lib-translations> -->
+          <!-- child question section -->
+          <div class="b-1-100 br-4 my-15 px-32 py-10 sb-bg-color-primary-0"
+            *ngFor="let question of dependentQuestions;let childindex=index">
+            {{ questionSetHierarchy.children ? 'Q'+ (questionSetHierarchy.children.length+1):''}} {{'. '+
+            (childindex+1)}}
+            <button
+              class="sb-btn sb-btn-outline-primary sb-btn-xs sb-left-icon-btn text-inherit b-0 bg-none no-hover pl-0">
+              <span class="sb-line-height-24">edit question</span>
+            </button>
           </div>
           <hr>
           <div *ngIf="leafFormConfig">

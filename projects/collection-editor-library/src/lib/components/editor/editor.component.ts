@@ -399,10 +399,13 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       case 'showReviewcomments':
         this.showReviewModal = !this.showReviewModal;
         break;
-      //case 'showCorrectioncomments':
-        //this.contentComment = _.get(this.editorConfig, 'context.correctionComments')
-        //this.showReviewModal = !this.showReviewModal;
-        //break;
+      case 'reviewContent':
+        this.redirectToQuestionTab('review');
+        break;    
+      // case 'showCorrectioncomments':
+        // this.contentComment = _.get(this.editorConfig, 'context.correctionComments')
+        // this.showReviewModal = !this.showReviewModal;
+        // break;
       default:
         break;
     }
@@ -435,6 +438,44 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.toasterService.error(err);
         this.buttonLoaders.addFromLibraryButtonLoader = false;
       });
+    }
+  }
+  showQuestionLibraryComponentPage() {
+    if (_.isUndefined(this.libraryComponentInput.searchFormConfig) || _.isEmpty(this.libraryComponentInput.searchFormConfig)) {
+      this.toasterService.error(_.get(this.configService, 'labelConfig.err.searchConfigNotFound'));
+      return;
+    }
+    if (this.editorService.checkIfContentsCanbeAdded('add')) {
+      const questionCategory = [];
+      this.buttonLoaders.addQuestionFromLibraryButtonLoader = true;
+      if (!_.isUndefined(this.editorService.templateList) &&
+        _.isArray(this.editorService.templateList)) {
+          _.forEach(this.editorService.templateList, (template) => {
+            questionCategory.push({name: template, targetObjectType: 'Question'});
+          });
+        }
+      this.saveContent().then((message: string) => {
+        const activeNode = this.treeService.getActiveNode();
+        this.buttonLoaders.addQuestionFromLibraryButtonLoader = false;
+        this.questionlibraryInput = {
+          libraryLabels: {
+            itemType: _.get(this.configService, 'labelConfig.lbl.questionsetAddFromLibraryItemLabel'),
+            collectionType: _.get(this.configService, 'labelConfig.lbl.questionsetAddFromLibraryCollectionLabel')
+          },
+          targetPrimaryCategories: questionCategory,
+          collectionId: this.collectionId,
+          existingcontentCounts: this.editorService.getContentChildrens().length,
+          collection: activeNode?.data?.metadata,
+          framework: this.organisationFramework,
+          editorConfig: this.editorConfig,
+          searchFormConfig:  this.libraryComponentInput.searchFormConfig
+        };
+        this.pageId = 'question_library';
+        console.log(this.questionlibraryInput);
+      }).catch(((error: string) => {
+        this.toasterService.error(error);
+        this.buttonLoaders.addQuestionFromLibraryButtonLoader = false;
+      }));
     }
   }
 
@@ -763,12 +804,73 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   redirectToQuestionTab(mode, interactionType?) {
+    let questionId = !_.isUndefined(mode) ? this.selectedNodeData?.data?.metadata?.identifier : undefined;
+    let questionCategory = '';
+    if (this.objectType === 'question') {
+      questionId = _.get(this.editorConfig, 'context.identifier');
+      interactionType = _.get(this.editorConfig, 'config.interactionType');
+      questionCategory = _.get(this.editorConfig, 'config.questionCategory');
+      this.creationContext =  {
+        mode: mode,
+        objectType: this.objectType,
+        collectionObjectType: _.get(this.editorConfig, 'context.collectionObjectType'),
+        isReadOnlyMode: _.get(this.editorConfig, 'config.isReadOnlyMode'),
+        unitIdentifier: _.get(this.editorConfig, 'context.unitIdentifier'),
+        correctionComments: _.get(this.editorConfig, 'context.correctionComments'),
+        editableFields: _.get(this.editorConfig, 'config.editableFields')
+      };
+    }
+
     this.questionComponentInput = {
       questionSetId: this.collectionId,
       questionId: mode === 'edit' ? this.selectedNodeData.data.metadata.identifier : undefined,
       type: interactionType
     };
+
+    if(!_.isUndefined(mode) && !_.isUndefined(this.editorConfig.config.renderTaxonomy)){
+      this.editorService.selectedChildren = {
+        primaryCategory: _.get(this.selectedNodeData, 'data.metadata.primaryCategory'),
+        interactionType: _.get(this.selectedNodeData, 'data.metadata.interactionTypes[0]')
+      };
+        this.questionComponentInput = {
+          ...this.questionComponentInput,
+          creationContext:{
+            isReadOnlyMode: mode !== 'edit' ? true : false,
+            correctionComments:this.contentComment
+        }
+      }
+      this.editorService.getCategoryDefinition(this.selectedNodeData.data.metadata.primaryCategory, null, 'Question')
+      .subscribe((res) => {
+        const selectedtemplateDetails = res.result.objectCategoryDefinition;
+        this.editorService.selectedChildren['label']=selectedtemplateDetails.label;
+        const selectedTemplateFormFields = _.get(selectedtemplateDetails, 'forms.create.properties');
+        if (!_.isEmpty(selectedTemplateFormFields)) {
+          const questionCategoryConfig = selectedTemplateFormFields;
+          questionCategoryConfig.forEach(field => {
+            if (field.code === 'evidenceMimeType') {
+              evidenceMimeType = field.range;
+              field.options = this.setEvidence;
+              field.range = null;
+            }
+          });
+          this.leafFormConfig = questionCategoryConfig;
+        }
+        const catMetaData = selectedtemplateDetails.objectMetadata;
+        this.sourcingSettings = catMetaData?.config?.sourcingSettings || {};
+        if (!_.has(this.sourcingSettings, 'enforceCorrectAnswer')) {
+          this.sourcingSettings.enforceCorrectAnswer = true;
+        }
+        this.pageId = 'question';
+      },(error) => {
+        const errInfo = {
+          errorMsg: _.get(this.configService, 'labelConfig.messages.error.006'),
+        };
+        return throwError(this.editorService.apiErrorHandling(error, errInfo))
+      });
+    }
+    else{
     this.pageId = 'question';
+    }
   }
 
   questionEventListener(event: any) {
@@ -881,5 +983,22 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+  }
+}
+
+  setEcm(control, depends: FormControl[], formGroup: FormGroup, loading, loaded) {
+    control.isVisible = 'no';
+    control.options = ecm;
+    return merge(..._.map(depends, depend => depend.valueChanges)).pipe(
+        switchMap((value: any) => {
+            if (!_.isEmpty(value) && _.toLower(value) === 'yes') {
+                control.isVisible = 'yes';
+                return of({options: ecm});
+            } else {
+                control.isVisible = 'no';
+                return of(null);
+            }
+        })
+    );
   }
 }

@@ -11,7 +11,10 @@ import * as categoryConfig from '../../services/config/category.config.json';
 import { of } from 'rxjs';
 import { PublicDataService } from '../public-data/public-data.service';
 import { ToasterService} from '../../services/toaster/toaster.service';
-
+import { TreeService } from '../tree/tree.service';
+import * as mockData from './editor.service.spec.data';
+import { map } from 'rxjs/operators';
+import * as _ from 'lodash-es';
 
 describe('EditorService', () => {
   let editorService: EditorService;
@@ -353,3 +356,175 @@ describe('EditorService', () => {
     expect(returnValue).toBeDefined();
   });
 });
+  it('#updateCollection() should reject question for event sourcingRejectQuestion', () => {
+      const collectionId = 'do_11330102570702438417';
+      const event = {
+        button: 'sourcingRejectQuestion',
+        requestBody: {
+          request: {
+            questionset: {}
+          }
+        }
+      };
+      const publicDataService: PublicDataService = TestBed.get(PublicDataService);
+      editorConfig.context.collectionObjectType = 'QuestionSet';
+      spyOn(publicDataService, 'patch').and.returnValue(of({
+          responseCode: 'OK'
+      }));
+      editorService.updateCollection(collectionId, event).subscribe(data => {
+          expect(data.responseCode).toEqual('OK');
+      });
+  })
+
+  it('#getBranchingLogicByFolder() should call', () => {
+    spyOn(editorService,'getBranchingLogicByFolder').and.callThrough();
+    spyOn(editorService.treeService, 'getNodeById').and.returnValue(of(treeNodeData))
+    editorService.getBranchingLogicByFolder('do_113432866096922624110');
+    expect(editorService.getBranchingLogicByFolder).toHaveBeenCalled();
+  });
+
+  it('#getDependentNodes() should call', () => {
+    spyOn(editorService,'getDependentNodes').and.callThrough();
+    spyOn(editorService.treeService, 'getNodeById').and.returnValue(of(treeNodeData))
+    editorService.getDependentNodes('do_113432866096922624110');
+    expect(editorService.getDependentNodes).toHaveBeenCalled();
+  });
+
+  it('#getBranchingLogicByNodeId() should call', () => {
+    spyOn(editorService,'getBranchingLogicByNodeId').and.callThrough();
+    spyOn(editorService.treeService, 'getNodeById').and.returnValue(of(treeNodeData))
+    editorService.getBranchingLogicByNodeId('do_113432866096922624110');
+    expect(editorService.getBranchingLogicByNodeId).toHaveBeenCalled();
+  });
+
+  it('#getParentDependentMap() should call', () => {
+    spyOn(editorService,'getParentDependentMap').and.callThrough();
+    editorService.getParentDependentMap(rootNodeData);
+    expect(editorService.getParentDependentMap).toHaveBeenCalled();
+  });
+
+  it('#getFlattenedBranchingLogic() should call', () => {
+    spyOn(editorService,'getFlattenedBranchingLogic');
+    editorService._toFlatObjFromHierarchy(rootNodeData)
+    editorService.getFlattenedBranchingLogic(rootNodeData);
+    expect(editorService.getFlattenedBranchingLogic);
+  });
+
+  it('#getBranchingLogicEntry() should call', () => {
+    spyOn(editorService,'getBranchingLogicEntry').and.callThrough();
+    editorService.getBranchingLogicEntry(BranchingLogicData,'do_113432866799935488112');
+    expect(editorService.getBranchingLogicEntry).toHaveBeenCalled();
+  });
+
+  it('#getPrimaryCategoryName() should call to get primary category name', () => {
+    spyOn(editorService.treeService, 'getNodeById').and.returnValue(of(treeNodeData))
+    spyOn(editorService,'getPrimaryCategoryName').and.callThrough();
+    editorService.getPrimaryCategoryName('do_11326714211239526417');
+    expect(editorService.getPrimaryCategoryName).toHaveBeenCalledWith('do_11326714211239526417')
+  });
+
+  it('#setQuestionIds should set questionIds', () => {
+    editorService.questionIds = [];
+    spyOn(editorService, 'setQuestionIds').and.callThrough();
+    editorService.setQuestionIds([mockData.rootNode.children]);
+    expect(editorService.questionIds).toEqual(['do_1135097615298723841131', 'do_1135097709808189441133']);
+  });
+
+  it('#getMaxScore should not call calculateMaxScore', async () => {
+    spyOn(editorService.treeService, 'getFirstChild').and.returnValue({});
+    spyOn(editorService, 'setQuestionIds').and.callFake(() => {});
+    spyOn(await editorService, 'getQuestionList').and.callFake(() => {});
+    spyOn(editorService, 'calculateMaxScore').and.callFake(() => {});
+    spyOn(editorService, 'getMaxScore').and.callThrough();
+    const maxScore = await editorService.getMaxScore();
+    expect(editorService.treeService.getFirstChild).toHaveBeenCalled();
+    expect(editorService.setQuestionIds).not.toHaveBeenCalled();
+    expect(editorService.getQuestionList).not.toHaveBeenCalled();
+    expect(editorService.calculateMaxScore).not.toHaveBeenCalled();
+    expect(maxScore).toEqual(0);
+  });
+
+  it('#getMaxScore should return maxScore', async () => {
+    spyOn(editorService.treeService, 'getFirstChild').and.returnValue(mockData.rootNode);
+    spyOn(editorService, 'setQuestionIds').and.callFake(() => {
+      editorService.questionIds = ['do_1135097615298723841131', 'do_1135097709808189441133'];
+    });
+    spyOn(await editorService, 'getQuestionList').and.returnValue(of(mockData.questionResult).pipe(map(data => _.get(data, 'result'))));
+    spyOn(editorService, 'calculateMaxScore').and.callThrough();
+    spyOn(editorService, 'getMaxScore').and.callThrough();
+    const maxScore = await editorService.getMaxScore();
+    expect(editorService.questionIds.length).toEqual(2);
+    expect(editorService.getQuestionList).toHaveBeenCalled();
+    expect(editorService.calculateMaxScore).toHaveBeenCalled();
+    expect(maxScore).toEqual(1);
+  });
+
+  it('#calculateMaxScore should return calculated Max Score as 1', () => {
+    spyOn(editorService, 'calculateMaxScore').and.callThrough();
+    const questions = [{
+      responseDeclaration: {
+        response1: {
+          maxScore: 1
+        }
+      },
+      primaryCategory: 'Multiple Choice Question'
+    }];
+    const maxScore = editorService.calculateMaxScore(questions);
+    expect(maxScore).toEqual(1);
+  });
+
+  it('#calculateMaxScore should return calculated Max Score as 0', () => {
+    spyOn(editorService, 'calculateMaxScore').and.callThrough();
+    const questions = [{
+      responseDeclaration: {
+        response1: {
+          type: 'string'
+        }
+      },
+      primaryCategory: 'Subjective Question'
+    }];
+    const maxScore = editorService.calculateMaxScore(questions);
+    expect(maxScore).toEqual(0);
+  });
+
+  it('#getCollectionHierarchy should call',()=>{
+    spyOn(editorService,'getCollectionHierarchy').and.callThrough();
+    spyOn(treeService, 'getFirstChild').and.callFake(() => {
+      return { data: { metadata: { identifier: '0123'} } };
+    });
+    hierarchyRootNodeData.folder=true;
+    editorService.getHierarchyObj(hierarchyRootNodeData,'do_113432866096922624110','do_113432866096922624110','do_1134468013653114881310');
+    editorService.getCollectionHierarchy();
+    expect(editorService.getCollectionHierarchy).toHaveBeenCalled();
+  })
+
+  it('#getCollectionHierarchy should call when folder false',()=>{
+    spyOn(editorService,'getCollectionHierarchy').and.callThrough();
+    spyOn(treeService, 'getFirstChild').and.callFake(() => {
+      return { data: { metadata: { identifier: '0123'} } };
+    });
+    hierarchyRootNodeData.folder=false;
+    editorService.getHierarchyObj(hierarchyRootNodeData,'do_113432866096922624110','do_113432866096922624110','do_1134468013653114881310');
+    editorService.getCollectionHierarchy();
+    expect(editorService.getCollectionHierarchy).toHaveBeenCalled();
+  })
+
+  it('#getCollectionHierarchy should call when no section id and parent',()=>{
+    spyOn(editorService,'getCollectionHierarchy').and.callThrough();
+    spyOn(treeService, 'getFirstChild').and.callFake(() => {
+      return { data: { metadata: { identifier: '0123'} } };
+    });
+    hierarchyRootNodeData.folder=false;
+    editorService.getHierarchyObj(hierarchyRootNodeData);
+    editorService.getCollectionHierarchy();
+    expect(editorService.getCollectionHierarchy).toHaveBeenCalled();
+  })
+
+  it('#_toFlatObjFromHierarchy should call',()=>{
+    spyOn(editorService,'_toFlatObjFromHierarchy').and.callThrough();
+    spyOn(treeService, 'getFirstChild').and.callFake(() => {
+      return { data: { metadata: { identifier: '0123'} } };
+    });
+    editorService._toFlatObjFromHierarchy(rootNodeData);
+    expect(editorService._toFlatObjFromHierarchy).toHaveBeenCalled();
+  })

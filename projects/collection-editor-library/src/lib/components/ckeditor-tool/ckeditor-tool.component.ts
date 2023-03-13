@@ -385,6 +385,7 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
       this.editorInstance.model.insertContent(imageElement, this.editorInstance.model.document.selection);
     });
     this.showImagePicker = false;
+    this.showImageUploadModal = false;
   }
 
   addVideoInEditor(videoModal?) {
@@ -588,13 +589,48 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
       const request = {
         data: this.formData
       };
-      this.questionService.uploadMedia(request, imgId).pipe(catchError(err => {
-        const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.019') };
+      this.questionService.generatePreSignedUrl(preSignedRequest, imgId).pipe(catchError(err => {
+        const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.026') };
+        this.loading = false;
+        this.isClosable = true;
+        this.imageFormValid = true;
         return throwError(this.editorService.apiErrorHandling(err, errInfo));
       })).subscribe((response) => {
-        this.addImageInEditor(response.result.content_url, response.result.node_id);
-        this.dismissPops(modal);
+        const signedURL = response.result.pre_signed_url;
+        const blobConfig = {
+          processData: false,
+          contentType: 'Asset',
+          headers: {
+            'x-ms-blob-type': 'BlockBlob'
+          }
+        };
+        this.uploadToBlob(signedURL, this.imageFile, blobConfig).subscribe(() => {
+          const fileURL = signedURL.split('?')[0];
+          const data = new FormData();
+          data.append('fileUrl', fileURL);
+          data.append('mimeType', this.imageFile.type);
+          const config1 = {
+            enctype: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            cache: false
+          };
+          const uploadMediaConfig = {
+            data,
+            param: config1
+          };
+          this.questionService.uploadMedia(uploadMediaConfig, imgId).pipe(catchError(err => {
+            const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.019') };
+            this.isClosable = true;
+            this.loading = false;
+            this.imageFormValid = true;
+            return throwError(this.editorService.apiErrorHandling(err, errInfo));
+          })).subscribe((response1) => {
+            this.addImageInEditor(response1.result.content_url, response1.result.node_id, this.assestData['name']);
+          });
+        });
       });
+
     });
   }
   openImageUploadModal() {
