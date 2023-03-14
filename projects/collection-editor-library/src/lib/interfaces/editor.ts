@@ -30,6 +30,17 @@ export interface Context {
     cloudStorageUrls: string[];
     additionalCategories: any[];
     labels?: any;
+    actor?: any;
+    channelData?: any;
+    correctionComments?: any;
+    sourcingResourceStatus?: string;
+    sourcingResourceStatusClass?: string;
+    collectionIdentifier?: string;
+    unitIdentifier?: string;
+    collectionObjectType?: string;
+    collectionPrimaryCategory?: string;
+    targetFWIds?: string[];
+    cloudStorage?: any;
 }
 export interface User {
     id: string;

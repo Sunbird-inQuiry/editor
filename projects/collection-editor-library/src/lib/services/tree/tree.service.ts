@@ -59,9 +59,9 @@ export class TreeService {
     this.setTreeCache(nodeId, _.merge({}, {[key] : value}, _.pick(node.data.metadata, ['objectType'])));
   }
 
-  updateTreeNodeMetadata(newData: any) {
-    const activeNode = this.getActiveNode();
-    const nodeId = activeNode.data.id;
+  updateTreeNodeMetadata(newData: any, nodeToBeUpdated?: any, primaryCategory?: any, objectType?: any) {
+    const activeNode = !_.isUndefined(nodeToBeUpdated) ? this.getNodeById(nodeToBeUpdated) : this.getActiveNode();
+    const nodeId = nodeToBeUpdated  || activeNode.data.id;
     if (newData.instructions) {
       newData.instructions = { default: newData.instructions };
      }
@@ -79,6 +79,9 @@ export class TreeService {
 
     if (copyrightYear) {
       newData.copyrightYear = _.toNumber(copyrightYear);
+    }
+    if (objectType) {
+      newData.objectType = objectType;
     }
     const timeLimits: any = {};
     if (maxTime) {
@@ -147,7 +150,13 @@ export class TreeService {
   }
 
   getActiveNode() {
-    return this.getTreeObject().getActiveNode();
+    let activeNode;
+    try {
+      activeNode = this.getTreeObject().getActiveNode();
+    } catch {
+      activeNode = {};
+    }
+    return activeNode;
   }
 
   setActiveNode(node?) {
@@ -160,7 +169,13 @@ export class TreeService {
   }
 
   getFirstChild() {
-    return $(this.treeNativeElement).fancytree('getRootNode').getFirstChild();
+    let treeData;
+    try {
+      treeData = $(this.treeNativeElement).fancytree('getRootNode').getFirstChild();
+    } catch {
+      treeData = {};
+    }
+    return treeData;
   }
 
   findNode(nodeId) {

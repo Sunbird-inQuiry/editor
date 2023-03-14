@@ -211,10 +211,41 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
         const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.019') };
         return throwError(this.editorService.apiErrorHandling(err, errInfo));
       })).subscribe((response) => {
-        this.addImageInEditor(response.result.content_url, response.result.node_id);
-        this.showImageUploadModal = false;
-        this.dismissPops(modal);
+        const signedURL = response.result.pre_signed_url;
+        let blobConfig = {
+          processData: false,
+          contentType: 'Asset'
+        };
+        blobConfig = this.editorService.appendCloudStorageHeaders(blobConfig);
+        this.uploadToBlob(signedURL, this.imageFile, blobConfig).subscribe(() => {
+          const fileURL = signedURL.split('?')[0];
+          const data = new FormData();
+          data.append('fileUrl', fileURL);
+          data.append('mimeType', _.get(this.imageFile, 'type'));
+          const config1 = {
+            enctype: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            cache: false
+          };
+          const uploadMediaConfig = {
+            data,
+            param: config1
+          };
+          this.questionService.uploadMedia(uploadMediaConfig, imgId).pipe(catchError(err => {
+            const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.019') };
+            this.isClosable = true;
+            this.loading = false;
+            this.imageFormValid = true;
+            return throwError(this.editorService.apiErrorHandling(err, errInfo));
+          })).subscribe((response1) => {
+            this.addImageInEditor(response1.result.content_url, response1.result.node_id);
+            this.showImageUploadModal = false;
+            this.dismissPops(modal);
+          });
+        });
       });
+
     });
   }
   generateAssetCreateRequest(fileName, fileType, mediaType) {
