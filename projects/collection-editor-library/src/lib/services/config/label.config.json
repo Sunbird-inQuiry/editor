@@ -123,8 +123,8 @@
        "viewComments":"View Comments",
        "addReviewComments":"Add Review Comments",
        "enterYourComments":"Enter your comments",
-       "publishCollection":"Publish Collection",
-       "confirmPublishCollection":"Are you sure you want to publish this collection?",
+       "publishCollection":"Publish ${objectType}",
+       "confirmPublishCollection":"Are you sure you want to publish this ${objectType}?",
        "fillComments":"Fill comments",
        "searchLibrary":"Search Library",
        "options":"Options",
@@ -177,6 +177,11 @@
        "collaborators": "Collaborators",
        "addCollaborators": "Add Collaborators",
        "manageCollaborators": "Manage Collaborators",
+       "sliderValue":"Slider Value",
+       "left":"Left",
+       "stepSize":"Step size",
+       "right":"Right",
+       "translation":"Translation",
        "publishchecklistTitle": "Please confirm that ALL the following items are verified (by ticking the check-boxes) before you can publish:",
        "bulkUploadErrorMessage" : "The metadata file has following errors. Please check and upload again",
        "bulkUploadQuestion": "Bulk Upload Question",
@@ -301,7 +306,12 @@
          "009": "QR code(s) updated successfully",
          "010": "QR code generated.",
          "011": "QR codes downloaded" ,
-         "012": "Collaborators updated successfully" 
+         "012": "Collaborators updated successfully",
+         "013": "Question saved successfully",
+         "037": "Question accepted successfully",
+         "038": "Content is successfully approved",
+         "039": "Content is successfully rejected",
+         "040": "Content sent back for corrections"
       },
       "warning" : {
          "001" : "Errors found in linked QR Codes. Please check and correct.",
@@ -310,5 +320,8 @@
       "info" : {
          "001" : "QR code image generation is in progress. Please try downloading after sometime"
       }
-    }
+    },
+    "categoryLabels": {
+      "Multiselect Multiple Choice Question": "Multiple Choice Question"
+   }
  }

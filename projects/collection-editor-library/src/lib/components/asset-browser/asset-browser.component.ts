@@ -46,6 +46,7 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
   public termsAndCondition: any;
   public assetName: any;
   public emptySearchMessage: any;
+  public imageFile: any;
   ngOnInit() {
     this.initialFormConfig =  _.get(config, 'uploadIconFormConfig');
     this.formConfig =  _.get(config, 'uploadIconFormConfig');
@@ -153,6 +154,7 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
     this.getAllImages(offset, this.query, true);
   }
   uploadImage(event) {
+    this.imageFile = event.target.files[0];
     const file = event.target.files[0];
     const reader = new FileReader();
     this.formData = new FormData();
@@ -199,16 +201,28 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
     this.formConfig = formvalue;
   }
   uploadAndUseImage(modal) {
-    this.questionService.createMediaAsset({ content: this.assestData }).pipe(catchError(err => {
+    this.isClosable = false;
+    this.loading = true;
+    this.showErrorMsg = false;
+    this.imageFormValid = false;
+    this.questionService.createMediaAsset({ asset: this.assestData }).pipe(catchError(err => {
       const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.019') };
+      this.loading = false;
+      this.isClosable = true;
+      this.imageFormValid = true;
       return throwError(this.editorService.apiErrorHandling(err, errInfo));
     })).subscribe((res) => {
       const imgId = res.result.node_id;
-      const request = {
-        data: this.formData
+      const preSignedRequest = {
+        content: {
+          fileName: this.assetName
+        }
       };
-      this.questionService.uploadMedia(request, imgId).pipe(catchError(err => {
-        const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.019') };
+      this.questionService.generatePreSignedUrl(preSignedRequest, imgId).pipe(catchError(err => {
+        const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.026') };
+        this.loading = false;
+        this.isClosable = true;
+        this.imageFormValid = true;
         return throwError(this.editorService.apiErrorHandling(err, errInfo));
       })).subscribe((response) => {
         const signedURL = response.result.pre_signed_url;
@@ -270,8 +284,10 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
 
 
   dismissImageUploadModal() {
+    if (this.isClosable) {
     this.showImagePicker = true;
     this.showImageUploadModal = false;
+    }
   }
   openImageUploadModal() {
     this.showImageUploadModal = true;
@@ -280,10 +296,14 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
     this.imageUploadLoader = false;
     this.imageFormValid = false;
     this.showErrorMsg = false;
+    this.loading = false;
+    this.isClosable = true;
   }
   dismissPops(modal) {
     this.dismissImagePicker();
-    modal.deny();
+    if (modal && modal.deny) {
+      modal.deny();
+    }
   }
   dismissImagePicker() {
     this.showImagePicker = false;

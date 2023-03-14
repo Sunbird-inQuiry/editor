@@ -7,7 +7,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { mockData } from './asset-browser.component.spec.data';
 import { FormsModule } from '@angular/forms';
 import { EditorService } from '../../services/editor/editor.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import * as _ from 'lodash-es';
 
 const mockEditorService = {
@@ -185,11 +185,9 @@ describe('AssetBrowserComponent', () => {
     spyOn(component, 'uploadAndUseImage').and.callThrough();
     component.uploadAndUseImage(modal);
     expect(questionService.createMediaAsset).toHaveBeenCalled();
-    expect(questionService.uploadMedia).toHaveBeenCalled();
-    expect(component.addImageInEditor).toHaveBeenCalledWith('/test', 'do_234');
-    expect(component.showImageUploadModal).toEqual(false);
-    expect(component.dismissPops).toHaveBeenCalledWith(modal);
-  })
+    expect(questionService.generatePreSignedUrl).toHaveBeenCalled();
+    expect(component.uploadToBlob).toHaveBeenCalled();
+  });
   it('#generateAssetCreateRequest() should return asset create request', () => {
     let fileName = 'test';
     let fileType = 'image/png';

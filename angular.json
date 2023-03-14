@@ -55,9 +55,12 @@
               "src/assets/styles/styles.scss",
               "node_modules/font-awesome/css/font-awesome.css",
               "node_modules/katex/dist/katex.min.css",
-              "node_modules/video.js/dist/video-js.min.css"
+              "node_modules/video.js/dist/video-js.min.css",
+              "node_modules/@project-sunbird/sunbird-video-player-v9/lib/assets/videojs.markers.min.css",
+              "node_modules/videojs-http-source-selector/dist/videojs-http-source-selector.css"
             ],
             "scripts": [
+              "node_modules/epubjs/dist/epub.js",
               "src/assets/libs/iziToast/iziToast.min.js",
               "node_modules/jquery/dist/jquery.min.js",
               "node_modules/jquery.fancytree/dist/jquery.fancytree-all-deps.min.js",
@@ -138,7 +141,9 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": [],
+            "scripts": [
+              "node_modules/epubjs/dist/epub.js"
+            ],
             "assets": [
               "src/favicon.ico",
               "src/assets"

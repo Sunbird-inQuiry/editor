@@ -1,10 +1,11 @@
-# Sunbird Collection Editor
 
-## Run Locally
+# :diamond_shape_with_a_dot_inside: Collection Editor library for Sunbird platform
+Contains Collection Editor library components powered by angular. These components are designed to be used in the sunbirdEd portal and web portal to drive reusability, maintainability hence reducing the redundant development effort significantly.
 
-`Use node version 14.15.0`
+![image](https://user-images.githubusercontent.com/36467967/153172086-5552cfe4-ad39-4b70-b015-e7553610a6fa.png)
 
-Fork the project
+# :bookmark_tabs: Getting Started
+This guide explains how to set up your Angular project to begin using the collection editor library. It includes information on prerequisites, installing editor library, and optionally displaying a sample editor library component in your application to verify your setup.
 
 If you are new to Angular or getting started with a new Angular application, see [Angular's full Getting Started Guide](https://angular.io/start) and [Setting up your environment](https://angular.io/guide/setup-local).
 
@@ -21,11 +22,8 @@ The following commands will add `sunbird-collection-editor` library to your pack
 npm i @project-sunbird/sunbird-collection-editor --save
 ```
 
-### Setting up the Collection Editor Library
-Go to the root directory
+Don't forget to install the below peer dependencies of the library in your application. that need to be installed in order to use the library in your angular project.
 
-```bash
-  cd sunbird-collection-editor
 ```
 npm i common-form-elements-web-v9 --save
 npm i ng2-semantic-ui-v9 --save
@@ -145,31 +143,16 @@ Now open the `angular.json` file and add the following under `architect.build.as
   ...
 }
 ```
+ 
 
-It will create a `/dist/collection-editor-library` folder at the root directory and also copy all the required assets.
+## :label: Step 4: Add question-cursor-implementation.service
+Create a **`question-cursor-implementation.service.ts`** in a project and which will implement the `QuestionCursor` and `EditorCursor` abstract class.  
+`QuestionCursor` and `EditorCursor` is an abstract class, exported from the library, which needs to be implemented. Basically it has some methods which should make an API request over HTTP  
 
-
-### Starting up Sample application
-
-A sample angular application is included as part of this repo
-
-In another terminal tab -
-
-From the root directory - Start the server
-
-```bash
-  npm run start
+Let's create the `question-cursor-implementation` service by running the following command:
 ```
-The demo app will launch at `http://localhost:4200`
-
-### Run Node server to proxy the APIs
-From the root directory - go to `server.js` file
-```bash
-Update the host variable to which env your pointing. example if you are pointing sunbird dev instance update veriable like below
-const host = 'dev.sunbirded.org'
-
-add `authorization` token as shown below
-proxyReqOpts.headers['authorization'] = 'Bearer XXXX'
+cd src/app
+ng g service question-cursor-implementation
 ```
 
 Now open `app.module.ts` file and import like this:
@@ -179,21 +162,21 @@ Now open `app.module.ts` file and import like this:
 + import { QuestionCursor } from '@project-sunbird/sunbird-quml-player';
 + import { EditorCursorImplementationService } from './editor-cursor-implementation.service';
 
-    "assets": [
-              "src/favicon.ico",
-              "src/assets",
-              {
-                "glob": "**/*",
-                "input": "./node_modules/@project-sunbird/sunbird-collection-editor-v9/lib/assets/",
-                "output": "/assets/"
-              }
-            ],
+@NgModule({
+  providers: [
++    { provide: QuestionCursor, useExisting: EditorCursorImplementationService },
++    { provide: EditorCursor, useExisting: EditorCursorImplementationService }
+  ],
+})
+export class AppModule { }
 
-######  Step 3: Import the modules and components
+```
 
-Add to `NgModule` for the application in which you want to use:
 
-    import { CollectionEditorLibraryModule } from 'sunbird-collection-editor-v9';
+For more information refer [question-cursor-implementation.service.ts](https://github.com/Sunbird-Ed/sunbird-collection-editor/blob/release-4.7.0/src/app/editor-cursor-implementation.service.ts) and do not forgot to add your question list API URL
+**For example:** `https://staging.sunbirded.org/api/question/v1/list`
+
+
 
 
 ## :label: Step 5: Import the modules and components
@@ -207,43 +190,127 @@ Include `CollectionEditorLibraryModule` in your app module:
   import { QuestionCursor } from '@project-sunbird/sunbird-quml-player';
   import { EditorCursorImplementationService } from './editor-cursor-implementation.service';
 
-    @NgModule({
-	    ...
-	    imports: [
-            CollectionEditorLibraryModule,
-	    ...
-    })
+  @NgModule({
+   ...
 
-### How to use question editor
-In your template add
+   imports: [ 
++      CollectionEditorLibraryModule,
+      BrowserAnimationsModule,
+      RouterModule.forRoot([])
+      ],
+   providers: [
+    { provide: QuestionCursor, useExisting: EditorCursorImplementationService },
+    { provide: EditorCursor, useExisting: EditorCursorImplementationService }
+   ]
 
-	<lib-editor [editorConfig]="editorConfig" (editorEmitter)="editorEventListener($event)" ></lib-editor>
+   ...
+  })
 
-#### Input for library
+ export class AppModule { }
+```
 
-A sample config file is included in the demo app at `src/app/data.ts`
+Once your library is imported, you can use its main component, `lib-editor` in your Angular application.
 
-    editorConfig: {
-        context: {
-            identifier: 'do_1132125506761932801130',
-            user: {},
-            framework: '',
-            channel: '',
-            uid: "
-        },
-        config: {
-            mode: 'edit', // edit / review / read
-            maxDepth: 0,
-            objectType: 'QuestionSet',
-            primaryCategory: 'Practice Question Set',
-            isRoot: true,
-            iconClass: 'fa fa-book',
-            children: {
-                Question: [
-                    'Multiple Choice Question',
-                    'Subjective Question'
-                ]
-            },
-            hierarchy: {}
-        }
-    }
+Add the <lib-editor> tag to the `app.component.html` like so:
+
+```
+<lib-editor [editorConfig]="editorConfig" (editorEmitter)="editorEventListener($event)"></lib-editor>
+```
+
+## :label: Step 6: Send input to render Collection Editor
+
+Create a data.ts file which contains the `collectionEditorConfig`   Refer: [data.ts](https://github.com/Sunbird-Ed/sunbird-collection-editor/blob/release-4.8.0/src/app/data.ts)
+
+(Note: `data.ts` contains the mock config used in component to send it as input to collection Editor. We need only [collectionEditorConfig](https://github.com/Sunbird-Ed/sunbird-collection-editor/blob/release-4.8.0/src/app/data.ts#L143).Use the mock config in your component to send input to collection editor as `editorConfig`)  
+
+**app.component.ts**
+```diff
+   ...
++  import { collectionEditorConfig } from './data';
+   @Component({
+     ...
+   })
+   export class AppComponent {
+     ...
++     public editorConfig: any = collectionEditorConfig;
+   }
+```
+
+**app.component.html**
+
+```html
+<lib-editor [editorConfig]="editorConfig" (editorEmitter)="editorEventListener($event)"></lib-editor>
+```
+
+## :orange_circle: Available components
+|Feature| Notes| Selector|Code|Input|Output
+|--|--|--|------------------------------------------------------------------------------------------|---|--|
+| Collection Editor | Can be used to render Editor | lib-editor| *`<lib-editor [editorConfig]="editorConfig"></lib-editor>`*|editorConfig|editorEmitter|
+
+### :small_red_triangle_down: Input Parameters
+1. editorConfig: Object - [`Required`]  
+```javascript
+{
+  context: Object   // Information about the telemetry and default settings for editor API requests
+  config: Object    // default editor config such as sidebar menu list
+}
+```
+For more information refer this documentation: [CONFIGURATION.MD](/docs/CONFIGURATION.md)
+
+### :small_red_triangle_down: Output Events
+1. editorEmitter()    - It emits event for each action performed in the editor.
+---
+
+
+## :label: Step 7: Set the auth token and collection identifier
+Go to the root directory - Open `server.js` file
+
+
+Update the host variable to which env your pointing. example if you are pointing sunbird dev instance update variable like below
+```javascript
+const BASE_URL = 'dev.sunbirded.org'
+const API_AUTH_TOKEN = 'XXXX'
+const USER_TOKEN= 'YYYY'
+```
+Note: You will need actual `API_AUTH_TOKEN` and `USER_TOKEN`
+
+If you are pointing to sunbird dev -> [dev.sunbirded.org](https://dev.sunbirded.org/), create a textbook in sunbird dev, copy the `textbook_id` from the browser url and set the do_id of textbook in the `data.ts` file
+
+```javascript
+export const collectionEditorConfig = {
+  context: {
+       ...
+       identifier: 'do_id', // identifier of textbook created in sunbird dev
+      ...
+  },
+  config: {
+      ...
+  }
+```
+## :label: Step 8: Build the library
+ 
+Run `npm run build-lib` to build the library. The build artifacts will be stored in the dist/ directory.
+ 
+## :label: Step 9: Run the application
+ 
+Before running the application, we have to start the node server to proxy the APIs by running the following command:
+
+```
+nodemon server.js
+```
+
+Once that is done, Use the following CLI command to run your application locally
+
+
+```
+npm run start
+```
+
+To see your application in the browser, go to [http://localhost:4200](http://localhost:4200).
+
+
+# :bookmark_tabs: Editor Contribution and Configuration Guide
+
+[Contribution guidelines for this project](docs/CONTRIBUTING.md)
+
+[Configuration guidelines for this project](docs/CONFIGURATION.md)

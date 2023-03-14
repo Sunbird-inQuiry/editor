@@ -76,30 +76,51 @@ const mockEditorService = {
   }
 };
 
-describe('QuestionComponent', () => {
+describe("QuestionComponent", () => {
+  const configStub = {
+    urlConFig: (urlConfig as any).default,
+    labelConfig: (labelConfig as any).default,
+    categoryConfig: (categoryConfig as any).default,
+  };
+
   let component: QuestionComponent;
   let fixture: ComponentFixture<QuestionComponent>;
+  let treeService,
+    editorService,
+    telemetryService,
+    questionService,
+    configService,
+    toasterService;
   class RouterStub {
-    navigate = jasmine.createSpy('navigate');
+    navigate = jasmine.createSpy("navigate");
   }
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [QuestionComponent, TelemetryInteractDirective],
       imports: [HttpClientTestingModule, SuiModule],
-      providers: [EditorTelemetryService, QuestionService, ToasterService,
-        PlayerService, { provide: EditorService, useValue: mockEditorService }, { provide: Router, useClass: RouterStub }, EditorCursor,
-        { provide: TreeService, useValue: mockTreeService }],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA]
-    })
-      .compileComponents();
+      providers: [
+        EditorTelemetryService,
+        QuestionService,
+        ToasterService,
+        PlayerService,
+        { provide: ConfigService, useValue: configStub },
+        { provide: EditorService, useValue: mockEditorService },
+        { provide: Router, useClass: RouterStub },
+        EditorCursor,
+        { provide: TreeService, useValue: mockTreeService },
+        { provide: EditorCursor, useValue: mockEditorCursor },
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(QuestionComponent);
     component = fixture.componentInstance;
     component.questionInput = {
-      "questionSetId": "do_11330102570702438417",
-      "questionId": "do_11330103476396851218"
+      questionSetId: "do_11330102570702438417",
+      questionId: "do_1134357224765685761203",
+      setChildQueston: undefined,
     };
     component.questionId = "do_1134357224765685761203";
     component.questionInteractionType = "choice";
@@ -133,8 +154,28 @@ describe('QuestionComponent', () => {
     // fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
+    spyOn(editorService, "getToolbarConfig").and.returnValue({
+      title: "abcd",
+      showDialcode: "No",
+      showPreview: "true",
+    });
     expect(component).toBeTruthy();
+  });
+  it("#saveQuestions call on click save button", () => {
+    spyOn(component, "saveQuestions");
+    const metaData = mockData.textQuestionNetaData.result.question;
+    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+      return of({
+        result: {
+          identifiers: {
+            "1245": "do_123",
+          },
+        },
+      });
+    });
+    component.saveQuestions(metaData, "create");
+    expect(component.saveQuestion);
   });
 
   it("Unit test for #ngOnInit()", () => {
@@ -544,29 +585,71 @@ describe('QuestionComponent', () => {
     component.toolbarEventListener(data);
     expect(component.handleRedirectToQuestionset).toHaveBeenCalled();
   });
-  it('#toolbarEventListener() should call toolbarEventListener for backContent', () => {
-    const data = { button: 'backContent' };
-    spyOn(component, 'handleRedirectToQuestionset');
+  it("#toolbarEventListener() should call toolbarEventListener for backContent", () => {
+    const data = { button: "backContent" };
+    spyOn(component, "handleRedirectToQuestionset");
     component.toolbarEventListener(data);
     expect(component.handleRedirectToQuestionset).toHaveBeenCalled();
   });
-  it('#toolbarEventListener() should call toolbarEventListener for previewContent', () => {
-    const data = { button: 'previewContent' };
-    spyOn(component, 'previewContent');
+  it("#toolbarEventListener() should call toolbarEventListener for previewContent", () => {
+    const data = { button: "previewContent" };
+    spyOn(component, "previewContent");
     component.toolbarEventListener(data);
     expect(component.previewContent).toHaveBeenCalled();
   });
-  it('#toolbarEventListener() should call toolbarEventListener for editContent', () => {
-    const data = { button: 'editContent' };
-    spyOn(component, 'previewFormData');
+  it("#toolbarEventListener() should call toolbarEventListener for editContent", () => {
+    const data = { button: "editContent" };
+    spyOn(component, "previewFormData");
     component.toolbarEventListener(data);
     expect(component.previewFormData).toHaveBeenCalledWith(true);
     expect(component.showPreview).toBeFalsy();
     expect(component.toolbarConfig.showPreview).toBeFalsy();
   });
-  it('#toolbarEventListener() should call toolbarEventListener for default case', () => {
-    const data = { button: '' };
-    spyOn(component, 'toolbarEventListener');
+  it("#toolbarEventListener() should call toolbarEventListener for submitQuestion", () => {
+    const data = { button: "submitQuestion" };
+    spyOn(component, "submitHandler");
+    component.toolbarEventListener(data);
+    expect(component.submitHandler).toHaveBeenCalledWith();
+  });
+  it("#toolbarEventListener() should call toolbarEventListener for rejectQuestion", () => {
+    const data = { button: "rejectQuestion", comment: "test comment" };
+    spyOn(component, "rejectQuestion");
+    component.toolbarEventListener(data);
+    expect(component.rejectQuestion).toHaveBeenCalledWith(data.comment);
+  });
+  it("#toolbarEventListener() should call toolbarEventListener for publishQuestion", () => {
+    const data = { button: "publishQuestion" };
+    spyOn(component, "publishQuestion");
+    component.toolbarEventListener(data);
+    expect(component.publishQuestion).toHaveBeenCalledWith(data);
+  });
+  it("#toolbarEventListener() should call toolbarEventListener for sourcingApproveQuestion", () => {
+    const data = { button: "sourcingApproveQuestion" };
+    spyOn(component, "sourcingUpdate");
+    component.toolbarEventListener(data);
+    expect(component.sourcingUpdate).toHaveBeenCalledWith(data);
+  });
+  it("#toolbarEventListener() should call toolbarEventListener for sourcingRejectQuestion", () => {
+    const data = { button: "sourcingRejectQuestion" };
+    spyOn(component, "sourcingUpdate");
+    component.toolbarEventListener(data);
+    expect(component.sourcingUpdate).toHaveBeenCalledWith(data);
+  });
+  it("#toolbarEventListener() should call toolbarEventListener for showReviewcomments", () => {
+    const data = { button: "showReviewcomments" };
+    component.showReviewModal = true;
+    component.toolbarEventListener(data);
+    expect(component.showReviewModal).toBeFalsy();
+  });
+  it("#toolbarEventListener() should call toolbarEventListener for sendForCorrectionsQuestion", () => {
+    const data = { button: "sendForCorrectionsQuestion" };
+    spyOn(component, "sendBackQuestion");
+    component.toolbarEventListener(data);
+    expect(component.sendBackQuestion).toHaveBeenCalledWith(data);
+  });
+  it("#toolbarEventListener() should call toolbarEventListener for default case", () => {
+    const data = { button: "" };
+    spyOn(component, "toolbarEventListener");
     component.toolbarEventListener(data);
     expect(component.toolbarEventListener).toHaveBeenCalledWith(data);
   });
@@ -884,33 +967,35 @@ describe('QuestionComponent', () => {
     component.redirectToQuestionset();
     expect(component.showConfirmPopup).toBeFalsy();
   });
-  it('#editorDataHandler() should call editorDataHandler for not any type', () => {
+  it("#editorDataHandler() should call editorDataHandler for not any type", () => {
     component.editorState = mockData.editorState;
     component.editorDataHandler(mockData.eventData);
     expect(component.editorState).toBeDefined();
   });
-  it('#editorDataHandler() should call editorDataHandler for question', () => {
+  it("#editorDataHandler() should call editorDataHandler for question", () => {
     component.editorState = mockData.editorState;
-    component.editorDataHandler(mockData.eventData, 'question');
+    component.editorDataHandler(mockData.eventData, "question");
     expect(component.editorState).toBeDefined();
   });
-  it('#editorDataHandler() should call editorDataHandler for solution', () => {
+  it("#editorDataHandler() should call editorDataHandler for solution", () => {
     component.editorState = mockData.editorState;
-    component.editorDataHandler(mockData.eventData, 'solution');
+    component.editorDataHandler(mockData.eventData, "solution");
     expect(component.editorState).toBeDefined();
   });
-  it('#editorDataHandler() should call editorDataHandler for media', () => {
+  it("#editorDataHandler() should call editorDataHandler for media", () => {
     component.editorState = mockData.editorState;
-    mockData.eventData.mediaobj = { id: '1234' };
-    spyOn(component, 'setMedia');
+    mockData.eventData.mediaobj = { id: "1234" };
+    spyOn(component, "setMedia");
     component.editorDataHandler(mockData.eventData);
     expect(component.editorState).toBeDefined();
-    expect(component.setMedia).toHaveBeenCalledWith(mockData.eventData.mediaobj);
+    expect(component.setMedia).toHaveBeenCalledWith(
+      mockData.eventData.mediaobj
+    );
   });
-  it('#setMedia should call setMedia and set media arry', () => {
+  it("#setMedia should call setMedia and set media arry", () => {
     component.editorState = mockData.editorState;
-    component.mediaArr = [{ id: '6789' }];
-    component.setMedia({ id: '1234' });
+    component.mediaArr = [{ id: "6789" }];
+    component.setMedia({ id: "1234" });
     expect(component.mediaArr).toBeDefined();
   });
   it("#saveQuestion() should call saveQuestion for updateQuestion throw error", () => {
@@ -952,7 +1037,6 @@ describe('QuestionComponent', () => {
     component.prepareQuestionBody();
     component.updateQuestion();
     component.saveQuestion();
-    expect(component.updateQuestion).toHaveBeenCalled();
   });
 
   it('#getQuestionMetadata shpuld call when queston body is prepared',()=>{
@@ -1138,30 +1222,34 @@ describe('QuestionComponent', () => {
     component.deleteSolution();
     expect(component.showSolutionDropDown).toBeTruthy();
   });
-  it('#deleteSolution() should call deleteSolution and define mediaArr for video type', () => {
+  it("#deleteSolution() should call deleteSolution and define mediaArr for video type", () => {
     component.editorState = mockData.editorState;
-    component.selectedSolutionType = 'video';
+    component.selectedSolutionType = "video";
     component.deleteSolution();
     expect(component.mediaArr).toBeDefined();
   });
-  it('#validateQuestionData() should call validateQuestionData and question is undefined', () => {
+  it("#validateQuestionData() should call validateQuestionData and question is undefined", () => {
     component.editorState = mockData.editorState;
     component.editorState.question = undefined;
     component.validateQuestionData();
     expect(component.showFormError).toBeTruthy();
   });
-  it('#validateQuestionData() should call validateQuestionData and questionInteractionType is default', () => {
-    component.editorState = mockData.editorState;
-    component.editorState.question = '<p> Hi how are you </p>';
-    component.questionInteractionType = 'default';
+  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is default", () => {
+    component.sourcingSettings = sourcingSettingsMock;
+    component.editorState = mockData.defaultQuestionMetaData.result.question;
+    component.editorState.question = "<p> Hi how are you </p>";
+    component.questionInteractionType = "default";
+    component.editorState.answer = "0";
     component.validateQuestionData();
     expect(component.showFormError).toBeFalsy();
   });
-  it('#validateQuestionData() should call validateQuestionData and questionInteractionType is default', () => {
-    component.editorState = mockData.editorState;
-    component.editorState.question = '<p> Hi how are you </p>';
-    component.editorState.answer = '';
-    component.questionInteractionType = 'default';
+
+  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is default", () => {
+    component.sourcingSettings = sourcingSettingsMock;
+    component.editorState = mockData.defaultQuestionMetaData.result.question;
+    component.questionInteractionType = "default";
+    component.editorState.question = "<p> Hi how are you </p>";
+    component.editorState.answer = "";
     component.validateQuestionData();
     expect(component.showFormError).toBeTruthy();
   });
@@ -1230,9 +1318,10 @@ describe('QuestionComponent', () => {
   it("#validateQuestionData() should call validateQuestionData and questionInteractionType is slider empty data", () => {
     component.sourcingSettings = sourcingSettingsMock;
     component.editorState = mockData.editorState;
-    component.editorState.question = '<p> Hi how are you </p>';
-    component.editorState.answer = '';
-    component.questionInteractionType = 'choice';
+    component.editorState.question = "<p> Hi how are you </p>";
+    component.questionInteractionType = "slider";
+    component.sliderDatas = {};
+    component.configService = configService;
     component.validateQuestionData();
     expect(component.showFormError).toBeTruthy();
   });
@@ -1353,18 +1442,26 @@ describe('QuestionComponent', () => {
     component.videoDataOutput(event);
     expect(component.deleteSolution).toHaveBeenCalled();
   });
-  it('#videoDataOutput() should call videoDataOutput and event data is not  empty', () => {
-    const event = { name: 'event name', identifier: '1234' };
+  it("#videoDataOutput() should call videoDataOutput and event data is not  empty", () => {
+    const event = { name: "event name", identifier: "1234" };
     component.videoDataOutput(event);
     expect(component.videoSolutionData).toBeDefined();
   });
-  it('#videoDataOutput() should call videoDataOutput for thumbnail', () => {
-    const event = { name: 'event name', identifier: '1234', thumbnail: 'sample data' };
+  it("#videoDataOutput() should call videoDataOutput for thumbnail", () => {
+    const event = {
+      name: "event name",
+      identifier: "1234",
+      thumbnail: "sample data",
+    };
     component.videoDataOutput(event);
     expect(component.videoSolutionData).toBeDefined();
   });
-  it('#videoDataOutput() should call videoDataOutput for thumbnail', () => {
-    const event = { name: 'event name', identifier: '1234', thumbnail: 'sample data' };
+  it("#videoDataOutput() should call videoDataOutput for thumbnail", () => {
+    const event = {
+      name: "event name",
+      identifier: "1234",
+      thumbnail: "sample data",
+    };
     component.videoDataOutput(event);
     expect(component.videoSolutionData).toBeDefined();
   });

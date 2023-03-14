@@ -2,7 +2,7 @@ import { EditorService } from './../../services/editor/editor.service';
 import { ComponentFixture, TestBed, inject, waitForAsync } from '@angular/core/testing';
 import { FancyTreeComponent } from './fancy-tree.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, ChangeDetectorRef } from '@angular/core';
 import { TelemetryInteractDirective } from '../../directives/telemetry-interact/telemetry-interact.directive';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { config, treeData, tree, editorConfig, TargetNodeMockData,
@@ -30,7 +30,10 @@ describe('FancyTreeComponent', () => {
     TestBed.configureTestingModule({
       providers: [EditorTelemetryService, EditorService, HelperService,
           { provide: Router, useClass: RouterStub }, ToasterService,
-          { provide: ConfigService, useValue: config }],
+          { provide: ConfigService, useValue: config },
+          { provide: TreeService, useValue: mockTreeService },
+          { provide: ChangeDetectorRef, useValue: { detectChanges: () => {} } }
+        ],
       imports: [HttpClientTestingModule, SuiModule],
       declarations: [ FancyTreeComponent, TelemetryInteractDirective ],
       schemas: [NO_ERRORS_SCHEMA]
@@ -450,6 +453,9 @@ describe('FancyTreeComponent', () => {
     spyOn(component, 'dropNode').and.callFake(() => {
       return true;
     });
+    spyOn(editorService,'getDependentNodes').and.callFake(()=>{
+      return {};
+    })
     const node = {};
     component.dragDrop(node, data);
     expect(component.dropNode).toHaveBeenCalled();
@@ -515,10 +521,71 @@ describe('FancyTreeComponent', () => {
 
   it ('#dropNode() should drop node', () => {
     component.config =  editorConfig.config;
+    spyOn(component, 'dropNode').and.callFake(() => {
+      return true;
+    });
     const targetNode = { folder: false, getLevel: () => 2 };
-    const contentNode: any = { hitMode: 'before', otherNode: { getLevel: () => 1, moveTo: () => true }, node: { data: { root: false } }};
-    const result = component.dropNode(targetNode, contentNode);
+    const contentNode: any = { hitMode: 'after', otherNode: { data:{id:"do_11330103476396851218"},getLevel: () => 1, moveTo: () => true }, node: { data: { root: false } }};
+    component.dropNode(targetNode, contentNode);
+    const result = component.dragDrop(targetNode, contentNode);
+
+    spyOn(editorService, 'getDependentNodes').and.returnValue({
+      "source": [],
+      "target": [
+          "do_1134347722012835841130",
+          "do_1134355563320688641163"
+      ]
+  });
     expect(result).toBeTruthy();
+  });
+
+  it("#rearrangeBranchingLogic on the node drag and drop on tree structure",()=>{
+    const currentSectionId='do_1134355577791283201172';
+    const nodeId ='do_1134347235008512001125';
+    const targetSectionId='do_1134347209749299201119';
+    const dependentNodeIDs ={
+      "source": [],
+      "target": [
+          "do_1134347722012835841130",
+          "do_1134355563320688641163"
+      ]
+  };
+    const movingNodeIds= ['do_1134347722012835841130', 'do_1134355563320688641163', 'do_1134347235008512001125'];
+    spyOn(component,"rearrangeBranchingLogic").and.callThrough();
+    component.rearrangeBranchingLogic(nodeId, currentSectionId, targetSectionId, dependentNodeIDs, movingNodeIds);
+    expect(component.rearrangeBranchingLogic).toHaveBeenCalled();
+
+  })
+
+  it("#moveDependentNodes on the node drag and drop on tree structure",()=>{
+    spyOn(component,'moveDependentNodes').and.callThrough();
+    component.moveDependentNodes(TargetNodeMockData,CurrentNodeMockData);
+    expect(component.moveDependentNodes).toHaveBeenCalled();
+  });
+
+  it('#rearrangeBranchingLogic() should call when drag and drop with branchingLogic is there ', () => {
+    const nodeId = "do_113449672558780416163";
+    const currentSectionId = "do_1134460323602841601200";
+    const targetSectionId = "do_1134460323604971521236";
+    const movingNodeIds=[
+     "do_113449672558780416163",
+     "do_113449775832088576181",
+     "do_113449787008081920183",
+     "do_113449808985628672185",
+     "do_11345671149997260811"
+    ];
+    const dependentNodeIDs = {
+      source: [],
+      target: [
+        "do_113449775832088576181",
+        "do_113449787008081920183",
+        "do_113449808985628672185",
+        "do_11345671149997260811"
+      ]
+    }
+    spyOn(component,'rearrangeBranchingLogic').and.callThrough();
+    component.rearrangeBranchingLogic(nodeId,currentSectionId,targetSectionId,dependentNodeIDs,movingNodeIds);
+    expect(component.rearrangeBranchingLogic).toHaveBeenCalled();
   });
 
 });

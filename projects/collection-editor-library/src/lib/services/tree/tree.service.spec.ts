@@ -146,4 +146,14 @@ describe('TreeService', () => {
     const result = treeService.removeSpecialChars(string);
     expect(result).toEqual('testioo');
   })
+
+  it('#getChildren should call',()=>{
+    spyOn(treeService,'getChildren').and.callThrough();
+    spyOn(treeService, 'getActiveNode').and.callFake(() => {
+      return { visit(cb) { cb({ data: { metadata: {} } }); } };
+    });
+    treeService.getChildren();
+    expect(treeService.getChildren).toHaveBeenCalled();
+  })
+
 });

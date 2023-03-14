@@ -1,7 +1,9 @@
 export interface Context {
+    programId?: string;
+    contributionOrgId?: string;
     user: User;
-    identifier: string;
-    mode: string;
+    identifier?: string;
+    mode?: string;
     authToken?: string;
     sid: string;
     did: string;
@@ -27,8 +29,8 @@ export interface Context {
     subject?: any;
     topic?: any;
     framework: string;
-    cloudStorageUrls: string[];
-    additionalCategories: any[];
+    cloudStorageUrls?: string[];
+    additionalCategories?: any[];
     labels?: any;
     actor?: any;
     channelData?: any;
@@ -44,8 +46,13 @@ export interface Context {
 }
 export interface User {
     id: string;
-    name: string;
+    name?: string;
     orgIds: string[];
+    organisations?: any;
+    fullName?: string;
+    firstName?: string;
+    lastName?: string;
+    isRootOrgAdmin?: boolean;
 }
 export interface Pdata {
     id: string;

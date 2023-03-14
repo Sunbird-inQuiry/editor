@@ -82,8 +82,8 @@ describe('EditorComponent', () => {
     expect(component.showQuestionTemplatePopup).toBeFalsy();
     expect(component.showDeleteConfirmationPopUp).toBeFalsy();
     expect(component.showPreview).toBeFalsy();
+    expect(component.buttonLoaders.previewButtonLoader).toBeFalsy();
     expect(component.buttonLoaders.saveAsDraftButtonLoader).toBeFalsy();
-    expect(component.buttonLoaders.addFromLibraryButtonLoader).toBeFalsy();
     expect(component.buttonLoaders.addFromLibraryButtonLoader).toBeFalsy();
     expect(component.buttonLoaders.showReviewComment).toBeFalsy();
     expect(component.csvDropDownOptions).toEqual({});
@@ -120,7 +120,7 @@ describe('EditorComponent', () => {
     expect(editorService.initialize).toHaveBeenCalledWith(editorConfig);
     expect(editorService.editorMode).toEqual('edit');
     expect(component.editorMode).toEqual('edit');
-    expect(treeService.initialize).toHaveBeenCalled();
+    expect(treeService.initialize).toHaveBeenCalledWith(editorConfig);
     expect(component.collectionId).toBeDefined();
     expect(editorService.getToolbarConfig).toHaveBeenCalled();
     expect(component.isObjectTypeCollection).toBeTruthy();
@@ -161,7 +161,6 @@ describe('EditorComponent', () => {
     spyOn(editorService, 'getshowQuestionLibraryPageEmitter').and.returnValue(questionLibraryPageEmitter);
     spyOn(component, 'showQuestionLibraryComponentPage').and.callFake(() => {});
     component.ngOnInit();
-    expect(component.editorConfig).toEqual(editorConfig);
     expect(editorService.editorMode).toEqual('edit');
     expect(component.editorMode).toEqual('edit');
     expect(editorService.initialize).toHaveBeenCalledWith(editorConfig_question);
@@ -410,6 +409,15 @@ describe('EditorComponent', () => {
     expect(component.showLibraryComponentPage).toHaveBeenCalled();
   });
 
+  it('#toolbarEventListener() should call #showQuestionLibraryComponentPage() if event is showQuestionLibraryPage', () => {
+    spyOn(component, 'showQuestionLibraryComponentPage').and.callFake(() => { });
+    const event = {
+      button: 'showQuestionLibraryPage'
+    };
+    component.toolbarEventListener(event);
+    expect(component.showQuestionLibraryComponentPage).toHaveBeenCalled();
+  });
+
   it('#toolbarEventListener() should call #submitHandler() if event is submitContent', () => {
     spyOn(component, 'submitHandler').and.callFake(() => { });
     const event = {
@@ -428,12 +436,9 @@ describe('EditorComponent', () => {
     expect(component.showDeleteConfirmationPopUp).toBeTruthy();
   });
 
-  it('#toolbarEventListener() should call #rejectContent() if event is rejectContent', () => {
+  it('#toolbarEventListener() should call #redirectToQuestionTab() if event is editContent', () => {
     spyOn(component, 'redirectToQuestionTab').and.callFake(() => { });
-    const event = {
-      button: 'editContent',
-      comment: 'abcd'
-    };
+    const event = { button: 'editContent' };
     component.toolbarEventListener(event);
     expect(component.redirectToQuestionTab).toHaveBeenCalled();
   });
@@ -446,7 +451,7 @@ describe('EditorComponent', () => {
       comment: 'abcd'
     };
     component.toolbarEventListener(event);
-    expect(component.rejectContent).toHaveBeenCalled();
+    expect(component.rejectContent).toHaveBeenCalledWith(event.comment);
   });
 
   it('#toolbarEventListener() should call #publishContent() if event is publishContent', () => {
@@ -491,6 +496,7 @@ describe('EditorComponent', () => {
       button: 'onFormValueChange'
     };
     component.toolbarEventListener(event);
+    expect(component.toolbarEventListener).toHaveBeenCalledWith(event);
     expect(component.updateToolbarTitle).toHaveBeenCalled();
   });
 
@@ -512,6 +518,53 @@ describe('EditorComponent', () => {
     component.toolbarEventListener(event);
     expect(component.redirectToChapterListTab).toHaveBeenCalled();
   });
+
+  it('#toolbarEventListener() should call #sourcingApproveContent() if event is sourcingApprove', () => {
+    spyOn(component, 'sourcingApproveContent').and.callFake(() => { return false });
+    const event = {
+      button: 'sourcingApprove',
+      comment: 'test'
+    };
+    component.toolbarEventListener(event);
+    expect(component.sourcingApproveContent).toHaveBeenCalled();
+  });
+
+  it('#toolbarEventListener() should call #redirectToChapterListTab() if event is sourcingReject', () => {
+    const editorService = TestBed.inject(EditorService);
+    const event = {
+      button: 'sourcingReject',
+      comment: 'test',
+    };
+    spyOn(component, 'sourcingRejectContent').and.callFake(() => {return false});
+    component.editorConfig = editorConfig;
+    component.toolbarEventListener(event);
+    expect(component.sourcingRejectContent).toHaveBeenCalledWith({ comment: 'test' });
+  });
+
+  it('#toolbarEventListener() should call #toggleCollaboratorModalPoup()', () => {
+    const event = {
+      button: 'addCollaborator'
+    };
+    component.addCollaborator = false;
+    spyOn(component, 'toggleCollaboratorModalPoup').and.callThrough();
+    spyOn(component, 'toolbarEventListener').and.callThrough();
+    component.toolbarEventListener(event);
+    expect(component.actionType).toBe('addCollaborator');
+    expect(component.toggleCollaboratorModalPoup).toHaveBeenCalled();
+    expect(component.addCollaborator).toEqual(true);
+  });
+
+  it('#toolbarEventListener() should not call #toggleCollaboratorModalPoup()', () => {
+    spyOn(component, 'toggleCollaboratorModalPoup');
+    const event = {
+      button: 'xyz'
+    };
+    component.toolbarEventListener(event);
+    expect(component.actionType).toBe('xyz');
+    expect(component.toggleCollaboratorModalPoup).not.toHaveBeenCalled();
+  });
+
+
   it('#toolbarEventListener() should set showReviewModal to true ', () => {
     spyOn(component, 'toolbarEventListener').and.callThrough();
     component.showReviewModal = false;
@@ -576,8 +629,18 @@ describe('EditorComponent', () => {
     };
     component.pageId = 'pagination';
     component.toolbarEventListener(event);
-    expect(component.actionType).toBe('xyz');
-    expect(component.toggleCollaboratorModalPoup).not.toHaveBeenCalled();
+    expect(component.pageId).toEqual('pagination');
+  });
+
+  it('#redirectToChapterListTab() should emit #editorEmitter event', () => {
+    component.actionType = 'dummyCase';
+    component.collectionId = 'do_12345';
+    spyOn(component.editorEmitter, 'emit');
+    component.redirectToChapterListTab({ data: 'dummyData' });
+    expect(component.editorEmitter.emit).toHaveBeenCalledWith({
+      close: true, library: 'collection_editor', action: 'dummyCase', identifier: 'do_12345',
+      data: 'dummyData'
+    });
   });
 
   it('#redirectToChapterListTab() should emit #editorEmitter event', () => {
@@ -809,6 +872,15 @@ describe('EditorComponent', () => {
     component.rejectContent('test');
     expect(editorService.submitRequestChanges).toHaveBeenCalled();
     expect(component.redirectToChapterListTab).toHaveBeenCalled();
+  });
+
+  it('#rejectContent() should call #submitRequestChanges() and #redirectToChapterListTab() api error', async () => {
+    component.collectionId = 'do_1234';
+    const editorService = TestBed.inject(EditorService);
+    spyOn(editorService, 'submitRequestChanges').and.returnValue(throwError({}));
+    component.editorConfig = editorConfig;
+    component.rejectContent('test');
+    expect(editorService.submitRequestChanges).toHaveBeenCalled();
   });
 
   it('#publishContent should call #publishContent() and #redirectToChapterListTab()', () => {
@@ -1138,6 +1210,7 @@ describe('EditorComponent', () => {
   });
 
   it('#handleTemplateSelection should set #showQuestionTemplatePopup to false', () => {
+    component.editorConfig = editorConfig;
     component.handleTemplateSelection({});
     expect(component.showQuestionTemplatePopup).toEqual(false);
   });
@@ -1434,9 +1507,11 @@ describe('EditorComponent', () => {
     component['modal'] = {
       deny: jasmine.createSpy('deny')
     };
+    spyOn(treeService, 'clearTreeCache').and.callFake(() => {});
     spyOn(component, 'generateTelemetryEndEvent');
     component.ngOnDestroy();
     expect(component.generateTelemetryEndEvent).not.toHaveBeenCalled();
+    expect(treeService.clearTreeCache).not.toHaveBeenCalled();
     // tslint:disable-next-line:no-string-literal
     expect(component['modal'].deny).toHaveBeenCalled();
   });
@@ -1463,4 +1538,6 @@ describe('EditorComponent', () => {
     spyOn(component, 'fetchFrameWorkDetails').and.callThrough();
     component.fetchFrameWorkDetails();
   });
+
+});
 

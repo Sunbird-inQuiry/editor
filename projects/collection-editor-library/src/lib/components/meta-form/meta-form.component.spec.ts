@@ -130,7 +130,7 @@ describe('MetaFormComponent', () => {
     spyOn(component, 'setAppIconData').and.callThrough();
     spyOn(component, 'ifFieldIsEditable').and.callFake(() => {return false});
     component.appIconConfig = {
-      isAppIconEditable: ''
+      isAppIconEditable: true
     };
     component.setAppIconData();
     expect(component.showAppIcon).toBeTruthy();

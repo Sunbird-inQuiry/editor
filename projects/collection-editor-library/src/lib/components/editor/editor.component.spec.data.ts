@@ -132,10 +132,10 @@ editorConfig = {
       },
     },
     collection: {
-      maxContentsLimit: 10
+      maxContentsLimit: 10,
     },
     questionSet: {
-      maxQuestionsLimit: 10
+      maxQuestionsLimit: 10,
     },
     contentPolicyUrl: '/term-of-use.html',
   },
@@ -1092,8 +1092,8 @@ export const categoryDefinitionData = {
                   primaryCategory: 'Course Unit',
                   iconClass: 'fa fa-folder-o',
                   children: {
-                    Content: []
-                  }
+                    Content: [],
+                  },
                 },
                 level3: {
                   name: 'Course Unit',
@@ -1103,8 +1103,8 @@ export const categoryDefinitionData = {
                   primaryCategory: 'Course Unit',
                   iconClass: 'fa fa-folder-o',
                   children: {
-                    Content: []
-                  }
+                    Content: [],
+                  },
                 },
                 level4: {
                   name: 'Course Unit',
@@ -1114,12 +1114,12 @@ export const categoryDefinitionData = {
                   primaryCategory: 'Course Unit',
                   iconClass: 'fa fa-folder-o',
                   children: {
-                    Content: []
-                  }
-                }
-              }
-            }
-          }
+                    Content: [],
+                  },
+                },
+              },
+            },
+          },
         },
         schema: {
           properties: {
@@ -1141,7 +1141,7 @@ export const categoryDefinitionData = {
                 enabled: 'Yes',
                 autoBatch: 'Yes',
               },
-              additionalProperties: false
+              additionalProperties: false,
             },
             monitorable: {
               type: 'array',
@@ -1162,7 +1162,7 @@ export const categoryDefinitionData = {
               default: {
                 enabled: 'Yes',
               },
-              additionalProperties: false
+              additionalProperties: false,
             },
             userConsent: {
               type: 'string',
@@ -1204,7 +1204,7 @@ export const categoryDefinitionData = {
                     class: 'sb-g-col-lg-1 required',
                   },
                   required: true,
-                  visible: true
+                  visible: true,
                 },
                 {
                   code: 'name',
@@ -1268,9 +1268,9 @@ export const categoryDefinitionData = {
                   label: 'Keywords',
                   placeholder: 'Enter Keywords',
                   required: false,
-                  validations: []
-                }
-              ]
+                  validations: [],
+                },
+              ],
             },
             {
               name: 'Second Section',
@@ -1291,7 +1291,7 @@ export const categoryDefinitionData = {
                   },
                   range: ['Yes', 'No'],
                   required: false,
-                  visible: true
+                  visible: true,
                 },
                 {
                   code: 'dialcodes',
@@ -1336,7 +1336,7 @@ export const categoryDefinitionData = {
                   placeholder: '',
                   required: true,
                   visible: true,
-                  validations: []
+                  validations: [],
                 },
                 {
                   code: 'additionalCategories',
@@ -1350,9 +1350,9 @@ export const categoryDefinitionData = {
                   placeholder: 'Select Additional Category',
                   renderingHints: {},
                   required: false,
-                  visible: true
-                }
-              ]
+                  visible: true,
+                },
+              ],
             },
             {
               name: 'Organisation Framework Terms',
@@ -1558,7 +1558,7 @@ export const categoryDefinitionData = {
                     class: 'sb-g-col-lg-1',
                   },
                   required: false,
-                  visible: true
+                  visible: true,
                 },
                 {
                   code: 'attributions',
@@ -1573,7 +1573,7 @@ export const categoryDefinitionData = {
                     class: 'sb-g-col-lg-1',
                   },
                   required: false,
-                  visible: true
+                  visible: true,
                 },
                 {
                   code: 'copyright',
@@ -1664,7 +1664,7 @@ export const categoryDefinitionData = {
               name: 'Type',
               placeholder: 'Select ContentType',
               required: false,
-              visible: true
+              visible: true,
             },
             {
               code: 'board',
@@ -1825,7 +1825,7 @@ export const categoryDefinitionData = {
                   label: 'Keywords',
                   placeholder: 'Enter Keywords',
                   required: false,
-                  validations: []
+                  validations: [],
                 },
                 {
                   code: 'topic',
@@ -1841,7 +1841,7 @@ export const categoryDefinitionData = {
                   label: 'Topics',
                   placeholder: 'Choose Topics',
                   required: false,
-                  validations: []
+                  validations: [],
                 },
                 {
                   code: 'dialcodeRequired',
@@ -1859,7 +1859,7 @@ export const categoryDefinitionData = {
                   },
                   range: ['Yes', 'No'],
                   required: false,
-                  visible: true
+                  visible: true,
                 },
                 {
                   code: 'dialcodes',

@@ -18,6 +18,7 @@ import * as _ from 'lodash-es';
 
 describe('EditorService', () => {
   let editorService: EditorService;
+  let treeService;
   const configStub = {
     urlConFig: (urlConfig as any).default,
     labelConfig: (labelConfig as any).default,
@@ -30,6 +31,16 @@ describe('EditorService', () => {
           '011': 'File downloaded'
         },
       }
+    },
+    categoryConfig: {
+      QuestionSet: 'questionSet'
+    },
+    urlConFig: {
+      URLS: {
+        questionSet: {
+          SYSYTEM_UPDATE: ''
+        }
+      }
     }
   };
   beforeEach(() => {
@@ -37,6 +48,7 @@ describe('EditorService', () => {
       imports: [HttpClientModule],
       providers: [HttpClient,
         DataService,
+        TreeService,
         PublicDataService,
         { provide: ConfigService, useValue: configStub }]
     });
@@ -129,8 +141,8 @@ describe('EditorService', () => {
 
   it('#getQuestionList() should return question list', async () => {
     const questionIds: string[] = [
-      "do_11330103476396851218",
-      "do_113301035530600448110"
+      'do_11330103476396851218',
+      'do_113301035530600448110'
     ];
     const dataService = TestBed.inject(DataService);
     const response = mockData.serverResponse;
@@ -237,7 +249,7 @@ describe('EditorService', () => {
   it('#checkIfContentsCanbeAdded() should return true', () => {
     editorService.contentsCount = 0;
     spyOn(editorService, 'getContentChildrens').and.callFake(() => []);
-    let result = editorService.checkIfContentsCanbeAdded();
+    let result = editorService.checkIfContentsCanbeAdded('add');
     expect(editorService.getContentChildrens).toHaveBeenCalled();
     expect(result).toBe(true);
   });
