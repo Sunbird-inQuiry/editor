@@ -16,18 +16,21 @@ jobs:
       - checkout:
           path: ~/sunbird-questionset-editor
       - run:
-          name: Install node.js v14 with build in nvm tool
+          name: Node version
+          command: 'node --version'
+      - run:
+          name: Install  Node.js v14.20.0 with build in nvm tool
           command: |
             export NVM_DIR="/opt/circleci/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
             nvm install v14 && nvm use 14 && nvm alias default 14
             node -v
       - run:
-          name: Node version
+          name: Alter Node version
           command: 'node --version'
       - run:
           name: Installing angular cli
-          command: 'npm install -g @angular/cli@13 --no-progress'
+          command: 'npm install -g @angular/cli@13.3.12 --no-progress'
       #~ - restore_cache:
           #~ key: dependency-cache-{{ checksum "package.json" }}
       - run:
