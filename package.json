@@ -14,15 +14,15 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "~12.2.16",
-    "@angular/cdk": "12.2.13",
-    "@angular/common": "~12.2.16",
-    "@angular/compiler": "^12.2.16",
-    "@angular/core": "~12.2.16",
-    "@angular/forms": "~12.2.16",
-    "@angular/platform-browser": "~12.2.16",
-    "@angular/platform-browser-dynamic": "~12.2.16",
-    "@angular/router": "~12.2.16",
+    "@angular/animations": "~13.3.12",
+    "@angular/cdk": "13.3.9",
+    "@angular/common": "~13.3.12",
+    "@angular/compiler": "^13.3.12",
+    "@angular/core": "~13.3.12",
+    "@angular/forms": "~13.3.12",
+    "@angular/platform-browser": "~13.3.12",
+    "@angular/platform-browser-dynamic": "~13.3.12",
+    "@angular/router": "~13.3.12",
     "@project-sunbird/ckeditor-build-classic": "^4.1.3",
     "@project-sunbird/client-services": "5.0.0",
     "@project-sunbird/sb-styles": "0.0.9",
@@ -66,10 +66,10 @@
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~12.2.18",
-    "@angular/cli": "~12.2.18",
-    "@angular/compiler-cli": "^12.2.16",
-    "@angular/language-service": "~12.2.16",
+    "@angular-devkit/build-angular": "~13.3.10",
+    "@angular/cli": "~13.3.10",
+    "@angular/compiler-cli": "^13.3.12",
+    "@angular/language-service": "~13.3.12",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.11.1",
@@ -81,10 +81,10 @@
     "karma-coverage": "^2.2.0",
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
-    "ng-packagr": "^12.2.7",
+    "ng-packagr": "^13.3.1",
     "protractor": "~7.0.0",
     "ts-node": "~7.0.0",
     "tslint": "~6.1.0",
-    "typescript": "4.3.5"
+    "typescript": "4.6.4"
   }
 }
