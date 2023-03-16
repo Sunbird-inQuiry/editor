@@ -15,7 +15,7 @@ import { filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { Observable, throwError, forkJoin, Subscription, Subject, merge, of } from 'rxjs';
 import * as _ from 'lodash-es';
 import { ConfigService } from '../../services/config/config.service';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
 let evidenceMimeType;
 let ecm;
@@ -1186,7 +1186,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-  setEvidence(control, depends: FormControl[], formGroup: FormGroup, loading, loaded) {
+  setEvidence(control, depends: UntypedFormControl[], formGroup: UntypedFormGroup, loading, loaded) {
     control.isVisible = 'no';
     control.range = evidenceMimeType;
     return merge(..._.map(depends, depend => depend.valueChanges)).pipe(
@@ -1202,7 +1202,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  setEcm(control, depends: FormControl[], formGroup: FormGroup, loading, loaded) {
+  setEcm(control, depends: UntypedFormControl[], formGroup: UntypedFormGroup, loading, loaded) {
     control.isVisible = 'no';
     control.options = ecm;
     return merge(..._.map(depends, depend => depend.valueChanges)).pipe(
@@ -1218,7 +1218,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  setAllowEcm(control, depends: FormControl[]) {
+  setAllowEcm(control, depends: UntypedFormControl[]) {
     control.isVisible = 'no';
     const response = merge(..._.map(depends, depend => depend.valueChanges)).pipe(
         switchMap((value: any) => {
