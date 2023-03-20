@@ -208,7 +208,6 @@
       }
     }
   },
-  "defaultProject": "sunbird-questionset-editor",
   "cli": {
     "analytics": false
   }

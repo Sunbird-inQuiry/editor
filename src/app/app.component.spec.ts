@@ -18,10 +18,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'Sunbird Collection Editor'`, () => {
+  it(`should have as title 'Sunbird Questionset Editor'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
-    expect(app.title).toEqual('Sunbird Collection Editor');
+    expect(app.title).toEqual('Sunbird Questionset Editor');
   });
 
   xit('should render title in a h1 tag', () => {
