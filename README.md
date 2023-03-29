@@ -35,7 +35,7 @@ npm i @project-sunbird/sunbird-pdf-player-v9 --save
 npm i @project-sunbird/sunbird-epub-player-v9 --save
 npm i @project-sunbird/sunbird-video-player-v9 --save
 npm i @project-sunbird/sunbird-quml-player --save
-npm i ngx-bootstrap@6.0.0 --save
+npm i ngx-bootstrap@8.0.0 --save
 npm i ngx-chips@2.2.0 --save
 npm i epubjs --save
 npm i videojs-contrib-quality-levels --save
@@ -49,7 +49,7 @@ npm i @project-sunbird/sb-styles
 ```
 
 
-Note: *As QuestionSet library is build with angular version 12, we are using **bootstrap@4.6.1** and **ngx-bootstrap@6.0.0** which are the compatible versions.
+Note: *As QuestionSet library is build with angular version 13, we are using **"bootstrap": "^4.6.2"** and **ngx-bootstrap@^8.0.0** which are the compatible versions.
 For more reference Check compatibility document for ng-bootstrap [here](https://valor-software.com/ngx-bootstrap/#/documentation#compatibility)*  
 
 ## :label: Step 2: create and copy required assests
