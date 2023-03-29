@@ -49,7 +49,7 @@ npm i @project-sunbird/sb-styles
 ```
 
 
-Note: *As QuestionSet library is build with angular version 13, we are using **"bootstrap": "^4.6.2"** and **ngx-bootstrap@^9.0.0** which are the compatible versions.
+Note: *As QuestionSet library is build with angular version 14, we are using **"bootstrap": "^4.6.2"** and **ngx-bootstrap@^9.0.0** which are the compatible versions.
 For more reference Check compatibility document for ng-bootstrap [here](https://valor-software.com/ngx-bootstrap/#/documentation#compatibility)*  
 
 ## :label: Step 2: create and copy required assests
