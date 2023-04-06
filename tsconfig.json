@@ -20,11 +20,11 @@
       "dom"
     ],
     "paths": {
-      "collection-editor-library": [
-        "dist/collection-editor-library"
+      "questionset-editor-library": [
+        "dist/questionset-editor-library"
       ],
-      "collection-editor-library/*": [
-        "dist/collection-editor-library/*"
+      "questionset-editor-library/*": [
+        "dist/questionset-editor-library/*"
       ]
     }
   }
