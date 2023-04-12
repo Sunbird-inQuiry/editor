@@ -638,7 +638,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   saveContent() {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve, reject) => { //NOSONAR
       if (!this.validateFormStatus()) {
         return reject(_.get(this.configService, 'labelConfig.messages.error.029'));
       }
