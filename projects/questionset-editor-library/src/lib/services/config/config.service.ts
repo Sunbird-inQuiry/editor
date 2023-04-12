@@ -16,5 +16,7 @@ export class ConfigService {
   editorConfig = (editorConfig as any);
   public sessionContext: Array<string> =  ['board', 'medium', 'gradeLevel', 'subject',
        'topic', 'author', 'channel', 'framework', 'copyright', 'attributions', 'audience',  'license' ];
-  constructor() { }
+  constructor() {
+    // This is intentional
+  }
 }

@@ -1184,7 +1184,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     this.toolbarConfig.title = questionTitle;
   }
 
-  output(event) { }
+  output(event) {
+    // This is intentional
+  }
 
   onStatusChanges(event) {
     console.log(event);

@@ -15,6 +15,7 @@ export class CollectionIconComponent implements OnInit {
   constructor(public configService: ConfigService) { }
 
   ngOnInit() {
+    // This is intentional
   }
 
   initializeImagePicker() {

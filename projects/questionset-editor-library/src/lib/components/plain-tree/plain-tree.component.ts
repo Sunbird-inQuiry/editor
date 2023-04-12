@@ -12,7 +12,7 @@ import 'jquery.fancytree';
 import * as _ from 'lodash-es';
 import { EditorService } from '../../services/editor/editor.service';
 
-declare var $: any;
+declare let $: any;
 
 @Component({
   selector: 'lib-plain-tree',
@@ -26,7 +26,9 @@ export class PlainTreeComponent implements OnInit, AfterViewInit {
 
   constructor(private editorService: EditorService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // This is intentional
+  }
 
   ngAfterViewInit() {
     this.renderTree(this.getTreeConfig());

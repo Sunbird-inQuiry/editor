@@ -18,7 +18,9 @@ export class TemplateComponent implements OnInit, OnDestroy {
 
   constructor(public telemetryService: EditorTelemetryService,  public configService: ConfigService) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+    // This is intentional
+  }
 
   next() {
     this.templateSelection.emit(this.templateSelected);

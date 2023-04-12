@@ -270,7 +270,9 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
     }
     return false;
   }
-  outputData(eventData: any) { }
+  outputData(eventData: any) {
+    // This is intentional
+  }
 
   onStatusChanges(event) {
     this.toolbarEmitter.emit({ button: 'onFormStatusChange', event });

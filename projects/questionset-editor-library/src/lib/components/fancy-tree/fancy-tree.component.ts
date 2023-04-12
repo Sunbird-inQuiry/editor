@@ -14,7 +14,7 @@ import { ConfigService } from '../../services/config/config.service';
 
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-declare var $: any;
+declare let $: any;
 
 @Component({
   selector: 'lib-fancy-tree',

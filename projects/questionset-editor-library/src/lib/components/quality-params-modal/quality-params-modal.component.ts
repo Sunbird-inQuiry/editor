@@ -20,6 +20,7 @@ export class QualityParamsModalComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        // This is intentional
     }
 
     onStatusChanges(event) {

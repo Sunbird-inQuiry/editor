@@ -20,6 +20,7 @@ export class RelationalMetadataComponent implements OnInit, OnChanges {
   constructor(private editorService: EditorService, private treeService: TreeService) { }
 
   ngOnInit(): void {
+    // This is intentional
   }
 
   ngOnChanges() {

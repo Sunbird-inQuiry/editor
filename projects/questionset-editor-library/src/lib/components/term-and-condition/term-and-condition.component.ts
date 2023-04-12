@@ -21,6 +21,7 @@ export class TermAndConditionComponent implements OnInit {
     }
 
     ngOnInit() {
+        // This is intentional
     }
 
     get contentPolicyUrl() {

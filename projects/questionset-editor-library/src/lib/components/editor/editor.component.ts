@@ -226,7 +226,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         targetFWType = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.config.frameworkMetadata.targetFWType');
         const channelFrameworks = _.get(this.helperService.channelInfo, 'frameworks');
         const channelFrameworksType = _.map(channelFrameworks, 'type');
-        const channelFrameworksIdentifiers = _.map(_.get(this.helperService.channelInfo, 'frameworks'), 'identifier');
         const difference = _.difference(targetFWType, _.uniq(channelFrameworksType));
 
         if (targetFWType && channelFrameworksType && _.isEmpty(difference)) {
@@ -432,7 +431,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.addCollaborator = false;
     } else if (!this.addCollaborator) {
       this.addCollaborator = true;
-    } else {
     }
   }
 
@@ -642,7 +640,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       if (!this.validateFormStatus()) {
         return reject(_.get(this.configService, 'labelConfig.messages.error.029'));
       }
-      const nodesModified = _.get(this.editorService.getCollectionHierarchy(), 'nodesModified');
       if (this.objectType.toLowerCase() === 'questionset') {
         const maxScore = await this.editorService.getMaxScore();
         this.treeService.updateMetaDataProperty('maxScore', maxScore);
@@ -949,7 +946,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.sourcingSettings.enforceCorrectAnswer = true;
       }
       if (_.isEmpty(_.get(catMetaData, 'schema.properties.interactionTypes.items.enum'))) {
-        // this.toasterService.error(this.resourceService.messages.emsg.m0026);
         this.editorService.selectedChildren = {
           primaryCategory: selectedQuestionType,
           mimeType: catMetaData.schema.properties.mimeType.enum[0],
@@ -1124,7 +1120,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       fileName: this.collectionId
     };
     window.open(downloadConfig.blobUrl, '_blank');
-    /*this.editorService.downloadBlobUrlFile(downloadConfig);*/
   }
   hanndleCsvEmitter(event) {
     switch (event.type) {
