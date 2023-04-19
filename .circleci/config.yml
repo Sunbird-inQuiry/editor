@@ -9,12 +9,12 @@ jobs:
           name: run build file
           command: /bin/bash -x build.sh ${CIRCLE_SHA1} test
   test-cases:
-    working_directory: ~/sunbird-collection-editor
+    working_directory: ~/sunbird-questionset-editor
     machine:
       image: ubuntu-2004:202010-01
     steps:
       - checkout:
-          path: ~/sunbird-collection-editor
+          path: ~/sunbird-questionset-editor
       - run:
           name: Node version
           command: 'node --version'
@@ -50,16 +50,16 @@ jobs:
           command: npm install -g sonarqube-scanner
       - run:
           name: Run sonar scanner
-          command: 'cd ~/sunbird-collection-editor && sonar-scanner'
+          command: 'cd ~/sunbird-questionset-editor && sonar-scanner'
       - run:
           name: Publish to NPM
           command: |
-            if [ -n $CIRCLE_PR_NUMBER ]; then
-              npm run build-lib && npm pack ./dist/collection-editor-library
+            if [ -z $CIRCLE_PR_NUMBER ]; then
+              npm run build-lib && npm pack ./dist/questionset-editor-library
               echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
-              npm publish project-sunbird-sunbird-collection-editor-*
+              npm publish project-sunbird-sunbird-questionset-editor-*
             else
-              npm run build-lib && npm pack ./dist/collection-editor-library
+              npm run build-lib && npm pack ./dist/questionset-editor-library
             fi
 workflows:
   version: 2

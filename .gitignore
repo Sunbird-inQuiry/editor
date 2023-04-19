@@ -2,7 +2,7 @@
 
 # compiled output
 /dist
-/projects/collection-editor-library/coverage
+/projects/questionset-editor-library/coverage
 /tmp
 /out-tsc
 # Only exists if Bazel was run
