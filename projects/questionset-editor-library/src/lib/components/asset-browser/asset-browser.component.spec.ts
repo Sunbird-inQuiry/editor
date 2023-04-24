@@ -78,6 +78,12 @@ describe('AssetBrowserComponent', () => {
     expect(component.showImagePicker).toBeTruthy();
   });
 
+  it('#outputEventHandler() should log event', () => {
+    spyOn(component, 'outputEventHandler').and.callThrough();
+    component.outputEventHandler({});
+    expect(component.outputEventHandler).toHaveBeenCalled();
+  })
+
   it('#getMyImages() should return images on API success', async () => {
     const response = mockData.serverResponse;
     response.result = {

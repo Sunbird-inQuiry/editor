@@ -131,6 +131,7 @@ editorConfig = {
         },
       },
     },
+    interactionType: 'choice',
     collection: {
       maxContentsLimit: 10,
     },
@@ -283,6 +284,7 @@ editorConfig_question = {
     isReadOnlyMode: false,
     interactionType: 'default',
     questionCategory: 'VSA',
+    questionPrimaryCategories: ['Multiple Choice Question', 'Subjective Question']
   },
 };
 
@@ -359,6 +361,9 @@ export const getCategoryDefinitionResponse = {
     objectCategoryDefinition: {
       identifier: 'obj-cat:multiple-choice-question_question_all',
       objectMetadata: {
+        childrenConfig: {
+          choice: {}
+        },
         config: {},
         schema: {
           properties: {
