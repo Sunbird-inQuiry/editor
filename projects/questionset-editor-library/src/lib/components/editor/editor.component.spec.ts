@@ -63,6 +63,13 @@ describe('EditorComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('unloadHandler should call generateTelemetryEndEvent', () => {
+    spyOn(component, 'unloadHandler').and.callThrough();
+    spyOn(component, 'generateTelemetryEndEvent').and.callFake(() => {});
+    component.unloadHandler({});
+    expect(component.generateTelemetryEndEvent).toHaveBeenCalled();
+  })
+
   it('should have default value of variables', () => {
     expect(component.questionComponentInput).toEqual({});
     expect(component.selectedNodeData).toEqual({});
@@ -94,6 +101,7 @@ describe('EditorComponent', () => {
   });
 
   it('#ngOnInit() should call all methods inside it (for objectType Collection)', () => {
+    component.objectType = 'questionSet';
     component.editorConfig = editorConfig;
     const editorService = TestBed.inject(EditorService);
     spyOn(editorService, 'initialize').and.callThrough();
@@ -683,6 +691,18 @@ describe('EditorComponent', () => {
     component.showLibraryComponentPage();
     expect(component.buttonLoaders.addFromLibraryButtonLoader).toEqual(true);
     expect(component.saveContent).toHaveBeenCalled();
+  });
+
+  it('#showLibraryComponentPage() should throw error', () => {
+    const toasterService = TestBed.inject(ToasterService);
+    spyOn(toasterService, 'error').and.callFake(() => {})
+    const editorService = TestBed.inject(EditorService);
+    spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(true);
+    spyOn(component, 'saveContent').and.callFake(() => {
+      return Promise.reject({error: "Content not able to save"});
+    });
+    component.showLibraryComponentPage();
+    expect(component.buttonLoaders.addFromLibraryButtonLoader).toEqual(true);
   });
 
   it('#showLibraryComponentPage should call call saveContent', () => {
@@ -1506,6 +1526,78 @@ describe('EditorComponent', () => {
     spyOn(component, 'fetchFrameWorkDetails').and.callThrough();
     component.fetchFrameWorkDetails();
   });
+
+  it('getHierarchyChildrenConfig should return question children data', () => {
+    const categoryData = [
+      {
+          "identifier": "obj-cat:multiple-choice-question_question_all",
+          "name": "Multiple Choice Question",
+          "targetObjectType": "Question"
+      },
+      {
+          "identifier": "obj-cat:subjective-question_question_all",
+          "name": "Subjective Question",
+          "targetObjectType": "Question"
+      }
+    ];
+    const helperService = TestBed.inject(HelperService);
+    spyOn(helperService, 'questionPrimaryCategories').and.returnValue(categoryData)
+    const childrenData = {
+      "Question": []
+    };
+    spyOn(component, 'getHierarchyChildrenConfig').and.callThrough();
+    const returnChildrenData = component.getHierarchyChildrenConfig(childrenData);
+    expect(returnChildrenData).toBeDefined();
+  });
+
+  it('getHierarchyChildrenConfig should return question children data from editorConfig', () => {
+    component.editorConfig = editorConfig_question;
+    const helperService = TestBed.inject(HelperService);
+    spyOn(helperService, 'questionPrimaryCategories').and.returnValue(undefined);
+    const childrenData = {
+      "Question": []
+    };
+    spyOn(component, 'getHierarchyChildrenConfig').and.callThrough();
+    const returnChildrenData = component.getHierarchyChildrenConfig(childrenData);
+    expect(returnChildrenData).toBeDefined();
+  });
+
+  it('getHierarchyChildrenConfig should return content children data', () => {
+    const categoryData = [{ "name": "eTextbook"}];
+    const helperService = TestBed.inject(HelperService);
+    spyOn(helperService, 'contentPrimaryCategories').and.returnValue(categoryData)
+    let childrenData = {
+      "Content": []
+    };
+    spyOn(component, 'getHierarchyChildrenConfig').and.callThrough();
+    const returnChildrenData = component.getHierarchyChildrenConfig(childrenData);
+    expect(returnChildrenData).toBeDefined();
+  });
+
+  it('getHierarchyChildrenConfig should return collection children data', () => {
+    const categoryData = [{ "name": "Course"}];
+    const helperService = TestBed.inject(HelperService);
+    spyOn(helperService, 'collectionPrimaryCategories').and.returnValue(categoryData)
+    let childrenData = {
+      "Collection": []
+    };
+    spyOn(component, 'getHierarchyChildrenConfig').and.callThrough();
+    const returnChildrenData = component.getHierarchyChildrenConfig(childrenData);
+    expect(returnChildrenData).toBeDefined();
+  });
+
+  it('getHierarchyChildrenConfig should return questionset children data', () => {
+    const categoryData = [{ "name": "Practise Question Set"}];
+    const helperService = TestBed.inject(HelperService);
+    spyOn(helperService, 'questionsetPrimaryCategories').and.returnValue(categoryData)
+    let childrenData = {
+      "QuestionSet": []
+    };
+    spyOn(component, 'getHierarchyChildrenConfig').and.callThrough();
+    const returnChildrenData = component.getHierarchyChildrenConfig(childrenData);
+    expect(returnChildrenData).toBeDefined();
+  });
+
 
 });
 
