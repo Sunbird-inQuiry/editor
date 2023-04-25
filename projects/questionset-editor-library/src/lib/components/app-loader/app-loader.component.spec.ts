@@ -21,10 +21,32 @@ describe('AppLoaderComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(AppLoaderComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('ngOnInit should set the loader message', () => {
+    component.data = {headerMessage: 'Please wait..', loaderMessage: 'We are fetching the details..'}
+    spyOn(component, 'ngOnInit').and.callThrough();
+    component.headerMessage = '';
+    component.loaderMessage = '';
+    component.ngOnInit();
+    expect(component.ngOnInit).toHaveBeenCalled();
+    expect(component.headerMessage).toEqual(component.data.headerMessage);
+    expect(component.loaderMessage).toEqual(component.data.loaderMessage);
+  });
+
+  it('ngOnInit should not set the loader message', () => {
+    component.data = undefined;
+    spyOn(component, 'ngOnInit').and.callThrough();
+    component.headerMessage = '';
+    component.loaderMessage = '';
+    component.ngOnInit();
+    expect(component.ngOnInit).toHaveBeenCalled();
+    expect(component.headerMessage).toEqual('');
+    expect(component.loaderMessage).toEqual('');
+  });
+
 });
