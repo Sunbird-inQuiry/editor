@@ -24,6 +24,6 @@ export class AppModule implements DoBootstrap {
   constructor(private injector: Injector) { }
   ngDoBootstrap() {
     const customElement = createCustomElement(EditorComponent, { injector: this.injector });
-    customElements.define('sunbird-questionset-editor', customElement);
+    customElements.define('lib-questionset-editor', customElement);
   }
 }
