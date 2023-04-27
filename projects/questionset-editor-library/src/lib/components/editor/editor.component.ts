@@ -111,11 +111,10 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         try {
           this.editorConfig = JSON.parse(this.editorConfig);
         } catch (error) {
-          console.error('Invalid editorConfig: ', error);
+          console.error('Invalid editor config: ', error);
         }
       }
     }
-
     this.editorService.initialize(this.editorConfig);
     this.editorMode = this.editorService.editorMode;
     this.treeService.initialize(this.editorConfig);
