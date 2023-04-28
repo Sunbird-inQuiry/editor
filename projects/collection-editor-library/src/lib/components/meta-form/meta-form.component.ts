@@ -31,9 +31,12 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
   public appIcon: any;
   public previousShuffleValue: boolean;
   public subscription: Subscription;
+  public formSectionProperties:any;
+  isDataValidated:boolean= false
   constructor(private editorService: EditorService, public treeService: TreeService,
               public frameworkService: FrameworkService, private helperService: HelperService,
               private configService: ConfigService, private toasterService: ToasterService) {
+                console.log('constructor loaded')
                 framworkServiceTemp = frameworkService;
                }
 
@@ -254,6 +257,7 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
     });
 
     this.formFieldProperties = _.cloneDeep(formConfig);
+    this.formSectionProperties = _.cloneDeep(this.formFieldProperties[0].fields)
   }
   isReviewMode() {
     return  _.includes([ 'review', 'read', 'sourcingreview', 'orgreview' ], this.editorService.editorMode);
@@ -324,6 +328,7 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
     if (_.has(event, 'shuffle')) {
       this.showShuffleMessage(event);
     }
+    this.getRequiredValues(event)
     const data = _.omit(event, ['allowECM', 'levels', 'setPeriod']);
     if (!_.isEmpty(event?.levels)) {
       data.outcomeDeclaration = {
@@ -338,6 +343,52 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
     this.toolbarEmitter.emit({ button: 'onFormValueChange', data });
     this.treeService.updateNode(data);
   }
+
+  getRequiredValues(event) {
+    if (event.board && event.medium?.length && event.gradeLevel?.length && event.subject?.length && event.difficultyLevel?.length && event.selectedQuestionType?.length ) {
+      this.isDataValidated = true;
+    }
+    else {
+      this.isDataValidated = false;
+    }
+  if (this.isDataValidated) {
+    const requestbody = {
+      filters: {
+        primaryCategory: ["Multiple Choice Question"],
+        objectType: ["Question"],
+        board: [event.board],
+        medium: event.medium,
+        gradeLevel: event.gradeLevel,
+        subject: event.subject,
+        difficultyLevel: event.difficultyLevel,
+        status: ["Live"]
+      },
+    }
+    this.frameworkService.getBlueprintData(requestbody).subscribe((data) => {
+      console.log('count',data.result.count)
+      console.log('section',this.formFieldProperties)
+
+
+      const metaDataField = _.get(this.nodeMetadata, 'data.metadata');
+      const isRootNode = _.get(this.nodeMetadata, 'data.root');
+      let formConfig: any = (_.get(metaDataField, 'visibility') === 'Default') || isRootNode ? _.cloneDeep(this.rootFormConfig) : _.cloneDeep(this.unitFormConfig);
+      console.log('metaData',formConfig)
+      formConfig = formConfig && _.has(_.first(formConfig), 'fields') ? formConfig : [{name: '', fields: formConfig}];
+      _.forEach(this.formFieldProperties,(section)=>{
+        _.forEach(section.fields, field=>{
+          if (field.code === 'requiredQuestionCount') {
+            // const activeNode = this.treeService.getActiveNode();
+           // const rootFirstChildNode = this.editorService.getContentChildrens(activeNode);
+            // if (rootFirstChildNode && rootFirstChildNode.length > 0) {
+              field.range = _.times(data.result.count, index => index + 1);
+            // }
+          }
+         // this.formFieldProperties = _.cloneDeep(formConfig[0].fields);
+        })
+      })
+    })
+  }
+}
 
   createLeavels(levels) {
     const obj = {};

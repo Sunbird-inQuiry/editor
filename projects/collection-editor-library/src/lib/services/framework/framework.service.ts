@@ -113,4 +113,16 @@ export class FrameworkService {
       };
     return this.publicDataService.post(option);
   }
+
+  getBlueprintData(requestbody){
+    const option ={
+     url: `${this.configService.urlConFig.URLS.COMPOSITE.SEARCH}`,
+     data:{
+      request:{
+        ...requestbody
+      }
+     }
+    };
+    return this.publicDataService.post(option)
+  }
 }

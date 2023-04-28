@@ -4,7 +4,7 @@ import { Observable, of, throwError} from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { map, mergeMap } from 'rxjs/operators';
 import { QuestionCursor } from '@project-sunbird/sunbird-quml-player';
-import { EditorCursor } from 'collection-editor-library';
+import { EditorCursor } from 'upsmf-collection-editor';
 import * as _ from 'lodash-es';
 
 @Injectable({
