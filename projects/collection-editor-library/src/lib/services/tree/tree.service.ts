@@ -247,6 +247,7 @@ export class TreeService {
     if (this.treeCache.nodesModified[nodeId]) {
       // tslint:disable-next-line:max-line-length
       this.treeCache.nodesModified[nodeId].metadata = _.assign(this.treeCache.nodesModified[nodeId].metadata, _.omit(metadata, 'objectType'));
+      this.updateEvaluable(nodeId);
     } else {
       this.treeCache.nodesModified[nodeId] = {
         root: activeNode && activeNode.root ? true : false,
@@ -256,6 +257,19 @@ export class TreeService {
       };
       this.treeCache.nodes.push(nodeId); // To track sequence of modifiation
     }
+  }
+
+  updateEvaluable(nodeId){
+    this.treeCache.nodesModified[nodeId].metadata.evaluable = this.treeCache.nodesModified[nodeId].metadata.primaryCategory === this.configService.editorConfig.evaluableQuestionSet ? true:false;
+      if(!this.treeCache.nodesModified[nodeId].root){
+        this.treeCache.nodesModified[nodeId].metadata.evaluable = this.getFirstChild().data.primaryCategory === this.configService.editorConfig.evaluableQuestionSet?true:false;
+        } else {
+        this.updateFirstChild(this.treeCache.nodesModified[nodeId].metadata.primaryCategory)
+      }
+  }
+
+  updateFirstChild(type) {
+    $(this.treeNativeElement).fancytree('getRootNode').getFirstChild().data.primaryCategory = type
   }
 
   clearTreeCache(node?) {

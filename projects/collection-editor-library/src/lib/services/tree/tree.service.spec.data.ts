@@ -30,6 +30,7 @@ export const treeNode = {
         "showTimer": "Yes",
         "author": "Test",
         "maxQuestions": 2,
+        "evaluable":false,
         "consumerId": "273f3b18-5dda-4a27-984a-060c7cd398d3",
         "childNodes": [
             "do_113264103767826432118",

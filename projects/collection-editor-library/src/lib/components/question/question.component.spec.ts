@@ -6,6 +6,7 @@ import { Router } from "@angular/router";
 import { PlayerService } from "../../services/player/player.service";
 import { EditorTelemetryService } from "../../services/telemetry/telemetry.service";
 import { EditorService } from "../../services/editor/editor.service";
+import * as editorConfig from "../../services/config/editor.config.json";
 import { ToasterService } from "../../services/toaster/toaster.service";
 import { EditorCursor } from "../../collection-editor-cursor.service";
 import { TreeService } from "../../services/tree/tree.service";
@@ -50,6 +51,7 @@ const mockEditorService = {
       },
     },
   },
+  evaluableQuestionSet: "PIAA Question Set",
   parentIdentifier: "",
   optionsLength: 4,
   selectedChildren: {
@@ -81,6 +83,7 @@ describe("QuestionComponent", () => {
     urlConFig: (urlConfig as any).default,
     labelConfig: (labelConfig as any).default,
     categoryConfig: (categoryConfig as any).default,
+    editorConfig: (editorConfig as any).default
   };
 
   let component: QuestionComponent;

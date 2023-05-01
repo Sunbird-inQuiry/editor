@@ -29,6 +29,7 @@
     },
     "showAddCollaborator": false,
     "enableBulkUpload": false,
+    "evaluableQuestionSet": "PIAA Question Set",
     "defaultStates": {
         "nonInteractiveQuestions": {
             "MTF": {
