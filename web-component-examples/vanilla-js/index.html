@@ -17,7 +17,7 @@
 </head>
 
 <body>
-  <div class="player-grid" id="wrapper">
+  <div id="inQuiryEditor">
   </div>
   <script type="text/javascript" src="sunbird-questionset-editor.js"></script>
   <script type="text/javascript">
@@ -27,9 +27,9 @@
         contributionOrgId: '',
         user: {
           id: '5a587cc1-e018-4859-a0a8-e842650b9d64',
-          fullName: 'Vaibahv Bhuva',
-          firstName: 'Vaibhav',
-          lastName: 'Bhuva',
+          fullName: 'Test User',
+          firstName: 'Test',
+          lastName: 'User',
           orgIds: ['01309282781705830427']
         },
         identifier: 'do_21378237663284428811081', //do_2137377386197565441500, do_2137284880695541761408 // do_11330102570702438417 , do_113449692707643392118, //do_113449692707643392118 , do_113460158539554816151
@@ -201,8 +201,8 @@
     const myElement = document.createElement('lib-questionset-editor');
     myElement.setAttribute('editor-config', JSON.stringify(questionSetEditorConfig));
 
-    const wrapper = document.getElementById("wrapper");
-    wrapper.appendChild(myElement);
+    const inQuiryEditor = document.getElementById("inQuiryEditor");
+    inQuiryEditor.appendChild(myElement);
   </script>
 </body>
 
