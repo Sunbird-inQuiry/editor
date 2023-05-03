@@ -31,6 +31,7 @@ const build = async () => {
 
   await concat(files, "web-component-examples/vanilla-js/sunbird-questionset-editor.js");
   await fs.copy("./dist/questionset-editor-library-wc/", "web-component-examples/vanilla-js/", {filter});
+  await fs.copy("README.md", "web-component/README.md")
   console.log("Files concatenated successfully!!!");
 };
 build();
