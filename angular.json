@@ -234,6 +234,11 @@
               "projects/questionset-editor-library-wc/src/assets",
               {
                 "glob": "**/*",
+                "input": "src/assets/libs/mathEquation/",
+                "output": "/assets/libs/mathEquation/"
+              },
+              {
+                "glob": "**/*",
                 "input": "node_modules/@project-sunbird/sunbird-pdf-player-v9/lib/assets/",
                 "output": "/assets/"
               },
