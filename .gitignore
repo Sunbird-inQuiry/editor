@@ -46,3 +46,7 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+
+# Web components Files
+project-sunbird-sunbird-questionset-editor-web-component-*
