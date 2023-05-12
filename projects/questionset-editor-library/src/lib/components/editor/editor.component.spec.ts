@@ -101,8 +101,9 @@ describe('EditorComponent', () => {
   });
 
   it('#ngOnInit() should call all methods inside it (for objectType Collection)', () => {
+    const sampleEditorConfig: any = JSON.stringify(editorConfig);
+    component.editorConfig = sampleEditorConfig;
     component.objectType = 'questionSet';
-    component.editorConfig = editorConfig;
     const editorService = TestBed.inject(EditorService);
     spyOn(editorService, 'initialize').and.callThrough();
     const treeService = TestBed.inject(TreeService);
@@ -124,6 +125,7 @@ describe('EditorComponent', () => {
     spyOn(editorService, 'getshowQuestionLibraryPageEmitter').and.callFake(() => {return questionLibraryPage});
     spyOn(component, 'showQuestionLibraryComponentPage').and.callFake(() => {});
     component.ngOnInit();
+    expect(component.editorConfig).toBeDefined();
     expect(editorService.initialize).toHaveBeenCalledWith(editorConfig);
     expect(editorService.editorMode).toEqual('edit');
     expect(component.editorMode).toEqual('edit');

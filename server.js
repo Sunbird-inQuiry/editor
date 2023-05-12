@@ -11,15 +11,16 @@ const API_AUTH_TOKEN = "";
 const PORTAL_COOKIES= ""
 const USER_TOKEN = "";
 
-
 var app = express();
 app.set('port', 3000);
 app.use(express.json())
 app.get("/latex/convert", latexService.convert)
 app.post("/latex/convert", bodyParser.json({ limit: '1mb' }), latexService.convert);
+app.use(express.static(__dirname + '/web-component-examples/vanilla-js'));
 app.all(['/api/framework/v1/read/*',
      '/learner/framework/v1/read/*', 
-     '/api/channel/v1/read/*'], proxy(BASE_URL, {
+     '/api/channel/v1/read/*',
+     '/api/question/v1/list'], proxy(BASE_URL, {
     https: true,
     proxyReqPathResolver: function(req) {
         console.log('proxyReqPathResolver ',  urlHelper.parse(req.url).path);
@@ -45,6 +46,27 @@ app.use(['/action/questionset/v1/*',
     limit: '30mb',
     proxyReqPathResolver: function (req) {
         let originalUrl = req.originalUrl.replace('/action/', '/api/')
+        console.log('proxyReqPathResolver questionset', originalUrl, require('url').parse(originalUrl).path);
+        return require('url').parse(originalUrl).path;
+    },
+    proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        console.log('proxyReqOptDecorator 3')
+        // you can update headers
+        proxyReqOpts.headers['Content-Type'] = 'application/json';
+        proxyReqOpts.headers['user-id'] = 'content-editor';
+        proxyReqOpts.headers['Cookie'] = PORTAL_COOKIES;
+        proxyReqOpts.headers['authorization'] = `Bearer ${API_AUTH_TOKEN}`;
+        proxyReqOpts.headers['x-authenticated-user-token'] = USER_TOKEN;
+         return proxyReqOpts;
+    }
+}));
+
+app.use(['/action/composite/v3/search'
+    ], proxy(BASE_URL, {
+    https: true,
+    limit: '30mb',
+    proxyReqPathResolver: function (req) {
+        let originalUrl = req.originalUrl.replace('/action/composite/v3/', '/api/composite/v1/')
         console.log('proxyReqPathResolver questionset', originalUrl, require('url').parse(originalUrl).path);
         return require('url').parse(originalUrl).path;
     },
