@@ -1,0 +1,23 @@
+{
+    "name": "@project-sunbird/sunbird-questionset-editor-web-component",
+    "version": "1.0.2",
+    "description": "The web component package for the sunbird questionset editor",
+    "main": "sunbird-questionset-editor.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "homepage": "https://github.com/Sunbird-inQuiry/editor#readme",
+    "keywords": [
+        "sunbird",
+        "questionSet",
+        "Question",
+        "editor",
+        "web-component"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Sunbird-inQuiry/editor.git"
+    },
+    "author": "Sunbird",
+    "license": "MIT"
+}
