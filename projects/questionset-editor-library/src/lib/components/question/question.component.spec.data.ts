@@ -3392,13 +3392,11 @@ export const RubricData = [
   },
 ];
 
-export const videoSolutionObject= [
-  {
+export const videoSolutionObject= {
     "id": "4772d9da-569f-46bb-a8b1-9faf742d0640",
     "type": "video",
     "value": "do_2137972441518325761398"
-  }
-];
+};
 
 export const mediaVideoArray = [
   {

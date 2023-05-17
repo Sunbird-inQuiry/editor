@@ -743,6 +743,26 @@ describe("QuestionComponent", () => {
     expect(component.onStatusChanges).toHaveBeenCalled();
   });
 
+  it('#getQuestionSolution() should return video solution', () => {
+    component.mediaArr = mediaVideoArray;
+    spyOn(component, 'getQuestionSolution').and.callThrough();
+    spyOn(component, 'getMediaById').and.callThrough();
+    spyOn(component, 'getVideoSolutionHtml').and.callThrough();
+    const solution = component.getQuestionSolution(videoSolutionObject);
+    expect(solution).toBeDefined();
+  })
+
+  it('#getQuestionSolution() should return html solution', () => {
+    const solutionObject = {
+      "id": "4772d9da-569f-46bb-a8b1-9faf742d0640",
+      "type": "html",
+      "value": "<p>This is sample Html solution</p>"
+    }
+    spyOn(component, 'getQuestionSolution').and.callThrough();
+    const solution = component.getQuestionSolution(solutionObject);
+    expect(solution).toBeDefined();
+  })
+
   it('#getMediaById() should return media object', () => {
     component.mediaArr = mediaVideoArray;
     spyOn(component, 'getMediaById').and.callThrough();
@@ -1085,15 +1105,9 @@ describe("QuestionComponent", () => {
         createdBy: '5a587cc1-e018-4859-a0a8-e842650b9d64'
       }
     );
-    spyOn(component, 'getMediaById').and.callThrough();
-    spyOn(component, 'getVideoSolutionHtml').and.callThrough();
-    component.editorState.solutions = videoSolutionObject;
-    component.mediaArr = mediaVideoArray;
-    spyOn(component, 'getSolutionObj').and.returnValue(videoSolutionObject);
+    spyOn(component, 'getQuestionSolution').and.returnValue({});
     spyOn(component, 'getQuestionMetadata').and.callThrough();
     const metadata = component.getQuestionMetadata();
-    expect(component.getMediaById).toHaveBeenCalled();
-    expect(component.getVideoSolutionHtml).toHaveBeenCalled();
     expect(metadata.responseDeclaration.response1.maxScore).toEqual(1);
     expect(metadata.responseDeclaration.response1.correctResponse.outcomes.SCORE).toEqual(1);
   });

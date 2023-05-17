@@ -792,14 +792,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!_.isUndefined(this.selectedSolutionType) && !_.isEmpty(this.selectedSolutionType)) {
       const solutionObj = this.getSolutionObj(this.solutionUUID, this.selectedSolutionType, this.editorState.solutions);
       metadata.editorState.solutions = [solutionObj];
-      if (this.selectedSolutionType === 'html') {
-        metadata.solutions = {[this.solutionUUID]: solutionObj.value};
-      } else if (this.selectedSolutionType === 'video') {
-        const videoMedia = this.getMediaById(this.editorState.solutions[0].value);
-        const videoThumbnail = videoMedia?.thumbnail ? videoMedia?.thumbnail : '';
-        const videoSolution = this.getVideoSolutionHtml(videoThumbnail, videoMedia?.src);
-        metadata.solutions = {[this.solutionUUID]: videoSolution};
-      }
+      metadata.solutions = this.getQuestionSolution(solutionObj);
     }
     if (_.isEmpty(this.editorState.solutions)) {
       metadata.solutions = {};
@@ -820,6 +813,17 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     // tslint:disable-next-line:max-line-length
     return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions']);
+  }
+
+  getQuestionSolution(solutionObj) {
+    if (solutionObj?.type === 'html') {
+      return {[solutionObj?.id]: solutionObj.value};
+    } else if (solutionObj?.type === 'video') {
+      const videoMedia = this.getMediaById(solutionObj?.value);
+      const videoThumbnail = videoMedia?.thumbnail ? videoMedia?.thumbnail : '';
+      const videoSolution = this.getVideoSolutionHtml(videoThumbnail, videoMedia?.src);
+      return {[solutionObj.id]: videoSolution};
+    }
   }
 
   getMediaById(mediaId) {
