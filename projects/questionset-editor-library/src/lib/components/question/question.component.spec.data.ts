@@ -3391,3 +3391,23 @@ export const RubricData = [
     status: "Draft",
   },
 ];
+
+export const videoSolutionObject= [
+  {
+    "id": "4772d9da-569f-46bb-a8b1-9faf742d0640",
+    "type": "video",
+    "value": "do_2137972441518325761398"
+  }
+];
+
+export const mediaVideoArray = [
+  {
+      "id": "do_2137972441518325761398",
+      "src": "/assets/public/content/assets/do_2137972441518325761398/earth.mp4",
+      "type": "video",
+      "assetId": "do_2137972441518325761398",
+      "name": "earth",
+      "baseUrl": "https://dev.inquiry.sunbird.org",
+      "thubmnail": "/assets/public/content/assets/do_21379724415183257613675/earth.png"
+  }
+];

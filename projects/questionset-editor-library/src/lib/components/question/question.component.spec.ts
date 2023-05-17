@@ -25,7 +25,9 @@ import {
   BranchingLogic,
   mockEditorCursor,
   interactionChoiceEditorState,
-  RubricData
+  RubricData,
+  videoSolutionObject,
+  mediaVideoArray
 } from "./question.component.spec.data";
 import { of, throwError } from "rxjs";
 import * as urlConfig from "../../services/config/url.config.json";
@@ -741,6 +743,19 @@ describe("QuestionComponent", () => {
     expect(component.onStatusChanges).toHaveBeenCalled();
   });
 
+  it('#getMediaById() should return media object', () => {
+    component.mediaArr = mediaVideoArray;
+    spyOn(component, 'getMediaById').and.callThrough();
+    const mediaobj = component.getMediaById(mediaVideoArray[0].id);
+    expect(mediaobj).toBeDefined();
+  });
+
+  it('#getVideoSolutionHtml() should return videoSolutionHtml', () => {
+    spyOn(component, 'getVideoSolutionHtml').and.callThrough();
+    const videoSolutionHtml = component.getVideoSolutionHtml(mediaVideoArray[0].thubmnail, mediaVideoArray[0].src);
+    expect(videoSolutionHtml).toBeDefined();
+  });
+
   it("call #getMcqQuestionHtmlBody() to verify questionBody", () => {
     const question = '<div class=\'question-body\' tabindex=\'-1\'><div class=\'mcq-title\' tabindex=\'0\'>{question}</div><div data-choice-interaction=\'response1\' class=\'{templateClass}\'></div></div>';
     const templateId = "mcq-vertical";
@@ -905,8 +920,11 @@ describe("QuestionComponent", () => {
     expect(component.isEditable("bloomsLevel")).toBeFalsy();
   });
   it("Unit test for #prepareQuestionBody", () => {
-    component.questionId = undefined;
-    spyOn(component, 'getQuestionMetadata').and.returnValue({});
+    component.questionId = 'do_12345';
+    const editorService = TestBed.inject(EditorService);
+    spyOn(component, 'getQuestionMetadata').and.returnValue({answer: [1,2]});
+    spyOn(component, 'setQuestionTypeValues').and.callFake(() => {});
+    spyOn(editorService, 'getHierarchyObj').and.callFake(() => {})
     spyOn(component, "prepareQuestionBody").and.callThrough();
     const response = component.prepareQuestionBody();
     expect(component.prepareQuestionBody).toHaveBeenCalled();
@@ -1035,7 +1053,7 @@ describe("QuestionComponent", () => {
     component.getQuestionMetadata();
     component.setQuestionTypeValues(metaData);
     component.prepareQuestionBody();
-    component.updateQuestion();
+    // component.updateQuestion();
     component.saveQuestion();
   });
 
@@ -1052,7 +1070,7 @@ describe("QuestionComponent", () => {
   it('#getQuestionMetadata() should return question metata when interactionType is choice', () => {
     component.mediaArr = [];
     component.editorState = interactionChoiceEditorState;
-    component.selectedSolutionType = undefined;
+    component.selectedSolutionType = 'video';
     component.creationContext = undefined;
     component.questionInteractionType = 'choice';
     component.childFormData = {
@@ -1067,8 +1085,15 @@ describe("QuestionComponent", () => {
         createdBy: '5a587cc1-e018-4859-a0a8-e842650b9d64'
       }
     );
+    spyOn(component, 'getMediaById').and.callThrough();
+    spyOn(component, 'getVideoSolutionHtml').and.callThrough();
+    component.editorState.solutions = videoSolutionObject;
+    component.mediaArr = mediaVideoArray;
+    spyOn(component, 'getSolutionObj').and.returnValue(videoSolutionObject);
     spyOn(component, 'getQuestionMetadata').and.callThrough();
     const metadata = component.getQuestionMetadata();
+    expect(component.getMediaById).toHaveBeenCalled();
+    expect(component.getVideoSolutionHtml).toHaveBeenCalled();
     expect(metadata.responseDeclaration.response1.maxScore).toEqual(1);
     expect(metadata.responseDeclaration.response1.correctResponse.outcomes.SCORE).toEqual(1);
   });

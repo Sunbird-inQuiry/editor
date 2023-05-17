@@ -792,10 +792,17 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!_.isUndefined(this.selectedSolutionType) && !_.isEmpty(this.selectedSolutionType)) {
       const solutionObj = this.getSolutionObj(this.solutionUUID, this.selectedSolutionType, this.editorState.solutions);
       metadata.editorState.solutions = [solutionObj];
-      metadata.solutions = [solutionObj];
+      if (this.selectedSolutionType === 'html') {
+        metadata.solutions = {[this.solutionUUID]: solutionObj.value};
+      } else if (this.selectedSolutionType === 'video') {
+        const videoMedia = this.getMediaById(this.editorState.solutions[0].value);
+        const videoThumbnail = videoMedia?.thumbnail ? videoMedia?.thumbnail : '';
+        const videoSolution = this.getVideoSolutionHtml(videoThumbnail, videoMedia?.src);
+        metadata.solutions = {[this.solutionUUID]: videoSolution};
+      }
     }
     if (_.isEmpty(this.editorState.solutions)) {
-      metadata.solutions = [];
+      metadata.solutions = {};
     }
     metadata = _.merge(metadata, this.getDefaultSessionContext());
     if(_.get(this.creationContext, 'objectType') === 'question') {
@@ -815,6 +822,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions']);
   }
 
+  getMediaById(mediaId) {
+    return _.find(this.mediaArr, { 'id': mediaId });
+  }
+
   getResponseDeclaration(type) {
     const responseDeclaration = {
       response1: {
@@ -827,6 +838,11 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return responseDeclaration;
   }
 
+  getVideoSolutionHtml(posterURL, srcUrl) {
+    const videoSolutionHtml = '<video width=\'400\' poster=\'{posterUrl}\'><source type=\'video/mp4\' src=\'{sourceURL}\'><source type=\'video/webm\' src=\'{sourceURL}\'></video>'
+    const videoSolutionValue = videoSolutionHtml.replace('{posterUrl}', posterURL).replace('{sourceURL}', srcUrl).replace('{sourceURL}', srcUrl);
+    return videoSolutionValue;
+  }
 
 
   getMcqQuestionHtmlBody(question, templateId) {
@@ -873,7 +889,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     metaData.interactions = metaData.interactions || {};
 
-    metaData.interactions.validation = { required: this.childFormData.markAsNotMandatory === 'Yes' ? 'No' : 'Yes'};
+    if (this.questionInteractionType !== 'default') {
+      metaData.interactions.response1.validation = { required: this.childFormData.markAsNotMandatory === 'Yes' ? 'No' : 'Yes'};
+    }
+
     if (this.childFormData.allowMultiSelect === 'Yes') {
       metaData.responseDeclaration.response1.cardinality = 'multiple';
     }
@@ -944,8 +963,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     this.editorService.data = {};
     this.editorService.selectedSection = selectedUnitId;
     let metaData = this.getQuestionMetadata();
-    if (this.questionInteractionType === 'choice') {
-      metaData = _.omit(metaData, 'answer')
+    if (_.isArray(metaData?.answer)) {
+      metaData.answer = (metaData.answer).toString();
     }
     this.setQuestionTypeValues(metaData);
     return {
