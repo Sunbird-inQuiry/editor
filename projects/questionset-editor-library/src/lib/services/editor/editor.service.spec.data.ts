@@ -276,16 +276,17 @@ export const questionsData = [
         channel: '01309282781705830427',
         responseDeclaration: {
             response1: {
-                maxScore: 1,
                 cardinality: 'single',
                 type: 'integer',
                 correctResponse: {
                     value: '0',
-                    outcomes: {
-                        SCORE: 1
-                    }
                 },
-                mapping: []
+                mapping: [
+                    {
+                      value: 0,
+                      score: 1
+                    }
+                ]
             }
         },
         language: [

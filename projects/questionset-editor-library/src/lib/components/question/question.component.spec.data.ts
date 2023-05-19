@@ -257,7 +257,6 @@ export const mockData = {
           response1: {
             mapping: [],
             type: "integer",
-            maxScore: 1,
           },
         },
         solutions: [],
@@ -395,7 +394,6 @@ export const mockData = {
           response1: {
             mapping: [],
             type: "string",
-            maxScore: 1,
           },
         },
         solutions: [],
@@ -459,7 +457,6 @@ export const mockData = {
         responseDeclaration: {
           response1: {
             type: "string",
-            maxScore: 1,
           },
         },
         mimeType: "application/vnd.sunbird.question",
@@ -727,13 +724,10 @@ export const readQuestionMock = {
       showRemarks: "No",
       responseDeclaration: {
         response1: {
-          maxScore: 1,
           cardinality: "multiple",
           type: "integer",
           correctResponse: {
-            outcomes: {
-              SCORE: 1,
-            },
+            value: 0
           },
           mapping: [],
         },
@@ -744,7 +738,7 @@ export const readQuestionMock = {
       editorState: {
         options: [
           {
-            answer: false,
+            answer: true,
             value: {
               body: "<p>false</p>",
               value: 0,
@@ -3091,16 +3085,17 @@ export const interactionChoiceEditorState = {
   name: 'Multiple Choice Question',
   responseDeclaration: {
       response1: {
-          maxScore: 1,
           cardinality: 'single',
           type: 'integer',
           correctResponse: {
               value: '0',
-              outcomes: {
-                  SCOR: 1
-              }
           },
-          mapping: []
+          mapping: [
+            {
+              value: 0,
+              score: 1
+            }
+          ]
       }
   },
   interactionTypes: [
