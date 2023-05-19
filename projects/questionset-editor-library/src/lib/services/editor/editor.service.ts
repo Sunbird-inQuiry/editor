@@ -170,7 +170,7 @@ export class EditorService {
     return this.publicDataService.get(req);
   }
 
-  updateHierarchy() {
+  updateHierarchy(): Observable<any> {
     const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
     const req = {
       url: url.HIERARCHY_UPDATE,
