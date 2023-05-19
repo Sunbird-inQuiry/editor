@@ -1146,7 +1146,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   getOutcomeDeclaration(questionMetadata) {
     let cardinality = 'single';
     if (!_.isUndefined(questionMetadata?.responseDeclaration?.response1?.mapping) &&
-    (questionMetadata?.responseDeclaration?.response1?.mapping).length > 1) {
+    (questionMetadata.responseDeclaration.response1.mapping).length > 1) {
         cardinality = 'multiple';
     }
     const outcomeDeclaration = {
