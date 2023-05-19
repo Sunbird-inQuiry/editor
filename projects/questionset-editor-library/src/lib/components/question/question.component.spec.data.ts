@@ -186,16 +186,29 @@ export const mockData = {
         name: "MCQ Question",
         responseDeclaration: {
           response1: {
-            maxScore: 1,
             cardinality: "multiple",
             type: "integer",
             correctResponse: {
-              outcomes: {
-                SCORE: 1,
-              },
+              value: [0,1]
             },
-            mapping: [],
+            mapping: [
+              {
+                "value": 1,
+                "score": 0.5
+              },
+              {
+                "value": 0,
+                "score": 0.5
+              }
+            ],
           },
+        },
+        outcomeDeclaration: {
+          maxScore: {
+            cardinality: "multiple",
+            type: "integer",
+            defaultValue: 1
+          }
         },
         remarks: {
           maxLength: 100,

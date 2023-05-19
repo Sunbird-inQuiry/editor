@@ -654,7 +654,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       const nodesModified = _.get(this.editorService.getCollectionHierarchy(), 'nodesModified');
       if (this.objectType.toLowerCase() === 'questionset') {
         const maxScore = await this.editorService.getMaxScore();
-        this.treeService.updateMetaDataProperty('maxScore', maxScore);
+        this.treeService.updateMetaDataProperty('outcomeDeclaration', { maxScore: { cardinality: 'single', type: 'integer', defaultValue: maxScore } });
       }
       this.editorService.updateHierarchy()
         .pipe(map(data => _.get(data, 'result'))).subscribe(response => {

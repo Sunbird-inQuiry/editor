@@ -178,10 +178,39 @@ describe('OptionsComponent', () => {
   });
 
   it('#getResponseDeclaration() should return expected response declaration', () => {
+    component.mapping = [{
+      "value": 0,
+      "score": 1
+    }];
     spyOn(component,"getResponseDeclaration").and.callThrough();
-    component.getResponseDeclaration(mockOptionData.editorOptionData);
+    spyOn(component, 'getCardinality').and.callFake(() => {return 'single'});
+    const responseDeclaration = component.getResponseDeclaration(mockOptionData.editorOptionData);
     expect(component.getResponseDeclaration).toHaveBeenCalled();
-    // expect(mockOptionData.prepareMcqBody.responseDeclaration).toEqual(result);
+    expect(component.getCardinality).toHaveBeenCalled();
+    expect(responseDeclaration.response1.cardinality).toEqual('single');
+  });
+
+  it('#getOutcomeDeclaration should return OutcomeDeclaration', () => {
+    component.maxScore = 2;
+    spyOn(component, 'getOutcomeDeclaration').and.callThrough();
+    spyOn(component, 'getCardinality').and.callFake(() => {return 'single'});
+    const OutcomeDeclaration = component.getOutcomeDeclaration();
+    expect(OutcomeDeclaration.maxScore.cardinality).toEqual('single');
+    expect(OutcomeDeclaration.maxScore.defaultValue).toEqual(2);
+  });
+
+  it('#getCardinality should return cardinality single', () => {
+    spyOn(component, 'getCardinality').and.callThrough();
+    component.mapping = [];
+    const cardinality = component.getCardinality();
+    expect(cardinality).toEqual('single');
+  });
+
+  it('#getCardinality should return cardinality multiple', () => {
+    spyOn(component, 'getCardinality').and.callThrough();
+    component.mapping = [{"value": 0, "score": 1}, {"value": 2, "score": 1}];
+    const cardinality = component.getCardinality();
+    expect(cardinality).toEqual('multiple');
   });
 
   it('setMapping should set the mapping for single select MCQ', () => {

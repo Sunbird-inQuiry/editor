@@ -170,7 +170,7 @@ export class EditorService {
     return this.publicDataService.get(req);
   }
 
-  updateHierarchy(): Observable<any> {
+  updateHierarchy() {
     const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
     const req = {
       url: url.HIERARCHY_UPDATE,
@@ -388,7 +388,7 @@ export class EditorService {
       if (_.has(nodeData.parent.data.metadata, 'shuffle') && nodeData.parent.data.metadata.shuffle === true) {
         return sum + 1;
       } else {
-        return sum + (question?.responseDeclaration?.response1?.maxScore ? _.get(question, 'responseDeclaration.response1.maxScore') : 0);
+        return sum + (question?.outcomeDeclaration?.maxScore?.defaultValue ? _.get(question, 'outcomeDeclaration.maxScore.defaultValue') : 0);
       }
     }, 0);
   }

@@ -772,7 +772,7 @@ describe("QuestionComponent", () => {
 
   it('#getVideoSolutionHtml() should return videoSolutionHtml', () => {
     spyOn(component, 'getVideoSolutionHtml').and.callThrough();
-    const videoSolutionHtml = component.getVideoSolutionHtml(mediaVideoArray[0].thubmnail, mediaVideoArray[0].src);
+    const videoSolutionHtml = component.getVideoSolutionHtml(mediaVideoArray[0].thubmnail, mediaVideoArray[0].src, mediaVideoArray[0].id);
     expect(videoSolutionHtml).toBeDefined();
   });
 
@@ -919,17 +919,75 @@ describe("QuestionComponent", () => {
   });
 
   it("Unit test for #setQumlPlayerData", () => {
-    // spyOn(component, 'editorCursor.setQuestionMap').and.callFake(()=> {});
     spyOn(component, 'getQuestionMetadata').and.returnValue(mockData.mcqQuestionMetaData.result.question);
+    spyOn(component, 'getOutcomeDeclaration').and.callThrough();
     component.questionSetHierarchy = {
       children: [],
-      maxScore: '1'
+      shuffle: true
     };
     spyOn(component, 'setQumlPlayerData').and.callThrough();
     component.setQumlPlayerData('do_12345');
     expect(component.getQuestionMetadata).toHaveBeenCalled();
-    expect(component.questionSetHierarchy.maxScore).toBeDefined();
+    expect(component.getOutcomeDeclaration).toHaveBeenCalled();
+    expect(component.questionSetHierarchy.outcomeDeclaration.maxScore.defaultValue).toEqual(1);
   });
+
+  it("Unit test for #setQumlPlayerData for shuffle false", () => {
+    component.maxScore = 2;
+    spyOn(component, 'getQuestionMetadata').and.returnValue(mockData.mcqQuestionMetaData.result.question);
+    spyOn(component, 'getOutcomeDeclaration').and.callThrough();
+    component.questionSetHierarchy = {
+      children: [],
+      shuffle: false
+    };
+    spyOn(component, 'setQumlPlayerData').and.callThrough();
+    component.setQumlPlayerData('do_12345');
+    expect(component.getQuestionMetadata).toHaveBeenCalled();
+    expect(component.getOutcomeDeclaration).toHaveBeenCalled();
+    expect(component.questionSetHierarchy.outcomeDeclaration.maxScore.defaultValue).toEqual(2);
+  });
+
+  it("Unit test for #setQumlPlayerData for Subjective Question", () => {
+    let questionMetadata = mockData.mcqQuestionMetaData.result.question;
+    questionMetadata.qType = 'SA';
+    spyOn(component, 'getQuestionMetadata').and.returnValue(questionMetadata);
+    component.questionSetHierarchy = {
+      children: [],
+      outcomeDeclaration: {},
+      shuffle: true
+    };
+    spyOn(component, 'setQumlPlayerData').and.callThrough();
+    component.setQumlPlayerData('do_12345');
+    expect(component.getQuestionMetadata).toHaveBeenCalled();
+    expect(component.questionSetHierarchy).not.toContain('outcomeDeclaration');
+  });
+
+  it('#getOutcomeDeclaration should return outcomeDeclaration with cardinality multiple', () => {
+    component.maxScore = 1;
+    spyOn(component, 'getOutcomeDeclaration').and.callThrough();
+    const outcomeDeclaration = component.getOutcomeDeclaration({
+      responseDeclaration: {
+        response1: {
+          mapping: [{"value": 0, "score": 1}, { "value": 2, "score": 1}]
+        }
+      }
+    });
+    expect(outcomeDeclaration.maxScore.cardinality).toEqual('multiple');
+  });
+
+  it('#getOutcomeDeclaration should return outcomeDeclaration with cardinality single', () => {
+    component.maxScore = 1;
+    spyOn(component, 'getOutcomeDeclaration').and.callThrough();
+    const outcomeDeclaration = component.getOutcomeDeclaration({
+      responseDeclaration: {
+        response1: {
+          mapping: [{"value": 0, "score": 1}]
+        }
+      }
+    });
+    expect(outcomeDeclaration.maxScore.cardinality).toEqual('single');
+  });
+
   it("Unit test for #isEditable without queston id", () => {
     component.creationContext = creationContextMock;
     component.questionId=undefined;
@@ -1108,8 +1166,7 @@ describe("QuestionComponent", () => {
     spyOn(component, 'getQuestionSolution').and.returnValue({});
     spyOn(component, 'getQuestionMetadata').and.callThrough();
     const metadata = component.getQuestionMetadata();
-    expect(metadata.responseDeclaration.response1.maxScore).toEqual(1);
-    expect(metadata.responseDeclaration.response1.correctResponse.outcomes.SCORE).toEqual(1);
+    expect(metadata['outcomeDeclaration'].maxScore.defaultValue).toEqual(1);
   });
 
   it("#saveQuestion() should call saveQuestion for updateQuestion objectType not a question", () => {
@@ -1312,8 +1369,8 @@ describe("QuestionComponent", () => {
       return { data: { metadata: { identifier: "0123",allowScoring:'Yes' } } };
     });
     mockData.mcqQuestionMetaData.result.question.responseDeclaration.response1.mapping=[
-      {response:0,score:10},
-      {response:1,score:10}
+      {value:0,score:10},
+      {value:1,score:10}
     ]
     component.editorState = mockData.mcqQuestionMetaData.result.question;
     editorService = TestBed.inject(EditorService);
@@ -1701,12 +1758,18 @@ describe("QuestionComponent", () => {
     expect(component.sliderData).toHaveBeenCalledWith(event);
   });
 
-  it("#getResponseDeclaration() should call for question save", () => {
-    component.maxScore = 1;
+  it("#getResponseDeclaration() should set responseDecleration for slider", () => {
     spyOn(component, "getResponseDeclaration").and.callThrough();
     const responseDecleration = component.getResponseDeclaration("slider");
     expect(component.getResponseDeclaration).toHaveBeenCalled();
-    expect(responseDecleration.response1['maxScore']).toEqual(1);
+    expect(responseDecleration.response1.type).toEqual('integer');
+  });
+
+  it("#getResponseDeclaration() should set responseDecleration for text", () => {
+    spyOn(component, "getResponseDeclaration").and.callThrough();
+    const responseDecleration = component.getResponseDeclaration("text");
+    expect(component.getResponseDeclaration).toHaveBeenCalled();
+    expect(responseDecleration.response1.type).toEqual('string');
   });
 
   it("#saveUpdateQuestions call on click save button api fail case", () => {

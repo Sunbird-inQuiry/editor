@@ -107,6 +107,7 @@ export class OptionsComponent implements OnInit, OnChanges {
       templateId: this.templateType,
       name: this.questionPrimaryCategory || 'Multiple Choice Question',
       responseDeclaration: this.getResponseDeclaration(editorState),
+      outcomeDeclaration: this.getOutcomeDeclaration(),
       interactionTypes: ['choice'],
       interactions: this.getInteractions(editorState.options),
       editorState: {
@@ -119,23 +120,36 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   getResponseDeclaration(editorState) {
-    let questionCardinality = 'single';
-    if (this.mapping.length > 1) {
-      questionCardinality = 'multiple';
-    }
     const responseDeclaration = {
       response1: {
-        maxScore: this.maxScore,
-        cardinality: questionCardinality,
+        cardinality: this.getCardinality(),
         type: 'integer',
         correctResponse: {
           value: editorState.answer,
-          outcomes: { SCORE: this.maxScore },
         },
         mapping: this.mapping,
       },
     };
     return responseDeclaration;
+  }
+
+  getOutcomeDeclaration() {
+    const outcomeDeclaration = {
+      maxScore: {
+        cardinality: this.getCardinality(),
+        type: 'integer',
+        defaultValue: this.maxScore
+      }
+    };
+    return outcomeDeclaration;
+  }
+
+  getCardinality() {
+    let questionCardinality = 'single';
+    if (this.mapping.length > 1) {
+      questionCardinality = 'multiple';
+    }
+    return questionCardinality;
   }
 
   setMapping() {
@@ -144,10 +158,8 @@ export class OptionsComponent implements OnInit, OnChanges {
       const scoreForEachOption = _.round((this.maxScore/this.selectedOptions.length), 2);
       _.forEach(this.selectedOptions, (value) => {
         const optionMapping = {
-          response: value,
-          outcomes: {
-            score: scoreForEachOption,
-          },
+          value: value,
+          score: scoreForEachOption,
         }
         this.mapping.push(optionMapping)
       })
