@@ -299,7 +299,12 @@ export const treeData = {
   depth: 2,
   compatibilityLevel: 1,
   name: "Sub-Module",
-  timeLimits: {},
+  timeLimits: {
+    questionSet: {
+      min: 0,
+      max: 300
+    }
+  },
   status: "Draft",
   level: 3,
 };

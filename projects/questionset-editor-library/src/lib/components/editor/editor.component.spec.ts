@@ -1034,11 +1034,14 @@ describe('EditorComponent', () => {
     spyOn(helperService, 'hmsToSeconds').and.returnValue('300');
     const treeNodeMockData = treeNodeData;
     // tslint:disable-next-line:no-string-literal
-    treeNodeMockData.data.metadata['timeLimits'] = undefined;
+    treeNodeMockData.data.metadata['timeLimits'] = {
+      questionSet: {
+        min: 0,
+        max: 300
+      }
+    };
     // tslint:disable-next-line:no-string-literal
     treeNodeMockData.data.metadata['maxTime'] = '00:05';
-    // tslint:disable-next-line:no-string-literal
-    treeNodeMockData.data.metadata['warningTime'] = '00:01';
     const treeService = TestBed.inject(TreeService);
     spyOn(treeService, 'getFirstChild').and.returnValue(treeNodeData);
     spyOn(component, 'updateTreeNodeData').and.callThrough();

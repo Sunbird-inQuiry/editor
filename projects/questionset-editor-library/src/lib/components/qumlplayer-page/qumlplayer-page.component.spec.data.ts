@@ -489,8 +489,10 @@ export const mockData = {
     "compatibilityLevel": 5,
     "navigationMode": "non-linear",
     "timeLimits": {
-      "maxTime": "300",
-      "warningTime": "240"
+      "questionSet": {
+        "min": 0,
+        "max": 300
+      }
     },
     "shuffle": true,
     "board": "CBSE",

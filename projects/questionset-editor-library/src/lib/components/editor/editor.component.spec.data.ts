@@ -512,7 +512,12 @@ export const hirearchyGet = {
       createdBy: '5a587cc1-e018-4859-a0a8-e842650b9d64',
       compatibilityLevel: 1,
       userConsent: 'Yes',
-      timeLimits: '{}',
+      timeLimits: {
+        questionSet: {
+          min: 0,
+          max: 300
+        }
+      },
       resourceType: 'Course',
     },
   },
@@ -949,7 +954,12 @@ export const hierarchyResponse = [
                 depth: 2,
                 compatibilityLevel: 1,
                 name: 'unit-1.1',
-                timeLimits: {},
+                timeLimits: {
+                  questionSet: {
+                    min: 0,
+                    max: 300
+                  }
+                },
                 status: 'Draft',
                 level: 3,
               },
@@ -982,7 +992,12 @@ export const hierarchyResponse = [
             depth: 1,
             compatibilityLevel: 1,
             name: 'unit-1',
-            timeLimits: {},
+            timeLimits: {
+              questionSet: {
+                min: 0,
+                max: 300
+              }
+            },
             status: 'Draft',
             level: 2,
           },
@@ -1042,7 +1057,12 @@ export const hierarchyResponse = [
         createdBy: '5a587cc1-e018-4859-a0a8-e842650b9d64',
         compatibilityLevel: 1,
         userConsent: 'Yes',
-        timeLimits: '{}',
+        timeLimits: {
+          questionSet: {
+            min: 0,
+            max: 300
+          }
+        },
         resourceType: 'Course',
         level: 1,
       },
@@ -3050,7 +3070,12 @@ export const rootNodeData = {
   programId: '1a4d0130-1a9b-11ec-8655-6320ba8843b0',
   instructions: '',
   level: 1,
-  timeLimits: {},
+  timeLimits: {
+    questionSet: {
+      min: 0,
+      max: 300
+    }
+  },
 };
 
 
@@ -3462,7 +3487,12 @@ export const hierarchyRootNodeData = {
       programId: '3ef43b40-7dc7-11ec-bb5d-23c7a3b99eb5',
       instructions: '',
       level: 1,
-      timeLimits: {},
+      timeLimits: {
+        questionSet: {
+          min: 0,
+          max: 300
+        }
+      },
       audience: [],
       description: null,
     },
@@ -3831,7 +3861,10 @@ export const questionsetHierarchyRead = {
       compatibilityLevel: 5,
       navigationMode: 'non-linear',
       timeLimits: {
-        maxTime: '300'
+        questionSet: {
+          min: 0,
+          max: 300
+        }
       },
       shuffle: true,
       board: 'CBSE'
@@ -3890,7 +3923,10 @@ export const nodesModifiedData = {
           license: 'CC BY 4.0',
           attributions: [],
           timeLimits: {
-              maxTime: '300'
+            questionSet: {
+              min: 0,
+              max: 300
+            }
           },
           keywords: [
               'questionset'

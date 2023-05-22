@@ -84,8 +84,10 @@ export const treeNode = {
         "compatibilityLevel": 5,
         "navigationMode": "non-linear",
         "timeLimits": {
-            "maxTime": "360",
-            "warningTime": "10"
+            "questionSet": {
+              "min": 0,
+              "max": 300
+            }
         },
         "shuffle": true,
         "board": "CBSE",
