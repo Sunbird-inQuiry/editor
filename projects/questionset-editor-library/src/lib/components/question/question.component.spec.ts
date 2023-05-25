@@ -864,7 +864,7 @@ describe("QuestionComponent", () => {
       showPreview: true
     }
     spyOn(treeService , 'getActiveNode').and.returnValue({
-      parent:{ data:{ metadata:{shuffle: true, showSolutions: 'Yes', showFeedback: 'Yes'}}}
+      parent:{ data:{ metadata:{shuffle: true, showSolutions: true, showFeedback: true}}}
     });
     spyOn(component, 'setParentConfig').and.callFake(() => {});
     spyOn(component, 'previewContent').and.callThrough();
@@ -887,35 +887,35 @@ describe("QuestionComponent", () => {
 
   it('#setParentConfig should set questionset behaviour with truthy parentConfig', () => {
     component.questionSetHierarchy = {
-      shuffle: false, showSolutions: 'No', showFeedback: 'No'
+      shuffle: false, showSolutions: false, showFeedback: false
     }
     spyOn(component, 'setParentConfig').and.callThrough();
-    component.setParentConfig({shuffle: true, showSolutions: 'Yes', showFeedback: 'Yes'});
+    component.setParentConfig({shuffle: true, showSolutions: true, showFeedback: true});
     expect(component.questionSetHierarchy.shuffle).toBeTruthy();
-    expect(component.questionSetHierarchy.showSolutions).toEqual('Yes');
-    expect(component.questionSetHierarchy.showFeedback).toEqual('Yes');
+    expect(component.questionSetHierarchy.showSolutions).toEqual(true);
+    expect(component.questionSetHierarchy.showFeedback).toEqual(true);
   });
 
   it('#setParentConfig should set questionset behaviour with falsy parentConfig', () => {
     component.questionSetHierarchy = {
-      shuffle: true, showSolutions: 'Yes', showFeedback: 'Yes'
+      shuffle: true, showSolutions: true, showFeedback: true
     }
     spyOn(component, 'setParentConfig').and.callThrough();
-    component.setParentConfig({shuffle: false, showSolutions: 'No', showFeedback: 'No'});
+    component.setParentConfig({shuffle: false, showSolutions: false, showFeedback: false});
     expect(component.questionSetHierarchy.shuffle).toBeFalsy();
-    expect(component.questionSetHierarchy.showSolutions).toEqual('No');
-    expect(component.questionSetHierarchy.showFeedback).toEqual('No');
+    expect(component.questionSetHierarchy.showSolutions).toEqual(false);
+    expect(component.questionSetHierarchy.showFeedback).toEqual(false);
   });
 
   it('#setParentConfig should set questionset behaviour without parentConfig', () => {
     component.questionSetHierarchy = {
-      shuffle: false, showSolutions: 'Yes', showFeedback: 'Yes'
+      shuffle: false, showSolutions: true, showFeedback: true
     }
     spyOn(component, 'setParentConfig').and.callThrough();
     component.setParentConfig({});
     expect(component.questionSetHierarchy.shuffle).toBeTruthy();
-    expect(component.questionSetHierarchy.showSolutions).toEqual('No');
-    expect(component.questionSetHierarchy.showFeedback).toEqual('No');
+    expect(component.questionSetHierarchy.showSolutions).toEqual(false);
+    expect(component.questionSetHierarchy.showFeedback).toEqual(false);
   });
 
   it("Unit test for #setQumlPlayerData", () => {

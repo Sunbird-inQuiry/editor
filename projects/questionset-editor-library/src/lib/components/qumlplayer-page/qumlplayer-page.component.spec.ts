@@ -58,10 +58,10 @@ describe('QumlplayerPageComponent', () => {
       data: { metadata: {} },
       parent: { data: { metadata: { shuffle: false } } }
     });
-    spyOn(treeService, 'getParent').and.returnValue({ data: { metadata: { showSolutions: 'Yes', showFeedback: 'Yes' } } });
+    spyOn(treeService, 'getParent').and.returnValue({ data: { metadata: { showSolutions: true, showFeedback: true } } });
     component.initQumlPlayer();
-    expect(component.hierarchy.showSolutions).toEqual('Yes');
-    expect(component.hierarchy.showFeedback).toEqual('Yes');
+    expect(component.hierarchy.showSolutions).toEqual(true);
+    expect(component.hierarchy.showFeedback).toEqual(true);
   });
   it('#switchToPotraitMode() should set  showPotrait to true', () => {
     component.showPotrait = false;
