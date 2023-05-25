@@ -51,8 +51,8 @@ export class QumlplayerPageComponent implements OnChanges {
         }
       }
       const parent = this.treeService.getParent()?.data?.metadata;
-      this.hierarchy.showSolutions = parent?.showSolutions || "No";
-      this.hierarchy.showFeedback = parent?.showFeedback || "No";
+      this.hierarchy.showSolutions = parent?.showSolutions || false;
+      this.hierarchy.showFeedback = parent?.showFeedback || false;
       this.prevQuestionId = newQuestionId;
       setTimeout(() => {
         this.showPlayerPreview = true;

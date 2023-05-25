@@ -46,7 +46,7 @@ export class QumlPlayerComponent implements OnInit {
         this.qumlPlayerConfig.context.threshold = 1;
         this.qumlPlayerConfig.metadata.maxQuestions = 1;
         this.qumlPlayerConfig.metadata.showStartPage = 'No';
-        this.qumlPlayerConfig.metadata.showTimer = 'No';
+        this.qumlPlayerConfig.metadata.showTimer = false;
         this.qumlPlayerConfig.metadata.requiresSubmit = 'No';
         this.qumlPlayerConfig.config.showLegend = false;
       }
