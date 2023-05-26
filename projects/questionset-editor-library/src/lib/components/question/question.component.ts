@@ -771,8 +771,29 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       _.get(treeNodeData,'allowScoring') === 'Yes' ? '' : _.set(metadata,'responseDeclaration.response1.mapping',[]);
     }
 
+    if (this.questionInteractionType != 'choice') {
+      if (_.isString(metadata.answer)  &&  !_.isEmpty(metadata.answer)) {
+        const answerHtml = this.getAnswerHtml(metadata.answer);
+        const finalAnswer = this.getAnswerWrapperHtml(answerHtml);
+        metadata.answer = finalAnswer;
+      } else {
+        metadata.answer = '';
+      }
+    }
+
     if (this.questionInteractionType === 'choice') {
       metadata.body = this.getMcqQuestionHtmlBody(this.editorState.question, this.editorState.templateId);
+      if(_.isString(_.toNumber(metadata.answer))) {
+        metadata.answer = [metadata.answer];
+      }
+      const correctAnswersData = this.getInteractionValues(metadata.answer, metadata.interactions);
+      let concatenatedAnswers = '';
+      _.forEach(correctAnswersData, (answer) => {
+        const optionAnswer = this.getAnswerHtml(answer.label);
+        concatenatedAnswers = concatenatedAnswers.concat(optionAnswer);
+      })
+      const finalAnswer = this.getAnswerWrapperHtml(concatenatedAnswers);
+      metadata.answer = finalAnswer;
     } else if (this.questionInteractionType != 'default' && this.questionInteractionType != 'choice') {
       metadata.responseDeclaration = this.getResponseDeclaration(this.questionInteractionType);
     }
@@ -800,6 +821,25 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     // tslint:disable-next-line:max-line-length
     return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions']);
+  }
+
+  getAnswerHtml(optionLabel) {
+    const answerHtml = '<div class=\"anwser-body\">{answer}</div>';
+    const optionHtml = answerHtml.replace('{answer}', optionLabel);
+    return optionHtml;
+  }
+
+  getAnswerWrapperHtml(concatenatedAnswers) {
+    const answerTemplate = '<div class=\"anwser-container\">{answers}</div>';
+    const answer = answerTemplate.replace('{answers}', concatenatedAnswers);
+    return answer;
+  }
+
+  getInteractionValues(answer, interactions) {
+    const correctAnswers = _.filter(interactions.response1.options, (value, key) => {
+      return _.includes(answer, value.value);
+    });
+    return correctAnswers;
   }
 
   getQuestionSolution(solutionObj) {
@@ -951,9 +991,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     this.editorService.data = {};
     this.editorService.selectedSection = selectedUnitId;
     let metaData = this.getQuestionMetadata();
-    if (_.isArray(metaData?.answer)) {
-      metaData.answer = (metaData.answer).toString();
-    }
     this.setQuestionTypeValues(metaData);
     return {
       nodesModified: {
