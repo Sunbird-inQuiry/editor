@@ -1,6 +1,6 @@
 {
   "name": "@project-sunbird/sunbird-questionset-editor",
-  "version": "6.0.0-beta.0",
+  "version": "6.0.0-beta.1",
   "dependencies": {
     "tslib": "^2.0.0"
   },
