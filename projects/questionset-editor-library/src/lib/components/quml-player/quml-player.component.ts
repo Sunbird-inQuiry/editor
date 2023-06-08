@@ -29,6 +29,7 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit {
 
   initialize() {
     this.setQumlPlayerData();
+    this.showPreview = true;
   }
 
   setQumlPlayerData() {
