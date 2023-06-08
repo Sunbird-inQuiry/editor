@@ -2,7 +2,7 @@
      <div class="content-player">
         <div class="w-100 h-100">
                 <div class="contentViewerIframeShadow" *ngIf="!showViewButton">
-                    <span #qumlPlayer></span>
+                    <span id="qumlPlayer" #qumlPlayer></span>
                 </div>
                 <div class="mt-25" *ngIf="(editorService?.editorMode !== 'edit' && showViewButton)">
                     <h5>Click on View details to view the question details.</h5>
