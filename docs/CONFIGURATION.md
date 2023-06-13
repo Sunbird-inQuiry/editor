@@ -163,7 +163,8 @@ config: {
       ...
       }
     },
-    contentPolicyUrl: 'string' //Ex.: '/term-of-use.html' 
+    contentPolicyUrl: 'string', //Ex.: '/term-of-use.html'
+    assetProxyUrl: 'string', //Ex: '/assets/public/'
   }
 ```
 

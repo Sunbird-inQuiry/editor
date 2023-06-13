@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ConfigService} from '../../services/config/config.service';
 import {EditorTelemetryService} from '../../services/telemetry/telemetry.service';
 import {EditorService} from '../../services/editor/editor.service';
+import * as _ from 'lodash-es';
 
 @Component({
     selector: 'lib-term-and-condition',
@@ -15,12 +16,16 @@ export class TermAndConditionComponent implements OnInit {
     allConsent = false;
     termsConsent = false;
     editingConsent = false;
+    commonFrameworkLicenseUrl = 'https://creativecommons.org/licenses';
 
     constructor(public editorService: EditorService, public configService: ConfigService,
                 public telemetryService: EditorTelemetryService) {
     }
 
     ngOnInit() {
+        if (_.get(this.editorService.editorConfig, 'config.commonFrameworkLicenseUrl')) {
+            this.commonFrameworkLicenseUrl = _.get(this.editorService.editorConfig, 'config.commonFrameworkLicenseUrl');
+        }
     }
 
     get contentPolicyUrl() {

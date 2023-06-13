@@ -94,6 +94,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   public onComponentDestroy$ = new Subject<any>();
   public outcomeDeclaration: any;
   public levelsArray: any;
+  public commonFrameworkLicenseUrl = 'https://creativecommons.org/licenses'
   constructor(private editorService: EditorService, public treeService: TreeService, private frameworkService: FrameworkService,
               private helperService: HelperService, public telemetryService: EditorTelemetryService, private router: Router,
               private toasterService: ToasterService,
@@ -676,6 +677,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
       return;
     } else {
+      if (_.get(this.editorService.editorConfig, 'config.commonFrameworkLicenseUrl')) {
+        this.commonFrameworkLicenseUrl = _.get(this.editorService.editorConfig, 'config.commonFrameworkLicenseUrl');
+      }
       this.showConfirmPopup = true;
     }
   }

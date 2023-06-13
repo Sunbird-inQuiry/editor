@@ -10,23 +10,40 @@ import { TreeService } from '../../services/tree/tree.service';
   styleUrls: ['./qumlplayer-page.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class QumlplayerPageComponent implements OnChanges {
+export class QumlplayerPageComponent implements OnChanges, OnInit {
   qumlPlayerConfig: any;
   @Input() questionMetaData: any;
+  @Input() leafFormConfig: any
   @Input() questionSetHierarchy: any;
   @Output() public toolbarEmitter: EventEmitter<any> = new EventEmitter();
   prevQuestionId: string;
   showPlayerPreview = false;
   showPotrait = false;
   hierarchy: any;
+  showForm = false;
+  questionFormConfig: any;
 
   constructor(public telemetryService: EditorTelemetryService, public configService: ConfigService, public editorService: EditorService,
               private treeService: TreeService) { }
+
+  ngOnInit() {
+    this.questionFormConfig = _.cloneDeep(this.leafFormConfig);
+    this.setFormdata();
+  }
 
   ngOnChanges() {
     if (_.has(this.questionMetaData, 'data.metadata')) {
       this.initQumlPlayer();
     }
+  }
+
+  setFormdata() {
+    _.forEach(this.questionFormConfig, (formField) => {
+      const fieldcode = formField.code;
+      formField.default = this.questionMetaData[fieldcode];
+      formField.editable = false;
+    });
+  this.showForm = true;
   }
 
   initQumlPlayer() {

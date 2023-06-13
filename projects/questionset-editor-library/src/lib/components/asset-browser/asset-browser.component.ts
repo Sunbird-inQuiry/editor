@@ -31,7 +31,6 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
   isClosable = true;
   loading = false;
   public mediaobj;
-  public assetProxyUrl = '/assets/public/';
   public editorInstance: any;
   public assetsCount: any;
   public searchMyInput = '';

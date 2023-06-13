@@ -54,6 +54,7 @@
                 (onChange)="subMenuChange($event)"></lib-question-option-sub-menu>
 
               <lib-answer *ngIf="questionInteractionType === 'default'"
+                [questionPrimaryCategory]="questionPrimaryCategory"
                 [editorState]="editorState" [showFormError]="showFormError"
                 (editorDataOutput)="editorDataHandler($event)" [isReadOnlyMode]="isReadOnlyMode"></lib-answer>
 
