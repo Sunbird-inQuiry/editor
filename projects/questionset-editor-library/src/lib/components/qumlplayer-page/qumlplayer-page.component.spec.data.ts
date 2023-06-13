@@ -503,8 +503,8 @@ export const mockData = {
     "warningTime": "00:04:00",
     "maxScore": "1"
   },
-  frameworkDetails: {
-    "frameworkData": [
+  frameworkdata: {
+    categories: [
       {
         "identifier": "inquiry_k-12_board",
         "code": "board",

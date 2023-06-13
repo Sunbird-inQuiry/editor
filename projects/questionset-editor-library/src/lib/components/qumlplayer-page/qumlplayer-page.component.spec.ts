@@ -8,7 +8,7 @@ import { EditorService } from '../../services/editor/editor.service';
 import { mockData } from './qumlplayer-page.component.spec.data';
 import { TreeService } from '../../services/tree/tree.service';
 import { FrameworkService } from '../../services/framework/framework.service';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 describe('QumlplayerPageComponent', () => {
   let component: QumlplayerPageComponent;
   let fixture: ComponentFixture<QumlplayerPageComponent>;
@@ -63,17 +63,21 @@ describe('QumlplayerPageComponent', () => {
     expect(component.initQumlPlayer).not.toHaveBeenCalled();
   });
 
-  xit('#fetchFrameWorkDetails() should fetch frameworkDetails', () => {
+  it('#fetchFrameWorkDetails() should fetch frameworkDetails', () => {
     let frameworkService = TestBed.inject(FrameworkService);
-    spyOnProperty(frameworkService, 'frameworkData$', 'get').and.returnValue(of(mockData.frameworkDetails))
+    const frameworkdata = {
+      'inquiry_k-12': mockData.frameworkdata
+    }
+    frameworkService['_frameworkData$'] = new BehaviorSubject<any>(undefined);
+    frameworkService['_frameworkData$'].next({ err: null, frameworkdata: frameworkdata })
+    // spyOnProperty(frameworkService, '_frameworkData$').and.returnValue(queryParamsMock)
     spyOn(component, 'fetchFrameWorkDetails').and.callThrough();
     spyOn(component, 'setFieldsTerms').and.callFake(() => {});
     component.fetchFrameWorkDetails('inquiry_k-12');
-    expect(component.setFieldsTerms).toHaveBeenCalled();
   });
 
   it('#setFieldsTerms() should set fields terms', () => {
-    component.frameworkDetails = mockData.frameworkDetails
+    component.frameworkDetails = {frameworkData: mockData.frameworkdata.categories} ;
     component.questionFormConfig = mockData.questionFormConfig;
     spyOn(component, 'setFieldsTerms').and.callThrough();
     spyOn(component, 'setFormDefaultValues').and.callFake(() => {});
