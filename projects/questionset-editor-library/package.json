@@ -1,6 +1,6 @@
 {
   "name": "@project-sunbird/sunbird-questionset-editor",
-  "version": "6.0.0-beta.4",
+  "version": "6.0.0-beta.5",
   "dependencies": {
     "tslib": "^2.0.0"
   },
@@ -8,7 +8,7 @@
     "@angular/common": "^15.2.3",
     "@angular/core": "^15.2.3",
     "@project-sunbird/ckeditor-build-classic": "4.1.3",
-    "common-form-elements-web-v9": "4.7.2",
+    "@project-sunbird/common-form-elements-full": "^6.0.3",
     "ng2-semantic-ui-v9": "0.0.3",
     "@angular/cdk": "15.2.3"
   },
