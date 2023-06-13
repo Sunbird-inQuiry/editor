@@ -7,6 +7,8 @@ import { EditorTelemetryService } from '../../services/telemetry/telemetry.servi
 import { EditorService } from '../../services/editor/editor.service';
 import { mockData } from './qumlplayer-page.component.spec.data';
 import { TreeService } from '../../services/tree/tree.service';
+import { FrameworkService } from '../../services/framework/framework.service';
+import { of } from 'rxjs';
 describe('QumlplayerPageComponent', () => {
   let component: QumlplayerPageComponent;
   let fixture: ComponentFixture<QumlplayerPageComponent>;
@@ -30,24 +32,72 @@ describe('QumlplayerPageComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  it('#ngOnChanges() should call initQumlPlayer', () => {
+  it('#ngOnChanges() should call initQumlPlayer and fetchFrameWorkDetails', () => {
     component.questionMetaData = {data: {metadata: {}}};
+    component.questionSetHierarchy = {framework: 'inQuiry-k12'}
     spyOn(component, 'initQumlPlayer').and.callFake(() => {});
+    spyOn(component, 'fetchFrameWorkDetails').and.callFake(() => {});
     component.ngOnChanges();
     expect(component.initQumlPlayer).toHaveBeenCalled();
+    expect(component.fetchFrameWorkDetails).toHaveBeenCalled();
   });
+
+  it('#ngOnChanges() should call initQumlPlayer and setFormDefaultValues', () => {
+    component.questionMetaData = {data: {metadata: {}}};
+    component.questionSetHierarchy = {framework: undefined};
+    const editorService = TestBed.inject(EditorService);
+    spyOnProperty(editorService, 'editorConfig', 'get').and.returnValue({});
+    spyOn(component, 'initQumlPlayer').and.callFake(() => {});
+    spyOn(component, 'fetchFrameWorkDetails').and.callFake(() => {});
+    spyOn(component, 'setFormDefaultValues').and.callFake(() => {});
+    component.ngOnChanges();
+    expect(component.initQumlPlayer).toHaveBeenCalled();
+    expect(component.fetchFrameWorkDetails).not.toHaveBeenCalled();
+    expect(component.setFormDefaultValues).toHaveBeenCalled();
+  });
+
   it('#ngOnChanges() should not call initQumlPlayer', () => {
     component.questionMetaData = {};
     spyOn(component, 'initQumlPlayer').and.callFake(() => {});
     component.ngOnChanges();
     expect(component.initQumlPlayer).not.toHaveBeenCalled();
   });
+
+  xit('#fetchFrameWorkDetails() should fetch frameworkDetails', () => {
+    let frameworkService = TestBed.inject(FrameworkService);
+    spyOnProperty(frameworkService, 'frameworkData$', 'get').and.returnValue(of(mockData.frameworkDetails))
+    spyOn(component, 'fetchFrameWorkDetails').and.callThrough();
+    spyOn(component, 'setFieldsTerms').and.callFake(() => {});
+    component.fetchFrameWorkDetails('inquiry_k-12');
+    expect(component.setFieldsTerms).toHaveBeenCalled();
+  });
+
+  it('#setFieldsTerms() should set fields terms', () => {
+    component.frameworkDetails = mockData.frameworkDetails
+    component.questionFormConfig = mockData.questionFormConfig;
+    spyOn(component, 'setFieldsTerms').and.callThrough();
+    spyOn(component, 'setFormDefaultValues').and.callFake(() => {});
+    component.setFieldsTerms();
+    expect(component.setFieldsTerms).toHaveBeenCalled();
+    expect(component.setFormDefaultValues).toHaveBeenCalled();
+  });
+
+  it('#setFormDefaultValues() should set fields default value', () => {
+    component.showForm = false;
+    component.questionMetaData = mockData.questionMetaData;
+    spyOn(component, 'setFormDefaultValues').and.callThrough();
+    component.setFormDefaultValues();
+    expect(component.setFormDefaultValues).toHaveBeenCalled();
+    expect(component.showForm).toBeTruthy();
+  });
+
   it('#initQumlPlayer() should set prevQuestionId', () => {
     component.showPlayerPreview = false;
     component.prevQuestionId = 'do_11326368076523929623';
     component.initQumlPlayer();
     expect(component.prevQuestionId).not.toBe(mockData.questionMetaData.identifier);
   });
+
   it('initQumlPlayer() should set hierarchy.maxScore', () => {
     component.hierarchy = {children: [], childNodes: [], maxScore: undefined};
     component.questionMetaData = { data: { metadata: mockData.questionMetaData}};
