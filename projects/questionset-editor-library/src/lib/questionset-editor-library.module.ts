@@ -70,7 +70,7 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     TermAndConditionComponent,
     QualityParamsModalComponent
   ],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule.forChild([]), SuiModule,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule.withConfig({callSetDisabledState: 'whenDisabledForLegacyCode'}), RouterModule.forChild([]), SuiModule,
   CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule],
   providers: [
   ],
