@@ -64,20 +64,16 @@ describe('QumlplayerPageComponent', () => {
   });
 
   it('#fetchFrameWorkDetails() should fetch frameworkDetails', () => {
-    let frameworkService = TestBed.inject(FrameworkService);
-    const frameworkdata = {
-      'inquiry_k-12': mockData.frameworkdata
-    }
-    frameworkService['_frameworkData$'] = new BehaviorSubject<any>(undefined);
-    frameworkService['_frameworkData$'].next({ err: null, frameworkdata: frameworkdata })
-    // spyOnProperty(frameworkService, '_frameworkData$').and.returnValue(queryParamsMock)
+    const frameworkService = TestBed.inject(FrameworkService);
+    frameworkService['_frameworkData'] = mockData._frameworkdata;
+    frameworkService.initialize('inquiry_k-12');
     spyOn(component, 'fetchFrameWorkDetails').and.callThrough();
     spyOn(component, 'setFieldsTerms').and.callFake(() => {});
     component.fetchFrameWorkDetails('inquiry_k-12');
   });
 
   it('#setFieldsTerms() should set fields terms', () => {
-    component.frameworkDetails = {frameworkData: mockData.frameworkdata.categories} ;
+    component.frameworkDetails = {frameworkData: mockData._frameworkdata['inquiry_k-12'].categories} ;
     component.questionFormConfig = mockData.questionFormConfig;
     spyOn(component, 'setFieldsTerms').and.callThrough();
     spyOn(component, 'setFormDefaultValues').and.callFake(() => {});
