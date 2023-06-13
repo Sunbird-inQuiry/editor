@@ -1298,6 +1298,22 @@ describe('EditorComponent', () => {
     expect(component.editorEmitter.emit).toHaveBeenCalledWith(expectedParams);
   });
 
+  it('#contentPolicyUrl return content policy url', () => {
+    const editorService = TestBed.inject(EditorService);
+    spyOnProperty(editorService, 'contentPolicyUrl').and.returnValue('/term-of-use.html');
+    spyOn(component, 'contentPolicyUrl').and.callThrough();
+    const policyUrl = component.contentPolicyUrl;
+    expect(policyUrl).toEqual('/term-of-use.html');
+  });
+
+  it('#commonFrameworkLicenseUrl return license url', () => {
+    const editorService = TestBed.inject(EditorService);
+    spyOnProperty(editorService, 'commonFrameworkLicenseUrl').and.returnValue('https://creativecommons.org/licenses');
+    spyOn(component, 'commonFrameworkLicenseUrl').and.callThrough();
+    const licenseUrl = component.commonFrameworkLicenseUrl;
+    expect(licenseUrl).toEqual('https://creativecommons.org/licenses');
+  });
+
   it('#showCommentAddedAgainstContent should return false', () => {
     component.editorConfig = editorConfig_question;
     component.collectionTreeNodes = { data:

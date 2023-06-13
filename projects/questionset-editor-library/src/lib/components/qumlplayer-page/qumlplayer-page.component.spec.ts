@@ -84,6 +84,7 @@ describe('QumlplayerPageComponent', () => {
 
   it('#setFormDefaultValues() should set fields default value', () => {
     component.showForm = false;
+    component.questionFormConfig = mockData.questionFormConfig;
     component.questionMetaData = mockData.questionMetaData;
     spyOn(component, 'setFormDefaultValues').and.callThrough();
     component.setFormDefaultValues();
