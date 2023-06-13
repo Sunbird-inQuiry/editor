@@ -37,6 +37,7 @@
     },
     "ContentPolicyUrl" : "/term-of-use.html",
     "assetProxyUrl": "/assets/public/",
+    "commonFrameworkLicenseUrl": "https://creativecommons.org/licenses",
     "getCategoryDefinition": "object/category/definition/v1/read?fields=objectMetadata,forms,name,label",
     "CONTENT": {
     "HIERARCHY_ADD":"content/v3/hierarchy/add",

@@ -16,21 +16,21 @@ export class TermAndConditionComponent implements OnInit {
     allConsent = false;
     termsConsent = false;
     editingConsent = false;
-    commonFrameworkLicenseUrl = 'https://creativecommons.org/licenses';
 
     constructor(public editorService: EditorService, public configService: ConfigService,
                 public telemetryService: EditorTelemetryService) {
     }
 
     ngOnInit() {
-        if (_.get(this.editorService.editorConfig, 'config.commonFrameworkLicenseUrl')) {
-            this.commonFrameworkLicenseUrl = _.get(this.editorService.editorConfig, 'config.commonFrameworkLicenseUrl');
-        }
     }
 
     get contentPolicyUrl() {
         return this.editorService.contentPolicyUrl;
     }
+
+    get commonFrameworkLicenseUrl() {
+        return this.editorService.commonFrameworkLicenseUrl;
+      }
 
     onConsentChange(event, consentType) {
         switch (consentType) {

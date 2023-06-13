@@ -4,13 +4,16 @@ import { EditorTelemetryService } from '../../services/telemetry/telemetry.servi
 import { EditorService } from '../../services/editor/editor.service';
 import { ConfigService } from '../../services/config/config.service';
 import { TreeService } from '../../services/tree/tree.service';
+import { FrameworkService } from '../../services/framework/framework.service';
+import { filter } from 'rxjs/operators';
+
 @Component({
   selector: 'lib-qumlplayer-page',
   templateUrl: './qumlplayer-page.component.html',
   styleUrls: ['./qumlplayer-page.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class QumlplayerPageComponent implements OnChanges, OnInit {
+export class QumlplayerPageComponent implements OnChanges {
   qumlPlayerConfig: any;
   @Input() questionMetaData: any;
   @Input() leafFormConfig: any
@@ -22,22 +25,49 @@ export class QumlplayerPageComponent implements OnChanges, OnInit {
   hierarchy: any;
   showForm = false;
   questionFormConfig: any;
+  frameworkDetails: any = {};
 
   constructor(public telemetryService: EditorTelemetryService, public configService: ConfigService, public editorService: EditorService,
-              private treeService: TreeService) { }
-
-  ngOnInit() {
-    this.questionFormConfig = _.cloneDeep(this.leafFormConfig);
-    this.setFormdata();
-  }
+              private treeService: TreeService, private frameworkService: FrameworkService) { }
 
   ngOnChanges() {
     if (_.has(this.questionMetaData, 'data.metadata')) {
       this.initQumlPlayer();
+      this.questionFormConfig = _.cloneDeep(this.leafFormConfig);
+      const framework = _.get(this.questionSetHierarchy, 'framework') ||  _.get(this.editorService.editorConfig, 'context.framework')
+      if (framework) {
+        this.fetchFrameWorkDetails(framework);
+      } else {
+        this.setFormDefaultValues();
+      }
     }
   }
 
-  setFormdata() {
+  fetchFrameWorkDetails(framework) {
+    this.frameworkService.frameworkData$.pipe(
+      filter(data => _.get(data, `frameworkdata.${framework}`))).subscribe((frameworkDetails: any) => {
+      if (frameworkDetails && !frameworkDetails.err) {
+        const frameworkData = frameworkDetails.frameworkdata[framework].categories;
+        this.frameworkDetails.frameworkData = frameworkData;
+        this.frameworkDetails.topicList = _.get(_.find(frameworkData, { code: 'topic' }), 'terms');
+        this.setFieldsTerms();
+      }
+    });
+  }
+
+  setFieldsTerms() {
+    const categoryMasterList = this.frameworkDetails.frameworkData;
+    _.forEach(categoryMasterList, (category) => {
+      _.forEach(this.questionFormConfig, (formFieldCategory) => {
+        if (category.code === formFieldCategory.code) {
+          formFieldCategory.terms = category.terms;
+        }
+      });
+    });
+    this.setFormDefaultValues();
+  }
+
+  setFormDefaultValues() {
     _.forEach(this.questionFormConfig, (formField) => {
       const fieldcode = formField.code;
       formField.default = this.questionMetaData[fieldcode];
