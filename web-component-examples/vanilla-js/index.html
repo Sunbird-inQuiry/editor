@@ -70,7 +70,7 @@
         defaultLicense: 'CC BY 4.0',
         endpoint: '/data/v3/telemetry',
         env: 'questionset_editor',
-        framework: 'ekstep_ncert_k-12',
+        framework: 'inquiry_k-12',
         cloudStorageUrls: ['https://s3.ap-south-1.amazonaws.com/ekstep-public-qa/', 'https://ekstep-public-qa.s3-ap-south-1.amazonaws.com/',
           'https://sunbirddev.blob.core.windows.net/sunbird-content-dev/'],
         additionalCategories: [
@@ -195,7 +195,9 @@
             }
           }
         },
-        contentPolicyUrl: '/term-of-use.html'
+        contentPolicyUrl: '/term-of-use.html',
+        assetProxyUrl: '/assets/public/',
+        commonFrameworkLicenseUrl: 'https://creativecommons.org/licenses/'
       }
     };
     const myElement = document.createElement('lib-questionset-editor');

@@ -164,7 +164,8 @@ config: {
       }
     },
     contentPolicyUrl: 'string', //Ex.: '/term-of-use.html'
-    assetProxyUrl: 'string', //Ex: '/assets/public/'
+    assetProxyUrl: 'string', //Ex: '/assets/public/',
+    commonFrameworkLicenseUrl: string // Ex: ''https://creativecommons.org/licenses/'
   }
 ```
 
