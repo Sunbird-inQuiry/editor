@@ -1405,6 +1405,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     this.onComponentDestroy$.next();
     this.onComponentDestroy$.complete();
     this.editorCursor.clearQuestionMap();
+    this.editorCursor.removeQuestionMap(this.questionId || this.tempQuestionId);
   }
 
   sliderData($event) {
