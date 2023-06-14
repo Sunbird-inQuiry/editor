@@ -339,7 +339,7 @@ describe('EditorComponent', () => {
   });
 
   it('#mergeCollectionExternalProperties() should call fetchCollectionHierarchy for objectType questionset', () => {
-    component.objectType = 'questionSet';
+    component.objectType = 'questionset';
     component.collectionId = 'do_113528954932387840149';
     const editorService = TestBed.inject(EditorService);
     component.editorConfig = editorConfig;
