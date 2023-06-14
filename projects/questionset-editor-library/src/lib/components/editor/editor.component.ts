@@ -352,7 +352,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.collectionTreeNodes = null;
     this.isTreeInitialized = true;
     requests.push(this.editorService.fetchCollectionHierarchy(this.collectionId));
-    if (this.objectType === 'questionSet') {
+    if (this.objectType === 'questionset') {
       requests.push(this.editorService.readQuestionSet(this.collectionId));
     }
     return forkJoin(requests).pipe(tap(responseList => {
@@ -367,7 +367,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.toolbarConfig.hasChildren = true;
       }
 
-      if (this.objectType === 'questionSet') {
+      if (this.objectType === 'questionset') {
         const questionSetResponse = _.last(responseList);
         const data = _.get(questionSetResponse, _.toLower(`result.${this.objectType}`));
         this.collectionTreeNodes.data.instructions = data.instructions ? data.instructions : '';
@@ -824,14 +824,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   updateTreeNodeData() {
     const treeNodeData = _.get(this.treeService.getFirstChild(), 'data.metadata');
     if (!treeNodeData.timeLimits) {
-      treeNodeData.timeLimits = {
-        questionSet: {
-          min: 0,
-          max: 0
-        }
-      };
+      treeNodeData.timeLimits = {};
     }
-    if (treeNodeData?.questionSet?.max) {
+    if (treeNodeData?.questionSet?.maxTime) {
       treeNodeData.timeLimits.questionSet.max = _.parseInt(this.helperService.hmsToSeconds(treeNodeData.maxTime));
     }
     this.collectionTreeNodes.data = _.merge(this.collectionTreeNodes.data, _.omit(treeNodeData, ['childNodes']));

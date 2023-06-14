@@ -1,9 +1,10 @@
 {
   "URLS": {
     "QuestionSet": {
-      "HIERARCHY_READ": "questionset/v1/hierarchy",
+      "HIERARCHY_READ": "questionset/v2/hierarchy",
+      "READ": "questionset/v2/read",
+
       "ADD": "questionset/v1/add",
-      "READ": "questionset/v1/read",
       "CREATE": "questionset/v1/create",
       "UPDATE": "questionset/v1/update/",
       "HIERARCHY_UPDATE": "questionset/v1/hierarchy/update",
