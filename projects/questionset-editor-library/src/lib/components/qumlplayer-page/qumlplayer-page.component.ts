@@ -49,7 +49,6 @@ export class QumlplayerPageComponent implements OnChanges {
       if (frameworkDetails && !frameworkDetails.err) {
         const frameworkData = frameworkDetails.frameworkdata[framework].categories;
         this.frameworkDetails.frameworkData = frameworkData;
-        this.frameworkDetails.topicList = _.get(_.find(frameworkData, { code: 'topic' }), 'terms');
         this.setFieldsTerms();
       }
     });
