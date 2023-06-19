@@ -127,7 +127,7 @@ export class EditorService {
 
   getQuestionList(questionIds: string[]): Observable<any> {
     const option = {
-      url: _.get(this.configService.urlConFig, 'URLS.QUESTION.LIST'),
+      url: _.get(this.configService.urlConFig, 'URLS.Question.LIST'),
       data: {
         request: {
           search: {
@@ -244,7 +244,7 @@ export class EditorService {
     objType = objType.toLowerCase();
     const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
     const option = {
-      url: url.CONTENT_REVIEW + contentId,
+      url: url.REVIEW + contentId,
       data: {
         request: {
           [objType]: {}
@@ -266,7 +266,7 @@ export class EditorService {
       }
     };
     const option = {
-      url: `${url.CONTENT_REJECT}${contentId}`,
+      url: `${url.REJECT}${contentId}`,
       data: requestBody
     };
     return this.publicDataService.post(option);
@@ -288,7 +288,7 @@ export class EditorService {
     requestBody.request[objType] = { ...requestBody.request[objType], ...publishData };
    }
     const option = {
-      url: `${url.CONTENT_PUBLISH}${contentId}`,
+      url: `${url.PUBLISH}${contentId}`,
       data: requestBody
     };
     return this.publicDataService.post(option);
@@ -466,7 +466,7 @@ export class EditorService {
     return relationalMetadata;
   }
 
-  getCategoryDefinition(categoryName, channel, objectType?: any) {
+  getCategoryDefinition(categoryName, channel, objectType) : Observable<any> {
     const req = {
       url: _.get(this.configService.urlConFig, 'URLS.getCategoryDefinition'),
       data: {

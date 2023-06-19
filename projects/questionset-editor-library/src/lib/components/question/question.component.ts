@@ -186,14 +186,14 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   initialize() {
     this.editorService.fetchCollectionHierarchy(this.questionSetId).subscribe((response) => {
-      this.questionSetHierarchy = _.get(response, 'result.questionSet');
+      this.questionSetHierarchy = _.get(response, 'result.questionset');
       const parentId = this.editorService.parentIdentifier ? this.editorService.parentIdentifier : this.questionId;
       //only for observation,survey,observation with rubrics
       if (!_.isUndefined(parentId) && !_.isUndefined(this.editorService.editorConfig.config.renderTaxonomy)) {
         this.getParentQuestionOptions(parentId);
         const sectionData = this.treeService.getNodeById(parentId);
-        const children = _.get(response, 'result.questionSet.children');
-        this.sectionPrimaryCategory = _.get(response, 'result.questionSet.primaryCategory');
+        const children = _.get(response, 'result.questionset.children');
+        this.sectionPrimaryCategory = _.get(response, 'result.questionset.primaryCategory');
         this.selectedSectionId = _.get(sectionData, 'data.metadata.parent');
         this.getBranchingLogic(children);
       }
@@ -497,7 +497,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       let comments = event.comment
       let successMessage = '';
       this.editorService.fetchCollectionHierarchy(this.questionSetId).subscribe(res => {
-        const questionSet = res.result['questionSet'];
+        const questionSet = res.result['questionset'];
         switch (event.button) {
           case 'sourcingApproveQuestion':
             questionIds = questionSet.acceptedContributions || [];
@@ -812,9 +812,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       metadata.collectionId = _.get(this.editorService, 'editorConfig.context.collectionIdentifier');
       metadata.organisationId = _.get(this.editorService, 'editorConfig.context.contributionOrgId');
     }
-    if (_.includes(['choice','text','slider'], this.questionInteractionType)) {
-      metadata['outcomeDeclaration'] = this.getOutcomeDeclaration(metadata);
-    }
+    metadata['outcomeDeclaration'] = this.getOutcomeDeclaration(metadata);
     metadata = _.merge(metadata, _.pickBy(this.childFormData, _.identity));
     if (_.get(this.creationContext, 'objectType') === 'question') {
       metadata.isReviewModificationAllowed = !!_.get(this.questionMetaData, 'isReviewModificationAllowed');
@@ -1156,7 +1154,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     this.questionSetHierarchy.showSolutions = !_.isUndefined(parentConfig?.showSolutions) ?
     parentConfig.showSolutions : false;
     this.questionSetHierarchy.shuffle = !_.isUndefined(parentConfig?.shuffle) ?
-    parentConfig.shuffle : true;
+    parentConfig.shuffle : false;
     this.questionSetHierarchy.showFeedback = !_.isUndefined(parentConfig?.showFeedback) ?
     parentConfig.showFeedback : false;
   }
@@ -1165,17 +1163,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     const questionMetadata: any = _.cloneDeep(this.getQuestionMetadata());
     questionMetadata.identifier = questionId;
     this.questionSetHierarchy.children = [questionMetadata];
+    this.questionSetHierarchy['outcomeDeclaration'] = this.getOutcomeDeclaration(questionMetadata);
     if (this.questionSetHierarchy.shuffle === true) {
-      // tslint:disable-next-line:no-string-literal
-      this.questionSetHierarchy['outcomeDeclaration'] = this.getOutcomeDeclaration(questionMetadata);
       this.questionSetHierarchy.outcomeDeclaration.maxScore.defaultValue = DEFAULT_SCORE;
-    } else {
-      if (questionMetadata.qType === 'SA') {
-        this.questionSetHierarchy = _.omit(this.questionSetHierarchy, 'outcomeDeclaration');
-      } else if (questionMetadata.outcomeDeclaration) {
-        // tslint:disable-next-line:no-string-literal
-        this.questionSetHierarchy['outcomeDeclaration'] = this.getOutcomeDeclaration(questionMetadata)
-      }
     }
     this.editorCursor.setQuestionMap(questionId, questionMetadata);
   }

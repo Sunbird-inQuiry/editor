@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TranslationsComponent } from './translations.component';
 import { mockData } from './translations.component.spec.data';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 describe('TranslationsComponent', () => {
   let component: TranslationsComponent;
@@ -9,7 +10,8 @@ describe('TranslationsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ TranslationsComponent ]
+      declarations: [ TranslationsComponent ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
     .compileComponents();
   }));

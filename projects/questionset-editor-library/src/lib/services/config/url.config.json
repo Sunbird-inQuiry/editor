@@ -1,36 +1,34 @@
 {
   "URLS": {
     "QuestionSet": {
-      "HIERARCHY_READ": "questionset/v2/hierarchy",
+      "ADD": "questionset/v2/add",
       "READ": "questionset/v2/read",
-
-      "ADD": "questionset/v1/add",
-      "CREATE": "questionset/v1/create",
-      "UPDATE": "questionset/v1/update/",
-      "HIERARCHY_UPDATE": "questionset/v1/hierarchy/update",
-      "CONTENT_REVIEW" : "questionset/v1/review/",
-      "CONTENT_REJECT" : "questionset/v1/reject/",
-      "CONTENT_PUBLISH" : "questionset/v1/publish/",
-      "DEFAULT_PARAMS_FIELDS": "instructions,outcomeDeclaration",
-      "SYSYTEM_UPDATE": "questionset/v4/system/update/",
-      "DELETENODE" : "questionset/v1/remove",
-      "QUESTION_LIST" : "question/v1/list"
+      "UPDATE": "questionset/v2/update/",
+      "REVIEW" : "questionset/v2/review/",
+      "REJECT" : "questionset/v2/reject/",
+      "PUBLISH" : "questionset/v2/publish/",
+      "DELETENODE" : "questionset/v2/remove",
+      "HIERARCHY_READ": "questionset/v2/hierarchy",
+      "SYSYTEM_UPDATE": "questionset/v2/system/update/",
+      "HIERARCHY_UPDATE": "questionset/v2/hierarchy/update",
+      "DEFAULT_PARAMS_FIELDS": "instructions,outcomeDeclaration"
     },
     "Question": {
-      "HIERARCHY_READ": "questionset/v1/hierarchy",
-      "CREATE": "question/v1/create",
-      "UPDATE": "question/v1/update/",
-      "CONTENT_REVIEW" : "question/v1/review/",
-      "CONTENT_REJECT": "question/v1/reject/",
-      "CONTENT_PUBLISH": "question/v1/publish/",
-      "SYSYTEM_UPDATE": "question/v4/system/update/"
+      "LIST":"question/v2/list",
+      "READ":"question/v2/read/",
+      "CREATE": "question/v2/create",
+      "UPDATE": "question/v2/update/",
+      "REVIEW" : "question/v2/review/",
+      "REJECT": "question/v2/reject/",
+      "PUBLISH": "question/v2/publish/",
+      "SYSYTEM_UPDATE": "question/v2/system/update/"
     },
     "Collection": {
       "HIERARCHY_READ": "content/v3/hierarchy",
       "HIERARCHY_UPDATE": "content/v3/hierarchy/update",
-      "CONTENT_REVIEW" : "content/v3/review/",
-      "CONTENT_REJECT" : "content/v3/reject/",
-      "CONTENT_PUBLISH" : "content/v3/publish/",
+      "REVIEW" : "content/v3/review/",
+      "REJECT" : "content/v3/reject/",
+      "PUBLISH" : "content/v3/publish/",
       "SYSYTEM_UPDATE": "system/v3/content/update/"
     },
     "COMPOSITE": {
@@ -40,19 +38,14 @@
     "assetProxyUrl": "/assets/public/",
     "getCategoryDefinition": "object/category/definition/v1/read?fields=objectMetadata,forms,name,label",
     "CONTENT": {
-    "HIERARCHY_ADD":"content/v3/hierarchy/add",
-    "READ":"content/v3/read/",
-    "CREATE":"content/v3/create",
-    "UPLOAD":"content/v3/upload/",
-    "UPLOAD_URL":"content/v3/upload/url/",
-    "UPDATE_COLLABORATOR":"content/v1/collaborator/update/"
-    },
-    "QUESTION": {
-      "LIST":"question/v1/list",
-      "READ":"question/v1/read/"
+      "HIERARCHY_ADD":"content/v3/hierarchy/add",
+      "READ":"content/v3/read/",
+      "CREATE":"content/v3/create",
+      "UPLOAD":"content/v3/upload/",
+      "UPLOAD_URL":"content/v3/upload/url/",
+      "UPDATE_COLLABORATOR":"content/v1/collaborator/update/"
     },
     "frameworkRead":"framework/v1/read/",
-    "compositSearch":"composite/v3/search",
     "channelRead":"channel/v1/read/",
     "telemetry":"/data/v3/telemetry",
     "CSV": {
@@ -64,8 +57,8 @@
       "CREATE": "program/v1/process/create",
       "UPDATE": "program/v1/process/update",
       "SEARCH": "program/v1/process/search",
-      "UPLOAD": "question/v1/bulkUpload",
-      "STATUS": "question/v1/bulkUploadStatus",
+      "UPLOAD": "question/v2/bulkUpload",
+      "STATUS": "question/v2/bulkUploadStatus",
       "SAMPLE_QUESTION_FILE" : "bulk-question-upload-sample-format.csv"
     },
     "USER": {

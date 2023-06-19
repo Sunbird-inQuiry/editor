@@ -274,7 +274,7 @@ describe("QuestionComponent", () => {
       return of(collectionHierarchyMock);
     });
     component.questionId = "do_123";
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.mcqQuestionMetaData)
     );
@@ -331,7 +331,7 @@ describe("QuestionComponent", () => {
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     component.questionId = "do_1234";
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.sliderQuestionMetaData)
@@ -361,7 +361,7 @@ describe("QuestionComponent", () => {
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     component.questionId = "do_1235";
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.textQuestionNetaData)
@@ -393,7 +393,7 @@ describe("QuestionComponent", () => {
     });
     component.questionId = "do_126";
     component.questionPrimaryCategory = undefined;
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.dateQuestionMetaDate)
     );
@@ -420,7 +420,7 @@ describe("QuestionComponent", () => {
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.defaultQuestionMetaData)
     );
@@ -491,7 +491,7 @@ describe("QuestionComponent", () => {
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
@@ -518,7 +518,7 @@ describe("QuestionComponent", () => {
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
@@ -548,7 +548,7 @@ describe("QuestionComponent", () => {
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.dateQuestionMetaDate)
     );
@@ -664,7 +664,7 @@ describe("QuestionComponent", () => {
     component.questionMetaData=mockData.mcqQuestionMetaData.result.question;
     component.leafFormConfig = leafFormConfigMock;
     component.questionId = "do_123";
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(component,'fetchFrameWorkDetails').and.callFake(()=>{});
     spyOn(component,'previewFormData').and.callFake(()=>{})
     component.populateFormData();
@@ -680,7 +680,7 @@ describe("QuestionComponent", () => {
     component.initialLeafFormConfig = leafFormConfigMock;
     component.questionFormConfig = leafFormConfigMock;
     component.questionMetaData=mockData.mcqQuestionMetaData.result.question;
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(component,'fetchFrameWorkDetails').and.callFake(()=>{});
     component.populateFormData();
    });
@@ -695,7 +695,7 @@ describe("QuestionComponent", () => {
     component.initialLeafFormConfig = leafFormConfigMock;
     component.questionFormConfig = leafFormConfigMock;
     component.questionId = "do_123";
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(component,'previewFormData').and.callFake(()=>{})
     component.populateFormData();
     expect(component.previewFormData).toHaveBeenCalled(); 
@@ -902,18 +902,18 @@ describe("QuestionComponent", () => {
     }
     spyOn(component, 'setParentConfig').and.callThrough();
     component.setParentConfig({shuffle: false, showSolutions: false, showFeedback: false});
-    expect(component.questionSetHierarchy.shuffle).toBeFalsy();
+    expect(component.questionSetHierarchy.shuffle).toEqual(false);
     expect(component.questionSetHierarchy.showSolutions).toEqual(false);
     expect(component.questionSetHierarchy.showFeedback).toEqual(false);
   });
 
   it('#setParentConfig should set questionset behaviour without parentConfig', () => {
     component.questionSetHierarchy = {
-      shuffle: false, showSolutions: true, showFeedback: true
+      shuffle: true, showSolutions: true, showFeedback: true
     }
     spyOn(component, 'setParentConfig').and.callThrough();
     component.setParentConfig({});
-    expect(component.questionSetHierarchy.shuffle).toBeTruthy();
+    expect(component.questionSetHierarchy.shuffle).toEqual(false);
     expect(component.questionSetHierarchy.showSolutions).toEqual(false);
     expect(component.questionSetHierarchy.showFeedback).toEqual(false);
   });
@@ -1446,7 +1446,7 @@ describe("QuestionComponent", () => {
       return of(collectionHierarchyMock);
     });
     spyOn(editorService, "updateCollection").and.returnValue(of({}));
-    const questionSet = collectionHierarchyMock.result["questionSet"];
+    const questionSet = collectionHierarchyMock.result["questionset"];
     component.questionId = "do_11326368076523929611";
     component.actionType = "sourcingRejectQuestion";
     const data = {
@@ -1479,7 +1479,7 @@ describe("QuestionComponent", () => {
       of(readQuestionMock)
     );
     spyOn(editorService, "updateCollection").and.returnValue(of({}));
-    const questionSet = collectionHierarchyMock.result["questionSet"];
+    const questionSet = collectionHierarchyMock.result["questionset"];
     component.questionId = "do_11326368076523929611";
     component.actionType = "sourcingApproveQuestion";
     const data = { button: "sourcingApproveQuestion" };

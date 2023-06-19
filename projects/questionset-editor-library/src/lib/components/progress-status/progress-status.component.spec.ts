@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ProgressStatusComponent } from './progress-status.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 describe('ProgressStatusComponent', () => {
   let component: ProgressStatusComponent;
@@ -10,7 +11,8 @@ describe('ProgressStatusComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      declarations: [ ProgressStatusComponent ]
+      declarations: [ ProgressStatusComponent ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
     .compileComponents();
   }));

@@ -951,7 +951,7 @@ export const collectionHierarchyMock = {
   },
   responseCode: "OK",
   result: {
-    questionSet: {
+    questionset: {
       acceptedContributions: [
         "do_11326368076523929623",
         "do_11326368076523929635",

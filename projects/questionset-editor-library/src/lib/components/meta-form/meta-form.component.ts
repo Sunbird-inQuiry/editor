@@ -145,9 +145,9 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
           if (_.has(metaDataFields, field.code)) {
             field.default = _.get(metaDataFields, field.code);
           } else if (_.includes(['maxTime'], field.code)) {
-            const value = _.get(metaDataFields, `timeLimits.questionSet.${field.code}`);
+            const value = _.get(metaDataFields, 'timeLimits.questionSet.max') ? _.toString(_.get(metaDataFields, 'timeLimits.questionSet.max')) : '';
             field.default = !_.isEmpty(value) ?
-            moment.utc(moment.duration(value, 'seconds').asMilliseconds()).format(this.helperService.getTimerFormat(field)) : 0;
+            _.toString(moment.utc(moment.duration(value, 'seconds').asMilliseconds()).format(this.helperService.getTimerFormat(field))) : null;
           }
         }
         if (field.code === 'framework') {

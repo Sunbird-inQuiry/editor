@@ -7,6 +7,7 @@ import { EditorService } from '../../services/editor/editor.service';
 import { of, throwError } from 'rxjs';
 import { QuestionService } from '../../services/question/question.service';
 import { mockQuestionData, mockTreeData } from './assign-page-number.component.spec.data';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 const mockEditorService = {
   getToolbarConfig: () => { },
@@ -27,7 +28,8 @@ describe('AssignPageNumberComponent', () => {
         QuestionService,
         { provide: TreeService, useValue: mockTreeService },
         { provide: EditorService, useValue: mockEditorService },
-      ]
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
       .compileComponents();
   });
