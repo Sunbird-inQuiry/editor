@@ -1080,6 +1080,10 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.editorService.contentPolicyUrl;
   }
 
+  get commonFrameworkLicenseUrl() {
+    return this.editorService.commonFrameworkLicenseUrl;
+  }
+
   showCommentAddedAgainstContent() {
     // tslint:disable-next-line:max-line-length
     if (this.collectionTreeNodes.data.status === 'Draft' && this.collectionTreeNodes.data.prevStatus  === 'Review' && _.has(this.collectionTreeNodes.data, 'rejectComment')) {
