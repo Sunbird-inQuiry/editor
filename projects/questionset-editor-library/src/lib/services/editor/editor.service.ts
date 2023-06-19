@@ -102,7 +102,12 @@ export class EditorService {
 
   get contentPolicyUrl() {
     const url = _.get(this.editorConfig, 'config.contentPolicyUrl');
-    return url ? url : this.configService.urlConFig.ContentPolicyUrl;
+    return url ? url : this.configService.urlConFig.URLS.ContentPolicyUrl;
+  }
+
+  get commonFrameworkLicenseUrl() {
+    const url = _.get(this.editorConfig, 'config.commonFrameworkLicenseUrl');
+    return !_.isEmpty(url) ? url : this.configService.urlConFig.URLS.commonFrameworkLicenseUrl;
   }
 
   getToolbarConfig() {

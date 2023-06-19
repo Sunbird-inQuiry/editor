@@ -96,6 +96,18 @@ describe('EditorService', () => {
     expect(editorService.contentPolicyUrl).toEqual('/term-of-use.html');
   });
 
+  it('it should return #commonFrameworkLicenseUrl', () => {
+    editorService.editorConfig.config.commonFrameworkLicenseUrl = 'https://creativecommons.org/licenses';
+    editorService.configService.urlConFig.URLS.ContentPolicyUrl = undefined;
+    expect(editorService.commonFrameworkLicenseUrl).toEqual('https://creativecommons.org/licenses');
+  });
+
+  it('it should return #commonFrameworkLicenseUrl', () => {
+    editorService.editorConfig.config.commonFrameworkLicenseUrl = undefined;
+    editorService.configService.urlConFig.URLS.ContentPolicyUrl = 'https://creativecommons.org/licenses'
+    expect(editorService.commonFrameworkLicenseUrl).toEqual('https://creativecommons.org/licenses');
+  });
+
   it('#getToolbarConfig should return toolbar config', () => {
     const result = editorService.getToolbarConfig();
     expect(result).toBeTruthy();
