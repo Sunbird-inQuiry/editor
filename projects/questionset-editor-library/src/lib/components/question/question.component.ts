@@ -885,9 +885,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         };
       }
       if (el.id === 'addTip') {
-        metaData.instructions = {
-          en: [el.value]
-        };
+        metaData.instructions = el.value;
       }
     });
 
@@ -1318,9 +1316,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       {
         id: 'addTip',
         name: 'Add Tip',
-        value: _.get(this.questionMetaData, 'instructions.en[0]'),
+        value: _.get(this.questionMetaData, 'instructions]'),
         label: 'Tip',
-        enabled: _.get(this.questionMetaData, 'instructions.en[0]') ? true : false,
+        enabled: _.get(this.questionMetaData, 'instructions]') ? true : false,
         type: 'input',
         show: _.get(this.sourcingSettings, 'showAddTips')
       },

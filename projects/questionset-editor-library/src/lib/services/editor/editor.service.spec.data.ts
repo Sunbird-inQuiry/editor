@@ -184,11 +184,7 @@ export const rootNode = {
 
 export const questionsData = [
     {
-        instructions: {
-            en: [
-                null
-            ]
-        },
+        instructions: null,
         copyright: 'NIT123',
         code: '65b5b3ba-fe06-4abe-f969-a2ba4dcb8266',
         subject: [
@@ -263,11 +259,7 @@ export const questionsData = [
         status: 'Draft'
     },
     {
-        instructions: {
-            en: [
-                null
-            ]
-        },
+        instructions: null,
         copyright: 'NIT123',
         code: '18712769-7a5c-f393-ee92-87ae2e90b172',
         subject: [

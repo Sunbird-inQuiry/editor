@@ -64,7 +64,7 @@ export class TreeService {
     const activeNode = !_.isUndefined(nodeToBeUpdated) ? this.getNodeById(nodeToBeUpdated) : this.getActiveNode();
     const nodeId = nodeToBeUpdated  || activeNode.data.id;
     if (newData.instructions) {
-      newData.instructions = { default: newData.instructions };
+      newData.instructions = newData.instructions;
      }
     activeNode.data.metadata = { ...activeNode.data.metadata, ...newData };
     activeNode.title = newData.name;

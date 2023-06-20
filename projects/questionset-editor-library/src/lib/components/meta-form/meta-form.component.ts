@@ -206,7 +206,7 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
           field.options = this.showTimer;
         }
         if (field.code === 'instructions') {
-          field.default = _.get(metaDataFields, 'instructions.default') || '' ;
+          field.default = _.get(metaDataFields, 'instructions') || '' ;
         }
         if (field.code === 'setPeriod') {
           field.default = !_.isEmpty(metaDataFields, 'endDate') ? 'Yes' : 'No' ;

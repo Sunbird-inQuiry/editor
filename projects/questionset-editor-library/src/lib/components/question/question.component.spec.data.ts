@@ -290,9 +290,7 @@ export const mockData = {
         hints: {
           en: [null],
         },
-        instructions: {
-          en: [null],
-        },
+        instructions: null,
         interactionTypes: ["slider"],
         primaryCategory: "Slider",
       },
@@ -350,9 +348,7 @@ export const mockData = {
         hints: {
           en: [null],
         },
-        instructions: {
-          en: [null],
-        },
+        instructions: null,
         interactionTypes: ["date"],
         primaryCategory: "Date",
       },
@@ -418,9 +414,7 @@ export const mockData = {
         hints: {
           en: [null],
         },
-        instructions: {
-          en: [null],
-        },
+        instructions: null,
         interactionTypes: ["text"],
         primaryCategory: "Text",
       },
@@ -440,9 +434,7 @@ export const mockData = {
     responseCode: "OK",
     result: {
       question: {
-        instructions: {
-          en: [null],
-        },
+        instructions:null,
         responseDeclaration: {
           response1: {
             type: "string",
@@ -708,9 +700,7 @@ export const readQuestionMock = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions: null,
       showRemarks: "No",
       responseDeclaration: {
         response1: {
@@ -795,9 +785,7 @@ export const readQuestionMockSlider = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions: null,
       showRemarks: "No",
       mimeType: "application/vnd.sunbird.question",
       media: [],
@@ -847,9 +835,7 @@ export const readQuestionMockDate = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions: null,
       mimeType: "application/vnd.sunbird.question",
       media: [],
       body: "<p>Dep Date 3</p>",
@@ -894,9 +880,7 @@ export const readQuestionMockText = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions:null,
       showRemarks: "No",
       mimeType: "application/vnd.sunbird.question",
       media: [],
