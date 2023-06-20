@@ -59,7 +59,7 @@
                 (toolbarEmitter)="toolbarEventListener($event)"></lib-meta-form>
               </ng-container>
               <ng-container *ngIf="isCurrentNodeFolder === false && isCurrentNodeRoot !== true">
-                  <lib-qumlplayer-page *ngIf="isQumlPlayer" [questionMetaData]="selectedNodeData" [questionSetHierarchy]="collectionTreeNodes?.data"
+                  <lib-qumlplayer-page *ngIf="isQumlPlayer" [leafFormConfig]="leafFormConfig" [questionMetaData]="selectedNodeData" [questionSetHierarchy]="collectionTreeNodes?.data"
                       (toolbarEmitter)="toolbarEventListener($event)">
                     </lib-qumlplayer-page>
                   <div *ngIf="relationFormConfig" class="p-2">
@@ -110,7 +110,7 @@
                         class="font-weight-bold mb-4 d-block">"{{configService.labelConfig?.lbl?.iAgreeSubmit}}</span>
                     </div>
                     <div class="sb-color-gray-300">{{configService.labelConfig?.lbl?.iconfirmContent}}<a
-                        class="sb-color-primary font-weight-bold cursor-pointer" href="https://creativecommons.org/licenses" target="_blank" > {{configService.labelConfig?.lbl?.createCommonFramework}}</a>
+                        class="sb-color-primary font-weight-bold cursor-pointer" href="{{commonFrameworkLicenseUrl}}" target="_blank" > {{configService.labelConfig?.lbl?.createCommonFramework}}</a>
                         {{configService.labelConfig?.lbl?.accordance}}
                      <a class="sb-color-primary font-weight-bold cursor-pointer" href="{{contentPolicyUrl}}" target="_blank" >{{configService.labelConfig?.lbl?.contentPolicy}}</a> {{configService.labelConfig?.lbl?.privacyRights}}"</div>
                   </label>

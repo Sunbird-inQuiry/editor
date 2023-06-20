@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
-import { CommonFormElementsModule } from 'common-form-elements-web-v9';
+import { CommonFormElementsModule } from '@project-sunbird/common-form-elements-full';
 import { SuiModule } from 'ng2-semantic-ui-v9';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { HttpClientModule } from '@angular/common/http';
@@ -19,11 +19,6 @@ import { OptionsComponent } from './components/options/options.component';
 import { AnswerComponent } from './components/answer/answer.component';
 import { CkeditorToolComponent } from './components/ckeditor-tool/ckeditor-tool.component';
 import { QuestionComponent } from './components/question/question.component';
-import {SunbirdPdfPlayerModule} from '@project-sunbird/sunbird-pdf-player-v9';
-import { SunbirdEpubPlayerModule } from '@project-sunbird/sunbird-epub-player-v9';
-import { SunbirdVideoPlayerModule } from '@project-sunbird/sunbird-video-player-v9';
-import { QumlLibraryModule } from '@project-sunbird/sunbird-quml-player';
-import {CarouselModule} from 'ngx-bootstrap/carousel';
 import { TelemetryInteractDirective } from './directives/telemetry-interact/telemetry-interact.directive';
 import { DateFormatPipe } from './directives/date-format/date-format.pipe';
 import { AssetBrowserComponent } from './components/asset-browser/asset-browser.component';
@@ -75,9 +70,8 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     TermAndConditionComponent,
     QualityParamsModalComponent
   ],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule.forChild([]), SuiModule,
-  CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, QumlLibraryModule,  SunbirdPdfPlayerModule, SunbirdVideoPlayerModule,
-  CarouselModule, SunbirdEpubPlayerModule, ResourceLibraryModule, A11yModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule.withConfig({callSetDisabledState: 'whenDisabledForLegacyCode'}), RouterModule.forChild([]), SuiModule,
+  CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule],
   providers: [
   ],
   exports: [EditorComponent],

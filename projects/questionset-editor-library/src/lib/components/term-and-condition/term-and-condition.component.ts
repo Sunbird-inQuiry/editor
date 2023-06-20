@@ -27,6 +27,10 @@ export class TermAndConditionComponent implements OnInit {
         return this.editorService.contentPolicyUrl;
     }
 
+    get commonFrameworkLicenseUrl() {
+        return this.editorService.commonFrameworkLicenseUrl;
+      }
+
     onConsentChange(event, consentType) {
         switch (consentType) {
             case 'ALL':

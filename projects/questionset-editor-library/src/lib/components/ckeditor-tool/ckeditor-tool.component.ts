@@ -69,7 +69,7 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
   public emptyImageSearchMessage: any;
   public emptyVideoSearchMessage: any;
   ngOnInit() {
-    this.assetProxyUrl =  _.get(this.configService.urlConFig, 'URLS.assetProxyUrl');
+    this.assetProxyUrl = _.get(this.editorService.editorConfig, 'config.assetProxyUrl') || _.get(this.configService.urlConFig, 'URLS.assetProxyUrl');
     this.initialFormConfig = _.get(config, 'uploadIconFormConfig');
     this.formConfig = _.get(config, 'uploadIconFormConfig');
     this.emptyImageSearchMessage =  _.get(this.configService.labelConfig, 'messages.error.016');

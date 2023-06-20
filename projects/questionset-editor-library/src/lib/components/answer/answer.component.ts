@@ -7,6 +7,7 @@ import { ConfigService } from '../../services/config/config.service';
 })
 export class AnswerComponent implements OnInit {
   @Input() editorState;
+  @Input() questionPrimaryCategory;
   @Input() showFormError;
   @Input() isReadOnlyMode;
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
@@ -29,7 +30,7 @@ export class AnswerComponent implements OnInit {
       },
       name: 'Subjective Question',
       qType: 'SA',
-      primaryCategory: 'Subjective Question'
+      primaryCategory: this.questionPrimaryCategory || 'Subjective Question'
     };
   }
 }
