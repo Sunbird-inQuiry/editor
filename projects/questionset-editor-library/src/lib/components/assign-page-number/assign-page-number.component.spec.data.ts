@@ -16,7 +16,7 @@ export const mockTreeData = [
                 "English"
             ],
             "mimeType": "application/vnd.sunbird.questionset",
-            "showHints": "No",
+            "showHints": false,
             "matrix": [
                 [
                     "Good",
@@ -41,13 +41,13 @@ export const mockTreeData = [
             "contentDisposition": "inline",
             "lastUpdatedOn": "2022-10-17T10:32:55.087+0000",
             "contentEncoding": "gzip",
-            "showSolutions": "No",
+            "showSolutions":  false,
             "allowAnonymousAccess": "Yes",
             "identifier": "do_1134460323603906561218",
             "lastStatusChangedOn": "2022-01-05T05:42:52.118+0000",
             "requiresSubmit": "No",
             "visibility": "Parent",
-            "showTimer": "No",
+            "showTimer": false,
             "groups": {
                 "Student interview": [
                     "do_113449672558780416163"
@@ -60,7 +60,7 @@ export const mockTreeData = [
             ],
             "version": 1,
             "versionKey": "1641361372118",
-            "showFeedback": "No",
+            "showFeedback": false,
             "license": "CC BY 4.0",
             "depth": 1,
             "minPossibleScore": "32",
@@ -217,7 +217,7 @@ export const mockTreeData = [
                         "English"
                     ],
                     "mimeType": "application/vnd.sunbird.questionset",
-                    "showHints": "No",
+                    "showHints": false,
                     "matrix": "",
                     "createdOn": "2022-01-05T05:42:52.106+0000",
                     "ecm": [],
@@ -226,13 +226,13 @@ export const mockTreeData = [
                     "contentDisposition": "inline",
                     "lastUpdatedOn": "2022-10-17T10:11:48.683+0000",
                     "contentEncoding": "gzip",
-                    "showSolutions": "No",
+                    "showSolutions":  false,
                     "allowAnonymousAccess": "Yes",
                     "identifier": "do_1134460323602841601200",
                     "lastStatusChangedOn": "2022-01-05T05:42:52.106+0000",
                     "requiresSubmit": "No",
                     "visibility": "Parent",
-                    "showTimer": "No",
+                    "showTimer": false,
                     "groups": {
                         "Student interview": [
                             "do_113449672558780416163",
@@ -256,7 +256,7 @@ export const mockTreeData = [
                     ],
                     "version": 1,
                     "versionKey": "1641361372106",
-                    "showFeedback": "No",
+                    "showFeedback": false,
                     "license": "CC BY 4.0",
                     "depth": 2,
                     "minPossibleScore": "204",
@@ -311,12 +311,12 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-10-10T10:01:37.428+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_113449672558780416163",
                             "lastStatusChangedOn": "2022-01-10T09:08:52.273+0000",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 1,
                             "qType": "MCQ",
@@ -325,7 +325,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1665396097434",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "choice"
@@ -378,13 +378,13 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-07-18T12:06:51.740+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_11357638131503104013481",
                             "lastStatusChangedOn": "2022-07-08T09:38:29.745+0000",
                             "creator": "Vaibahv Bhuva",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 2,
                             "languageCode": [
@@ -392,7 +392,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1658146011745",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "text"
@@ -445,13 +445,13 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-07-18T12:07:46.775+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_11357626234228736013446",
                             "lastStatusChangedOn": "2022-07-08T05:36:26.705+0000",
                             "creator": "Vaibahv Bhuva",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 3,
                             "languageCode": [
@@ -459,7 +459,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1658146066784",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "text"
@@ -511,13 +511,13 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-07-18T12:08:30.500+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_11357624960711065613442",
                             "lastStatusChangedOn": "2022-07-08T05:10:32.118+0000",
                             "creator": "Vaibahv Bhuva",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 4,
                             "languageCode": [
@@ -525,7 +525,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1658146110507",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "date"
@@ -576,13 +576,13 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-07-18T09:48:39.257+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_11357623678335385613440",
                             "lastStatusChangedOn": "2022-07-08T04:44:26.718+0000",
                             "creator": "Vaibahv Bhuva",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 5,
                             "languageCode": [
@@ -590,7 +590,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1658137719265",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "date"
@@ -643,12 +643,12 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-10-11T08:07:07.671+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_11358056771369369615004",
                             "lastStatusChangedOn": "2022-07-14T07:35:44.738+0000",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 6,
                             "qType": "MCQ",
@@ -657,7 +657,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1665475627678",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "choice"
@@ -711,13 +711,13 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-10-04T06:46:46.698+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_113583409935081472146",
                             "lastStatusChangedOn": "2022-07-18T07:58:15.591+0000",
                             "creator": "Vaibahv Bhuva",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 7,
                             "qType": "MCQ",
@@ -726,7 +726,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1664866006706",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "choice"
@@ -779,12 +779,12 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-10-11T08:17:31.886+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_1136011660822200321804",
                             "lastStatusChangedOn": "2022-08-12T10:03:14.021+0000",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 8,
                             "languageCode": [
@@ -792,7 +792,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1665476251895",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "date"
@@ -844,12 +844,12 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-10-11T08:18:06.321+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_1136011666813255681808",
                             "lastStatusChangedOn": "2022-08-12T10:04:27.154+0000",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 9,
                             "languageCode": [
@@ -857,7 +857,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1665476286330",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "date"
@@ -910,12 +910,12 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-10-10T10:30:01.920+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_11364293879332864011476",
                             "lastStatusChangedOn": "2022-10-10T10:30:01.920+0000",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 10,
                             "languageCode": [
@@ -923,7 +923,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1665397801921",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "text"
@@ -977,12 +977,12 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-10-11T08:18:16.341+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_11364297206960128011480",
                             "lastStatusChangedOn": "2022-10-10T11:37:43.965+0000",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 11,
                             "languageCode": [
@@ -990,7 +990,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1665476296349",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "text"
@@ -1036,7 +1036,7 @@ export const mockTreeData = [
                         "English"
                     ],
                     "mimeType": "application/vnd.sunbird.questionset",
-                    "showHints": "No",
+                    "showHints": false,
                     "matrix": [
                         [
                             null,
@@ -1060,13 +1060,13 @@ export const mockTreeData = [
                     "contentDisposition": "inline",
                     "lastUpdatedOn": "2022-10-13T08:26:03.971+0000",
                     "contentEncoding": "gzip",
-                    "showSolutions": "No",
+                    "showSolutions":  false,
                     "allowAnonymousAccess": "Yes",
                     "identifier": "do_1134460323604971521236",
                     "lastStatusChangedOn": "2022-01-05T05:42:52.131+0000",
                     "requiresSubmit": "No",
                     "visibility": "Parent",
-                    "showTimer": "No",
+                    "showTimer": false,
                     "groups": {
                         "Teacher interview": [
                             "do_11357919243396710414900"
@@ -1079,7 +1079,7 @@ export const mockTreeData = [
                     ],
                     "version": 1,
                     "versionKey": "1641361372131",
-                    "showFeedback": "No",
+                    "showFeedback": false,
                     "license": "CC BY 4.0",
                     "depth": 2,
                     "minPossibleScore": "15",
@@ -1124,12 +1124,12 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-10-11T08:23:51.049+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_11357919243396710414900",
                             "lastStatusChangedOn": "2022-07-12T08:57:43.912+0000",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 1,
                             "languageCode": [
@@ -1137,7 +1137,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1665476631058",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "text"
@@ -1200,12 +1200,12 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-07-18T12:32:50.978+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_11357919785679257614902",
                             "lastStatusChangedOn": "2022-07-12T09:08:45.878+0000",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 2,
                             "qType": "MCQ",
@@ -1214,7 +1214,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1658147570984",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "choice"
@@ -1289,7 +1289,7 @@ export const mockTreeData = [
                         "English"
                     ],
                     "mimeType": "application/vnd.sunbird.questionset",
-                    "showHints": "No",
+                    "showHints": false,
                     "matrix": [
                         [
                             null,
@@ -1313,13 +1313,13 @@ export const mockTreeData = [
                     "contentDisposition": "inline",
                     "lastUpdatedOn": "2022-10-12T12:09:54.073+0000",
                     "contentEncoding": "gzip",
-                    "showSolutions": "No",
+                    "showSolutions":  false,
                     "allowAnonymousAccess": "Yes",
                     "identifier": "do_1134460323603578881212",
                     "lastStatusChangedOn": "2022-01-05T05:42:52.114+0000",
                     "requiresSubmit": "No",
                     "visibility": "Parent",
-                    "showTimer": "No",
+                    "showTimer": false,
                     "groups": {
                         "Parent interview": [
                             "do_113583348668153856123"
@@ -1332,7 +1332,7 @@ export const mockTreeData = [
                     ],
                     "version": 1,
                     "versionKey": "1641361372114",
-                    "showFeedback": "No",
+                    "showFeedback": false,
                     "license": "CC BY 4.0",
                     "depth": 2,
                     "compatibilityLevel": 5,
@@ -1376,12 +1376,12 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-10-11T08:26:37.482+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_113583348668153856123",
                             "lastStatusChangedOn": "2022-07-18T05:53:36.718+0000",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 1,
                             "qType": "MCQ",
@@ -1390,7 +1390,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1665476797489",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "choice"
@@ -1444,13 +1444,13 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-08-10T13:15:15.347+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_1135998448873226241592",
                             "lastStatusChangedOn": "2022-08-10T13:15:15.347+0000",
                             "creator": "Vaibahv Bhuva",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 2,
                             "languageCode": [
@@ -1458,7 +1458,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1660137315379",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "text"
@@ -1511,12 +1511,12 @@ export const mockTreeData = [
                             "contentDisposition": "inline",
                             "lastUpdatedOn": "2022-08-09T09:42:18.971+0000",
                             "contentEncoding": "gzip",
-                            "showSolutions": "No",
+                            "showSolutions":  false,
                             "allowAnonymousAccess": "Yes",
                             "identifier": "do_1135990324344504321511",
                             "lastStatusChangedOn": "2022-08-09T09:42:18.971+0000",
                             "visibility": "Parent",
-                            "showTimer": "No",
+                            "showTimer": false,
                             "author": "check1@yopmail.com",
                             "index": 3,
                             "languageCode": [
@@ -1524,7 +1524,7 @@ export const mockTreeData = [
                             ],
                             "version": 1,
                             "versionKey": "1660038139036",
-                            "showFeedback": "No",
+                            "showFeedback": false,
                             "license": "CC BY 4.0",
                             "interactionTypes": [
                                 "date"

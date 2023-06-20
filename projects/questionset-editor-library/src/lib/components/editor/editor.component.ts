@@ -352,7 +352,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.collectionTreeNodes = null;
     this.isTreeInitialized = true;
     requests.push(this.editorService.fetchCollectionHierarchy(this.collectionId));
-    if (this.objectType === 'questionSet') {
+    if (this.objectType === 'questionset') {
       requests.push(this.editorService.readQuestionSet(this.collectionId));
     }
     return forkJoin(requests).pipe(tap(responseList => {
@@ -367,7 +367,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.toolbarConfig.hasChildren = true;
       }
 
-      if (this.objectType === 'questionSet') {
+      if (this.objectType === 'questionset') {
         const questionSetResponse = _.last(responseList);
         const data = _.get(questionSetResponse, _.toLower(`result.${this.objectType}`));
         this.collectionTreeNodes.data.instructions = data.instructions ? data.instructions : '';
@@ -654,7 +654,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       const nodesModified = _.get(this.editorService.getCollectionHierarchy(), 'nodesModified');
       if (this.objectType.toLowerCase() === 'questionset') {
         const maxScore = await this.editorService.getMaxScore();
-        this.treeService.updateMetaDataProperty('maxScore', maxScore);
+        this.treeService.updateMetaDataProperty('outcomeDeclaration', { maxScore: { cardinality: 'single', type: 'integer', defaultValue: maxScore } });
       }
       this.editorService.updateHierarchy()
         .pipe(map(data => _.get(data, 'result'))).subscribe(response => {
@@ -826,11 +826,8 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!treeNodeData.timeLimits) {
       treeNodeData.timeLimits = {};
     }
-    if (treeNodeData.maxTime) {
-      treeNodeData.timeLimits.maxTime = this.helperService.hmsToSeconds(treeNodeData.maxTime);
-    }
-    if (treeNodeData.warningTime) {
-      treeNodeData.timeLimits.warningTime = this.helperService.hmsToSeconds(treeNodeData.warningTime);
+    if (treeNodeData?.questionSet?.maxTime) {
+      treeNodeData.timeLimits.questionSet.max = _.parseInt(this.helperService.hmsToSeconds(treeNodeData.maxTime));
     }
     this.collectionTreeNodes.data = _.merge(this.collectionTreeNodes.data, _.omit(treeNodeData, ['childNodes']));
   }

@@ -47,7 +47,7 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit {
         this.qumlPlayerConfig.context.threshold = 1;
         this.qumlPlayerConfig.metadata.maxQuestions = 1;
         this.qumlPlayerConfig.metadata.showStartPage = 'No';
-        this.qumlPlayerConfig.metadata.showTimer = 'No';
+        this.qumlPlayerConfig.metadata.showTimer = false;
         this.qumlPlayerConfig.metadata.requiresSubmit = 'No';
         this.qumlPlayerConfig.config.showLegend = false;
       }
@@ -56,7 +56,7 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    (window as any).questionListUrl = `/api/${_.get(this.configService, 'urlConFig.URLS.QuestionSet.QUESTION_LIST')}`;
+    (window as any).questionListUrl = `/api/${_.get(this.configService, 'urlConFig.URLS.Question.LIST')}`;
     const qumlElement = document.createElement('sunbird-quml-player');
     qumlElement.setAttribute('player-config', JSON.stringify(this.qumlPlayerConfig));
 

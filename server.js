@@ -5,11 +5,10 @@ var express = require('express'),
     urlHelper = require('url');
 const latexService = require('./latexService.js')
 
-// ENV Variables
-const BASE_URL = 'dock.sunbirded.org';
+const BASE_URL = "dev.inquiry.sunbird.org";
 const API_AUTH_TOKEN = "";
-const PORTAL_COOKIES= ""
 const USER_TOKEN = "";
+const PORTAL_COOKIES= ""
 
 var app = express();
 app.set('port', 3000);
@@ -20,7 +19,7 @@ app.use(express.static(__dirname + '/web-component-examples/vanilla-js'));
 app.all(['/api/framework/v1/read/*',
      '/learner/framework/v1/read/*', 
      '/api/channel/v1/read/*',
-     '/api/question/v1/list'], proxy(BASE_URL, {
+     '/api/question/v2/list'], proxy(BASE_URL, {
     https: true,
     proxyReqPathResolver: function(req) {
         console.log('proxyReqPathResolver ',  urlHelper.parse(req.url).path);
@@ -36,8 +35,8 @@ app.all(['/api/framework/v1/read/*',
         return proxyReqOpts;
     }
 }));
-app.use(['/action/questionset/v1/*',
-    '/action/question/v1/*',
+app.use(['/action/questionset/v2/*',
+    '/action/question/v2/*',
     '/action/collection/v1/*',
     '/action/object/category/definition/v1/*',
     '/action/collection/v1/*'
@@ -83,8 +82,8 @@ app.use(['/action/composite/v3/search'
 }));
 
 app.use(['/action/program/v1/*',
-    '/action/question/v1/bulkUpload',
-    '/action/question/v1/bulkUploadStatus'
+    '/action/question/v2/bulkUpload',
+    '/action/question/v2/bulkUploadStatus'
     ], proxy(BASE_URL, {
     https: true,
     limit: '30mb',
