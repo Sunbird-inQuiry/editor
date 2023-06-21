@@ -35,14 +35,14 @@ export class OptionsComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit() {
-    if(!_.isEmpty(this.editorState.answer)) {
+    if(!_.isUndefined(this.editorState.answer)) {
       this.addSelectedOptions();
     }
     if (!_.isUndefined(this.editorState.templateId)) {
       this.templateType = this.editorState.templateId;
     }
-    this.editorDataHandler();
     this.mapping = _.get(this.editorState, 'responseDeclaration.response1.mapping') || [];
+    this.editorDataHandler();
     if(!_.isUndefined(this.editorService.editorConfig.config.renderTaxonomy)){
       this.parentMeta = this.treeService.getFirstChild().data.metadata;
       this.showSubMenu=true;
@@ -57,8 +57,8 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   addSelectedOptions() {
-    if (_.isString(this.editorState.answer)) {
-      this.selectedOptions.push(_.parseInt(this.editorState.answer));
+    if (_.isNumber(this.editorState.answer)) {
+      this.selectedOptions.push(this.editorState.answer);
     } else if (_.isArray(this.editorState.answer)) {
       this.selectedOptions = this.editorState.answer;
     }
@@ -84,10 +84,10 @@ export class OptionsComponent implements OnInit, OnChanges {
     const correctAnswer = editorState.answer;
     let resindex;
     let options;
-    if (_.isString(correctAnswer)) {
+    if (_.isNumber(correctAnswer)) {
       options = _.map(editorState.options, (opt, key) => {
         resindex = Number(key);
-        if (_.parseInt(correctAnswer) === resindex) {
+        if (correctAnswer === resindex) {
           return { answer: true, value: { body: opt.body, value: resindex } };
         } else {
           return { answer: false, value: { body: opt.body, value: resindex } };
@@ -107,6 +107,7 @@ export class OptionsComponent implements OnInit, OnChanges {
       templateId: this.templateType,
       name: this.questionPrimaryCategory || 'Multiple Choice Question',
       responseDeclaration: this.getResponseDeclaration(editorState),
+      outcomeDeclaration: this.getOutcomeDeclaration(),
       interactionTypes: ['choice'],
       interactions: this.getInteractions(editorState.options),
       editorState: {
@@ -119,23 +120,36 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   getResponseDeclaration(editorState) {
-    let questionCardinality = 'single';
-    if (this.mapping.length > 1) {
-      questionCardinality = 'multiple';
-    }
     const responseDeclaration = {
       response1: {
-        maxScore: this.maxScore,
-        cardinality: questionCardinality,
+        cardinality: this.getCardinality(),
         type: 'integer',
         correctResponse: {
           value: editorState.answer,
-          outcomes: { SCORE: this.maxScore },
         },
         mapping: this.mapping,
       },
     };
     return responseDeclaration;
+  }
+
+  getOutcomeDeclaration() {
+    const outcomeDeclaration = {
+      maxScore: {
+        cardinality: this.getCardinality(),
+        type: 'integer',
+        defaultValue: this.maxScore
+      }
+    };
+    return outcomeDeclaration;
+  }
+
+  getCardinality() {
+    let questionCardinality = 'single';
+    if (this.mapping.length > 1) {
+      questionCardinality = 'multiple';
+    }
+    return questionCardinality;
   }
 
   setMapping() {
@@ -144,10 +158,8 @@ export class OptionsComponent implements OnInit, OnChanges {
       const scoreForEachOption = _.round((this.maxScore/this.selectedOptions.length), 2);
       _.forEach(this.selectedOptions, (value) => {
         const optionMapping = {
-          response: value,
-          outcomes: {
-            score: scoreForEachOption,
-          },
+          value: value,
+          score: scoreForEachOption,
         }
         this.mapping.push(optionMapping)
       })
@@ -210,7 +222,7 @@ export class OptionsComponent implements OnInit, OnChanges {
         });
       }
       if (this.selectedOptions.length === 1) {
-        this.editorState.answer = _.toString(this.selectedOptions[0]);
+        this.editorState.answer = this.selectedOptions[0];
       } else if(this.selectedOptions.length > 1) {
         this.editorState.answer = this.selectedOptions;
       } else {

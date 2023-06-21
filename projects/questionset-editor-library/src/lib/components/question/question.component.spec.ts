@@ -25,7 +25,9 @@ import {
   BranchingLogic,
   mockEditorCursor,
   interactionChoiceEditorState,
-  RubricData
+  RubricData,
+  videoSolutionObject,
+  mediaVideoArray
 } from "./question.component.spec.data";
 import { of, throwError } from "rxjs";
 import * as urlConfig from "../../services/config/url.config.json";
@@ -272,7 +274,7 @@ describe("QuestionComponent", () => {
       return of(collectionHierarchyMock);
     });
     component.questionId = "do_123";
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.mcqQuestionMetaData)
     );
@@ -329,7 +331,7 @@ describe("QuestionComponent", () => {
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     component.questionId = "do_1234";
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.sliderQuestionMetaData)
@@ -359,7 +361,7 @@ describe("QuestionComponent", () => {
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     component.questionId = "do_1235";
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.textQuestionNetaData)
@@ -391,7 +393,7 @@ describe("QuestionComponent", () => {
     });
     component.questionId = "do_126";
     component.questionPrimaryCategory = undefined;
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.dateQuestionMetaDate)
     );
@@ -418,7 +420,7 @@ describe("QuestionComponent", () => {
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.defaultQuestionMetaData)
     );
@@ -489,7 +491,7 @@ describe("QuestionComponent", () => {
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
@@ -516,7 +518,7 @@ describe("QuestionComponent", () => {
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
@@ -546,7 +548,7 @@ describe("QuestionComponent", () => {
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(questionService, "readQuestion").and.returnValue(
       of(mockData.dateQuestionMetaDate)
     );
@@ -662,7 +664,7 @@ describe("QuestionComponent", () => {
     component.questionMetaData=mockData.mcqQuestionMetaData.result.question;
     component.leafFormConfig = leafFormConfigMock;
     component.questionId = "do_123";
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(component,'fetchFrameWorkDetails').and.callFake(()=>{});
     spyOn(component,'previewFormData').and.callFake(()=>{})
     component.populateFormData();
@@ -678,7 +680,7 @@ describe("QuestionComponent", () => {
     component.initialLeafFormConfig = leafFormConfigMock;
     component.questionFormConfig = leafFormConfigMock;
     component.questionMetaData=mockData.mcqQuestionMetaData.result.question;
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(component,'fetchFrameWorkDetails').and.callFake(()=>{});
     component.populateFormData();
    });
@@ -693,7 +695,7 @@ describe("QuestionComponent", () => {
     component.initialLeafFormConfig = leafFormConfigMock;
     component.questionFormConfig = leafFormConfigMock;
     component.questionId = "do_123";
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionSet;
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
     spyOn(component,'previewFormData').and.callFake(()=>{})
     component.populateFormData();
     expect(component.previewFormData).toHaveBeenCalled(); 
@@ -739,6 +741,39 @@ describe("QuestionComponent", () => {
     spyOn(component, "onStatusChanges");
     component.onStatusChanges("");
     expect(component.onStatusChanges).toHaveBeenCalled();
+  });
+
+  it('#getQuestionSolution() should return video solution', () => {
+    component.mediaArr = mediaVideoArray;
+    spyOn(component, 'getQuestionSolution').and.callThrough();
+    spyOn(component, 'getMediaById').and.callThrough();
+    spyOn(component, 'getVideoSolutionHtml').and.callThrough();
+    const solution = component.getQuestionSolution(videoSolutionObject);
+    expect(solution).toBeDefined();
+  })
+
+  it('#getQuestionSolution() should return html solution', () => {
+    const solutionObject = {
+      "id": "4772d9da-569f-46bb-a8b1-9faf742d0640",
+      "type": "html",
+      "value": "<p>This is sample Html solution</p>"
+    }
+    spyOn(component, 'getQuestionSolution').and.callThrough();
+    const solution = component.getQuestionSolution(solutionObject);
+    expect(solution).toBeDefined();
+  })
+
+  it('#getMediaById() should return media object', () => {
+    component.mediaArr = mediaVideoArray;
+    spyOn(component, 'getMediaById').and.callThrough();
+    const mediaobj = component.getMediaById(mediaVideoArray[0].id);
+    expect(mediaobj).toBeDefined();
+  });
+
+  it('#getVideoSolutionHtml() should return videoSolutionHtml', () => {
+    spyOn(component, 'getVideoSolutionHtml').and.callThrough();
+    const videoSolutionHtml = component.getVideoSolutionHtml(mediaVideoArray[0].thubmnail, mediaVideoArray[0].src, mediaVideoArray[0].id);
+    expect(videoSolutionHtml).toBeDefined();
   });
 
   it("call #getMcqQuestionHtmlBody() to verify questionBody", () => {
@@ -829,7 +864,7 @@ describe("QuestionComponent", () => {
       showPreview: true
     }
     spyOn(treeService , 'getActiveNode').and.returnValue({
-      parent:{ data:{ metadata:{shuffle: true, showSolutions: 'Yes', showFeedback: 'Yes'}}}
+      parent:{ data:{ metadata:{shuffle: true, showSolutions: true, showFeedback: true}}}
     });
     spyOn(component, 'setParentConfig').and.callFake(() => {});
     spyOn(component, 'previewContent').and.callThrough();
@@ -852,49 +887,107 @@ describe("QuestionComponent", () => {
 
   it('#setParentConfig should set questionset behaviour with truthy parentConfig', () => {
     component.questionSetHierarchy = {
-      shuffle: false, showSolutions: 'No', showFeedback: 'No'
+      shuffle: false, showSolutions: false, showFeedback: false
     }
     spyOn(component, 'setParentConfig').and.callThrough();
-    component.setParentConfig({shuffle: true, showSolutions: 'Yes', showFeedback: 'Yes'});
+    component.setParentConfig({shuffle: true, showSolutions: true, showFeedback: true});
     expect(component.questionSetHierarchy.shuffle).toBeTruthy();
-    expect(component.questionSetHierarchy.showSolutions).toEqual('Yes');
-    expect(component.questionSetHierarchy.showFeedback).toEqual('Yes');
+    expect(component.questionSetHierarchy.showSolutions).toEqual(true);
+    expect(component.questionSetHierarchy.showFeedback).toEqual(true);
   });
 
   it('#setParentConfig should set questionset behaviour with falsy parentConfig', () => {
     component.questionSetHierarchy = {
-      shuffle: true, showSolutions: 'Yes', showFeedback: 'Yes'
+      shuffle: true, showSolutions: true, showFeedback: true
     }
     spyOn(component, 'setParentConfig').and.callThrough();
-    component.setParentConfig({shuffle: false, showSolutions: 'No', showFeedback: 'No'});
-    expect(component.questionSetHierarchy.shuffle).toBeFalsy();
-    expect(component.questionSetHierarchy.showSolutions).toEqual('No');
-    expect(component.questionSetHierarchy.showFeedback).toEqual('No');
+    component.setParentConfig({shuffle: false, showSolutions: false, showFeedback: false});
+    expect(component.questionSetHierarchy.shuffle).toEqual(false);
+    expect(component.questionSetHierarchy.showSolutions).toEqual(false);
+    expect(component.questionSetHierarchy.showFeedback).toEqual(false);
   });
 
   it('#setParentConfig should set questionset behaviour without parentConfig', () => {
     component.questionSetHierarchy = {
-      shuffle: false, showSolutions: 'Yes', showFeedback: 'Yes'
+      shuffle: true, showSolutions: true, showFeedback: true
     }
     spyOn(component, 'setParentConfig').and.callThrough();
     component.setParentConfig({});
-    expect(component.questionSetHierarchy.shuffle).toBeTruthy();
-    expect(component.questionSetHierarchy.showSolutions).toEqual('No');
-    expect(component.questionSetHierarchy.showFeedback).toEqual('No');
+    expect(component.questionSetHierarchy.shuffle).toEqual(false);
+    expect(component.questionSetHierarchy.showSolutions).toEqual(false);
+    expect(component.questionSetHierarchy.showFeedback).toEqual(false);
   });
 
   it("Unit test for #setQumlPlayerData", () => {
-    // spyOn(component, 'editorCursor.setQuestionMap').and.callFake(()=> {});
     spyOn(component, 'getQuestionMetadata').and.returnValue(mockData.mcqQuestionMetaData.result.question);
+    spyOn(component, 'getOutcomeDeclaration').and.callThrough();
     component.questionSetHierarchy = {
       children: [],
-      maxScore: '1'
+      shuffle: true
     };
     spyOn(component, 'setQumlPlayerData').and.callThrough();
     component.setQumlPlayerData('do_12345');
     expect(component.getQuestionMetadata).toHaveBeenCalled();
-    expect(component.questionSetHierarchy.maxScore).toBeDefined();
+    expect(component.getOutcomeDeclaration).toHaveBeenCalled();
+    expect(component.questionSetHierarchy.outcomeDeclaration.maxScore.defaultValue).toEqual(1);
   });
+
+  it("Unit test for #setQumlPlayerData for shuffle false", () => {
+    component.maxScore = 2;
+    spyOn(component, 'getQuestionMetadata').and.returnValue(mockData.mcqQuestionMetaData.result.question);
+    spyOn(component, 'getOutcomeDeclaration').and.callThrough();
+    component.questionSetHierarchy = {
+      children: [],
+      shuffle: false
+    };
+    spyOn(component, 'setQumlPlayerData').and.callThrough();
+    component.setQumlPlayerData('do_12345');
+    expect(component.getQuestionMetadata).toHaveBeenCalled();
+    expect(component.getOutcomeDeclaration).toHaveBeenCalled();
+    expect(component.questionSetHierarchy.outcomeDeclaration.maxScore.defaultValue).toEqual(2);
+  });
+
+  it("Unit test for #setQumlPlayerData for Subjective Question", () => {
+    let questionMetadata = mockData.mcqQuestionMetaData.result.question;
+    questionMetadata.qType = 'SA';
+    spyOn(component, 'getQuestionMetadata').and.returnValue(questionMetadata);
+    component.questionSetHierarchy = {
+      children: [],
+      outcomeDeclaration: {},
+      shuffle: true
+    };
+    spyOn(component, 'setQumlPlayerData').and.callThrough();
+    component.setQumlPlayerData('do_12345');
+    expect(component.getQuestionMetadata).toHaveBeenCalled();
+    expect(component.questionSetHierarchy).not.toContain('outcomeDeclaration');
+  });
+
+  it('#getOutcomeDeclaration should return outcomeDeclaration with cardinality multiple', () => {
+    component.maxScore = 1;
+    spyOn(component, 'getOutcomeDeclaration').and.callThrough();
+    const outcomeDeclaration = component.getOutcomeDeclaration({
+      responseDeclaration: {
+        response1: {
+          mapping: [{"value": 0, "score": 1}, { "value": 2, "score": 1}]
+        }
+      }
+    });
+    expect(outcomeDeclaration.maxScore.cardinality).toEqual('multiple');
+  });
+
+  it('#getOutcomeDeclaration should return outcomeDeclaration with cardinality single', () => {
+    component.maxScore = 1;
+    spyOn(component, 'getOutcomeDeclaration').and.callThrough();
+    const outcomeDeclaration = component.getOutcomeDeclaration({
+      responseDeclaration: {
+        response1: {
+          mapping: [{"value": 0, "score": 1}]
+        }
+      }
+    });
+    expect(outcomeDeclaration.maxScore.cardinality).toEqual('single');
+  });
+
   it("Unit test for #isEditable without queston id", () => {
     component.creationContext = creationContextMock;
     component.questionId=undefined;
@@ -905,8 +998,11 @@ describe("QuestionComponent", () => {
     expect(component.isEditable("bloomsLevel")).toBeFalsy();
   });
   it("Unit test for #prepareQuestionBody", () => {
-    component.questionId = undefined;
-    spyOn(component, 'getQuestionMetadata').and.returnValue({});
+    component.questionId = 'do_12345';
+    const editorService = TestBed.inject(EditorService);
+    spyOn(component, 'getQuestionMetadata').and.returnValue({answer: [1,2]});
+    spyOn(component, 'setQuestionTypeValues').and.callFake(() => {});
+    spyOn(editorService, 'getHierarchyObj').and.callFake(() => {})
     spyOn(component, "prepareQuestionBody").and.callThrough();
     const response = component.prepareQuestionBody();
     expect(component.prepareQuestionBody).toHaveBeenCalled();
@@ -1035,7 +1131,7 @@ describe("QuestionComponent", () => {
     component.getQuestionMetadata();
     component.setQuestionTypeValues(metaData);
     component.prepareQuestionBody();
-    component.updateQuestion();
+    // component.updateQuestion();
     component.saveQuestion();
   });
 
@@ -1052,7 +1148,7 @@ describe("QuestionComponent", () => {
   it('#getQuestionMetadata() should return question metata when interactionType is choice', () => {
     component.mediaArr = [];
     component.editorState = interactionChoiceEditorState;
-    component.selectedSolutionType = undefined;
+    component.selectedSolutionType = 'video';
     component.creationContext = undefined;
     component.questionInteractionType = 'choice';
     component.childFormData = {
@@ -1067,11 +1163,29 @@ describe("QuestionComponent", () => {
         createdBy: '5a587cc1-e018-4859-a0a8-e842650b9d64'
       }
     );
+    spyOn(component, 'getQuestionSolution').and.returnValue({});
     spyOn(component, 'getQuestionMetadata').and.callThrough();
     const metadata = component.getQuestionMetadata();
-    expect(metadata.responseDeclaration.response1.maxScore).toEqual(1);
-    expect(metadata.responseDeclaration.response1.correctResponse.outcomes.SCORE).toEqual(1);
+    expect(metadata['outcomeDeclaration'].maxScore.defaultValue).toEqual(1);
   });
+
+  it('#getAnswerHtml() should return answer html', () => {
+    spyOn(component, 'getAnswerHtml').and.callThrough();
+    const answerHtml = component.getAnswerHtml('<p>Sample Answer</p>');
+    expect(answerHtml).toBe('<div class=\'anwser-body\'><p>Sample Answer</p></div>');
+  });
+
+  it('#getAnswerWrapperHtml() should return answer html', () => {
+    spyOn(component, 'getAnswerWrapperHtml').and.callThrough();
+    const answerWrappedHtml = component.getAnswerWrapperHtml('<div class=\'anwser-body\'><p>Sample Answer</p></div>');
+    expect(answerWrappedHtml).toBe('<div class=\'anwser-container\'><div class=\'anwser-body\'><p>Sample Answer</p></div></div>');
+  });
+
+  it('#getInteractionValues() should return correct answer object', () => {
+    spyOn(component, 'getInteractionValues').and.callThrough();
+    const correctAnswersData = component.getInteractionValues([0], interactionChoiceEditorState.interactions);
+    expect(correctAnswersData[0].label).toBe(interactionChoiceEditorState.interactions.response1.options[0].label);
+  })
 
   it("#saveQuestion() should call saveQuestion for updateQuestion objectType not a question", () => {
     component.editorState = mockData.editorState;
@@ -1273,8 +1387,8 @@ describe("QuestionComponent", () => {
       return { data: { metadata: { identifier: "0123",allowScoring:'Yes' } } };
     });
     mockData.mcqQuestionMetaData.result.question.responseDeclaration.response1.mapping=[
-      {response:0,score:10},
-      {response:1,score:10}
+      {value:0,score:10},
+      {value:1,score:10}
     ]
     component.editorState = mockData.mcqQuestionMetaData.result.question;
     editorService = TestBed.inject(EditorService);
@@ -1332,7 +1446,7 @@ describe("QuestionComponent", () => {
       return of(collectionHierarchyMock);
     });
     spyOn(editorService, "updateCollection").and.returnValue(of({}));
-    const questionSet = collectionHierarchyMock.result["questionSet"];
+    const questionSet = collectionHierarchyMock.result["questionset"];
     component.questionId = "do_11326368076523929611";
     component.actionType = "sourcingRejectQuestion";
     const data = {
@@ -1365,7 +1479,7 @@ describe("QuestionComponent", () => {
       of(readQuestionMock)
     );
     spyOn(editorService, "updateCollection").and.returnValue(of({}));
-    const questionSet = collectionHierarchyMock.result["questionSet"];
+    const questionSet = collectionHierarchyMock.result["questionset"];
     component.questionId = "do_11326368076523929611";
     component.actionType = "sourcingApproveQuestion";
     const data = { button: "sourcingApproveQuestion" };
@@ -1662,12 +1776,18 @@ describe("QuestionComponent", () => {
     expect(component.sliderData).toHaveBeenCalledWith(event);
   });
 
-  it("#getResponseDeclaration() should call for question save", () => {
-    component.maxScore = 1;
+  it("#getResponseDeclaration() should set responseDecleration for slider", () => {
     spyOn(component, "getResponseDeclaration").and.callThrough();
     const responseDecleration = component.getResponseDeclaration("slider");
     expect(component.getResponseDeclaration).toHaveBeenCalled();
-    expect(responseDecleration.response1['maxScore']).toEqual(1);
+    expect(responseDecleration.response1.type).toEqual('integer');
+  });
+
+  it("#getResponseDeclaration() should set responseDecleration for text", () => {
+    spyOn(component, "getResponseDeclaration").and.callThrough();
+    const responseDecleration = component.getResponseDeclaration("text");
+    expect(component.getResponseDeclaration).toHaveBeenCalled();
+    expect(responseDecleration.response1.type).toEqual('string');
   });
 
   it("#saveUpdateQuestions call on click save button api fail case", () => {

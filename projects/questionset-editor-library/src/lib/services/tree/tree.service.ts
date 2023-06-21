@@ -63,9 +63,6 @@ export class TreeService {
   updateTreeNodeMetadata(newData: any, nodeToBeUpdated?: any, primaryCategory?: any, objectType?: any) {
     const activeNode = !_.isUndefined(nodeToBeUpdated) ? this.getNodeById(nodeToBeUpdated) : this.getActiveNode();
     const nodeId = nodeToBeUpdated  || activeNode.data.id;
-    if (newData.instructions) {
-      newData.instructions = { default: newData.instructions };
-     }
     activeNode.data.metadata = { ...activeNode.data.metadata, ...newData };
     activeNode.title = newData.name;
     newData = _.omitBy(newData, (v, key ) => _.isUndefined(v) || _.isNull(v) || (v === '' && _.includes(this.omitFalseyProps, key)));
@@ -78,7 +75,7 @@ export class TreeService {
     } else {
       newData.attributions = [];
     }
-    const { maxTime, warningTime, copyrightYear } = newData;
+    const { maxTime, copyrightYear } = newData;
 
     if (copyrightYear) {
       newData.copyrightYear = _.toNumber(copyrightYear);
@@ -86,18 +83,14 @@ export class TreeService {
     if (objectType) {
       newData.objectType = objectType;
     }
-    const timeLimits: any = {};
+    const timeLimits: any = {questionSet: {max: 0, min: 0}};
     if (maxTime) {
-      timeLimits.maxTime = this.helperService.hmsToSeconds(maxTime);
-    }
-    if (warningTime) {
-      timeLimits.warningTime = this.helperService.hmsToSeconds(warningTime);
+      timeLimits.questionSet.max = _.parseInt(this.helperService.hmsToSeconds(maxTime));
     }
     if (!_.isEmpty(timeLimits)) {
       newData.timeLimits = timeLimits;
     }
     delete newData.maxTime;
-    delete newData.warningTime;
     if (primaryCategory) {
       newData.primaryCategory = primaryCategory;
     }

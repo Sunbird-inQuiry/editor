@@ -353,20 +353,20 @@ export const mockData = {
                     'English'
                 ],
                 mimeType: 'application/vnd.sunbird.questionset',
-                showHints: 'No',
+                showHints: false,
                 objectType: 'QuestionSet',
                 gradeLevel: [
                     'Class 7'
                 ],
                 primaryCategory: 'Practice Question Set',
                 contentEncoding: 'gzip',
-                showSolutions: 'No',
+                showSolutions: false,
                 identifier: 'do_113263678834016256111',
                 audience: [
                     'Student'
                 ],
                 visibility: 'Default',
-                showTimer: 'Yes',
+                showTimer: true,
                 author: 'Test',
                 maxQuestions: 6,
                 consumerId: '273f3b18-5dda-4a27-984a-060c7cd398d3',
@@ -409,16 +409,18 @@ export const mockData = {
                 requiresSubmit: 'Yes',
                 setType: 'materialised',
                 versionKey: '1619689987449',
-                showFeedback: 'No',
+                showFeedback: false,
                 framework: 'ekstep_ncert_k-12',
                 depth: 0,
                 createdBy: '5a587cc1-e018-4859-a0a8-e842650b9d64',
                 compatibilityLevel: 5,
                 navigationMode: 'non-linear',
                 timeLimits: {
-                    maxTime: '300',
-                    warningTime: '240'
-                },
+                    questionSet: {
+                      min: 0,
+                      max: 300
+                    }
+                  },
                 shuffle: true,
                 board: 'CBSE',
                 instructions: {

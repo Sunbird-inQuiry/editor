@@ -71,7 +71,7 @@ export class HelperService {
 
   getLicenses(): Observable<any> {
     const req = {
-      url: `${this.configService.urlConFig.URLS.compositSearch}`,
+      url: `${this.configService.urlConFig.URLS.COMPOSITE.SEARCH}`,
       data: {
         request: {
           filters: {

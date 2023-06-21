@@ -23,7 +23,7 @@ export class QuestionService {
     let field = this.configService.editorConfig.readQuestionFields;
     field = leafFormConfigfields ? field + leafFormConfigfields :  field;
     const option = {
-      url: `${this.configService.urlConFig.URLS.QUESTION.READ}${questionId}`,
+      url: `${this.configService.urlConFig.URLS.Question.READ}${questionId}`,
       param: {
         fields: field
       }
@@ -82,7 +82,7 @@ export class QuestionService {
 
   getAssetMedia(req?: object) {
     const reqParam = {
-      url: _.get(this.configService.urlConFig, 'URLS.compositSearch'),
+      url: _.get(this.configService.urlConFig, 'URLS.COMPOSITE.SEARCH'),
       data: {
         request: {
           filters: {
@@ -146,7 +146,7 @@ export class QuestionService {
 
   getQuestionList(req, field?: any) {
     const reqParam: any = {
-      url: this.configService.urlConFig.URLS.QuestionSet.QUESTION_LIST,
+      url: _.get(this.configService.urlConFig, 'URLS.Question.LIST'),
       data: {
         request: {
           search: {

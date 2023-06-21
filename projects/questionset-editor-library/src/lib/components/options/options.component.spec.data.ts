@@ -17,7 +17,7 @@ export const mockOptionData = {
       },
     ],
     templateId: 'mcq-split-grid',
-    answer: '0',
+    answer: 0,
     numberOfOptions: 4,
   },
   prepareMcqBody: {
@@ -25,15 +25,17 @@ export const mockOptionData = {
     name: 'Multiple Choice Question',
     responseDeclaration: {
       response1: {
-        maxScore: 1,
         cardinality: 'single',
         type: 'integer',
         correctResponse: {
-          value: '0',
-          outcomes: {
-            SCORE: 1,
-          },
+          value: 0
         },
+        mapping: [
+          {
+            value: 0,
+            score: 1
+          }
+        ]
       },
     },
     interactionTypes: ['choice'],

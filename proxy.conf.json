@@ -1,11 +1,11 @@
 {
-    "/action/question/v1/bulkUpload": {
+    "/action/question/v2/bulkUpload": {
         "target": "http://localhost:3000",
         "secure": false,
         "logLevel": "debug",
         "changeOrigin": true
     },
-    "/action/question/v1/bulkUploadStatus": {
+    "/action/question/v2/bulkUploadStatus": {
         "target": "http://localhost:3000",
         "secure": false,
         "logLevel": "debug",
@@ -17,7 +17,7 @@
         "logLevel": "debug",
         "changeOrigin": true
     },
-    "/action/questionset/v1": {
+    "/action/questionset/v2": {
         "target": "http://localhost:3000",
         "secure": false,
         "logLevel": "debug",
@@ -35,7 +35,7 @@
         "logLevel": "debug",
         "changeOrigin": true
     },
-    "/action/question/v1": {
+    "/action/question/v2": {
         "target": "http://localhost:3000",
         "secure": false,
         "logLevel": "debug",

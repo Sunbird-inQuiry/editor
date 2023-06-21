@@ -144,10 +144,10 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
         if (metaDataFields) {
           if (_.has(metaDataFields, field.code)) {
             field.default = _.get(metaDataFields, field.code);
-          } else if (_.includes(['maxTime', 'warningTime'], field.code)) {
-            const value = _.get(metaDataFields, `timeLimits.${field.code}`);
+          } else if (_.includes(['maxTime'], field.code)) {
+            const value = _.get(metaDataFields, 'timeLimits.questionSet.max') ? _.toString(_.get(metaDataFields, 'timeLimits.questionSet.max')) : '';
             field.default = !_.isEmpty(value) ?
-            moment.utc(moment.duration(value, 'seconds').asMilliseconds()).format(this.helperService.getTimerFormat(field)) : '';
+            _.toString(moment.utc(moment.duration(value, 'seconds').asMilliseconds()).format(this.helperService.getTimerFormat(field))) : null;
           }
         }
         if (field.code === 'framework') {
@@ -206,7 +206,7 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
           field.options = this.showTimer;
         }
         if (field.code === 'instructions') {
-          field.default = _.get(metaDataFields, 'instructions.default') || '' ;
+          field.default = _.get(metaDataFields, 'instructions') || '' ;
         }
         if (field.code === 'setPeriod') {
           field.default = !_.isEmpty(metaDataFields, 'endDate') ? 'Yes' : 'No' ;
