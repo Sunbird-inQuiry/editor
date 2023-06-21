@@ -43,7 +43,7 @@ export const questionSetEditorConfig = {
       l1: 'do_113140468925825024117',
       l2: 'do_113140468926914560125'
     },
-    host: '',
+    host: 'https://dev.inquiry.sunbird.org',
     defaultLicense: 'CC BY 4.0',
     endpoint: '/data/v3/telemetry',
     env: 'questionset_editor',
