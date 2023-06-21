@@ -3088,7 +3088,7 @@ export const interactionChoiceEditorState = {
           cardinality: 'single',
           type: 'integer',
           correctResponse: {
-              value: '0',
+              value: 0,
           },
           mapping: [
             {

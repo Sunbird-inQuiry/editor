@@ -9,7 +9,7 @@ export interface McqData {
   options: Array<McqOptions>;
   answer?: string;
   learningOutcome?: string;
-  bloomsLevel?: string;
+  complexityLevel?: string;
   maxScore?: number;
 }
 export interface McqConfig {
@@ -24,17 +24,17 @@ export class McqForm {
   public templateId: string;
   public answer: string;
   public learningOutcome;
-  public bloomsLevel;
+  public complexityLevel;
   public maxScore;
   public numberOfOptions;
   public maximumOptions;
-  constructor({question, options, answer, learningOutcome, bloomsLevel, maxScore}: McqData, {templateId, numberOfOptions, maximumOptions}: McqConfig) {
+  constructor({question, options, answer, learningOutcome, complexityLevel, maxScore}: McqData, {templateId, numberOfOptions, maximumOptions}: McqConfig) {
     this.question = question;
     this.options = options || [];
     this.templateId = templateId;
     this.answer = answer;
     this.learningOutcome = learningOutcome;
-    this.bloomsLevel = bloomsLevel;
+    this.complexityLevel = complexityLevel;
     this.maxScore = maxScore;
     this.numberOfOptions = numberOfOptions || 2;
     this.maximumOptions = maximumOptions || 4

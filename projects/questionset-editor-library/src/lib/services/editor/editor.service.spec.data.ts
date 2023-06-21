@@ -279,7 +279,7 @@ export const questionsData = [
                 cardinality: 'single',
                 type: 'integer',
                 correctResponse: {
-                    value: '0',
+                    value: 0,
                 },
                 mapping: [
                     {
