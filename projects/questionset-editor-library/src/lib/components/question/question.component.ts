@@ -578,7 +578,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       const optionValid = _.find(this.editorState.options, option =>
         (option.body === undefined || option.body === '' || option.length > this.setCharacterLimit));
-      if (optionValid || (!this.editorState.answer && this.sourcingSettings?.enforceCorrectAnswer)) {
+      if (optionValid || (_.isUndefined(this.editorState.answer) && this.sourcingSettings?.enforceCorrectAnswer)) {
         this.showFormError = true;
         return;
       } else {
@@ -772,7 +772,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.questionInteractionType != 'choice') {
-      if (_.isString(metadata.answer)  &&  !_.isEmpty(metadata.answer)) {
+      if (!_.isUndefined(metadata.answer)) {
         const answerHtml = this.getAnswerHtml(metadata.answer);
         const finalAnswer = this.getAnswerWrapperHtml(answerHtml);
         metadata.answer = finalAnswer;
@@ -783,7 +783,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.questionInteractionType === 'choice') {
       metadata.body = this.getMcqQuestionHtmlBody(this.editorState.question, this.editorState.templateId);
-      if(_.isString(_.toNumber(metadata.answer))) {
+      if(_.isNumber(metadata.answer)) {
         metadata.answer = [metadata.answer];
       }
       const correctAnswersData = this.getInteractionValues(metadata.answer, metadata.interactions);
@@ -822,13 +822,13 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getAnswerHtml(optionLabel) {
-    const answerHtml = '<div class=\"anwser-body\">{answer}</div>';
+    const answerHtml = '<div class=\'anwser-body\'>{answer}</div>';
     const optionHtml = answerHtml.replace('{answer}', optionLabel);
     return optionHtml;
   }
 
   getAnswerWrapperHtml(concatenatedAnswers) {
-    const answerTemplate = '<div class=\"anwser-container\">{answers}</div>';
+    const answerTemplate = '<div class=\'anwser-container\'>{answers}</div>';
     const answer = answerTemplate.replace('{answers}', concatenatedAnswers);
     return answer;
   }
@@ -1162,6 +1162,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     this.questionSetHierarchy['outcomeDeclaration'] = this.getOutcomeDeclaration(questionMetadata);
     if (this.questionSetHierarchy.shuffle === true) {
       this.questionSetHierarchy.outcomeDeclaration.maxScore.defaultValue = DEFAULT_SCORE;
+    } else {
+      if (questionMetadata.qType === 'SA') {
+        this.questionSetHierarchy['outcomeDeclaration'] = {maxScore: {defaultValue: 0}};
+      }
     }
     this.editorCursor.setQuestionMap(questionId, questionMetadata);
   }

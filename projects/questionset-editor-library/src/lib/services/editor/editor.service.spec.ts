@@ -532,11 +532,6 @@ describe('EditorService', () => {
     });
     spyOn(editorService, 'calculateMaxScore').and.callThrough();
     const questions = [{
-      responseDeclaration: {
-        response1: {
-          type: 'string'
-        }
-      },
       primaryCategory: 'Subjective Question'
     }];
     const maxScore = editorService.calculateMaxScore(questions);

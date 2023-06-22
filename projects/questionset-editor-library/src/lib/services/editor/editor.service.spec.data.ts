@@ -272,12 +272,14 @@ export const questionsData = [
                 cardinality: 'single',
                 type: 'integer',
                 correctResponse: {
-                    value: '0',
-                    outcomes: {
-                        SCORE: 1
-                    }
+                    value: 0,
                 },
-                mapping: []
+                mapping: [
+                    {
+                      value: 0,
+                      score: 1
+                    }
+                ]
             }
         },
         language: [
