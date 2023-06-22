@@ -1750,7 +1750,7 @@ describe("QuestionComponent", () => {
     component.questionMetaData = mockData.mcqQuestionMetaData.result.question;
     sourcingSettingsMock.showAddSecondaryQuestion = true;
     component.questionMetaData.hints = {
-      en: [],
+      '70c82bf5-9459-4c43-8897-0e58b7e1da62':''
     };
     sourcingSettingsMock.showAddHints = false;
     component.sourcingSettings = sourcingSettingsMock;

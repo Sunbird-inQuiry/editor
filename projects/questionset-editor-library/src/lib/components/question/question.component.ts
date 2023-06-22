@@ -925,9 +925,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
     _.forEach(this.subMenus, (el: any) => {
       if (el.id === 'addHint') {
-        metaData.hints = {
-          en: [el.value]
-        };
+        metaData.hints[uuidv4()] = el.value
       }
       if (el.id === 'addTip') {
         metaData.instructions = el.value;
@@ -1358,9 +1356,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       {
         id: 'addHint',
         name: 'Add Hint',
-        value: _.get(this.questionMetaData, 'hints.en[0]'),
+        value: Object.values(_.get(this.questionMetaData, 'hints'))[0],
         label: 'Hint',
-        enabled: _.get(this.questionMetaData, 'hints.en[0]') ? true : false,
+        enabled: Object.values(_.get(this.questionMetaData, 'hints'))[0] ? true : false,
         type: 'input',
         show: _.get(this.sourcingSettings, 'showAddHints')
       },
