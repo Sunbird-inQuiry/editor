@@ -393,7 +393,11 @@ export class EditorService {
       if (_.has(nodeData.parent.data.metadata, 'shuffle') && nodeData.parent.data.metadata.shuffle === true) {
         return sum + 1;
       } else {
-        return sum + (question?.outcomeDeclaration?.maxScore?.defaultValue ? _.get(question, 'outcomeDeclaration.maxScore.defaultValue') : 0);
+        if (question?.responseDeclaration?.response1) {
+          return sum + (question?.outcomeDeclaration?.maxScore?.defaultValue ? _.get(question, 'outcomeDeclaration.maxScore.defaultValue') : 0);
+        } else {
+          return sum + 0;
+        }
       }
     }, 0);
   }
