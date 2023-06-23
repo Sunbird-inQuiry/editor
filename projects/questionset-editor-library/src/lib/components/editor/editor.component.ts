@@ -828,7 +828,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       treeNodeData.timeLimits = {};
     }
     if (treeNodeData?.maxTime) {
-      treeNodeData.timeLimits.questionSet.max = _.parseInt(this.helperService.hmsToSeconds(treeNodeData.maxTime));
+      _.set(treeNodeData.timeLimits, 'questionSet.max', _.parseInt(this.helperService.hmsToSeconds(treeNodeData.maxTime)));
     }
     this.collectionTreeNodes.data = _.merge(this.collectionTreeNodes.data, _.omit(treeNodeData, ['childNodes']));
   }
