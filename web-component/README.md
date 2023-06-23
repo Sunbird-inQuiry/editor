@@ -1,5 +1,5 @@
 
-# :diamond_shape_with_a_dot_inside: QuestionSet Editor library for Sunbird platform
+# :diamond_shape_with_a_dot_inside: QuestionSet Editor for Sunbird!
 Question Set Editor library components is powered by angular. This editor is primarily designed to be used in the sunbirdEd portal and web portal to drive reusability, maintainability hence reducing the redundant development effort significantly. And it can be integrated with any platform irrespective of the platforms and the frontend frameworks. It is exported not only as an angular library but also as a web component aims to make it easy to share, discover, and reuse web components. It creates a framework agnostic way of composing and re-purposing code.
 
 # :bookmark_tabs: Getting started with integration steps
