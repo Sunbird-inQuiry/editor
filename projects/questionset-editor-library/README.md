@@ -1,24 +1,15 @@
-# CourseEditorLibrary
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.2.0.
+# :diamond_shape_with_a_dot_inside: QuestionSet Editor library for Sunbird platform
+Question Set Editor library components is powered by angular. This editor is primarily designed to be used in the sunbirdEd portal and web portal to drive reusability, maintainability hence reducing the redundant development effort significantly. And it can be integrated with any platform irrespective of the platforms and the frontend frameworks. It is exported not only as an angular library but also as a web component aims to make it easy to share, discover, and reuse web components. It creates a framework agnostic way of composing and re-purposing code.
 
-## Code scaffolding
+# :bookmark_tabs: Getting started with integration steps
+The Question Set Editor can be integrated as a web component and also as an angular library in angular application projects and it can also be integrated into vanilla javascript and angular framework as a web component.
 
-Run `ng generate component component-name --project questionset-editor-library` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project questionset-editor-library`.
-> Note: Don't forget to add `--project questionset-editor-library` or else it will be added to the default project in your `angular.json` file.
+- [Using it as Web component](https://inquiry.sunbird.org/use/developer-installation/question-set-editor/installation#use-as-web-components)
+- [Using it as Angular library](https://inquiry.sunbird.org/use/developer-installation/question-set-editor/installation#use-as-angular-library-in-angular-app)
 
-## Build
+# :bookmark_tabs: Editor Contribution and Configuration Guide
 
-Run `ng build questionset-editor-library` to build the project. The build artifacts will be stored in the `dist/` directory.
+[Contribution guidelines for this project](https://inquiry.sunbird.org/use/developer-installation/question-set-editor/installation#questionset-editor-contribution-guide)
 
-## Publishing
-
-After building your library with `ng build questionset-editor-library`, go to the dist folder `cd dist/questionset-editor-library` and run `npm publish`.
-
-## Running unit tests
-
-Run `ng test questionset-editor-library` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+[Configuration guidelines for this project](https://inquiry.sunbird.org/learn/product-and-developer-guide/question-and-question-set-editor/configuration)
