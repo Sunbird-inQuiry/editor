@@ -77,7 +77,7 @@
   </div>
 </sui-modal>
 
-<sui-modal [isClosable]="isClosable" class="sb-modal overflow-modal" [isInverted]="false"
+<sui-modal [isClosable]="true" class="sb-modal overflow-modal" [isInverted]="false"
   (dismissed)="dismissVideoPicker()" *ngIf="showVideoPicker" [size]="'normal'" [isFullScreen]="false"
   [mustScroll]="true" #modal>
   <div class="sb-modal-header">{{configService.labelConfig?.lbl?.selectVideo}}</div>
