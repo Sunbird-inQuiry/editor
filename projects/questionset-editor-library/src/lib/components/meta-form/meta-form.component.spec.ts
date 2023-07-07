@@ -210,12 +210,6 @@ describe('MetaFormComponent', () => {
     expect(isFieldEditable).toBeTruthy();
   });
 
-  it('outputData should be called', () => {
-    spyOn(component, 'outputData').and.callThrough();
-    component.outputData({});
-    expect(component.outputData).toHaveBeenCalledWith({});
-  });
-
   it('#onStatusChanges() should emit toolbarEmitter event', () => {
     const data = { button: 'onFormStatusChange', event: '' };
     spyOn(component.toolbarEmitter, 'emit').and.callFake(() => {});

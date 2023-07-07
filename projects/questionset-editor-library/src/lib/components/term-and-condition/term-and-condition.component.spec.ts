@@ -27,12 +27,6 @@ describe('TermAndConditionComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call ngOnInit', () => {
-    spyOn(component, 'ngOnInit').and.callThrough();
-    component.ngOnInit();
-    expect(component.ngOnInit).toHaveBeenCalled();
-  });
-
   it('#contentPolicyUrl return content policy url', () => {
     const editorService = TestBed.inject(EditorService);
     spyOnProperty(editorService, 'contentPolicyUrl').and.returnValue('/term-of-use.html');

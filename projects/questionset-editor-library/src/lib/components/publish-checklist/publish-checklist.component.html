@@ -7,7 +7,7 @@
     <span *ngIf="!publishchecklist?.length"> {{configService.labelConfig?.lbl?.confirmPublishCollection | interpolate: '${objectType}': objectType}} </span>
     <div class="sectionTitle" *ngIf="publishchecklist?.length">{{configService.labelConfig?.lbl?.publishchecklistTitle}}</div>
     <sb-dynamic-form *ngIf="publishchecklist?.length" [config]="publishchecklist"
-      (initialize)="outputData($event)" (statusChanges)="onStatusChanges($event)" (valueChanges)="valueChanges($event)">
+      (statusChanges)="onStatusChanges($event)" (valueChanges)="valueChanges($event)">
     </sb-dynamic-form>
   </div>
   <div class="sb-modal-actions">

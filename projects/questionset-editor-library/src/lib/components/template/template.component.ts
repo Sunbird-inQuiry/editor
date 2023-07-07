@@ -1,5 +1,4 @@
-import { Component, OnInit, ViewChild, OnDestroy, Output, Input, EventEmitter } from '@angular/core';
-import * as _ from 'lodash-es';
+import { Component, ViewChild, OnDestroy, Output, Input, EventEmitter } from '@angular/core';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { ConfigService } from '../../services/config/config.service';
 
@@ -8,7 +7,7 @@ import { ConfigService } from '../../services/config/config.service';
   templateUrl: './template.component.html',
   styleUrls: ['./template.component.scss']
 })
-export class TemplateComponent implements OnInit, OnDestroy {
+export class TemplateComponent implements OnDestroy {
 
   @Input() templateList: any;
   @ViewChild('modal') private modal;
@@ -17,8 +16,6 @@ export class TemplateComponent implements OnInit, OnDestroy {
   public templateSelected;
 
   constructor(public telemetryService: EditorTelemetryService,  public configService: ConfigService) { }
-
-  ngOnInit() { }
 
   next() {
     this.templateSelection.emit(this.templateSelected);

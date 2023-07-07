@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, ViewEncapsulation } from '@angular/core';
 import { merge, of, Subject, Subscription } from 'rxjs';
 import * as _ from 'lodash-es';
 import { takeUntil, filter, switchMap, map } from 'rxjs/operators';
@@ -270,7 +270,6 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
     }
     return false;
   }
-  outputData(eventData: any) { }
 
   onStatusChanges(event) {
     this.toolbarEmitter.emit({ button: 'onFormStatusChange', event });
