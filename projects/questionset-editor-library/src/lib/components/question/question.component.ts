@@ -1213,10 +1213,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         questionTitle = this.questionPrimaryCategory;
       }
     } else {
-      let hierarchyChildren = this.treeService.getChildren();
       if (!_.isUndefined(questionId)) {
         questionTitle = this.getExistingQuestionTitle(questionId);
       } else {
+        const hierarchyChildren = this.treeService.getChildren();
         index = hierarchyChildren.length;
         questionTitle = `Q${(index + 1).toString()} | `;
         if (!_.isUndefined(this.questionPrimaryCategory)) {

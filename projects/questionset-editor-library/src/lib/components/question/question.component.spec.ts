@@ -1930,13 +1930,68 @@ describe("QuestionComponent", () => {
     component.prepareQuestionBody();
   });
 
-  it("#setQuestionTitle() should set #toolbarConfig.title for question", () => {
-    creationContextMock.objectType = "questionSet";
-    component.questionId = "do_123";
-    component.creationContext = creationContextMock;
-    component.questionPrimaryCategory = "";
+  it("#setQuestionTitle() should set #toolbarConfig.title for question editor", () => {
+    component.toolbarConfig.title = '';
+    component.creationContext = {objectType: 'question'};
+    component.questionPrimaryCategory = 'Multiple Choice Question';
+    spyOn(component, 'setQuestionTitle').and.callThrough();
     component.setQuestionTitle();
-    expect(component.questionId).toEqual("do_123");
+    expect(component.toolbarConfig.title).toEqual("Multiple Choice Question");
+  });
+
+  it("#setQuestionTitle() should set #toolbarConfig.title for questionset editor for defined questionId", () => {
+    component.toolbarConfig.title = '';
+    component.creationContext = {};
+    spyOn(component, 'getExistingQuestionTitle').and.returnValue('MCQ1');
+    spyOn(component, 'setQuestionTitle').and.callThrough();
+    component.setQuestionTitle('do_12345678910');
+    expect(component.getExistingQuestionTitle).toHaveBeenCalled();
+    expect(component.toolbarConfig.title).toEqual('MCQ1');
+  });
+
+  it("#setQuestionTitle() should set #toolbarConfig.title for questionset editor for undefined questionId", () => {
+    const treeService = TestBed.inject(TreeService);
+    spyOn(treeService, 'getChildren').and.returnValue([{'name': 'MCQ1'}])
+    component.toolbarConfig.title = '';
+    component.creationContext = {};
+    component.questionPrimaryCategory = 'Multiple Choice Question';
+    spyOn(component, 'setQuestionTitle').and.callThrough();
+    component.setQuestionTitle();
+    expect(component.toolbarConfig.title).toEqual('Q2 | Multiple Choice Question');
+  });
+
+  it('#setQuestionTitle() should set title for existingQuestion when hierarchy have children', ()=> {
+    const treeService = TestBed.inject(TreeService);
+    spyOn(treeService, 'getActiveNode').and.returnValue({
+      data: { id: '1234567891011' },
+      getParent() {
+        return {
+          getChildren() {
+            return [{children: [{identifier: 'do_12345', primaryCategory: 'Multiple Choice Question'}]}]
+          }
+        }
+      }
+    });
+    spyOn(component, 'setQuestionTitle').and.callThrough();
+    component.setQuestionTitle('do_12345');
+    expect(component.toolbarConfig.title).toEqual('Q1 | Multiple Choice Question');
+  });
+
+  it('#setQuestionTitle() should set title for existingQuestion when hierarchy have children', ()=> {
+    const treeService = TestBed.inject(TreeService);
+    spyOn(treeService, 'getActiveNode').and.returnValue({
+      data: { id: '1234567891011' },
+      getParent() {
+        return {
+          getChildren() {
+            return [{children: null, data: {id: 'do_123456', primaryCategory: 'Subjective Question'}}]
+          }
+        }
+      }
+    });
+    spyOn(component, 'setQuestionTitle').and.callThrough();
+    component.setQuestionTitle('do_123456');
+    expect(component.toolbarConfig.title).toEqual('Q1 | Subjective Question');
   });
 
   it("#upsertQuestion() should call on question save api false case", () => {
