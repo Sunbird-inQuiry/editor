@@ -732,11 +732,7 @@ describe("QuestionComponent", () => {
     component.populateFrameworkData();
     expect(component.leafFormConfig).toBeDefined();
   });
-  it("#outputData() should call outputData", () => {
-    spyOn(component, "output").and.callThrough();
-    component.output({});
-    expect(component.output).toHaveBeenCalled();
-  });
+
   it("#onStatusChanges() should call onStatusChanges", () => {
     spyOn(component, "onStatusChanges");
     component.onStatusChanges("");
@@ -816,7 +812,6 @@ describe("QuestionComponent", () => {
     spyOn(component, "setQuestionTitle");
     component.setQuestionId("do_11330103476396851218");
     expect(component.questionId).toEqual("do_11330103476396851218");
-    expect(component.setQuestionTitle);
   });
   it("#rejectQuestion() should call #requestForChanges", () => {
     const comment = "test comment";

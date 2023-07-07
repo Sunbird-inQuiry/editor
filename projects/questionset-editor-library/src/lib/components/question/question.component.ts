@@ -131,7 +131,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
-    const { questionSetId, questionId, type, category, config, creationContext, creationMode } = this.questionInput;
+    const { questionSetId, questionId, type, category, creationContext, creationMode } = this.questionInput;
     this.questionInteractionType = type;
     this.questionCategory = category;
     this.questionId = questionId;
@@ -755,22 +755,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return solutionObj;
   }
 
-  getQuestionMetadata() {
-    let metadata: any = {
-      mimeType: 'application/vnd.sunbird.question',
-      media: this.mediaArr,
-      editorState: {}
-    };
-    console.log('getQuestionMetadata');
-    console.log(this.editorState);
-    metadata = _.assign(metadata, this.editorState);
-    metadata.editorState.question = metadata.question;
-    metadata.body = metadata.question;
-    if (!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)) {
-      const treeNodeData = _.get(this.treeNodeData, 'data.metadata');
-      _.get(treeNodeData,'allowScoring') === 'Yes' ? '' : _.set(metadata,'responseDeclaration.response1.mapping',[]);
-    }
-
+  setQuestionProperties(metadata) {
     if (this.questionInteractionType != 'choice') {
       if (!_.isUndefined(metadata.answer)) {
         const answerHtml = this.getAnswerHtml(metadata.answer);
@@ -797,6 +782,24 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (this.questionInteractionType != 'default' && this.questionInteractionType != 'choice') {
       metadata.responseDeclaration = this.getResponseDeclaration(this.questionInteractionType);
     }
+    return metadata;
+  }
+
+  getQuestionMetadata() {
+    let metadata: any = {
+      mimeType: 'application/vnd.sunbird.question',
+      media: this.mediaArr,
+      editorState: {}
+    };
+    metadata = _.assign(metadata, this.editorState);
+    metadata.editorState.question = metadata.question;
+    metadata.body = metadata.question;
+    if (!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)) {
+      const treeNodeData = _.get(this.treeNodeData, 'data.metadata');
+      _.get(treeNodeData,'allowScoring') === 'Yes' ? '' : _.set(metadata,'responseDeclaration.response1.mapping',[]);
+    }
+
+    metadata = this.setQuestionProperties(metadata);
 
     if (!_.isUndefined(this.selectedSolutionType) && !_.isEmpty(this.selectedSolutionType)) {
       const solutionObj = this.getSolutionObj(this.solutionUUID, this.selectedSolutionType, this.editorState.solutions);
@@ -1212,22 +1215,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       let hierarchyChildren = this.treeService.getChildren();
       if (!_.isUndefined(questionId)) {
-          const parentNode = this.treeService.getActiveNode().getParent();
-          hierarchyChildren = parentNode.getChildren();
-          _.forEach(hierarchyChildren, (child) => {
-            if (child.children) {
-              index =  _.findIndex(child.children, { identifier: questionId });
-              const question  = child.children[index];
-              // tslint:disable-next-line:max-line-length
-              questionTitle = `Q${(index + 1).toString()} | ` + (_.get(this.categoryLabel, `${question.primaryCategory}`) || question.primaryCategory);
-            } else {
-              index =  _.findIndex(hierarchyChildren, (node) => node.data.id === questionId);
-              const question  = hierarchyChildren[index];
-              // tslint:disable-next-line:max-line-length
-              questionTitle = `Q${(index + 1).toString()} | ` + (_.get(this.categoryLabel, `${_.get(question, 'data.primaryCategory')}`) || _.get(question, 'data.primaryCategory'));
-            }
-        });
-
+        questionTitle = this.getExistingQuestionTitle(questionId);
       } else {
         index = hierarchyChildren.length;
         questionTitle = `Q${(index + 1).toString()} | `;
@@ -1239,7 +1227,26 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     this.toolbarConfig.title = questionTitle;
   }
 
-  output(event) { }
+  getExistingQuestionTitle(questionId) {
+    let index;
+    let questionTitle = '';
+    const parentNode = this.treeService.getActiveNode().getParent();
+    let hierarchyChildren = parentNode.getChildren();
+    _.forEach(hierarchyChildren, (child) => {
+      if (child.children) {
+        index =  _.findIndex(child.children, { identifier: questionId });
+        const question  = child.children[index];
+        // tslint:disable-next-line:max-line-length
+        questionTitle = `Q${(index + 1).toString()} | ` + (_.get(this.categoryLabel, `${question.primaryCategory}`) || question.primaryCategory);
+      } else {
+        index =  _.findIndex(hierarchyChildren, (node) => node.data.id === questionId);
+        const question  = hierarchyChildren[index];
+        // tslint:disable-next-line:max-line-length
+        questionTitle = `Q${(index + 1).toString()} | ` + (_.get(this.categoryLabel, `${_.get(question, 'data.primaryCategory')}`) || _.get(question, 'data.primaryCategory'));
+      }
+    });
+    return questionTitle;
+  }
 
   onStatusChanges(event) {
     console.log(event);
