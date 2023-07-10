@@ -544,60 +544,70 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   validateQuestionData() {
-
     if ([undefined, ''].includes(this.editorState.question)) {
       this.showFormError = true;
-      return;
+      return; //NOSONAR
     } else {
       this.showFormError = false;
     }
 
-
     // to handle when question type is subjective
     if (this.questionInteractionType === 'default') {
-      if (this.editorState.answer !== '') {
-        this.showFormError = false;
-      } else {
-        this.showFormError = true;
-        return;
-      }
+      this.validateDefaultQuestionData();
     }
 
     // to handle when question type is mcq
     if (this.questionInteractionType === 'choice') {
-      const data = _.get(this.treeNodeData, 'data.metadata');
-      if (_.get(this.editorState, 'interactionTypes[0]') === 'choice' &&
-        _.isEmpty(this.editorState?.responseDeclaration?.response1?.mapping) &&
-        !_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy) &&
-        _.get(data,'allowScoring') === 'Yes') {
-        this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
-        this.showFormError = true;
-        return;
-      } else {
-        this.showFormError = false;
-      }
-      const optionValid = _.find(this.editorState.options, option =>
-        (option.body === undefined || option.body === '' || option.length > this.setCharacterLimit));
-      if (optionValid || (_.isUndefined(this.editorState.answer) && this.sourcingSettings?.enforceCorrectAnswer)) {
-        this.showFormError = true;
-        return;
-      } else {
-        this.showFormError = false;
-      }
+      this.validateChoiceQuestionData();
     }
 
     if (this.questionInteractionType === 'slider') {
-      const min = _.get(this.sliderDatas, 'validation.range.min');
-      const max = _.get(this.sliderDatas, 'validation.range.max');
-      const step =  _.get(this.sliderDatas, 'step');
-      if (_.isEmpty(this.sliderDatas) || _.isEmpty(min) || _.isEmpty(max) || _.isEmpty(step)) {
-        this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
-        this.showFormError = true;
-      } else {
-        this.showFormError = false;
-      }
+      this.validateSliderQuestionData();
     }
 
+  }
+
+  validateDefaultQuestionData() {
+    if (this.editorState.answer !== '') {
+      this.showFormError = false;
+    } else {
+      this.showFormError = true;
+      return; //NOSONAR
+    }
+  }
+
+  validateChoiceQuestionData() {
+    const data = _.get(this.treeNodeData, 'data.metadata');
+    if (_.get(this.editorState, 'interactionTypes[0]') === 'choice' &&
+      _.isEmpty(this.editorState?.responseDeclaration?.response1?.mapping) &&
+      !_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy) &&
+      _.get(data,'allowScoring') === 'Yes') {
+      this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
+      this.showFormError = true;
+      return; //NOSONAR
+    } else {
+      this.showFormError = false;
+    }
+    const optionValid = _.find(this.editorState.options, option =>
+      (option.body === undefined || option.body === '' || option.length > this.setCharacterLimit));
+    if (optionValid || (_.isUndefined(this.editorState.answer) && this.sourcingSettings?.enforceCorrectAnswer)) {
+      this.showFormError = true;
+      return; //NOSONAR
+    } else {
+      this.showFormError = false;
+    }
+  }
+
+  validateSliderQuestionData() {
+    const min = _.get(this.sliderDatas, 'validation.range.min');
+    const max = _.get(this.sliderDatas, 'validation.range.max');
+    const step =  _.get(this.sliderDatas, 'step');
+    if (_.isEmpty(this.sliderDatas) || _.isEmpty(min) || _.isEmpty(max) || _.isEmpty(step)) {
+      this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
+      this.showFormError = true;
+    } else {
+      this.showFormError = false;
+    }
   }
 
   redirectToQuestionset() {

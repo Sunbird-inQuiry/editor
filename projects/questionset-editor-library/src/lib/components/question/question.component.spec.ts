@@ -1340,62 +1340,82 @@ describe("QuestionComponent", () => {
   it("#validateQuestionData() should call validateQuestionData and question is undefined", () => {
     component.editorState = mockData.editorState;
     component.editorState.question = undefined;
+    spyOn(component, 'validateQuestionData').and.callThrough();
     component.validateQuestionData();
     expect(component.showFormError).toBeTruthy();
   });
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is default", () => {
-    component.sourcingSettings = sourcingSettingsMock;
+  it("#validateQuestionData() should call validateDefaultQuestionData and questionInteractionType is default", () => {
     component.editorState = mockData.defaultQuestionMetaData.result.question;
     component.editorState.question = "<p> Hi how are you </p>";
-    component.questionInteractionType = "default";
+    component.questionInteractionType = "default";   
+    spyOn(component, 'validateQuestionData').and.callThrough();
+    spyOn(component, 'validateDefaultQuestionData').and.callFake(() => {});
+    component.validateQuestionData();
+    expect(component.validateDefaultQuestionData).toHaveBeenCalled();
+  });
+
+  it('#validateDefaultQuestionData() should validate answer and set showFormError to false', () => {
+    component.editorState = mockData.defaultQuestionMetaData.result.question;
+    component.editorState.question = "<p> Hi how are you </p>";
     component.editorState.answer = "0";
-    component.validateQuestionData();
+    spyOn(component, 'validateDefaultQuestionData').and.callThrough();
+    component.validateDefaultQuestionData();
     expect(component.showFormError).toBeFalsy();
   });
 
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is default", () => {
-    component.sourcingSettings = sourcingSettingsMock;
+  it('#validateDefaultQuestionData() should validate answer and set showFormError to true', () => {
     component.editorState = mockData.defaultQuestionMetaData.result.question;
-    component.questionInteractionType = "default";
     component.editorState.question = "<p> Hi how are you </p>";
     component.editorState.answer = "";
-    component.validateQuestionData();
+    spyOn(component, 'validateDefaultQuestionData').and.callThrough();
+    component.validateDefaultQuestionData();
     expect(component.showFormError).toBeTruthy();
   });
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is mcq", () => {
-    component.sourcingSettings = sourcingSettingsMock;
-    spyOn(treeService, "getFirstChild").and.callFake(() => {
-      return { data: { metadata: { identifier: "0123",allowScoring:'Yes' } } };
-    });
-    component.editorState = mockData.mcqQuestionMetaData.result.question;
-    editorService = TestBed.inject(EditorService);
-    editorService.editorConfig.renderTaxonomy=false;
-    component.editorState.question = "<p> Hi how are you </p>";
-    component.editorState.answer = "";
-    component.questionInteractionType = "choice";
+
+  it("#validateQuestionData() should call validateDefaultQuestionData and questionInteractionType is default", () => {
+    component.editorState = mockData.defaultQuestionMetaData.result.question;
+    component.editorState.question = "<p>2+2 = ?</p>";
+    component.questionInteractionType = "choice";   
+    spyOn(component, 'validateQuestionData').and.callThrough();
+    spyOn(component, 'validateChoiceQuestionData').and.callFake(() => {});
     component.validateQuestionData();
+    expect(component.validateChoiceQuestionData).toHaveBeenCalled();
   });
 
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is mcq when scoring is added", () => {
+  it('#validateChoiceQuestionData() should validate and set showFormError to true', () => {
     component.sourcingSettings = sourcingSettingsMock;
-    spyOn(treeService, "getFirstChild").and.callFake(() => {
-      return { data: { metadata: { identifier: "0123",allowScoring:'Yes' } } };
-    });
-    mockData.mcqQuestionMetaData.result.question.responseDeclaration.response1.mapping=[
-      {value:0,score:10},
-      {value:1,score:10}
-    ]
+    component.treeNodeData = {data: {metadata: {allowScoring: 'Yes'}}}
     component.editorState = mockData.mcqQuestionMetaData.result.question;
+    component.editorState.responseDeclaration.response1.mapping = [];
     editorService = TestBed.inject(EditorService);
-    editorService.editorConfig.renderTaxonomy=false;
+    editorService.editorConfig.renderTaxonomy = false;
     component.editorState.question = "<p> Hi how are you </p>";
     component.editorState.answer = "";
     component.questionInteractionType = "choice";
-    component.validateQuestionData();
+    const toasterService = TestBed.inject(ToasterService);
+    spyOn(toasterService, 'error').and.callFake(() => {});
+    spyOn(component, 'validateChoiceQuestionData').and.callThrough();
+    component.validateChoiceQuestionData();
+    expect(component.showFormError).toBeTruthy();
+  });
+
+  it('#validateChoiceQuestionData() should validate and set showFormError to false when allowScoring is No', () => {
+    component.sourcingSettings = sourcingSettingsMock;
+    component.treeNodeData = {data: {metadata: {allowScoring: 'No'}}}
+    component.editorState = mockData.mcqQuestionMetaData.result.question;
+    editorService = TestBed.inject(EditorService);
+    editorService.editorConfig.renderTaxonomy = false;
+    component.editorState.question = "<p> Hi how are you </p>";
+    component.editorState.answer = "";
+    component.questionInteractionType = "choice";
+    const toasterService = TestBed.inject(ToasterService);
+    spyOn(toasterService, 'error').and.callFake(() => {});
+    spyOn(component, 'validateChoiceQuestionData').and.callThrough();
+    component.validateChoiceQuestionData();
     expect(component.showFormError).toBeFalsy();
   });
 
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is text", () => {
+  it("#validateQuestionData() should call validateQuestionData when questionInteractionType is text", () => {
     component.sourcingSettings = sourcingSettingsMock;
     component.editorState = mockData.textQuestionNetaData.result.question;
     component.editorState.question = "<p> Hi how are you </p>";
@@ -1404,7 +1424,7 @@ describe("QuestionComponent", () => {
     expect(component.showFormError).toBeFalsy();
   });
 
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is date", () => {
+  it("#validateQuestionData() should call validateQuestionData when questionInteractionType is date", () => {
     component.sourcingSettings = sourcingSettingsMock;
     component.editorState = mockData.dateQuestionMetaDate.result.question;
     component.editorState.question = "<p> Hi how are you </p>";
@@ -1413,14 +1433,26 @@ describe("QuestionComponent", () => {
     expect(component.showFormError).toBeFalsy();
   });
 
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is slider", () => {
+  it("#validateQuestionData() should call validateQuestionData when questionInteractionType is date", () => {
+    component.sourcingSettings = sourcingSettingsMock;
+    component.editorState = mockData.dateQuestionMetaDate.result.question;
+    component.editorState.question = "<p> Hi how are you </p>";
+    component.questionInteractionType = "date";
+    component.validateQuestionData();
+    expect(component.showFormError).toBeFalsy();
+  })
+
+  it("#validateQuestionData() should call validateSliderQuestionData and questionInteractionType is slider", () => {
     component.sourcingSettings = sourcingSettingsMock;
     component.editorState = mockData.sliderQuestionMetaData.result.question;
     component.editorState.question = "<p> Hi how are you </p>";
     component.questionInteractionType = "slider";
     component.sliderDatas =
       mockData.sliderQuestionMetaData.result.question.interactions.response1;
+    spyOn(component, 'validateSliderQuestionData').and.callThrough();
+    spyOn(component, 'validateQuestionData').and.callThrough();
     component.validateQuestionData();
+    expect(component.validateSliderQuestionData).toHaveBeenCalled();
     expect(component.showFormError).toBeFalsy();
   });
 
@@ -1431,7 +1463,10 @@ describe("QuestionComponent", () => {
     component.questionInteractionType = "slider";
     component.sliderDatas = {};
     component.configService = configService;
+    spyOn(component, 'validateSliderQuestionData').and.callThrough();
+    spyOn(component, 'validateQuestionData').and.callThrough();
     component.validateQuestionData();
+    expect(component.validateSliderQuestionData).toHaveBeenCalled();
     expect(component.showFormError).toBeTruthy();
   });
 
@@ -1771,18 +1806,18 @@ describe("QuestionComponent", () => {
     expect(component.sliderData).toHaveBeenCalledWith(event);
   });
 
-  it("#getResponseDeclaration() should set responseDecleration for slider", () => {
+  it("#getResponseDeclaration() should set responseDeclaration for slider", () => {
     spyOn(component, "getResponseDeclaration").and.callThrough();
-    const responseDecleration = component.getResponseDeclaration("slider");
+    const responseDeclaration = component.getResponseDeclaration("slider");
     expect(component.getResponseDeclaration).toHaveBeenCalled();
-    expect(responseDecleration.response1.type).toEqual('integer');
+    expect(responseDeclaration.response1.type).toEqual('integer');
   });
 
-  it("#getResponseDeclaration() should set responseDecleration for text", () => {
+  it("#getResponseDeclaration() should set responseDeclaration for text", () => {
     spyOn(component, "getResponseDeclaration").and.callThrough();
-    const responseDecleration = component.getResponseDeclaration("text");
+    const responseDeclaration = component.getResponseDeclaration("text");
     expect(component.getResponseDeclaration).toHaveBeenCalled();
-    expect(responseDecleration.response1.type).toEqual('string');
+    expect(responseDeclaration.response1.type).toEqual('string');
   });
 
   it("#saveUpdateQuestions call on click save button api fail case", () => {
