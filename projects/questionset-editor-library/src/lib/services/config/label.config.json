@@ -77,7 +77,7 @@
        "answers":"Answers",
        "answersRequired":"Answer is required",
        "answersPopupText":"Please provide an answer for the question. Check preview to understand how it would look.",
-       "selectImage":"Select Image",
+       "selectImage":"Select Image",       
        "myImages":"My Images",
        "allImage":"All Image",
        "uploadAndUse":"Upload and Use",
@@ -91,9 +91,28 @@
        "copyRightsAndLicense":"Copyright & License",
        "dropChooseFile":"Drop or choose file to upload before entering the details",
        "charactersLeft":"Characters left:",
+       "myAssets": {
+         "image": "My Images",
+         "video": "My Video(s)"
+       },
+       "allAssets": {
+         "image": "All Image",
+         "video": "All Video(s)"
+       },
+       "selectAsset": {
+         "image":"Select Image",
+         "video":"Select Video"
+       },
+       "chooseOrDragAsset": {
+         "image": "Choose or drag and drop your image here",
+         "video": "Choose or drag and drop your video here"
+       },
        "myVideos":"My Video(s)",
        "allVideos":"All Video(s)",
        "selectVideo":"Select Video",
+       "myAudios": "My Audio(s)",
+       "allAudios":"All Audio(s)",
+       "selectAudio":"Select Audio",              
        "searchPlaceholder":"Search...",
        "addAnImage":"Add an image",
        "name":"Name",
@@ -246,6 +265,14 @@
     },
     "termsAndConditions": {
      "001": "I understand and confirm that all resources and assets created through the content editor or uploaded on the platform shall be available for free and public use without limitations on the platform (web portal, applications and any other end user interface that the platform would enable) and will be licensed under terms & conditions and policy guidelines of the platform. In doing so, the copyright and license of the original author is not infringed."
+    },
+    "emptySearchMessage": {
+      "image": "No images found, please try searching for something else",
+      "video": "No videos found, please try searching for something else"
+    },
+    "chooseFileMsg": {
+      "image": "Please choose an image file",
+      "video": "Please choose a video file"
     },
     "messages": {
       "error": {
