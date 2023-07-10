@@ -572,7 +572,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       this.showFormError = false;
     } else {
       this.showFormError = true;
-      return;
+      return;  //NOSONAR
     }
   }
 
@@ -584,7 +584,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       _.get(data,'allowScoring') === 'Yes') {
       this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
       this.showFormError = true;
-      return; //NOSONAR
+      return;
     } else {
       this.showFormError = false;
     }
@@ -592,7 +592,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       (option.body === undefined || option.body === '' || option.length > this.setCharacterLimit));
     if (optionValid || (_.isUndefined(this.editorState.answer) && this.sourcingSettings?.enforceCorrectAnswer)) {
       this.showFormError = true;
-      return; //NOSONAR
+      return;
     } else {
       this.showFormError = false;
     }
