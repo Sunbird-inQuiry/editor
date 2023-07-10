@@ -546,7 +546,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   validateQuestionData() {
     if ([undefined, ''].includes(this.editorState.question)) {
       this.showFormError = true;
-      return; //NOSONAR
+      return;
     } else {
       this.showFormError = false;
     }
@@ -572,7 +572,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       this.showFormError = false;
     } else {
       this.showFormError = true;
-      return; //NOSONAR
+      return;
     }
   }
 
