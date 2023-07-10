@@ -592,7 +592,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       (option.body === undefined || option.body === '' || option.length > this.setCharacterLimit));
     if (optionValid || (_.isUndefined(this.editorState.answer) && this.sourcingSettings?.enforceCorrectAnswer)) {
       this.showFormError = true;
-      return;
+      return; //NOSONAR
     } else {
       this.showFormError = false;
     }
