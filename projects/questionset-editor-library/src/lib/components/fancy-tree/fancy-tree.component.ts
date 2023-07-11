@@ -14,7 +14,7 @@ import { ConfigService } from '../../services/config/config.service';
 
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-declare var $: any;
+declare let $: any;
 
 @Component({
   selector: 'lib-fancy-tree',
@@ -464,7 +464,6 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
             });
           });
         }, 100);
-        // event.stopPropagation();
       });
 
       $($nodeSpan[0]).find(`#removeNodeIcon`).on('click', (event: any) => {

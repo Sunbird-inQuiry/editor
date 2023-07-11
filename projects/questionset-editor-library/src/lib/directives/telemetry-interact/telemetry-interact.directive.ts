@@ -1,6 +1,5 @@
 import { Directive, Input, HostListener } from '@angular/core';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
-import * as _ from 'lodash-es';
 export interface IInteractEventInput {
   'edata': IInteractEventEdata;
 }

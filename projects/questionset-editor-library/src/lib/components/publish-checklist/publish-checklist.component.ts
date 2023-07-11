@@ -47,7 +47,6 @@ export class PublishChecklistComponent implements OnInit {
     }
     modal.deny();
   }
-  outputData(eventData: any) { }
 
   onStatusChanges(event) {
     this.isButtonEnable = event.isValid;
