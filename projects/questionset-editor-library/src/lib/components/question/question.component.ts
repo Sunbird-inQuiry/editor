@@ -806,7 +806,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     metadata.body = metadata.question;
     if (!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)) {
       const treeNodeData = _.get(this.treeNodeData, 'data.metadata');
-      _.get(treeNodeData,'allowScoring') === 'Yes' ? '' : _.set(metadata,'responseDeclaration.response1.mapping',[]);
+      if (_.get(treeNodeData,'allowScoring') != 'Yes') {
+       _.set(metadata,'responseDeclaration.response1.mapping',[]);
+      }
     }
 
     metadata = this.setQuestionProperties(metadata);

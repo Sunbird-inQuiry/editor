@@ -329,8 +329,11 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
         levels: this.createLeavels(event.levels)
       };
     }
-    // tslint:disable-next-line:no-unused-expression
-    event?.instance ? data.instances = { label : event?.instances } : '';
+    if (event?.instance) {
+      data.instances = { label : event?.instances }
+    } else {
+      data.instances = '';
+    }
     if (!_.isEmpty(this.appIcon) && this.showAppIcon) {
       data.appIcon = this.appIcon;
     }

@@ -946,7 +946,11 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       const catMetaData = _.get(selectedtemplateDetails, 'objectMetadata');
-      !_.isUndefined(this.editorConfig.config.renderTaxonomy) ? (this.questionComponentInput.config ={maximumOptions:_.get(catMetaData, 'config.maximumOptions')}) : '' ;
+      if (!_.isUndefined(this.editorConfig.config.renderTaxonomy)) {
+        this.questionComponentInput.config = {maximumOptions:_.get(catMetaData, 'config.maximumOptions')};
+      } else {
+        this.questionComponentInput.config = {};
+      }
       this.setEnforceCorrectAnswer(catMetaData);
       if (_.isEmpty(_.get(catMetaData, 'schema.properties.interactionTypes.items.enum'))) {
         this.editorService.selectedChildren = {
