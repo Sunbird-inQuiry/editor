@@ -368,6 +368,9 @@ export const getCategoryDefinitionResponse = {
         config: {},
         schema: {
           properties: {
+            config: {
+              maximumOptions: 4
+            },
             mimeType: {
               type: 'string',
               enum: ['application/vnd.sunbird.question'],

@@ -1223,6 +1223,7 @@ describe('EditorComponent', () => {
     const event = 'Multiple Choice Question';
     const editorService = TestBed.inject(EditorService);
     component.editorConfig = editorConfig;
+    component.editorConfig.config.renderTaxonomy = true;
     component.editorConfig.config.showSourcingStatus = false;
     spyOn(component, 'redirectToQuestionTab').and.callFake(() => {});
     spyOn(editorService, 'getCategoryDefinition').and.returnValue(of(getCategoryDefinitionResponse));
