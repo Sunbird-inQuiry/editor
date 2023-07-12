@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, AfterViewInit, ViewEncapsulation, OnChanges, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, AfterViewInit, ViewEncapsulation, OnDestroy } from '@angular/core';
 import * as _ from 'lodash-es';
 import { v4 as uuidv4 } from 'uuid';
 import { McqForm } from '../../interfaces/McqForm';
