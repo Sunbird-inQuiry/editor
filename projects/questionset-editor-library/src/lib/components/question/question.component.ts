@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, AfterViewInit, ViewEncapsulation, OnChanges, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, AfterViewInit, ViewEncapsulation, OnDestroy } from '@angular/core';
 import * as _ from 'lodash-es';
 import { v4 as uuidv4 } from 'uuid';
 import { McqForm } from '../../interfaces/McqForm';
@@ -806,7 +806,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     metadata.body = metadata.question;
     if (!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)) {
       const treeNodeData = _.get(this.treeNodeData, 'data.metadata');
-      _.get(treeNodeData,'allowScoring') === 'Yes' ? '' : _.set(metadata,'responseDeclaration.response1.mapping',[]);
+      if (_.get(treeNodeData,'allowScoring') != 'Yes') {
+       _.set(metadata,'responseDeclaration.response1.mapping',[]);
+      }
     }
 
     metadata = this.setQuestionProperties(metadata);

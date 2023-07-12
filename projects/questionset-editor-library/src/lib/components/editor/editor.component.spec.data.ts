@@ -365,7 +365,9 @@ export const getCategoryDefinitionResponse = {
         childrenConfig: {
           choice: {}
         },
-        config: {},
+        config: {
+          maximumOptions: 4
+        },
         schema: {
           properties: {
             mimeType: {
