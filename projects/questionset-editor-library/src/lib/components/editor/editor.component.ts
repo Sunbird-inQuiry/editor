@@ -946,7 +946,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       const catMetaData = _.get(selectedtemplateDetails, 'objectMetadata');
-      if (!_.isUndefined(this.editorConfig.config.renderTaxonomy)) {
+      if (_.get(this.editorConfig, 'config.renderTaxonomy') === true) {
         this.questionComponentInput.config = {maximumOptions:_.get(catMetaData, 'config.maximumOptions')};
       } else {
         this.questionComponentInput.config = {};
@@ -1025,7 +1025,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     };
     this.pageId = 'question';
 
-    if(!_.isUndefined(mode) && !_.isUndefined(this.editorConfig.config.renderTaxonomy)){
+    if(!_.isUndefined(mode) && _.get(this.editorConfig, 'config.renderTaxonomy') === true){
       this.setQuestionInputOnRenderTaxonomy(mode);
     }
   }

@@ -1219,15 +1219,32 @@ describe('EditorComponent', () => {
     expect(editorService.apiErrorHandling).toHaveBeenCalled();
   });
 
-  it('#handleTemplateSelection should call #redirectToQuestionTab()', async () => {
+  it('#handleTemplateSelection should call #redirectToQuestionTab() when renderTaxonomy is true', async () => {
     const event = 'Multiple Choice Question';
     const editorService = TestBed.inject(EditorService);
     component.editorConfig = editorConfig;
     component.editorConfig.config.renderTaxonomy = true;
     component.editorConfig.config.showSourcingStatus = false;
     spyOn(component, 'redirectToQuestionTab').and.callFake(() => {});
+    spyOn(component, 'setLeafFormConfig').and.callFake(() => {});
+    spyOn(component, 'setEnforceCorrectAnswer').and.callFake(() => {});
     spyOn(editorService, 'getCategoryDefinition').and.returnValue(of(getCategoryDefinitionResponse));
     component.handleTemplateSelection(event);
+    expect(component.redirectToQuestionTab).toHaveBeenCalled();
+  });
+
+  it('#handleTemplateSelection should call #redirectToQuestionTab() when renderTaxonomy is false', async () => {
+    const event = 'Multiple Choice Question';
+    const editorService = TestBed.inject(EditorService);
+    component.editorConfig = editorConfig;
+    component.editorConfig.config.renderTaxonomy = false;
+    component.editorConfig.config.showSourcingStatus = false;
+    spyOn(component, 'setLeafFormConfig').and.callFake(() => {});
+    spyOn(component, 'setEnforceCorrectAnswer').and.callFake(() => {});
+    spyOn(component, 'redirectToQuestionTab').and.callFake(() => {});
+    spyOn(editorService, 'getCategoryDefinition').and.returnValue(of(getCategoryDefinitionResponse));
+    component.handleTemplateSelection(event);
+    expect(component.questionComponentInput.config).toEqual({});
     expect(component.redirectToQuestionTab).toHaveBeenCalled();
   });
 

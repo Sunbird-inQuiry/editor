@@ -365,12 +365,11 @@ export const getCategoryDefinitionResponse = {
         childrenConfig: {
           choice: {}
         },
-        config: {},
+        config: {
+          maximumOptions: 4
+        },
         schema: {
           properties: {
-            config: {
-              maximumOptions: 4
-            },
             mimeType: {
               type: 'string',
               enum: ['application/vnd.sunbird.question'],
