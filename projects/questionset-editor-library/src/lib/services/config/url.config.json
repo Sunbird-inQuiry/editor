@@ -43,8 +43,7 @@
       "READ":"content/v3/read/",
       "CREATE":"content/v3/create",
       "UPLOAD":"content/v3/upload/",
-      "UPLOAD_URL":"content/v3/upload/url/",
-      "UPDATE_COLLABORATOR":"content/v1/collaborator/update/"
+      "UPLOAD_URL":"content/v3/upload/url/"
     },
     "frameworkRead":"framework/v1/read/",
     "channelRead":"channel/v1/read/",
