@@ -375,20 +375,6 @@ describe('EditorComponent', () => {
     expect(component.getHierarchyChildrenConfig).toHaveBeenCalled();
   });
 
-  it('#toggleCollaboratorModalPoup() should set addCollaborator to true', () => {
-    component.addCollaborator = false;
-    spyOn(component, 'toggleCollaboratorModalPoup').and.callThrough();
-    component.toggleCollaboratorModalPoup();
-    expect(component.addCollaborator).toEqual(true);
-  });
-
-  it('#toggleCollaboratorModalPoup() should set addCollaborator to false', () => {
-    component.addCollaborator = true;
-    spyOn(component, 'toggleCollaboratorModalPoup').and.callThrough();
-    component.toggleCollaboratorModalPoup();
-    expect(component.addCollaborator).toEqual(false);
-  });
-
   it('#toolbarEventListener() should call #saveContent() if event is saveContent', () => {
   spyOn(component, 'saveContent').and.callFake(() => {
     return Promise.resolve();
@@ -549,30 +535,6 @@ describe('EditorComponent', () => {
     component.toolbarEventListener(event);
     expect(component.sourcingRejectContent).toHaveBeenCalledWith({ comment: 'test' });
   });
-
-  it('#toolbarEventListener() should call #toggleCollaboratorModalPoup()', () => {
-    const event = {
-      button: 'addCollaborator'
-    };
-    component.addCollaborator = false;
-    spyOn(component, 'toggleCollaboratorModalPoup').and.callThrough();
-    spyOn(component, 'toolbarEventListener').and.callThrough();
-    component.toolbarEventListener(event);
-    expect(component.actionType).toBe('addCollaborator');
-    expect(component.toggleCollaboratorModalPoup).toHaveBeenCalled();
-    expect(component.addCollaborator).toEqual(true);
-  });
-
-  it('#toolbarEventListener() should not call #toggleCollaboratorModalPoup()', () => {
-    spyOn(component, 'toggleCollaboratorModalPoup');
-    const event = {
-      button: 'xyz'
-    };
-    component.toolbarEventListener(event);
-    expect(component.actionType).toBe('xyz');
-    expect(component.toggleCollaboratorModalPoup).not.toHaveBeenCalled();
-  });
-
 
   it('#toolbarEventListener() should set showReviewModal to true ', () => {
     spyOn(component, 'toolbarEventListener').and.callThrough();

@@ -83,7 +83,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   public isEnableCsvAction: any;
   public isTreeInitialized: any;
   public ishierarchyConfigSet =  false;
-  public addCollaborator: boolean;
   public publishchecklist: any;
   public isComponenetInitialized = false;
   public unSubscribeShowLibraryPageEmitter: Subscription;
@@ -137,7 +136,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           const hierarchyResponse = _.first(response);
           const collection = _.get(hierarchyResponse, `result.${this.objectType}`);
           this.toolbarConfig.title = collection.name;
-          this.toolbarConfig.isAddCollaborator = (collection.createdBy === _.get(this.editorConfig, 'context.user.id'));
           this.initializeFrameworkAndChannel(collection);
         });
     }
@@ -443,15 +441,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     return childrenData;
   }
 
-  toggleCollaboratorModalPoup() {
-    this.isEnableCsvAction = true;
-    if (this.addCollaborator) {
-      this.addCollaborator = false;
-    } else if (!this.addCollaborator) {
-      this.addCollaborator = true;
-    }
-  }
-
   toolbarEventListener(event) {
     this.actionType = event.button;
     switch (event.button) {
@@ -520,9 +509,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         break;
       case 'sourcingReject':
         this.sourcingRejectContent({ comment: event.comment });
-        break;
-      case 'addCollaborator':
-        this.toggleCollaboratorModalPoup();
         break;
       case 'showReviewcomments':
         this.showReviewModal = !this.showReviewModal;

@@ -174,9 +174,6 @@
        "hierarchyUpdated":"Folder metadata has been successfully updated. Please close the dialog",
        "successful":"Successful !",
        "csvDownloadInstruction":"Please make sure that this is the file downloaded using the “Download folders as csv file” option and changes are made to it",
-       "collaborators": "Collaborators",
-       "addCollaborators": "Add Collaborators",
-       "manageCollaborators": "Manage Collaborators",
        "sliderValue":"Slider Value",
        "left":"Left",
        "stepSize":"Step size",
@@ -241,7 +238,6 @@
        "contentNotFoundonOrigin": "The content not found in consumption",
        "resultNotFound": "No Results Found",
        "userNotFound": "No users found",
-       "collaboratorsNotFound": "No collaborators found for this content",
        "searchConfigNotFound": "Search filters configuration not available. Please contact system admin for support."
     },
     "termsAndConditions": {

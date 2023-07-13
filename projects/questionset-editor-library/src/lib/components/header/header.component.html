@@ -34,11 +34,6 @@
     </div>
   </div>
   <div class="d-flex flex-ai-center" *ngIf="pageId === 'collection_editor' && labelConfigData">
-    <div *ngIf="visibility && visibility?.addCollaborator" [attr.data-title]="labelConfigData?.isAddCollaborator ? 'Add collaborator' : 'View collaborator'" class="cursor-pointer sb-color-primary mr-20 font-weight-bold"
-    (click)="buttonEmitter({type: 'addCollaborator'})" libTelemetryInteract
-    [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('add_collaborator','click','launch', telemetryService.telemetryPageId)">
-      <i class="icon user plus mr-0" aria-hidden="true"></i>
-    </div>
     <button *ngIf="visibility && visibility?.submitContent && !bulkUploadStatus && labelConfigData?.hasChildren && !visibility.hideSubmitForReviewBtn && visibility.showPaginationBtn"
     class="sb-btn sb-btn-normal sb-btn-primary mr-10" (click)="buttonEmitter({type:'pagination'})" libTelemetryInteract
     [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('submit','click','submit', telemetryService.telemetryPageId)"

@@ -1006,7 +1006,6 @@ export const hierarchyResponse = [
           },
         ],
         contentEncoding: 'gzip',
-        collaborators: ['5c3a2a46-4830-4ade-a4cd-b6780635569c'],
         lockKey: '49d5e059-5ff7-444c-bcf5-84e293f8da7c',
         generateDIALCodes: 'Yes',
         contentType: 'Course',
@@ -4278,7 +4277,6 @@ export const questionSetEditorConfig = {
       collection: {
           maxContentsLimit: 1200
       },
-      showAddCollaborator: false,
       publicStorageAccount: 'https://sunbirddev.blob.core.windows.net/',
       maxDepth: 1,
       addFromLibraryEnabled: true,

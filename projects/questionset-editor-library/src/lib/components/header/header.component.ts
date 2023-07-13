@@ -81,7 +81,6 @@ export class HeaderComponent implements OnDestroy, OnInit {
     this.visibility.showSourcingStatus = _.get(this.editorService, 'editorConfig.config.showSourcingStatus');
     this.visibility.showCorrectionComments = _.get(this.editorService, 'editorConfig.config.showCorrectionComments');
     this.visibility.hideSubmitForReviewBtn = _.get(this.editorService, 'editorConfig.config.hideSubmitForReviewBtn') || false;
-    this.visibility.addCollaborator = _.get(this.editorService, 'editorConfig.config.showAddCollaborator');
     this.visibility.showPaginationBtn = _.get(this.editorService, 'editorConfig.config.enablePagination');
   }
 

@@ -27,7 +27,6 @@
     "collection": {
       "maxContentsLimit": "1200"
     },
-    "showAddCollaborator": false,
     "enableBulkUpload": false,
     "defaultStates": {
         "nonInteractiveQuestions": {
