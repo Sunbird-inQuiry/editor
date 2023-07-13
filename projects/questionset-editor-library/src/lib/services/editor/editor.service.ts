@@ -29,8 +29,6 @@ export class EditorService {
   private _isReviewModificationAllowed = false;
   public showLibraryPage: EventEmitter<any> = new EventEmitter();
   public showQuestionLibraryPage: EventEmitter<any> = new EventEmitter();
-  private _bulkUploadStatus$ = new BehaviorSubject<any>(undefined);
-  public readonly bulkUploadStatus$: Observable<any> = this._bulkUploadStatus$;
   public contentsCount = 0;
   templateList = [];
   parentIdentifier: any;
@@ -114,9 +112,6 @@ export class EditorService {
     return _.cloneDeep(_.merge(this.configService.labelConfig.button_labels, _.get(this.editorConfig, 'context.labels')));
   }
 
-  nextBulkUploadStatus(status) {
-    this._bulkUploadStatus$.next(status);
-  }
   emitshowLibraryPageEvent(page) {
     this.showLibraryPage.emit(page);
   }

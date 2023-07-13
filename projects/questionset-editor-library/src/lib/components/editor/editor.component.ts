@@ -144,9 +144,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.editorConfig.context.channel, this.editorConfig.config.objectType)
       .subscribe(
         (response) => {
-          const enableBulkUpload = _.get(response, 'result.objectCategoryDefinition.objectMetadata.config.sourcingSettings.collection.enableBulkUpload');
-          this.toolbarConfig.showBulkUploadBtn = enableBulkUpload ? enableBulkUpload : false;
-
           this.sourcingSettings = _.get(response, 'result.objectCategoryDefinition.objectMetadata.config.sourcingSettings', {});
           this.helperService.channelData$.subscribe(
             (channelResponse) => {

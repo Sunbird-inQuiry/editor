@@ -25,7 +25,6 @@ export class HeaderComponent implements OnDestroy, OnInit {
     }
   }
   @Output() toolbarEmitter = new EventEmitter<any>();
-  @Output() bulkUploadEmitter = new EventEmitter<any>();
   @ViewChild('FormControl') FormControl: NgForm;
   @ViewChild('modal') public modal;
   @Output() qualityParamEmitter = new EventEmitter<any>();
@@ -40,21 +39,12 @@ export class HeaderComponent implements OnDestroy, OnInit {
   public sourcingStatusClass: string;
   public originPreviewUrl: string;
   public correctionComments: string;
-  public unsubscribe$ = new Subject<void>();
-  public bulkUploadStatus = false;
 
   constructor(private editorService: EditorService,
     public telemetryService: EditorTelemetryService,
     public configService: ConfigService) { }
 
   async ngOnInit() {
-    this.editorService.bulkUploadStatus$.pipe(takeUntil(this.unsubscribe$)).subscribe((status) => {
-      if (status === 'processing') {
-        this.bulkUploadStatus = true;
-      } else {
-        this.bulkUploadStatus = false;
-      }
-    });
     this.objectType = _.get(this.editorService, 'editorConfig.config.objectType');
     await this.handleActionButtons();
     this.getSourcingData();
@@ -74,8 +64,6 @@ export class HeaderComponent implements OnDestroy, OnInit {
     this.visibility.sourcingApproveContent = this.editorService.editorMode === 'sourcingreview';
     this.visibility.sourcingRejectContent = this.editorService.editorMode === 'sourcingreview';
     this.visibility.previewContent = _.get(this.editorService, 'editorConfig.config.objectType') === 'QuestionSet';
-    // tslint:disable-next-line:max-line-length
-    this.visibility.bulkUpload = _.get(this.editorService, 'editorConfig.config.objectType') === 'QuestionSet' && this.editorService.editorMode === 'edit';
     this.visibility.showOriginPreviewUrl = _.get(this.editorService, 'editorConfig.config.showOriginPreviewUrl');
     this.visibility.showSourcingStatus = _.get(this.editorService, 'editorConfig.config.showSourcingStatus');
     this.visibility.showCorrectionComments = _.get(this.editorService, 'editorConfig.config.showCorrectionComments');
@@ -119,15 +107,9 @@ export class HeaderComponent implements OnDestroy, OnInit {
     }
   }
 
-  bulkUploadListener(event) {
-    this.bulkUploadEmitter.emit(event);
-  }
-
   ngOnDestroy() {
     if (this.modal && this.modal.deny) {
       this.modal.deny();
     }
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
   }
 }

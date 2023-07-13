@@ -53,14 +53,6 @@
       "DOWNLOAD": "collection/v1/export/",
       "SAMPLE_COLLECTION_HIERARCHY": "sourcing/collection-hierarchy/createfoldersamplecsvfile.csv"
     },
-    "BULKJOB": {
-      "CREATE": "program/v1/process/create",
-      "UPDATE": "program/v1/process/update",
-      "SEARCH": "program/v1/process/search",
-      "UPLOAD": "question/v2/bulkUpload",
-      "STATUS": "question/v2/bulkUploadStatus",
-      "SAMPLE_QUESTION_FILE" : "bulk-question-upload-sample-format.csv"
-    },
     "USER": {
       "SEARCH":"user/v1/search"
     },

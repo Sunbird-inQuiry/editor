@@ -145,7 +145,6 @@ describe('EditorComponent', () => {
     expect(component.toolbarConfig.title).toEqual(hierarchyResponse[0].result.content.name);
     expect(component.initializeFrameworkAndChannel).toHaveBeenCalled();
     expect(editorService.getCategoryDefinition).toHaveBeenCalled();
-    expect(component.toolbarConfig.showBulkUploadBtn).toBeFalsy();
     expect(telemetryService.initializeTelemetry).toHaveBeenCalled();
     expect(telemetryService.telemetryPageId).toEqual('collection_editor');
     expect(telemetryService.start).toHaveBeenCalled();
