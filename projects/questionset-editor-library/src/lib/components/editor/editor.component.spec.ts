@@ -117,7 +117,6 @@ describe('EditorComponent', () => {
     spyOn(treeService, 'initialize').and.callThrough();
     const configService = TestBed.inject(ConfigService);
     component.configService = configService;
-    spyOn(editorService, 'getToolbarConfig').and.returnValue({ title: 'abcd', showDialcode: 'No' });
     spyOn(component, 'isReviewMode').and.returnValue(true);
     spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of(hierarchyResponse));
     spyOn(component, 'initializeFrameworkAndChannel').and.callFake(() => {});
@@ -138,7 +137,6 @@ describe('EditorComponent', () => {
     expect(component.editorMode).toEqual('edit');
     expect(treeService.initialize).toHaveBeenCalledWith(editorConfig);
     expect(component.collectionId).toBeDefined();
-    expect(editorService.getToolbarConfig).toHaveBeenCalled();
     expect(component.isObjectTypeCollection).toBeTruthy();
     expect(component.isReviewMode).toHaveBeenCalled();
     expect(component.isStatusReviewMode).toBeTruthy();
@@ -147,7 +145,6 @@ describe('EditorComponent', () => {
     expect(component.toolbarConfig.title).toEqual(hierarchyResponse[0].result.content.name);
     expect(component.initializeFrameworkAndChannel).toHaveBeenCalled();
     expect(editorService.getCategoryDefinition).toHaveBeenCalled();
-    expect(component.toolbarConfig.showDialcode).toEqual('yes');
     expect(component.toolbarConfig.showBulkUploadBtn).toBeFalsy();
     expect(telemetryService.initializeTelemetry).toHaveBeenCalled();
     expect(telemetryService.telemetryPageId).toEqual('collection_editor');
@@ -783,9 +780,6 @@ describe('EditorComponent', () => {
   });
 
   it('#submitHandler() should return true', () => {
-    component.toolbarConfig = {
-      showDialcode: 'No'
-    };
     spyOn(component, 'validateFormStatus').and.callFake(() => {
       return true;
     });

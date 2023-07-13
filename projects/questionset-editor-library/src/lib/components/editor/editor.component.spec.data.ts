@@ -80,8 +80,6 @@ editorConfig = {
     primaryCategory: 'Course',
     isReadOnlyMode: false,
     isRoot: true,
-    dialcodeMinLength: 2,
-    dialcodeMaxLength: 250,
     iconClass: 'fa fa-book',
     children: {},
     renderTaxonomy: false,
@@ -336,7 +334,6 @@ export const toolbarConfig_question = {
   next_btn_label: 'Next',
   remove_btn_label: 'Remove',
   done_btn_label: 'Done',
-  showDialcode: 'no',
   showBulkUploadBtn: false,
 };
 
@@ -380,9 +377,6 @@ export const getCategoryDefinitionResponse = {
                 type: 'string',
                 enum: ['choice'],
               },
-            },
-            generateDIALCodes: {
-              default: 'Yes',
             },
           },
         },
@@ -469,7 +463,6 @@ export const hirearchyGet = {
       children: [],
       contentEncoding: 'gzip',
       lockKey: '6ea80434-00b2-4e43-a872-20c34ee78615',
-      generateDIALCodes: 'Yes',
       contentType: 'Course',
       trackable: {
         enabled: 'Yes',
@@ -502,7 +495,6 @@ export const hirearchyGet = {
       copyrightYear: 2021,
       contentDisposition: 'inline',
       lastUpdatedOn: '2021-07-07T12:20:44.344+0000',
-      dialcodeRequired: 'No',
       lastStatusChangedOn: '2021-07-06T08:06:17.392+0000',
       createdFor: ['01309282781705830427'],
       creator: 'N11',
@@ -907,7 +899,6 @@ export const hierarchyResponse = [
                         'https://dock.sunbirded.org/api/content/v1/read/do_1133124455783546881476',
                     },
                     collectionId: 'do_1133124409135595521471',
-                    dialcodeRequired: 'No',
                     lastStatusChangedOn: '2021-06-30T12:01:42.198+0000',
                     createdFor: ['01309282781705830427'],
                     creator: 'Vai',
@@ -933,7 +924,6 @@ export const hierarchyResponse = [
                 lastUpdatedOn: '2021-07-06T07:15:50.428+0000',
                 contentEncoding: 'gzip',
                 contentType: 'CourseUnit',
-                dialcodeRequired: 'No',
                 trackable: {
                   enabled: 'No',
                   autoBatch: 'No',
@@ -971,7 +961,6 @@ export const hierarchyResponse = [
             lastUpdatedOn: '2021-07-06T07:15:40.525+0000',
             contentEncoding: 'gzip',
             contentType: 'CourseUnit',
-            dialcodeRequired: 'No',
             trackable: {
               enabled: 'No',
               autoBatch: 'No',
@@ -1007,7 +996,6 @@ export const hierarchyResponse = [
         ],
         contentEncoding: 'gzip',
         lockKey: '49d5e059-5ff7-444c-bcf5-84e293f8da7c',
-        generateDIALCodes: 'Yes',
         contentType: 'Course',
         trackable: {
           enabled: 'Yes',
@@ -1046,7 +1034,6 @@ export const hierarchyResponse = [
         contentDisposition: 'inline',
         additionalCategories: ['Lesson Plan', 'Textbook'],
         lastUpdatedOn: '2021-07-06T07:23:08.357+0000',
-        dialcodeRequired: 'No',
         lastStatusChangedOn: '2021-07-06T07:11:51.103+0000',
         createdFor: ['01309282781705830427'],
         creator: 'N11',
@@ -1199,12 +1186,7 @@ export const categoryDefinitionData = {
             mimeType: {
               type: 'string',
               enum: ['application/vnd.ekstep.content-collection'],
-            },
-            generateDIALCodes: {
-              type: 'string',
-              enum: ['Yes', 'No'],
-              default: 'Yes',
-            },
+            }
           },
         },
       },
@@ -1302,50 +1284,6 @@ export const categoryDefinitionData = {
             {
               name: 'Second Section',
               fields: [
-                {
-                  code: 'dialcodeRequired',
-                  dataType: 'text',
-                  description: 'QR CODE REQUIRED',
-                  editable: true,
-                  default: 'No',
-                  index: 5,
-                  inputType: 'radio',
-                  label: 'QR code required',
-                  name: 'dialcodeRequired',
-                  placeholder: 'QR code required',
-                  renderingHints: {
-                    class: 'sb-g-col-lg-1',
-                  },
-                  range: ['Yes', 'No'],
-                  required: false,
-                  visible: true,
-                },
-                {
-                  code: 'dialcodes',
-                  depends: ['dialcodeRequired'],
-                  dataType: 'list',
-                  description: 'Digital Infrastructure for Augmented Learning',
-                  editable: true,
-                  inputType: 'dialcode',
-                  label: 'QR code',
-                  name: 'dialcode',
-                  placeholder: 'Enter code here',
-                  renderingHints: {
-                    class: 'sb-g-col-lg-1',
-                  },
-                  required: true,
-                  visible: true,
-                  validations: [
-                    {
-                      type: 'minLength',
-                      value: '2',
-                    },
-                    {
-                      type: 'maxLength',
-                      value: '20',
-                    },
-                  ],
-                },
               ],
             },
             {
@@ -1869,51 +1807,7 @@ export const categoryDefinitionData = {
                   placeholder: 'Choose Topics',
                   required: false,
                   validations: [],
-                },
-                {
-                  code: 'dialcodeRequired',
-                  dataType: 'text',
-                  description: 'QR CODE REQUIRED',
-                  editable: true,
-                  default: 'No',
-                  index: 5,
-                  inputType: 'radio',
-                  label: 'QR code required',
-                  name: 'dialcodeRequired',
-                  placeholder: 'QR code required',
-                  renderingHints: {
-                    class: 'sb-g-col-lg-1',
-                  },
-                  range: ['Yes', 'No'],
-                  required: false,
-                  visible: true,
-                },
-                {
-                  code: 'dialcodes',
-                  depends: ['dialcodeRequired'],
-                  dataType: 'list',
-                  description: 'Digital Infrastructure for Augmented Learning',
-                  editable: true,
-                  inputType: 'dialcode',
-                  label: 'QR code',
-                  name: 'dialcode',
-                  placeholder: 'Enter code here',
-                  renderingHints: {
-                    class: 'sb-g-col-lg-1',
-                  },
-                  required: true,
-                  visible: true,
-                  validations: [
-                    {
-                      type: 'minLength',
-                      value: '2',
-                    },
-                    {
-                      type: 'maxLength',
-                      value: '20',
-                    },
-                  ],
-                },
+                }
               ],
             },
           ],
@@ -3773,7 +3667,6 @@ export const questionsetHierarchyRead = {
           contentDisposition: 'inline',
           lastUpdatedOn: '2022-05-27T05:09:45.757+0000',
           contentEncoding: 'gzip',
-          generateDIALCodes: 'No',
           showSolutions: false,
           trackable: {
             enabled: 'No',
@@ -3807,7 +3700,6 @@ export const questionsetHierarchyRead = {
       ],
       contentEncoding: 'gzip',
       lockKey: '86c9bcba-12bc-4164-a559-a036d3deca6e',
-      generateDIALCodes: 'No',
       showSolutions: false,
       trackable: {
         enabled: 'No',

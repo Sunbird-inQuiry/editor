@@ -337,11 +337,6 @@ lib-questionset-editor {
     border: none !important;
   }
 
-  .dialcodeModal {
-    input:focus-visible {
-      border: .0625rem solid #999999 !important;
-    }
-  }
   // Fancy tree css
   #fancytree-drop-marker.fa-long-arrow-right:before{
     content: " " !important;
@@ -542,16 +537,6 @@ lib-questionset-editor {
       tag{
         display: inline-flex !important;
       }
-    }
-  }
-  .sb-dialcode {
-    border-bottom: 0.5px solid #333333;
-    padding: 8px 5px !important;
-    border-radius: 0 !important;
-    &:focus-visible{
-      border-bottom: 0.5px solid #333333 !important;
-      border-radius: 0 !important;
-      outline: 0 !important;
     }
   }
   sb-dynamic-timer{
