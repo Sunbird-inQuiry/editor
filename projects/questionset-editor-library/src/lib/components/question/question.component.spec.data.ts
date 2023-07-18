@@ -151,21 +151,21 @@ export const mockData = {
               {
                 label: "<p>option 1</p>",
                 value: 0,
-                hints: {
+                hint: {
                   '70c82bf5-9459-4c43-8897-0e58b7e1da62':'test hint 1'
                 },
               },
               {
                 label: "<p>option 2</p>",
                 value: 1,
-                hints: {
+                hint: {
                   '70c82bf5-9459-4c43-8897-0e58b7e1as73':'test hint 2'
                 },
               },
               {
                 label: "<p>option 3</p>",
                 value: 2,
-                hints: {
+                hint: {
                   '70c82bf5-9459-4c43-8897-0e58b7e1gf87':'test hint 3'
                 },
               },
@@ -184,6 +184,7 @@ export const mockData = {
            "70c82bf5-9459-4c43-8897-0e58b7e1da64": { en: "test hint 1" },
            "70c82bf5-9459-4c43-8897-0e58b7e1as73": { en: "test hint 2" },
            "70c82bf5-9459-4c43-8897-0e58b7e1gf87": { en: "test hint 3" },
+           "70f9a0b2-94c3-4d81-86c0-2082fb10a47b": { en: "test hint 4" }
         },
         evidence: {
           mimeType: ["audio", "vedio"],
@@ -213,7 +214,12 @@ export const mockData = {
             cardinality: "multiple",
             type: "integer",
             defaultValue: 1
-          }
+          },
+          hint :{
+            cardinality: "single",
+            type: "string",
+            defaultValue: "70f9a0b2-94c3-4d81-86c0-2082fb10a47b"
+        }
         },
         remarks: {
           maxLength: 100,

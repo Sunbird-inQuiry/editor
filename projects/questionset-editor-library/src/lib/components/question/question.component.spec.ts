@@ -1750,8 +1750,11 @@ describe("QuestionComponent", () => {
     component.questionMetaData = mockData.mcqQuestionMetaData.result.question;
     sourcingSettingsMock.showAddSecondaryQuestion = true;
     component.questionMetaData.hints = {
-      '70c82bf5-9459-4c43-8897-0e58b7e1da62':''
-    };
+      "70c82bf5-9459-4c43-8897-0e58b7e1da64": { en: "test hint 1" },
+      "70c82bf5-9459-4c43-8897-0e58b7e1as73": { en: "test hint 2" },
+      "70c82bf5-9459-4c43-8897-0e58b7e1gf87": { en: "test hint 3" },
+      "70f9a0b2-94c3-4d81-86c0-2082fb10a47b": { en: "test hint 4" }
+   }
     sourcingSettingsMock.showAddHints = false;
     component.sourcingSettings = sourcingSettingsMock;
     component.questionInput.setChildQuestion = true;

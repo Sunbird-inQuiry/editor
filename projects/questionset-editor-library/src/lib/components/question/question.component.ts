@@ -115,6 +115,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   showQualityParameterPopup: boolean =false;
   public qualityFormConfig: any;
   requestChangesPopupAction: string;
+  uuid:string = uuidv4(); // to store question hint uuid to maintain state of the ID.
   constructor(
     private questionService: QuestionService, public editorService: EditorService, public telemetryService: EditorTelemetryService,
     public playerService: PlayerService, private toasterService: ToasterService, private treeService: TreeService,
@@ -239,6 +240,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 }, { templateId, numberOfOptions,maximumOptions });
                 this.editorState.solutions = this.questionMetaData?.editorState?.solutions;
                 this.editorState.interactions = interactions;
+                this.editorState.hints = this.questionMetaData.hints ? this.questionMetaData.hints : {};
                 if (_.has(this.questionMetaData, 'responseDeclaration')) {
                   this.editorState.responseDeclaration = _.get(this.questionMetaData, 'responseDeclaration');
                 }
@@ -288,6 +290,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         this.populateFormData();
         this.setQuestionTitle();
         let editorState = {}
+        this.editorState.hints = {};
         if (this.questionInteractionType === 'default') {
           if (this.questionCategory) {
             editorState = _.get(this.configService, `editorConfig.defaultStates.nonInteractiveQuestions.${this.questionCategory}`);
@@ -299,11 +302,11 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         else if (this.questionInteractionType === 'choice') {
           this.editorState = new McqForm({ question: '', options: [] }, { numberOfOptions: _.get(this.questionInput, 'config.numberOfOptions'), maximumOptions: _.get(this.questionInput, 'config.maximumOptions') });
         }
+        this.showLoader = false;
         /** for observation and survey to show hint,tip,dependent question option. */
         if(!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)){
           this.subMenuConfig();
         }
-        this.showLoader = false;
       }
     }, (err: ServerResponse) => {
       const errInfo = {
@@ -885,7 +888,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   getDefaultSessionContext() {
     return _.omitBy(_.merge(
       {
-        creator: _.get(this.editorService.editorConfig, 'context.user.fullName'),
+        // creator: _.get(this.editorService.editorConfig, 'context.user.fullName'),
         createdBy: _.get(this.editorService.editorConfig, 'context.user.id'),
         ..._.pick(_.get(this.editorService.editorConfig, 'context'), ['board', 'medium', 'gradeLevel', 'subject', 'topic'])
       },
@@ -914,8 +917,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       };
     }
     metaData.interactions = metaData.interactions || {};
-
-    if (this.questionInteractionType !== 'default') {
+    if (this.questionInteractionType !== 'default' && metaData.interactions.response1) {
       metaData.interactions.response1.validation = { required: this.childFormData.markAsNotMandatory === 'Yes' ? 'No' : 'Yes'};
     }
 
@@ -925,7 +927,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
     _.forEach(this.subMenus, (el: any) => {
       if (el.id === 'addHint') {
-        metaData.hints[uuidv4()] = el.value
+        metaData.hints[this.uuid] = {en: el.value}
+        this.getOutcomeDeclaration(metaData)
       }
       if (el.id === 'addTip') {
         metaData.instructions = el.value;
@@ -1181,6 +1184,11 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         cardinality: cardinality,
         type: 'integer',
         defaultValue: this.maxScore
+      },
+      hint: {
+        cardinality: "single",
+        type: "string",
+        defaultValue: this.uuid ? this.uuid : ''
       }
     };
     return outcomeDeclaration;
@@ -1360,18 +1368,18 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       {
         id: 'addHint',
         name: 'Add Hint',
-        value: Object.values(_.get(this.questionMetaData, 'hints'))[0],
+        value: this.questionMetaData ? this.questionMetaData.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en : '',
         label: 'Hint',
-        enabled: Object.values(_.get(this.questionMetaData, 'hints'))[0] ? true : false,
+        enabled: this.questionMetaData ? true : false,
         type: 'input',
         show: _.get(this.sourcingSettings, 'showAddHints')
       },
       {
         id: 'addTip',
         name: 'Add Tip',
-        value: _.get(this.questionMetaData, 'instructions]'),
+        value:this.questionMetaData ? this.questionMetaData.instructions:'',
         label: 'Tip',
-        enabled: _.get(this.questionMetaData, 'instructions]') ? true : false,
+        enabled: this.questionMetaData ? true : false,
         type: 'input',
         show: _.get(this.sourcingSettings, 'showAddTips')
       },
@@ -1507,7 +1515,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       if (res.responseCode === 'OK') {
         const result = res.result.question;
         if (result.interactionTypes[0] === 'choice') {
-          const numberOfOptions = result.editorState.options.length;
+          const numberOfOptions = result.interactions.response1.options.length;
           this.editorService.optionsLength = numberOfOptions;
           this.getOptions();
         }
