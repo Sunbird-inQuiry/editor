@@ -137,6 +137,7 @@ export const mockData = {
           ],
           question: "<p>MCQ Question</p>",
         },
+        instructions:'',
         templateId: "mcq-vertical",
         solutions: [
           {
