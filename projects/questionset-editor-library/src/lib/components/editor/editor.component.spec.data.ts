@@ -151,6 +151,7 @@ editorConfig_question = {
     uid: 'ae94b68c-a535-4dce-8e7a-fb9662b0ad68',
     programId: 'f09a30f0-5e34-11ec-874d-3de2a8c29d94',
     contributionOrgId: 'e7328d77-42a7-44c8-84f4-8cfea235f07d',
+    identifier: 'do_113274017771085824116',
     pdata: {
       id: 'local.sunbird.portal',
       ver: '2.8.0',
@@ -364,7 +365,9 @@ export const getCategoryDefinitionResponse = {
         childrenConfig: {
           choice: {}
         },
-        config: {},
+        config: {
+          maximumOptions: 4
+        },
         schema: {
           properties: {
             mimeType: {

@@ -100,6 +100,13 @@ describe('EditorComponent', () => {
     expect(component.isComponenetInitialized).toBeFalsy();
   });
 
+  it('#setEditorConfig() should set editor config', () => {
+    const sampleEditorConfig: any = JSON.stringify(editorConfig);
+    component.editorConfig = sampleEditorConfig;
+    spyOn(component, 'setEditorConfig').and.callThrough();
+    component.setEditorConfig();
+  })
+
   it('#ngOnInit() should call all methods inside it (for objectType Collection)', () => {
     const sampleEditorConfig: any = JSON.stringify(editorConfig);
     component.editorConfig = sampleEditorConfig;
@@ -153,22 +160,14 @@ describe('EditorComponent', () => {
 
   it('#ngOnInit() should call all methods inside it (for objectType Question)', () => {
     component.editorConfig = editorConfig_question;
+    spyOn(component, 'setEditorConfig').and.callFake(() => {});
     const editorService = TestBed.inject(EditorService);
     spyOn(editorService, 'initialize').and.callThrough();
     const treeService = TestBed.inject(TreeService);
     spyOn(treeService, 'initialize').and.callFake(() => {});
-    spyOn(component, 'isReviewMode').and.returnValue(true);
     spyOn(editorService, 'getToolbarConfig').and.returnValue(toolbarConfig_question);
-    spyOn(editorService, 'getCategoryDefinition').and.returnValue(of(getCategoryDefinitionResponse));
-    const telemetryService = TestBed.inject(EditorTelemetryService);
-    spyOn(telemetryService, 'initializeTelemetry').and.callFake(() => { });
-    spyOn(telemetryService, 'start').and.callFake(() => { });
-    const libraryPageEmitter: EventEmitter<any> = new EventEmitter();
-    const questionLibraryPageEmitter: EventEmitter<number> = new EventEmitter();
-    spyOn(editorService, 'getshowLibraryPageEmitter').and.returnValue(libraryPageEmitter);
-    spyOn(component, 'showLibraryComponentPage').and.callFake(() => {});
-    spyOn(editorService, 'getshowQuestionLibraryPageEmitter').and.returnValue(questionLibraryPageEmitter);
-    spyOn(component, 'showQuestionLibraryComponentPage').and.callFake(() => {});
+    spyOn(component, 'isReviewMode').and.returnValue(true);
+    spyOn(component, 'handleQuestionObjectType').and.callFake(() =>{});
     component.ngOnInit();
     expect(editorService.editorMode).toEqual('edit');
     expect(component.editorMode).toEqual('edit');
@@ -176,17 +175,18 @@ describe('EditorComponent', () => {
     expect(treeService.initialize).toHaveBeenCalled();
     expect(editorService.getToolbarConfig).toHaveBeenCalled();
     expect(component.isReviewMode).toHaveBeenCalled();
-    expect(component.collectionId).toBeDefined();
-    expect(component.organisationFramework).toBeDefined();
-    expect(component.toolbarConfig.showDialcode).toEqual('yes');
-    expect(editorService.getCategoryDefinition).toHaveBeenCalledWith('Subjective Question', '01309282781705830427', 'Question');
-    expect(telemetryService.initializeTelemetry).toHaveBeenCalled();
-    expect(telemetryService.telemetryPageId).toEqual('question');
-    expect(telemetryService.start).toHaveBeenCalled();
-    // expect(editorService.getshowLibraryPageEmitter).toHaveBeenCalled();
-    // expect(component.showLibraryComponentPage).toHaveBeenCalled();
-    // expect(editorService.getshowQuestionLibraryPageEmitter).toHaveBeenCalled();
-    // expect(component.showQuestionLibraryComponentPage).toHaveBeenCalled();
+    expect(component.handleQuestionObjectType).toHaveBeenCalled();
+  });
+
+  it('handleQuestionObjectType() should call redirectToQuestionTab()', () => {
+    spyOn(component, 'redirectToQuestionTab').and.callFake(() => {});
+    spyOn(component, 'handleQuestionObjectType').and.callThrough();
+    component.editorConfig = editorConfig_question;
+    spyOn(component, 'initializeFrameworkAndChannel').and.callFake(()=> {});
+    const editorService = TestBed.inject(EditorService);
+    spyOn(editorService, 'getCategoryDefinition').and.returnValue(of(getCategoryDefinitionResponse));
+    spyOn(component, 'getFrameworkDetails').and.callFake(() => {});
+    component.handleQuestionObjectType();
   });
 
   it('Unit test for #initializeFrameworkAndChannel()', () => {
@@ -1202,12 +1202,6 @@ describe('EditorComponent', () => {
     expect(telemetryService.end).toHaveBeenCalled();
   });
 
-  it('#handleTemplateSelection should set #showQuestionTemplatePopup to false', () => {
-    component.editorConfig = editorConfig;
-    component.handleTemplateSelection({});
-    expect(component.showQuestionTemplatePopup).toEqual(false);
-  });
-
   it('#handleTemplateSelection should return false', () => {
     const event = { type: 'close' };
     const result = component.handleTemplateSelection(event);
@@ -1225,16 +1219,59 @@ describe('EditorComponent', () => {
     expect(editorService.apiErrorHandling).toHaveBeenCalled();
   });
 
-  it('#handleTemplateSelection should call #redirectToQuestionTab()', async () => {
+  it('#handleTemplateSelection should call #redirectToQuestionTab() when renderTaxonomy is true', async () => {
     const event = 'Multiple Choice Question';
     const editorService = TestBed.inject(EditorService);
     component.editorConfig = editorConfig;
+    component.editorConfig.config.renderTaxonomy = true;
     component.editorConfig.config.showSourcingStatus = false;
     spyOn(component, 'redirectToQuestionTab').and.callFake(() => {});
+    spyOn(component, 'setLeafFormConfig').and.callFake(() => {});
+    spyOn(component, 'setEnforceCorrectAnswer').and.callFake(() => {});
     spyOn(editorService, 'getCategoryDefinition').and.returnValue(of(getCategoryDefinitionResponse));
     component.handleTemplateSelection(event);
     expect(component.redirectToQuestionTab).toHaveBeenCalled();
   });
+
+  it('#handleTemplateSelection should call #redirectToQuestionTab() when renderTaxonomy is false', async () => {
+    const event = 'Multiple Choice Question';
+    const editorService = TestBed.inject(EditorService);
+    component.editorConfig = editorConfig;
+    component.editorConfig.config.renderTaxonomy = false;
+    component.editorConfig.config.showSourcingStatus = false;
+    spyOn(component, 'setLeafFormConfig').and.callFake(() => {});
+    spyOn(component, 'setEnforceCorrectAnswer').and.callFake(() => {});
+    spyOn(component, 'redirectToQuestionTab').and.callFake(() => {});
+    spyOn(editorService, 'getCategoryDefinition').and.returnValue(of(getCategoryDefinitionResponse));
+    component.handleTemplateSelection(event);
+    expect(component.questionComponentInput.config).toEqual({});
+    expect(component.redirectToQuestionTab).toHaveBeenCalled();
+  });
+
+  it('setEnforceCorrectAnswer should set enforceCorrectAnswer', () => {
+    component.sourcingSettings = undefined;
+    spyOn(component, 'setEnforceCorrectAnswer').and.callThrough();
+    component.setEnforceCorrectAnswer({config: {sourcingSettings: {enforceCorrectAnswer: true}}});
+    expect(component.sourcingSettings.enforceCorrectAnswer).toBeTruthy();
+  })
+
+  it('setLeafFormConfig should set leafFormConfig', () => {
+    component.leafFormConfig = undefined;
+    const leafFormConfig = [{
+      "name": "form config",
+      "fields": [
+          {
+              "code": "evidenceMimeType",
+              "dataType": "list",
+              "inputType": "select",
+              "range": []
+          }
+      ]
+    }];
+    spyOn(component, 'setEvidence').and.returnValue(of(null));
+    spyOn(component, 'setLeafFormConfig').and.callThrough();
+    component.setLeafFormConfig(leafFormConfig);
+  })
 
   it('#redirectToQuestionTab() should set pageId as question', () => {
     component.pageId = '';

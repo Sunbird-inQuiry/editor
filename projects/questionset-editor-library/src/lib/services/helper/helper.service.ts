@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { catchError, map, skipWhile, tap} from 'rxjs/operators';
+import { catchError, map, skipWhile} from 'rxjs/operators';
 import * as _ from 'lodash-es';
 import { PublicDataService} from '../public-data/public-data.service';
 import { DataService} from '../data/data.service';

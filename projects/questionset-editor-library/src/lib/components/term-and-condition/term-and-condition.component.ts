@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ConfigService} from '../../services/config/config.service';
 import {EditorTelemetryService} from '../../services/telemetry/telemetry.service';
 import {EditorService} from '../../services/editor/editor.service';
@@ -8,7 +8,7 @@ import {EditorService} from '../../services/editor/editor.service';
     templateUrl: './term-and-condition.component.html',
     styleUrls: ['./term-and-condition.component.scss']
 })
-export class TermAndConditionComponent implements OnInit {
+export class TermAndConditionComponent {
     @Input() showEditingConsent = true;
     @Input() showSubmitConfirmPopup;
     @Output() sendForReviewOutput = new EventEmitter();
@@ -18,9 +18,6 @@ export class TermAndConditionComponent implements OnInit {
 
     constructor(public editorService: EditorService, public configService: ConfigService,
                 public telemetryService: EditorTelemetryService) {
-    }
-
-    ngOnInit() {
     }
 
     get contentPolicyUrl() {

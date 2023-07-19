@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, EventEmitter, Output, ViewEncapsulation, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, Output, OnChanges, SimpleChanges } from '@angular/core';
 import * as _ from 'lodash-es';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { ConfigService } from '../../services/config/config.service';
@@ -36,7 +36,6 @@ export class OptionsComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit() {
-    this.sourcingSettings.enforceCorrectAnswer = true;
     this.hints = this.editorState.hints ? this.editorState.hints : {};
     if(!_.isUndefined(this.editorState.answer)) {
       this.addSelectedOptions();

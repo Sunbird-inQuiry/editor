@@ -58,19 +58,6 @@
     background-color: transparent;
   }
   
-  .upload-file-section {
-    display: flex;
-    height: 240px;
-    width: 100%;
-    max-width: 800px;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    margin: 0 auto;
-    background-color: #F5F9FC;
-    border: 1px dashed #80a7ce;
-  }
-  
   .upload-file-description p {
     color: #999999;
   }
@@ -191,7 +178,7 @@
       height: 100%;
   }
   }
-  
+
   .upload-file-section {
     display: flex;
     height: 240px;
