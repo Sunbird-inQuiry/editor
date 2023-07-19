@@ -115,7 +115,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   showQualityParameterPopup: boolean =false;
   public qualityFormConfig: any;
   requestChangesPopupAction: string;
-  uuid:string = uuidv4(); // to store question hint uuid to maintain state of the ID.
+  uuid:string = '' // to store question hint uuid to maintain state of the ID.
   constructor(
     private questionService: QuestionService, public editorService: EditorService, public telemetryService: EditorTelemetryService,
     public playerService: PlayerService, private toasterService: ToasterService, private treeService: TreeService,
@@ -248,6 +248,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
               if (_.has(this.questionMetaData, 'primaryCategory')) {
                 this.editorState.primaryCategory = _.get(this.questionMetaData, 'primaryCategory');
               }
+              this.uuid = this.questionMetaData.outcomeDeclaration.hint ? this.questionMetaData.outcomeDeclaration.hint.defaultValue : uuidv4();
               this.setQuestionTitle(this.questionId);
               if (!_.isEmpty(this.editorState.solutions)) {
                 this.selectedSolutionType = this.editorState.solutions[0].type;
@@ -287,6 +288,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       if (_.isUndefined(this.questionId)) {
         this.tempQuestionId = uuidv4();
+        this.uuid = uuidv4();
         this.populateFormData();
         this.setQuestionTitle();
         let editorState = {}
@@ -927,6 +929,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
     _.forEach(this.subMenus, (el: any) => {
       if (el.id === 'addHint') {
+        metaData.hints = metaData.hints ? metaData.hints : {};
         metaData.hints[this.uuid] = {en: el.value}
         this.getOutcomeDeclaration(metaData)
       }
@@ -1370,7 +1373,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         name: 'Add Hint',
         value: this.questionMetaData ? this.questionMetaData.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en : '',
         label: 'Hint',
-        enabled: this.questionMetaData ? true : false,
+        enabled: this.questionMetaData && this.questionMetaData?.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en.length > 0 ? true : false,
         type: 'input',
         show: _.get(this.sourcingSettings, 'showAddHints')
       },
@@ -1379,7 +1382,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         name: 'Add Tip',
         value:this.questionMetaData ? this.questionMetaData.instructions:'',
         label: 'Tip',
-        enabled: this.questionMetaData ? true : false,
+        enabled: this.questionMetaData && this.questionMetaData?.instructions.length > 0 ? true : false,
         type: 'input',
         show: _.get(this.sourcingSettings, 'showAddTips')
       },
