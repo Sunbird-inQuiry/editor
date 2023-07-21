@@ -135,7 +135,8 @@ export const questionSetEditorConfig = {
     children: {
       Question: [
         'Multiple Choice Question',
-        'Subjective Question'
+        'Subjective Question',
+        'Match The Following Question',
       ]
     },
     addFromLibrary: false,
