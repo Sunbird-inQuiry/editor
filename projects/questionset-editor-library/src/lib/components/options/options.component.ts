@@ -15,6 +15,7 @@ export class OptionsComponent implements OnInit, OnChanges {
   @Input() showFormError;
   @Input() sourcingSettings;
   @Input() questionPrimaryCategory;
+  @Input() questionInteractionType;
   @Input() mapping = [];
   @Input() isReadOnlyMode;
   @Input() maxScore;
@@ -75,8 +76,16 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   editorDataHandler(event?) {
-    const body = this.prepareMcqBody(this.editorState);
-    this.editorDataOutput.emit({ body, mediaobj: event ? event.mediaobj : undefined });
+    let body: any;
+    if (this.questionInteractionType === 'choice') {
+      body = this.prepareMcqBody(this.editorState);
+    } else if (this.questionInteractionType === 'match') {
+      body = this.prepareMtfBody(this.editorState);
+    }
+    this.editorDataOutput.emit({
+      body,
+      mediaobj: event ? event.mediaobj : undefined,
+    });
   }
 
   prepareMcqBody(editorState) {
@@ -119,11 +128,40 @@ export class OptionsComponent implements OnInit, OnChanges {
     return metadata;
   }
 
+  prepareMtfBody(editorState) {
+    let metadata: any;
+    const correctAnswer = editorState.answer;
+    let options: any;
+    if (!_.isEmpty(correctAnswer)) {
+      options = _.reduce(this.editorState.options,function (acc, obj) {
+          acc.leftOption.push(obj.leftOption);
+          acc.rightOption.push(obj.rightOption);
+          return acc;
+        },{ leftOption: [], rightOption: [] }
+      );
+    }
+    console.log(options);
+    console.log(editorState.answer);
+    metadata = {
+      templateId: this.templateType,
+      name: this.questionPrimaryCategory || 'Match The Following Question',
+      responseDeclaration: this.getResponseDeclaration(editorState),
+      outcomeDeclaration: this.getOutcomeDeclaration(),
+      interactionTypes: ['match'],
+      interactions: this.getInteractions(editorState.options),
+      editorState: {
+        options,
+      },
+      qType: 'MTF',
+      primaryCategory: this.questionPrimaryCategory || "Match The Following Question",
+    };
+    return metadata;
+  }
   getResponseDeclaration(editorState) {
     const responseDeclaration = {
       response1: {
         cardinality: this.getCardinality(),
-        type: 'integer',
+        type: this.questionInteractionType === 'choice' ? 'integer' : 'map',
         correctResponse: {
           value: editorState.answer,
         },
