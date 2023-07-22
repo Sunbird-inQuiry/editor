@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output, AfterViewInit, ViewEnca
 import * as _ from 'lodash-es';
 import { v4 as uuidv4 } from 'uuid';
 import { McqForm } from '../../interfaces/McqForm';
+import { MtfForm } from '../../interfaces/MtfForm';
 import { ServerResponse } from '../../interfaces/serverResponse';
 import { QuestionService } from '../../services/question/question.service';
 import { PlayerService } from '../../services/player/player.service';
@@ -243,6 +244,31 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                   this.editorState.responseDeclaration = _.get(this.questionMetaData, 'responseDeclaration');
                 }
               }
+
+              if (this.questionInteractionType === 'match') {
+                const responseDeclaration = this.questionMetaData.responseDeclaration;
+                this.scoreMapping = _.get(responseDeclaration, 'response1.mapping');
+                const templateId = this.questionMetaData.templateId;
+                const numberOfOptions = this.questionMetaData?.editorState?.options?.length || 0;
+                const maximumOptions = _.get(this.questionInput, 'config.maximumOptions');
+                this.editorService.optionsLength = numberOfOptions;
+                // converting the options to the format required by the editor
+                const options = _.map(this.questionMetaData?.editorState?.options?.leftOption, (leftOption, index) => ({
+                  leftOption,
+                  rightOption:this.questionMetaData?.editorState?.options?.rightOption?.[index]
+                }));
+                const question = this.questionMetaData?.editorState?.question;
+                const interactions = this.questionMetaData?.interactions;
+                this.editorState = new MtfForm({
+                  question, options, answer: _.get(responseDeclaration, 'response1.correctResponse.value')
+                }, { templateId, numberOfOptions, maximumOptions });
+                this.editorState.solutions = this.questionMetaData?.editorState?.solutions;
+                this.editorState.interactions = interactions;
+                if (_.has(this.questionMetaData, 'responseDeclaration')) {
+                  this.editorState.responseDeclaration = _.get(this.questionMetaData, 'responseDeclaration');
+                }
+              }
+
               if (_.has(this.questionMetaData, 'primaryCategory')) {
                 this.editorState.primaryCategory = _.get(this.questionMetaData, 'primaryCategory');
               }
@@ -298,6 +324,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         else if (this.questionInteractionType === 'choice') {
           this.editorState = new McqForm({ question: '', options: [] }, { numberOfOptions: _.get(this.questionInput, 'config.numberOfOptions'), maximumOptions: _.get(this.questionInput, 'config.maximumOptions') });
+        }
+        else if (this.questionInteractionType === 'match') {
+          this.editorState = new MtfForm({ question: '', options: [] }, { numberOfOptions: _.get(this.questionInput, 'config.numberOfOptions'), maximumOptions: _.get(this.questionInput, 'config.maximumOptions') });
         }
         /** for observation and survey to show hint,tip,dependent question option. */
         if(!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)){
