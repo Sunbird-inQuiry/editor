@@ -17,8 +17,9 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('editor') public editorRef: ElementRef;
   @Output() videoDataOutput = new EventEmitter<any>();
   @Output() editorDataOutput = new EventEmitter<any>();
+  @Output() assetDataOutput = new EventEmitter<any>();
   @Input() editorDataInput: any;
-  @Input() videoShow;
+  @Input() assetShow;
   @Input() assetType;
   @Input() showAssetPicker;
   @Output() assetBrowserEmitter = new EventEmitter<any>();
@@ -147,12 +148,12 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges() {
-    if (this.videoShow) {
+    if (this.assetShow) {
       this.showAssetPicker = true;
       this.selectAsset(undefined);
     }
   }
-  
+
   getAcceptType(typeList, type) {
     const acceptTypeList = typeList.split(', ');
     const result = [];
@@ -164,13 +165,11 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   
   dismissAssetPicker() {
     this.showAssetPicker = false;
-    if(this.assetType=='video') {
-      this.videoShow=false;
-      this.videoDataOutput.emit(false);
-    } else if(this.assetType == 'image') {
-      this.showAssetPicker = false;
-      this.modalDismissEmitter.emit({});
-    }
+    this.assetShow=false;
+    this.videoDataOutput.emit(false);
+    this.showAssetPicker = false;
+    this.modalDismissEmitter.emit({});
+    this.assetDataOutput.emit(false);
   }
   
   selectAsset(data) {
@@ -189,7 +188,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   this.assetsCount = 0;
   if (!search) {
     this.searchMyInput = '';
-    if(this.assetType == 'video') {
+    if(this.assetType != 'image' ) {
       this.selectAsset(undefined);
     }
   }
@@ -209,11 +208,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   }
   this.questionService.getAssetMedia(req).pipe(catchError(err => {
     let errInfo;
-    if (this.assetType == 'image') {
-      errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.022') };
-    } else if (this.assetType == 'video') {
-      errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.023')};
-    }
+    errInfo =  _.get(this.configService.labelConfig?.assetSearchFailed[this.assetType]);
     return throwError(this.editorService.apiErrorHandling(err, errInfo));
   })).subscribe((res) => {
     this.assetsCount = res.result.count;
@@ -245,11 +240,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
     }
     this.questionService.getAssetMedia(req).pipe(catchError(err => {
       let errInfo;
-      if (this.assetType == 'image') {
-         errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.022') };
-      } else if (this.assetType == 'video') {
-        errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.023') };
-      }
+      errInfo = _.get(this.configService.labelConfig?.assetSearchFailed[this.assetType]);
       return throwError(this.editorService.apiErrorHandling(err, errInfo));
     })).subscribe((res) => {
       this.assetsCount = res.result.count;
@@ -307,16 +298,16 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
       });
       this.showAssetPicker = false;
       this.showAssetUploadModal = false;
-    } else if (this.assetType == 'video') {
-        const videoData: any = _.cloneDeep(this.selectedAsset);
-        videoData.src = this.getMediaOriginURL(videoData.downloadUrl);
-        videoData.thumbnail = (videoData.thumbnail) && this.getMediaOriginURL(videoData.thumbnail);
+    } else {
+        const assetData: any = _.cloneDeep(this.selectedAsset);
+        assetData.src = this.getMediaOriginURL(assetData.downloadUrl);
+        assetData.thumbnail = (assetData.thumbnail) && this.getMediaOriginURL(assetData.thumbnail);
         this.showAssetPicker = false;
-        this.videoDataOutput.emit(videoData);
+        this.assetDataOutput.emit(assetData);
         if (videoModal) {
           videoModal.deny();
       }
-    }
+    } 
   }
   
   getMediaOriginURL(src) {
@@ -372,14 +363,14 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   }
   
   uploadAsset(event) {
-    const file = event.target.files[0];
-    this.assetName = file.name;
+    this.assetFile = event.target.files[0];
+    this.assetName = this.assetFile.name;
     const reader = new FileReader();
     this.formData = new FormData();
-    this.formData.append('file', file);
-    const fileType = file.type;
-    const fileName = file.name.split('.').slice(0, -1).join('.');
-    const fileSize = file.size / 1024 / 1024;
+    this.formData.append('file', this.assetFile);
+    const fileType = this.assetFile.type;
+    const fileName = this.assetFile.name.split('.').slice(0, -1).join('.');
+    const fileSize = this.assetFile.size / 1024 / 1024;
     if (fileType.split('/')[0] === this.assetType) {
       this.showErrorMsg = false;
       if (fileSize > this.assetConfig[this.assetType].size) {
@@ -390,7 +381,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
       } else {
         this.errorMsg = '';
         this.showErrorMsg = false;
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(this.assetFile);
       }
     } else {
       this.showErrorMsg = true;
@@ -457,11 +448,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
         this.isClosable = true;
         this.assetFormValid = true;
         let errInfo;
-        if(this.assetType === 'video') {
-           errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.025') };
-        } else if(this.assetType === 'image') {
-          errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.019') };
-        }
+        errInfo = { errorMsg: _.get(this.configService.labelConfig?.chooseFileMsg[this.assetType]) };
         return throwError(this.editorService.apiErrorHandling(err, errInfo));
       })).subscribe((res) => {
         const contentId = res.result.node_id;
@@ -486,9 +473,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
           blobConfig = this.editorService.appendCloudStorageHeaders(blobConfig);
           this.uploadToBlob(signedURL, this.assetFile, blobConfig).subscribe(() => {
             const fileURL = signedURL.split('?')[0];
-            if (this.assetType === 'video') {
-              this.updateContentWithURL(fileURL, this.assetFile.type, contentId, modal);
-            } else if (this.assetType ==='image') {
+           if (this.assetType ==='image') {
               const data = new FormData();
               data.append('fileUrl', fileURL);
               data.append('mimeType', _.get(this.assetFile, 'type'));
@@ -513,6 +498,8 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
                 this.showAssetUploadModal = false;
                 this.dismissPops(modal);
               })   
+            } else {
+              this.updateContentWithURL(fileURL, this.assetFile.type, contentId, modal);
             }
           })
         })
@@ -532,7 +519,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
     };
     const option = {
       data,
-      param: config
+      param: conf
     };
     this.questionService.uploadMedia(option, contentId).pipe(catchError(err => {
       const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.027') };

@@ -34,10 +34,18 @@
               <div class="sb-field">
                 <div [ngClass]="{'ckeditor-tool__question': !isReadOnlyMode, 'ckeditor-tool__question-readonly': isReadOnlyMode, 'mb-5': true}">
                   <lib-ckeditor-tool
-                    *ngIf="!isReadOnlyMode"
+                    *ngIf="!isReadOnlyMode && assetType==='video'"
                     (editorDataOutput)="editorDataHandler($event, 'question')"
                     [editorDataInput]="editorState.question"
-                    (videoDataOutput)="videoDataOutput($event)" [videoShow]="videoShow"></lib-ckeditor-tool>
+                    (videoDataOutput)="assetDataOutput($event)" [videoShow]="assetShow"
+                    ></lib-ckeditor-tool>
+                    <lib-assets-browser
+                    *ngIf="!isReadOnlyMode && assetType==='audio'" [showAssetPicker]="showAssetPicker" 
+                    (editorDataOutput)="editorDataHandler($event, 'question')"
+                    [editorDataInput]="editorState.question"
+                    (assetDataOutput)="assetDataOutput($event)" [assetShow]="assetShow"
+                    [assetType]="assetType"
+                    ></lib-assets-browser>
                   <ng-container *ngIf="isReadOnlyMode">
                     <label class="px-16 py-8 fs-0-92 mb-0 ckeditor-tool__label width-100">{{configService.labelConfig?.lbl?.question}}</label>
                     <div class="ckeditor-tool__solution__body">
@@ -89,6 +97,10 @@
                         [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('solution_type','select','single_select', telemetryService.telemetryPageId, {solution_type:'video'})">
                         {{configService.labelConfig?.lbl?.video}}
                       </div>
+                      <div class="item" (click)="selectSolutionType('audio')" (keydown.enter)="selectSolutionType('audio')" tabindex="0" libTelemetryInteract
+                      [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('solution_type','select','single_select', telemetryService.telemetryPageId, {solution_type:'audio'})">
+                      {{configService.labelConfig?.lbl?.audio}}
+                    </div>
                     </div>
                   </div>
                 </div>
@@ -106,6 +118,31 @@
                     </div>
                   </div>
                 </div>
+                <div class="solution_video" *ngIf="selectedSolutionType == 'audio' && showSolution">
+                  <div class="ckeditor-tool__solution sb-bg-color-white sb-ckeditor relative">
+                    <div class="solution-media p-16 d-flex flex-ai-center ckeditor-tool__option p-16">
+                      <div class="mcq-checkbox-answer">
+                        <button class="sb-btn sb-ckeditor-close absolute" (click)="deleteSolution()"
+                        libTelemetryInteract
+                        [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('delete_solution','click','cancel', this.telemetryService.telemetryPageId, {solution_type:'audio'})">
+                        <i class="icon close"></i>
+                      </button>
+                      </div>
+                      <div class="solution-media__video relative position">
+                        <div class="overlay-image" [ngStyle]="
+                        audioThumbnail
+                          ? { background: 'url(' + assetThumbnail + ')' }
+                          : { background: 'rgba(0,0,0,0.3)' }
+                      ">
+                      <i class="play circle icon"></i>
+                      </div>
+                    </div>
+                    <div class="solution-media__desc ml-16 sb-color-primary">
+                      {{ assetSolutionName }}
+                    </div>
+                  </div>
+                 </div>
+                </div>
                 <div class="solution_video" *ngIf="selectedSolutionType == 'video' && showSolution">
                   <div class="ckeditor-tool__solution sb-bg-color-white sb-ckeditor relative">
                     <div class="solution-media p-16 d-flex flex-ai-center ckeditor-tool__option p-16">
@@ -118,15 +155,15 @@
                       </div>
                       <div class="solution-media__video relative position">
                         <div class="overlay-image" [ngStyle]="
-                            videoThumbnail
-                              ? { background: 'url(' + videoThumbnail + ')' }
+                        assetThumbnail
+                              ? { background: 'url(' + assetThumbnail + ')' }
                               : { background: 'rgba(0,0,0,0.3)' }
                           ">
                           <i class="play circle icon"></i>
                         </div>
                       </div>
                       <div class="solution-media__desc ml-16 sb-color-primary">
-                        {{ videoSolutionName
+                        {{ assetSolutionName
                         }}
                         <!-- <i class="icon ellipsis vertical sb-color-black"></i> -->
                       </div>
@@ -146,10 +183,10 @@
                               <div class="ckeditor-tool__solution__body" *ngIf="selectedSolutionType == 'video' && showSolution">
                                   <div class="solution-media p-16 d-flex flex-ai-center">
                                       <div class="solution-media__video relative position">
-                                      <div class="overlay-image" [ngStyle]="videoThumbnail ?  {'background' : 'url(' + videoThumbnail + ')' }  : {'background': 'rgba(0,0,0,0.3)'}"><i class="play circle icon"></i></div>
+                                      <div class="overlay-image" [ngStyle]="assetThumbnail ?  {'background' : 'url(' + assetThumbnail + ')' }  : {'background': 'rgba(0,0,0,0.3)'}"><i class="play circle icon"></i></div>
                                       </div>
                                       <div class="solution-media__desc ml-16">
-                                      {{videoSolutionName}}
+                                      {{assetSolutionName}}
                                       </div>
                                   </div>
                               </div>

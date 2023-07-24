@@ -15,6 +15,11 @@
             "size": "50",
             "sizeType": "MB",
             "accepted": "mp4, webm"
+          },
+          "audio": {
+            "size": "50",
+            "sizeType": "MB",
+            "accepted": "mp3"
           }
     },
     "questionPrimaryCategories": ["Multiple Choice Question", "Subjective Question"],

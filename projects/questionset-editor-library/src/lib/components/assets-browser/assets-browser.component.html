@@ -13,9 +13,9 @@
         <div class="sb-search-box small no-btn">
           <div class="input-div relative">
             <i class="search icon" aria-hidden="true"></i>
-            <input (change)="searchAsset($event, 'myImages')" class="sb-search-input" [(ngModel)]="searchMyInput"
+            <input (change)="searchAsset($event, 'myAssets')" class="sb-search-input" [(ngModel)]="searchMyInput"
               type="text" placeholder={{configService.labelConfig?.lbl?.searchPlaceholder}} />
-            <i class="close icon" (click)="searchAsset('clearInput', 'myImages')" aria-hidden="true"></i>
+            <i class="close icon" (click)="searchAsset('clearInput', 'myAssets')" aria-hidden="true"></i>
           </div>
           <button class="sb-btn sb-btn-normal">{{configService.labelConfig?.button_labels?.search_btn_label}}</button>
         </div>

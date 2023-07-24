@@ -559,6 +559,10 @@ export const editorConfig = {
         size: "50",
         accepted: "mp4, webm",
       },
+      audio: {
+        size: "50",
+        accepted: "mp3"
+      }
     },
     mode: "edit",
     maxDepth: 2,
