@@ -191,36 +191,74 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   setMapping() {
-    if(!_.isEmpty(this.selectedOptions)) {
-      this.mapping = [];
-      const scoreForEachOption = _.round((this.maxScore/this.selectedOptions.length), 2);
-      _.forEach(this.selectedOptions, (value) => {
-        const optionMapping = {
-          value: value,
-          score: scoreForEachOption,
-        }
-        this.mapping.push(optionMapping)
-      })
+    if (this.questionInteractionType === 'choice') {
+      if (!_.isEmpty(this.selectedOptions)) {
+        this.mapping = [];
+        const scoreForEachOption = _.round((this.maxScore/this.selectedOptions.length), 2);
+        _.forEach(this.selectedOptions, (value) => {
+          const optionMapping = {
+            value: value,
+            score: scoreForEachOption,
+          };
+          this.mapping.push(optionMapping);
+        });
+      }      
+    } else if(this.questionInteractionType === 'match') {
+      if (!_.isEmpty(this.editorState.answer)) {
+        this.mapping = [];
+        const scoreForEachMatch = _.round(
+          this.maxScore / this.editorState.answer.length,
+          2
+        );
+        _.forEach(this.editorState.answer, (value) => {
+          const optionMapping = {
+            value: value,
+            score: scoreForEachMatch,
+          };
+          this.mapping.push(optionMapping);
+        })
+      }
     } else {
       this.mapping = [];
     }
   }
 
   getInteractions(options) {
-    let index;
-    const interactOptions = _.map(options, (opt, key) => {
-      index = Number(key);
-      const hints  = _.get(this.editorState, `interactions.response1.options[${index}].hints`)
-      return { label: opt.body, value: index, hints };
-    });
-    this.subMenuConfig(options);
-    const interactions = {
-      response1: {
-        type: 'choice',
-        options: interactOptions,
-      },
-    };
-    return interactions;
+    if (this.questionInteractionType === 'choice') {
+      let index;
+      const interactOptions = _.map(options, (opt, key) => {
+        index = Number(key);
+        const hints  = _.get(this.editorState, `interactions.response1.options[${index}].hints`)
+        return { label: opt.body, value: index, hints };
+      });
+      this.subMenuConfig(options);
+      const interactions = {
+        response1: {
+          type: 'choice',
+          options: interactOptions,
+        },
+      };      
+      return interactions;
+    }
+    else if (this.questionInteractionType === 'match') {
+      const optionSet = {
+        left: options.map((option) => ({
+          label: option.leftOption,
+          value: option.leftOption.replace(/<\/?[^>]+(>|$)/g, ""),
+        })),
+        right: options.map((option) => ({
+          label: option.rightOption,
+          value: option.rightOption.replace(/<\/?[^>]+(>|$)/g, ""),
+        })),
+      }
+      const interactions = {
+        response1: {
+          type: 'match',
+          optionSet: optionSet,
+        }
+      };
+      return interactions;
+    }
   }
 
   setTemplete(template) {
@@ -269,7 +307,22 @@ export class OptionsComponent implements OnInit, OnChanges {
       this.setMapping();
       this.editorDataHandler();
   }
-
+  
+  onMatchCheck(event) {
+    if (event.target.checked) {
+      this.editorState.answer = this.editorState.options.map((option) => {
+        const obj = {};
+        let leftOption = option.leftOption.replace(/<\/?[^>]+(>|$)/g, "");
+        let rightOption = option.rightOption.replace(/<\/?[^>]+(>|$)/g, "");
+        obj[leftOption] = rightOption;
+        return obj;
+      });
+    } else {
+      this.editorState.answer = undefined;
+    }
+    this.setMapping();
+    this.editorDataHandler();
+  }
   setScore(value, scoreIndex) {
     const obj = {
       response: scoreIndex,
