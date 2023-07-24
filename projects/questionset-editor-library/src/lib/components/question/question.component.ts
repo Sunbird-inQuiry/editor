@@ -615,6 +615,29 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
+    //to handle when question type is match
+    if (this.questionInteractionType === 'match') {
+      const data = _.get(this.treeNodeData, 'data.metadata');
+      if (_.get(this.editorState, 'interactionTypes[0]') === 'match' &&
+        _.isEmpty(this.editorState?.responseDeclaration?.response1?.mapping) &&
+        !_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy) &&
+        _.get(data,'allowScoring') === 'Yes') {
+        this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
+        this.showFormError = true;
+        return;
+      } else {
+        this.showFormError = false;
+      }
+      const rightOptionValid = _.find(this.editorState.options, option => (option.rightOption === undefined || option.rightOption === '' || option.rightOption.length > this.setCharacterLimit));
+      const leftOptionValid = _.find(this.editorState.options, option => (option.leftOption === undefined || option.leftOption === '' || option.leftOption.length > this.setCharacterLimit));
+      if (rightOptionValid || leftOptionValid || (_.isUndefined(this.editorState.answer) && this.sourcingSettings?.enforceCorrectAnswer)) {
+        this.showFormError = true;
+        return;
+      } else {
+        this.showFormError = false;
+      }
+    }
+
     if (this.questionInteractionType === 'slider') {
       const min = _.get(this.sliderDatas, 'validation.range.min');
       const max = _.get(this.sliderDatas, 'validation.range.max');
@@ -800,7 +823,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       _.get(treeNodeData,'allowScoring') === 'Yes' ? '' : _.set(metadata,'responseDeclaration.response1.mapping',[]);
     }
 
-    if (this.questionInteractionType != 'choice') {
+    if (this.questionInteractionType != 'choice' && this.questionInteractionType != 'match') {
       if (!_.isUndefined(metadata.answer)) {
         const answerHtml = this.getAnswerHtml(metadata.answer);
         const finalAnswer = this.getAnswerWrapperHtml(answerHtml);
@@ -823,8 +846,15 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       })
       const finalAnswer = this.getAnswerWrapperHtml(concatenatedAnswers);
       metadata.answer = finalAnswer;
-    } else if (this.questionInteractionType != 'default' && this.questionInteractionType != 'choice') {
+    } else if (this.questionInteractionType != 'default' && this.questionInteractionType != 'choice' && this.questionInteractionType != 'match') {
       metadata.responseDeclaration = this.getResponseDeclaration(this.questionInteractionType);
+    }
+
+    if (this.questionInteractionType === 'match') {
+      metadata.body = this.getMatchQuestionHtmlBody(this.editorState.question);
+      const leftOptions = metadata.interactions.response1.optionSet.left;
+      const rightOptions = metadata.interactions.response1.optionSet.right;
+      metadata.answer = this.getMatchAnswerContainerHtml(leftOptions, rightOptions);
     }
 
     if (!_.isUndefined(this.selectedSolutionType) && !_.isEmpty(this.selectedSolutionType)) {
@@ -853,6 +883,33 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   getAnswerHtml(optionLabel) {
     const answerHtml = '<div class=\'anwser-body\'>{answer}</div>';
     const optionHtml = answerHtml.replace('{answer}', optionLabel);
+    return optionHtml;
+  }
+
+  
+  getMatchAnswerContainerHtml(leftOptions, rightOptions) {
+    const matchContainerTemplate = '<div class=\'match-container\'>{leftOptions}{rightOptions}</div>';
+    const leftOptionsHtml = this.getOptionWrapperHtml(leftOptions, 'left');
+    const rightOptionsHtml = this.getOptionWrapperHtml(rightOptions, 'right');
+    const matchContainer = matchContainerTemplate
+    .replace('{leftOptions}', leftOptionsHtml)
+    .replace('{rightOptions}', rightOptionsHtml);
+    return matchContainer;
+  }
+  
+  getOptionWrapperHtml(options, type) {
+    const wrapperTemplate = `<div class='option-wrapper ${type}-options'>{options}</div>`;
+    let optionsHtml = '';
+    options.forEach((option) => {
+      const optionHtml = this.getMatchAnswerHtml(option.label, option.value);
+      optionsHtml = optionsHtml.concat(optionHtml);
+    });
+    const wrapper = wrapperTemplate.replace('{options}', optionsHtml);
+    return wrapper;
+  }
+  getMatchAnswerHtml(label, value) {
+    const answerHtml = '<div class=\'answer-body\' data-value=\'{value}\'>{label}</div>';
+    const optionHtml = answerHtml.replace('{label}', label).replace('{value}', value);
     return optionHtml;
   }
 
@@ -899,6 +956,15 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return videoSolutionValue;
   }
 
+  getMatchQuestionHtmlBody(question) {
+    const matchTemplateConfig = {
+      // tslint:disable-next-line:max-line-length
+      matchBody: '<div class=\'question-body\' tabindex=\'-1\'><div class=\'match-title\' tabindex=\'0\'>{question}</div><div data-match-interaction=\'response1\' class=\'match-container\'></div></div>'
+    };
+    const { matchBody } = matchTemplateConfig;
+    const questionBody = matchBody.replace('{question}', question);
+    return questionBody;
+  }
 
   getMcqQuestionHtmlBody(question, templateId) {
     const mcqTemplateConfig = {
