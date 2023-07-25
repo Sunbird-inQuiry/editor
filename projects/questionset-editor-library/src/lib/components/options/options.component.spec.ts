@@ -169,8 +169,6 @@ describe('OptionsComponent', () => {
     expect(component.editorDataOutput.emit).toHaveBeenCalled();
   });
 
-
-
   it('#prepareMcqBody() should return expected mcq option data for single select MCQ', () => {
     component.maxScore = 1;
     component.selectedOptions = [0];
@@ -192,6 +190,7 @@ describe('OptionsComponent', () => {
   });
 
   it('#getResponseDeclaration() should return expected response declaration', () => {
+    component.questionInteractionType = 'choice';
     component.mapping = [{
       "value": 0,
       "score": 1
@@ -228,6 +227,7 @@ describe('OptionsComponent', () => {
   });
 
   it('setMapping should set the mapping for single select MCQ', () => {
+    component.questionInteractionType = 'choice';
     component.mapping = [];
     component.selectedOptions = [0];
     component.maxScore = 1;
@@ -237,6 +237,7 @@ describe('OptionsComponent', () => {
   });
 
   it('setMapping should set the mapping for single select MCQ', () => {
+    component.questionInteractionType = 'choice';
     component.mapping = [];
     component.selectedOptions = [0,1];
     component.maxScore = 1;
@@ -248,6 +249,7 @@ describe('OptionsComponent', () => {
 
   it('#getInteractions() should return expected response declaration', () => {
     spyOn(component,"getInteractions").and.callThrough();
+    component.questionInteractionType = 'choice';
     component.getInteractions(mockOptionData.editorOptionData.options);
     expect(component.getInteractions).toHaveBeenCalled();
     // expect(mockOptionData.prepareMcqBody.interactions).toEqual(result);
