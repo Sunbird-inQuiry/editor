@@ -33,7 +33,7 @@
       </label>
     </div>
   </div>
-  <div class="d-flex flex-ai-center" *ngIf="pageId === 'collection_editor' && labelConfigData">
+  <div class="d-flex flex-ai-center" *ngIf="pageId === 'questionset_editor' && labelConfigData">
     <button *ngIf="visibility && visibility?.submitContent && labelConfigData?.hasChildren && !visibility.hideSubmitForReviewBtn && visibility.showPaginationBtn"
     class="sb-btn sb-btn-normal sb-btn-primary mr-10" (click)="buttonEmitter({type:'pagination'})" libTelemetryInteract
     [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('submit','click','submit', telemetryService.telemetryPageId)"

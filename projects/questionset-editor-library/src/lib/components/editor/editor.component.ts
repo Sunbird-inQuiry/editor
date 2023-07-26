@@ -130,7 +130,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.objectType === 'question') {
       this.handleQuestionObjectType();
     } else {
-      this.pageId = 'collection_editor';
+      this.pageId = 'questionset_editor';
       this.mergeCollectionExternalProperties().subscribe(
         (response) => {
           const hierarchyResponse = _.first(response);
@@ -526,7 +526,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
   redirectToChapterListTab(data?: any) {
     this.editorEmitter.emit({
-      close: true, library: 'collection_editor', action: this.actionType, identifier: this.collectionId,
+      close: true, library: 'questionset_editor', action: this.actionType, identifier: this.collectionId,
       ...data
     });
   }
@@ -594,7 +594,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
   libraryEventListener(event: any) {
     this.mergeCollectionExternalProperties().subscribe((res: any) => {
-      this.pageId = 'collection_editor';
+      this.pageId = 'questionset_editor';
       this.telemetryService.telemetryPageId = this.pageId;
       this.isEnableCsvAction = true;
       this.isComponenetInitialized = true;
@@ -1055,11 +1055,11 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.selectedNodeData = undefined;
     if (this.objectType === 'question') {
       this.editorEmitter.emit({
-        close: true, library: 'collection_editor', action: event.actionType, identifier: event.identifier
+        close: true, library: 'questionset_editor', action: event.actionType, identifier: event.identifier
       });
     } else {
       this.mergeCollectionExternalProperties().subscribe((res: any) => {
-        this.pageId = 'collection_editor';
+        this.pageId = 'questionset_editor';
         this.telemetryService.telemetryPageId = this.pageId;
         this.isEnableCsvAction = true;
       });
@@ -1136,7 +1136,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         break;
       case 'updateHierarchy':
         this.mergeCollectionExternalProperties().subscribe((res: any) => {
-          this.pageId = 'collection_editor';
+          this.pageId = 'questionset_editor';
           this.telemetryService.telemetryPageId = this.pageId;
           this.isEnableCsvAction = true;
         });
@@ -1165,7 +1165,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   assignPageEmitterListener(event: any) {
-    this.pageId = 'collection_editor';
+    this.pageId = 'questionset_editor';
   }
 
   ngOnDestroy() {
