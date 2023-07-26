@@ -1401,7 +1401,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         id: 'addHint',
         name: 'Add Hint',
         value:(() => { 
-          if(this.questionMetaData) {
+          if(this.questionMetaData && this.questionMetaData.outcomeDeclaration ) {
             return this.questionMetaData?.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en;
           }
           else {
@@ -1410,7 +1410,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         })(),
         label: 'Hint',
         enabled:(() => { 
-          if(this.questionMetaData && this.questionMetaData?.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en.length > 0) {
+          if(this.questionMetaData && this.questionMetaData.outcomeDeclaration && this.questionMetaData?.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en.length > 0) {
             return true;
           }
           else {
@@ -1433,7 +1433,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         })(),
         label: 'Tip',
         enabled: (() => { 
-          if(this.questionMetaData && this.questionMetaData?.instructions.length) {
+          if(this.questionMetaData && this.questionMetaData?.instructions?.length > 0) {
             return true;
           }
           else {
