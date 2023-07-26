@@ -240,7 +240,12 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 }, { templateId, numberOfOptions,maximumOptions });
                 this.editorState.solutions = this.questionMetaData?.editorState?.solutions;
                 this.editorState.interactions = interactions;
-                this.editorState.hints = this.questionMetaData.hints ? this.questionMetaData.hints : {};
+                if(this.questionMetaData?.hints) {
+                  this.editorState.hints = this.questionMetaData.hints;
+                }
+                else {
+                  this.editorState.hints = {};
+                }
                 if (_.has(this.questionMetaData, 'responseDeclaration')) {
                   this.editorState.responseDeclaration = _.get(this.questionMetaData, 'responseDeclaration');
                 }
@@ -248,7 +253,12 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
               if (_.has(this.questionMetaData, 'primaryCategory')) {
                 this.editorState.primaryCategory = _.get(this.questionMetaData, 'primaryCategory');
               }
-              this.uuid = this.questionMetaData.outcomeDeclaration.hint ? this.questionMetaData.outcomeDeclaration.hint.defaultValue : uuidv4();
+              if(this.questionMetaData?.outcomeDeclaration?.hint) {
+                this.uuid = this.questionMetaData?.outcomeDeclaration?.hint?.defaultValue
+              }
+              else {
+                this.uuid = uuidv4()
+              }
               this.setQuestionTitle(this.questionId);
               if (!_.isEmpty(this.editorState.solutions)) {
                 this.selectedSolutionType = this.editorState.solutions[0].type;
@@ -1390,18 +1400,46 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       {
         id: 'addHint',
         name: 'Add Hint',
-        value: this.questionMetaData ? this.questionMetaData.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en : '',
+        value:(() => { 
+          if(this.questionMetaData) {
+            return this.questionMetaData?.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en;
+          }
+          else {
+             return '';
+          }
+        })(),
         label: 'Hint',
-        enabled: this.questionMetaData && this.questionMetaData?.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en.length > 0 ? true : false,
+        enabled:(() => { 
+          if(this.questionMetaData && this.questionMetaData?.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en.length > 0) {
+            return true;
+          }
+          else {
+            return false;
+          }
+        })(),
         type: 'input',
         show: _.get(this.sourcingSettings, 'showAddHints')
       },
       {
         id: 'addTip',
         name: 'Add Tip',
-        value:this.questionMetaData ? this.questionMetaData.instructions:'',
+        value: (() => { 
+          if(this.questionMetaData) {
+            return this.questionMetaData?.instructions
+          }
+          else {
+            return '';
+          }
+        })(),
         label: 'Tip',
-        enabled: this.questionMetaData && this.questionMetaData?.instructions.length > 0 ? true : false,
+        enabled: (() => { 
+          if(this.questionMetaData && this.questionMetaData?.instructions.length) {
+            return true;
+          }
+          else {
+             return false;
+          }
+        })(),
         type: 'input',
         show: _.get(this.sourcingSettings, 'showAddTips')
       },
