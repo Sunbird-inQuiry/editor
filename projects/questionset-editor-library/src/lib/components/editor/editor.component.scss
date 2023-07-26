@@ -56,11 +56,19 @@ lib-questionset-editor {
       }
     }
     .dynamic-form {
+      
       label {
         font-size: 12px !important;
         margin-bottom: 0.5rem !important;
         color: #121213e0;
         font-weight: 600;
+        position: relative;
+      }
+
+      label:not(input + label) {
+        &::before {
+          z-index: 1 !important;
+        }
       }
 
       .sb-textbox,
