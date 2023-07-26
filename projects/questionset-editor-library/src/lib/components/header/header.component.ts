@@ -4,8 +4,6 @@ import { EditorTelemetryService } from '../../services/telemetry/telemetry.servi
 import { ConfigService } from '../../services/config/config.service';
 import * as _ from 'lodash-es';
 import { NgForm } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'lib-header',
@@ -108,7 +106,7 @@ export class HeaderComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy() {
-    if (this.modal && this.modal.deny) {
+    if (this?.modal && this?.modal?.deny) {
       this.modal.deny();
     }
   }

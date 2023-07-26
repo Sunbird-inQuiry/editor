@@ -214,13 +214,6 @@ describe('FancyTreeComponent', () => {
     expect(component.removeIntermediateLevelsFromFramework).toHaveBeenCalledWith(RubricstreeData);
     expect(retunedObject).toBeDefined();
   });
-  
-  it('#addFromLibrary() should call #emitshowLibraryPageEvent()', () => {
-    const editorService: EditorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'emitshowLibraryPageEvent').and.callFake(() => {});
-    component.addFromLibrary();
-    expect(editorService.emitshowLibraryPageEvent).toHaveBeenCalledWith('showLibraryPage');
-  });
 
   it('#ngAfterViewInit() should call #getTreeConfig() and #renderTree()', () => {
     spyOn(component, 'getTreeConfig').and.callFake(() => {});
@@ -241,7 +234,6 @@ describe('FancyTreeComponent', () => {
     };
     spyOnProperty(editorService, 'editorConfig', 'get').and.returnValue(editorConfig);
     component.eachNodeActionButton(rootNode);
-    expect(component.visibility.addFromLibrary).toBeFalsy();
     expect(component.visibility.createNew).toBeFalsy();
     expect(component.visibility.addChild).toBeFalsy();
     expect(component.visibility.addSibling).toBeFalsy();
@@ -258,7 +250,6 @@ describe('FancyTreeComponent', () => {
     component.eachNodeActionButton(node);
     expect(component.visibility.addChild).toBeTruthy();
     expect(component.visibility.addSibling).toBeTruthy();
-    expect(component.visibility.addFromLibrary).toBeFalsy();
     expect(component.visibility.createNew).toBeFalsy();
   });
 
@@ -272,15 +263,7 @@ describe('FancyTreeComponent', () => {
     component.eachNodeActionButton(node);
     expect(component.visibility.addChild).toBeFalsy();
     expect(component.visibility.addSibling).toBeTruthy();
-    expect(component.visibility.addFromLibrary).toBeFalsy();
     expect(component.visibility.createNew).toBeFalsy();
-  });
-
-  it('#addFromLibrary() should call #emitshowLibraryPageEvent()', () => {
-    const editorService: EditorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'emitshowLibraryPageEvent');
-    component.addFromLibrary();
-    expect(editorService.emitshowLibraryPageEvent).toHaveBeenCalled();
   });
 
   it('#handleActionButtons() should call #removeNode() if action is delete', () => {

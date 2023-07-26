@@ -82,7 +82,6 @@ describe('EditorComponent', () => {
     expect(component.searchFormConfig).toBeUndefined();
     expect(component.leafFormConfig).toBeUndefined();
     expect(component.showLibraryPage).toBeFalsy();
-    expect(component.libraryComponentInput).toEqual({});
     expect(component.questionlibraryInput).toEqual({});
     expect(component.isQumlPlayer).toBeUndefined();
     expect(component.showQuestionTemplatePopup).toBeFalsy();
@@ -125,8 +124,6 @@ describe('EditorComponent', () => {
     spyOn(telemetryService, 'initializeTelemetry').and.callFake(() => { });
     spyOn(telemetryService, 'start').and.callFake(() => { });
     const libraryPage: EventEmitter<any> = new EventEmitter();
-    spyOn(editorService, 'getshowLibraryPageEmitter').and.callFake(() => {return libraryPage})
-    spyOn(component, 'showLibraryComponentPage').and.callFake(() => {});
     const questionLibraryPage: EventEmitter<any> = new EventEmitter();
     spyOn(editorService, 'getshowQuestionLibraryPageEmitter').and.callFake(() => {return questionLibraryPage});
     spyOn(component, 'showQuestionLibraryComponentPage').and.callFake(() => {});
@@ -287,7 +284,6 @@ describe('EditorComponent', () => {
     expect(component.setEditorForms).toHaveBeenCalled();
     expect(component.unitFormConfig).toBeDefined();
     expect(component.rootFormConfig).toBeDefined();
-    expect(component.libraryComponentInput.searchFormConfig).toBeDefined();
     expect(component.leafFormConfig).toBeDefined();
     expect(component.relationFormConfig).toBeDefined();
   });
@@ -299,7 +295,6 @@ describe('EditorComponent', () => {
     expect(component.setEditorForms).toHaveBeenCalled();
     expect(component.unitFormConfig).toBeDefined();
     expect(component.rootFormConfig).toBeDefined();
-    expect(component.libraryComponentInput.searchFormConfig).toBeDefined();
     expect(component.leafFormConfig).toBeDefined();
     expect(component.relationFormConfig).toBeDefined();
   });
@@ -318,7 +313,6 @@ describe('EditorComponent', () => {
     expect(component.setEditorForms).toHaveBeenCalled();
     expect(component.unitFormConfig).toBeDefined();
     expect(component.rootFormConfig).toBeDefined();
-    expect(component.libraryComponentInput.searchFormConfig).toBeDefined();
     expect(component.leafFormConfig).toBeDefined();
     expect(component.relationFormConfig).toBeDefined();
   });
@@ -389,15 +383,6 @@ describe('EditorComponent', () => {
     };
     component.toolbarEventListener(event);
     expect(component.previewContent).toHaveBeenCalled();
-  });
-
-  it('#toolbarEventListener() should call #showLibraryComponentPage() if event is addFromLibrary', () => {
-    spyOn(component, 'showLibraryComponentPage').and.callFake(() => { });
-    const event = {
-      button: 'addFromLibrary'
-    };
-    component.toolbarEventListener(event);
-    expect(component.showLibraryComponentPage).toHaveBeenCalled();
   });
 
   it('#toolbarEventListener() should call #showQuestionLibraryComponentPage() if event is showQuestionLibraryPage', () => {
@@ -642,37 +627,6 @@ describe('EditorComponent', () => {
     expect(component.toolbarConfig.title).toEqual('Untitled');
   });
 
-  it('#showLibraryComponentPage() should set #addFromLibraryButtonLoader to true and call #saveContent()', () => {
-    const editorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(true);
-    spyOn(component, 'saveContent').and.callFake(() => {
-      return Promise.resolve();
-    });
-    component.showLibraryComponentPage();
-    expect(component.buttonLoaders.addFromLibraryButtonLoader).toEqual(true);
-    expect(component.saveContent).toHaveBeenCalled();
-  });
-
-  it('#showLibraryComponentPage() should throw error', () => {
-    const toasterService = TestBed.inject(ToasterService);
-    spyOn(toasterService, 'error').and.callFake(() => {})
-    const editorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(true);
-    spyOn(component, 'saveContent').and.callFake(() => {
-      return Promise.reject({error: "Content not able to save"});
-    });
-    component.showLibraryComponentPage();
-    expect(component.buttonLoaders.addFromLibraryButtonLoader).toEqual(true);
-  });
-
-  it('#showLibraryComponentPage should call call saveContent', () => {
-    const editorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(false);
-    spyOn(component, 'saveContent');
-    component.showLibraryComponentPage();
-    expect(component.saveContent).not.toHaveBeenCalled();
-  });
-
   it('#showQuestionLibraryComponentPage() should set #addQuestionFromLibraryButtonLoader to false and call #saveContent()',
   fakeAsync(() => {
     const editorService = TestBed.inject(EditorService);
@@ -681,7 +635,7 @@ describe('EditorComponent', () => {
     component.collectionId = 'do_12345';
     component.organisationFramework = 'nit_k12';
     component.editorConfig = editorConfig_question;
-    component.libraryComponentInput.searchFormConfig = categoryDefinition.result.objectCategoryDefinition.forms.searchConfig;
+    component.questionlibraryInput.searchFormConfig = categoryDefinition.result.objectCategoryDefinition.forms.searchConfig;
     spyOn(treeService, 'getActiveNode').and.returnValue({data: {metadata: {}}});
     spyOn(editorService, 'getContentChildrens').and.returnValue([{}, {}]);
     spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(true);
@@ -1501,7 +1455,6 @@ describe('EditorComponent', () => {
   it('#ngOnDestroy should call modal.deny()', () => {
     component.telemetryService = undefined;
     component.treeService = undefined;
-    component.unSubscribeShowLibraryPageEmitter = undefined;
     component.unSubscribeshowQuestionLibraryPageEmitter = undefined;
     const treeService = TestBed.inject(TreeService);
     // tslint:disable-next-line:no-string-literal
