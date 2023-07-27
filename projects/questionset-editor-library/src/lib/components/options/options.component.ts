@@ -174,9 +174,6 @@ export class OptionsComponent implements OnInit, OnChanges {
 
   getInteractions(options) {
     let index;
-    // if(Object.keys(this.hints).length < this.editorState.interactions?.response1?.options.length) {
-    //   this.hints = this.editorState.interactions.response1.options.map((element) => element.hint)
-    // }
     const interactOptions = _.map(options, (opt, key) => {
       index = Number(key);
       return { label: opt.body, value: index,  hint: this.hints[this.editorState?.interactions?.response1?.options[index]?.hint] ? Object.keys(this.hints).find(element => element == this.editorState?.interactions?.response1?.options[index]?.hint) : '' };
@@ -196,7 +193,6 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   subMenuChange({ index, value }, optionIndex) {
-    // _.set(this.editorState, `interactions.response1.options[${optionIndex}].hints.en`, value)
     if(value.length && Object.keys(this.hints).length < this.editorState.interactions.response1.options.length ) {
       const hint = {[uuidv4()] : {en:value}}
       this.hints = {...this.hints, ...hint}

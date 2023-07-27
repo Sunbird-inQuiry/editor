@@ -9,8 +9,8 @@ export interface SubMenu {
   id: string;
   name: string;
   label: string;
-  value: string|any;
-  enabled: boolean|any;
+  value: string|any[];
+  enabled: boolean;
   type: string;
   show: boolean;
 }
