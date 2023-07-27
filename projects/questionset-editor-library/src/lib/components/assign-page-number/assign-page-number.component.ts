@@ -34,10 +34,8 @@ export class AssignPageNumberComponent implements OnInit {
   }
 
   toolbarEventListener(event) {
-    switch (event.button) {
-      case 'backContent':
-        this.redirectToQuestionSet();
-        break;
+    if (event?.button === 'backContent') {
+      this.redirectToQuestionSet();
     }
   }
 

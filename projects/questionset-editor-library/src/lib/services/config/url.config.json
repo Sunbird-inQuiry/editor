@@ -43,8 +43,7 @@
       "READ":"content/v3/read/",
       "CREATE":"content/v3/create",
       "UPLOAD":"content/v3/upload/",
-      "UPLOAD_URL":"content/v3/upload/url/",
-      "UPDATE_COLLABORATOR":"content/v1/collaborator/update/"
+      "UPLOAD_URL":"content/v3/upload/url/"
     },
     "frameworkRead":"framework/v1/read/",
     "channelRead":"channel/v1/read/",
@@ -53,14 +52,6 @@
       "UPLOAD": "collection/v1/import/",
       "DOWNLOAD": "collection/v1/export/",
       "SAMPLE_COLLECTION_HIERARCHY": "sourcing/collection-hierarchy/createfoldersamplecsvfile.csv"
-    },
-    "BULKJOB": {
-      "CREATE": "program/v1/process/create",
-      "UPDATE": "program/v1/process/update",
-      "SEARCH": "program/v1/process/search",
-      "UPLOAD": "question/v2/bulkUpload",
-      "STATUS": "question/v2/bulkUploadStatus",
-      "SAMPLE_QUESTION_FILE" : "bulk-question-upload-sample-format.csv"
     },
     "USER": {
       "SEARCH":"user/v1/search"

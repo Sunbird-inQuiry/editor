@@ -493,7 +493,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         return false;        }
       }
       let questionIds = [];
-      //let comments = {};
       let comments = event.comment
       let successMessage = '';
       this.editorService.fetchCollectionHierarchy(this.questionSetId).subscribe(res => {

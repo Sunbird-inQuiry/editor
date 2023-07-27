@@ -43,7 +43,7 @@ export const questionSetEditorConfig = {
       l1: 'do_113140468925825024117',
       l2: 'do_113140468926914560125'
     },
-    host: 'https://dev.inquiry.sunbird.org',
+    host: '',
     defaultLicense: 'CC BY 4.0',
     endpoint: '/data/v3/telemetry',
     env: 'questionset_editor',
@@ -128,8 +128,6 @@ export const questionSetEditorConfig = {
     primaryCategory: 'Practice Question Set',
     isRoot: true,
     iconClass: 'fa fa-book',
-    showAddCollaborator: false,
-    enableBulkUpload: true,
     publicStorageAccount: 'https://dockstorage.blob.core.windows.net/',
     hideSubmitForReviewBtn: false,
     children: {
@@ -446,8 +444,6 @@ export const observationEditorConfig = {
     primaryCategory: 'Observation',
     isRoot: true,
     iconClass: 'fa fa-book',
-    showAddCollaborator: false,
-    enableBulkUpload: true,
     publicStorageAccount: 'https://dockstorage.blob.core.windows.net/',
     children: {
       Question: [
@@ -639,8 +635,6 @@ export const surveyEditorConfig = {
     primaryCategory: 'Survey',
     isRoot: true,
     iconClass: 'fa fa-book',
-    showAddCollaborator: false,
-    enableBulkUpload: true,
     enablePagination: true,
     publicStorageAccount: 'https://dockstorage.blob.core.windows.net/',
     children: {
@@ -834,8 +828,6 @@ export const observationRubricsEditorConfig = {
     primaryCategory: 'Observation With rubrics',
     isRoot: true,
     iconClass: 'fa fa-book',
-    showAddCollaborator: false,
-    enableBulkUpload: true,
     enablePagination:true,
     publicStorageAccount: 'https://dockstorage.blob.core.windows.net/',
     children: {

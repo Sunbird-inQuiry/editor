@@ -143,20 +143,6 @@ export class HelperService {
     return this.publicDataService.post(req);
   }
 
-  updateCollaborator(contentId, collaboratorList) {
-    const req = {
-      url: _.get(this.configService.urlConFig, 'URLS.CONTENT.UPDATE_COLLABORATOR') + contentId,
-      data: {
-          request: {
-              content: {
-                  collaborators: collaboratorList
-              }
-          }
-      }
-    };
-    return this.publicDataService.patch(req);
-  }
-
   addDepthToHierarchy(arr, depth = 0, index = 0) {
     if (arr && index < arr.length) {
       _.forEach(arr, child => {

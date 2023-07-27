@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { Observable, Subject, BehaviorSubject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import * as _ from 'lodash-es';
 import { TreeService } from '../tree/tree.service';
 import { PublicDataService } from '../public-data/public-data.service';
@@ -27,10 +27,7 @@ export class EditorService {
   private _editorMode = 'edit';
   private _isReviewerEditEnable = false;
   private _isReviewModificationAllowed = false;
-  public showLibraryPage: EventEmitter<any> = new EventEmitter();
   public showQuestionLibraryPage: EventEmitter<any> = new EventEmitter();
-  private _bulkUploadStatus$ = new BehaviorSubject<any>(undefined);
-  public readonly bulkUploadStatus$: Observable<any> = this._bulkUploadStatus$;
   public contentsCount = 0;
   templateList = [];
   parentIdentifier: any;
@@ -114,15 +111,6 @@ export class EditorService {
     return _.cloneDeep(_.merge(this.configService.labelConfig.button_labels, _.get(this.editorConfig, 'context.labels')));
   }
 
-  nextBulkUploadStatus(status) {
-    this._bulkUploadStatus$.next(status);
-  }
-  emitshowLibraryPageEvent(page) {
-    this.showLibraryPage.emit(page);
-  }
-  getshowLibraryPageEmitter() {
-    return this.showLibraryPage;
-  }
   emitshowQuestionLibraryPageEvent(page) {
     this.showQuestionLibraryPage.emit(page);
   }
