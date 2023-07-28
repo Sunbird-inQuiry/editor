@@ -31,7 +31,7 @@ export const rootNode = {
                     contentDisposition: 'inline',
                     lastUpdatedOn: '2022-04-05T06:40:11.752+0000',
                     contentEncoding: 'gzip',
-                    showSolutions: false,
+                    showSolutions: 'No',
                     allowAnonymousAccess: 'Yes',
                     identifier: 'do_1135097615298723841131',
                     lastStatusChangedOn: '2022-04-05T06:40:11.752+0000',
@@ -39,7 +39,7 @@ export const rootNode = {
                         'Student'
                     ],
                     visibility: 'Parent',
-                    showTimer: false,
+                    showTimer: 'No',
                     author: 'N11',
                     index: 1,
                     qType: 'MCQ',
@@ -48,7 +48,7 @@ export const rootNode = {
                     ],
                     version: 1,
                     versionKey: '1649140811762',
-                    showFeedback: false,
+                    showFeedback: 'No',
                     license: 'CC BY 4.0',
                     interactionTypes: [
                         'choice'
@@ -94,7 +94,7 @@ export const rootNode = {
                     contentDisposition: 'inline',
                     lastUpdatedOn: '2022-04-05T06:59:25.432+0000',
                     contentEncoding: 'gzip',
-                    showSolutions: false,
+                    showSolutions: 'No',
                     allowAnonymousAccess: 'Yes',
                     identifier: 'do_1135097709808189441133',
                     lastStatusChangedOn: '2022-04-05T06:59:25.432+0000',
@@ -102,7 +102,7 @@ export const rootNode = {
                         'Student'
                     ],
                     visibility: 'Parent',
-                    showTimer: false,
+                    showTimer: 'No',
                     author: 'N11',
                     index: 2,
                     qType: 'SA',
@@ -111,7 +111,7 @@ export const rootNode = {
                     ],
                     version: 1,
                     versionKey: '1649141965442',
-                    showFeedback: false,
+                    showFeedback: 'No',
                     license: 'CC BY 4.0',
                     framework: 'ekstep_ncert_k-12',
                     depth: 2,
@@ -144,20 +144,21 @@ export const rootNode = {
                     'English'
                 ],
                 mimeType: 'application/vnd.sunbird.questionset',
-                showHints: false,
+                showHints: 'No',
                 createdOn: '2022-04-05T06:39:49.987+0000',
                 objectType: 'QuestionSet',
                 primaryCategory: 'Practice Question Set',
                 contentDisposition: 'inline',
                 lastUpdatedOn: '2022-04-05T06:59:12.048+0000',
                 contentEncoding: 'gzip',
-                showSolutions: false,
+                generateDIALCodes: 'No',
+                showSolutions: 'No',
                 allowAnonymousAccess: 'Yes',
                 identifier: 'do_1135097613515735041129',
                 lastStatusChangedOn: '2022-04-05T06:39:49.987+0000',
                 requiresSubmit: 'No',
                 visibility: 'Parent',
-                showTimer: false,
+                showTimer: 'No',
                 index: 1,
                 setType: 'materialised',
                 languageCode: [
@@ -165,7 +166,7 @@ export const rootNode = {
                 ],
                 version: 1,
                 versionKey: '1649140789987',
-                showFeedback: false,
+                showFeedback: 'No',
                 license: 'CC BY 4.0',
                 depth: 1,
                 compatibilityLevel: 5,
@@ -183,11 +184,7 @@ export const rootNode = {
 
 export const questionsData = [
     {
-        instructions: {
-            en: [
-                null
-            ]
-        },
+        instructions: null,
         copyright: 'NIT123',
         code: '65b5b3ba-fe06-4abe-f969-a2ba4dcb8266',
         subject: [
@@ -226,7 +223,7 @@ export const questionsData = [
         contentDisposition: 'inline',
         lastUpdatedOn: '2022-04-05T06:59:25.442+0000',
         contentEncoding: 'gzip',
-        showSolutions: false,
+        showSolutions: 'No',
         allowAnonymousAccess: 'Yes',
         identifier: 'do_1135097709808189441133',
         lastStatusChangedOn: '2022-04-05T06:59:25.432+0000',
@@ -234,7 +231,7 @@ export const questionsData = [
             'Student'
         ],
         visibility: 'Parent',
-        showTimer: false,
+        showTimer: 'No',
         author: 'N11',
         solutions: [],
         hints: {
@@ -248,7 +245,7 @@ export const questionsData = [
         ],
         version: 1,
         versionKey: '1649141965442',
-        showFeedback: false,
+        showFeedback: 'No',
         license: 'CC BY 4.0',
         framework: 'ekstep_ncert_k-12',
         answer: '<p>a</p>',
@@ -262,11 +259,7 @@ export const questionsData = [
         status: 'Draft'
     },
     {
-        instructions: {
-            en: [
-                null
-            ]
-        },
+        instructions: null,
         copyright: 'NIT123',
         code: '18712769-7a5c-f393-ee92-87ae2e90b172',
         subject: [
@@ -275,6 +268,7 @@ export const questionsData = [
         channel: '01309282781705830427',
         responseDeclaration: {
             response1: {
+                maxScore: 1,
                 cardinality: 'single',
                 type: 'integer',
                 correctResponse: {
@@ -344,7 +338,7 @@ export const questionsData = [
         contentDisposition: 'inline',
         lastUpdatedOn: '2022-04-05T06:40:11.762+0000',
         contentEncoding: 'gzip',
-        showSolutions: false,
+        showSolutions: 'No',
         allowAnonymousAccess: 'Yes',
         identifier: 'do_1135097615298723841131',
         lastStatusChangedOn: '2022-04-05T06:40:11.752+0000',
@@ -352,7 +346,7 @@ export const questionsData = [
             'Student'
         ],
         visibility: 'Parent',
-        showTimer: false,
+        showTimer: 'No',
         author: 'N11',
         solutions: [],
         hints: {
@@ -366,7 +360,7 @@ export const questionsData = [
         ],
         version: 1,
         versionKey: '1649140811762',
-        showFeedback: false,
+        showFeedback: 'No',
         license: 'CC BY 4.0',
         interactionTypes: [
             'choice'
