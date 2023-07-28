@@ -185,7 +185,7 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
           const channelData = this.helperService.channelInfo;
           field.default = _.get(metaDataFields, field.code);
           if (_.isEmpty(field.default) && this.editorService.editorConfig.config.setDefaultCopyRight) {
-            field.default = channelData && channelData.name;
+            field.default = channelData?.name;
           }
         }
 

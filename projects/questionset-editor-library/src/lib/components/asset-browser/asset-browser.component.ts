@@ -300,7 +300,7 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
   }
   dismissPops(modal) {
     this.dismissImagePicker();
-    if (modal && modal?.deny) {
+    if (modal?.deny) {
       modal.deny();
     }
   }

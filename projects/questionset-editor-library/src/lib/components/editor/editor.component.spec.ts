@@ -82,7 +82,6 @@ describe('EditorComponent', () => {
     expect(component.searchFormConfig).toBeUndefined();
     expect(component.leafFormConfig).toBeUndefined();
     expect(component.showLibraryPage).toBeFalsy();
-    expect(component.libraryComponentInput).toEqual({});
     expect(component.questionlibraryInput).toEqual({});
     expect(component.isQumlPlayer).toBeUndefined();
     expect(component.showQuestionTemplatePopup).toBeFalsy();
@@ -117,7 +116,6 @@ describe('EditorComponent', () => {
     spyOn(treeService, 'initialize').and.callThrough();
     const configService = TestBed.inject(ConfigService);
     component.configService = configService;
-    spyOn(editorService, 'getToolbarConfig').and.returnValue({ title: 'abcd', showDialcode: 'No' });
     spyOn(component, 'isReviewMode').and.returnValue(true);
     spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of(hierarchyResponse));
     spyOn(component, 'initializeFrameworkAndChannel').and.callFake(() => {});
@@ -126,8 +124,6 @@ describe('EditorComponent', () => {
     spyOn(telemetryService, 'initializeTelemetry').and.callFake(() => { });
     spyOn(telemetryService, 'start').and.callFake(() => { });
     const libraryPage: EventEmitter<any> = new EventEmitter();
-    spyOn(editorService, 'getshowLibraryPageEmitter').and.callFake(() => {return libraryPage})
-    spyOn(component, 'showLibraryComponentPage').and.callFake(() => {});
     const questionLibraryPage: EventEmitter<any> = new EventEmitter();
     spyOn(editorService, 'getshowQuestionLibraryPageEmitter').and.callFake(() => {return questionLibraryPage});
     spyOn(component, 'showQuestionLibraryComponentPage').and.callFake(() => {});
@@ -138,7 +134,6 @@ describe('EditorComponent', () => {
     expect(component.editorMode).toEqual('edit');
     expect(treeService.initialize).toHaveBeenCalledWith(editorConfig);
     expect(component.collectionId).toBeDefined();
-    expect(editorService.getToolbarConfig).toHaveBeenCalled();
     expect(component.isObjectTypeCollection).toBeTruthy();
     expect(component.isReviewMode).toHaveBeenCalled();
     expect(component.isStatusReviewMode).toBeTruthy();
@@ -147,10 +142,8 @@ describe('EditorComponent', () => {
     expect(component.toolbarConfig.title).toEqual(hierarchyResponse[0].result.content.name);
     expect(component.initializeFrameworkAndChannel).toHaveBeenCalled();
     expect(editorService.getCategoryDefinition).toHaveBeenCalled();
-    expect(component.toolbarConfig.showDialcode).toEqual('yes');
-    expect(component.toolbarConfig.showBulkUploadBtn).toBeFalsy();
     expect(telemetryService.initializeTelemetry).toHaveBeenCalled();
-    expect(telemetryService.telemetryPageId).toEqual('collection_editor');
+    expect(telemetryService.telemetryPageId).toEqual('questionset_editor');
     expect(telemetryService.start).toHaveBeenCalled();
     // expect(editorService.getshowLibraryPageEmitter).toHaveBeenCalled();
     // expect(component.showLibraryComponentPage).toHaveBeenCalled();
@@ -291,7 +284,6 @@ describe('EditorComponent', () => {
     expect(component.setEditorForms).toHaveBeenCalled();
     expect(component.unitFormConfig).toBeDefined();
     expect(component.rootFormConfig).toBeDefined();
-    expect(component.libraryComponentInput.searchFormConfig).toBeDefined();
     expect(component.leafFormConfig).toBeDefined();
     expect(component.relationFormConfig).toBeDefined();
   });
@@ -303,7 +295,6 @@ describe('EditorComponent', () => {
     expect(component.setEditorForms).toHaveBeenCalled();
     expect(component.unitFormConfig).toBeDefined();
     expect(component.rootFormConfig).toBeDefined();
-    expect(component.libraryComponentInput.searchFormConfig).toBeDefined();
     expect(component.leafFormConfig).toBeDefined();
     expect(component.relationFormConfig).toBeDefined();
   });
@@ -322,7 +313,6 @@ describe('EditorComponent', () => {
     expect(component.setEditorForms).toHaveBeenCalled();
     expect(component.unitFormConfig).toBeDefined();
     expect(component.rootFormConfig).toBeDefined();
-    expect(component.libraryComponentInput.searchFormConfig).toBeDefined();
     expect(component.leafFormConfig).toBeDefined();
     expect(component.relationFormConfig).toBeDefined();
   });
@@ -330,7 +320,7 @@ describe('EditorComponent', () => {
   it('#ngAfterViewInit() should call #impression()', () => {
     component.isComponenetInitialized = false;
     const telemetryService = TestBed.inject(EditorTelemetryService);
-    telemetryService.telemetryPageId = 'collection_editor';
+    telemetryService.telemetryPageId = 'questionset_editor';
     spyOn(telemetryService, 'impression').and.callFake(() => { });
     spyOn(component, 'ngAfterViewInit').and.callThrough();
     component.ngAfterViewInit();
@@ -375,20 +365,6 @@ describe('EditorComponent', () => {
     expect(component.getHierarchyChildrenConfig).toHaveBeenCalled();
   });
 
-  it('#toggleCollaboratorModalPoup() should set addCollaborator to true', () => {
-    component.addCollaborator = false;
-    spyOn(component, 'toggleCollaboratorModalPoup').and.callThrough();
-    component.toggleCollaboratorModalPoup();
-    expect(component.addCollaborator).toEqual(true);
-  });
-
-  it('#toggleCollaboratorModalPoup() should set addCollaborator to false', () => {
-    component.addCollaborator = true;
-    spyOn(component, 'toggleCollaboratorModalPoup').and.callThrough();
-    component.toggleCollaboratorModalPoup();
-    expect(component.addCollaborator).toEqual(false);
-  });
-
   it('#toolbarEventListener() should call #saveContent() if event is saveContent', () => {
   spyOn(component, 'saveContent').and.callFake(() => {
     return Promise.resolve();
@@ -407,15 +383,6 @@ describe('EditorComponent', () => {
     };
     component.toolbarEventListener(event);
     expect(component.previewContent).toHaveBeenCalled();
-  });
-
-  it('#toolbarEventListener() should call #showLibraryComponentPage() if event is addFromLibrary', () => {
-    spyOn(component, 'showLibraryComponentPage').and.callFake(() => { });
-    const event = {
-      button: 'addFromLibrary'
-    };
-    component.toolbarEventListener(event);
-    expect(component.showLibraryComponentPage).toHaveBeenCalled();
   });
 
   it('#toolbarEventListener() should call #showQuestionLibraryComponentPage() if event is showQuestionLibraryPage', () => {
@@ -550,30 +517,6 @@ describe('EditorComponent', () => {
     expect(component.sourcingRejectContent).toHaveBeenCalledWith({ comment: 'test' });
   });
 
-  it('#toolbarEventListener() should call #toggleCollaboratorModalPoup()', () => {
-    const event = {
-      button: 'addCollaborator'
-    };
-    component.addCollaborator = false;
-    spyOn(component, 'toggleCollaboratorModalPoup').and.callThrough();
-    spyOn(component, 'toolbarEventListener').and.callThrough();
-    component.toolbarEventListener(event);
-    expect(component.actionType).toBe('addCollaborator');
-    expect(component.toggleCollaboratorModalPoup).toHaveBeenCalled();
-    expect(component.addCollaborator).toEqual(true);
-  });
-
-  it('#toolbarEventListener() should not call #toggleCollaboratorModalPoup()', () => {
-    spyOn(component, 'toggleCollaboratorModalPoup');
-    const event = {
-      button: 'xyz'
-    };
-    component.toolbarEventListener(event);
-    expect(component.actionType).toBe('xyz');
-    expect(component.toggleCollaboratorModalPoup).not.toHaveBeenCalled();
-  });
-
-
   it('#toolbarEventListener() should set showReviewModal to true ', () => {
     spyOn(component, 'toolbarEventListener').and.callThrough();
     component.showReviewModal = false;
@@ -647,7 +590,7 @@ describe('EditorComponent', () => {
     spyOn(component.editorEmitter, 'emit');
     component.redirectToChapterListTab({ data: 'dummyData' });
     expect(component.editorEmitter.emit).toHaveBeenCalledWith({
-      close: true, library: 'collection_editor', action: 'dummyCase', identifier: 'do_12345',
+      close: true, library: 'questionset_editor', action: 'dummyCase', identifier: 'do_12345',
       data: 'dummyData'
     });
   });
@@ -658,7 +601,7 @@ describe('EditorComponent', () => {
     spyOn(component.editorEmitter, 'emit');
     component.redirectToChapterListTab();
     expect(component.editorEmitter.emit).toHaveBeenCalledWith({
-      close: true, library: 'collection_editor', action: 'dummyCase', identifier: 'do_12345'
+      close: true, library: 'questionset_editor', action: 'dummyCase', identifier: 'do_12345'
     });
   });
 
@@ -684,37 +627,6 @@ describe('EditorComponent', () => {
     expect(component.toolbarConfig.title).toEqual('Untitled');
   });
 
-  it('#showLibraryComponentPage() should set #addFromLibraryButtonLoader to true and call #saveContent()', () => {
-    const editorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(true);
-    spyOn(component, 'saveContent').and.callFake(() => {
-      return Promise.resolve();
-    });
-    component.showLibraryComponentPage();
-    expect(component.buttonLoaders.addFromLibraryButtonLoader).toEqual(true);
-    expect(component.saveContent).toHaveBeenCalled();
-  });
-
-  it('#showLibraryComponentPage() should throw error', () => {
-    const toasterService = TestBed.inject(ToasterService);
-    spyOn(toasterService, 'error').and.callFake(() => {})
-    const editorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(true);
-    spyOn(component, 'saveContent').and.callFake(() => {
-      return Promise.reject({error: "Content not able to save"});
-    });
-    component.showLibraryComponentPage();
-    expect(component.buttonLoaders.addFromLibraryButtonLoader).toEqual(true);
-  });
-
-  it('#showLibraryComponentPage should call call saveContent', () => {
-    const editorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(false);
-    spyOn(component, 'saveContent');
-    component.showLibraryComponentPage();
-    expect(component.saveContent).not.toHaveBeenCalled();
-  });
-
   it('#showQuestionLibraryComponentPage() should set #addQuestionFromLibraryButtonLoader to false and call #saveContent()',
   fakeAsync(() => {
     const editorService = TestBed.inject(EditorService);
@@ -723,7 +635,7 @@ describe('EditorComponent', () => {
     component.collectionId = 'do_12345';
     component.organisationFramework = 'nit_k12';
     component.editorConfig = editorConfig_question;
-    component.libraryComponentInput.searchFormConfig = categoryDefinition.result.objectCategoryDefinition.forms.searchConfig;
+    component.questionlibraryInput.searchFormConfig = categoryDefinition.result.objectCategoryDefinition.forms.searchConfig;
     spyOn(treeService, 'getActiveNode').and.returnValue({data: {metadata: {}}});
     spyOn(editorService, 'getContentChildrens').and.returnValue([{}, {}]);
     spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(true);
@@ -748,14 +660,14 @@ describe('EditorComponent', () => {
     expect(component.saveContent).not.toHaveBeenCalled();
   });
 
-  it('#libraryEventListener() should set pageId to collection_editor', async () => {
+  it('#libraryEventListener() should set pageId to questionset_editor', async () => {
     component.isEnableCsvAction = false;
     component.isComponenetInitialized = false;
     const res = {};
     spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of(res));
     spyOn(component, 'libraryEventListener').and.callThrough();
     component.libraryEventListener({});
-    expect(component.pageId).toEqual('collection_editor');
+    expect(component.pageId).toEqual('questionset_editor');
     expect(component.isEnableCsvAction).toBeTruthy();
     expect(component.isComponenetInitialized).toBeTruthy();
   });
@@ -821,9 +733,6 @@ describe('EditorComponent', () => {
   });
 
   it('#submitHandler() should return true', () => {
-    component.toolbarConfig = {
-      showDialcode: 'No'
-    };
     spyOn(component, 'validateFormStatus').and.callFake(() => {
       return true;
     });
@@ -1317,22 +1226,22 @@ describe('EditorComponent', () => {
     expect(component.pageId).toEqual('question');
   });
 
-  it('#questionEventListener() should set #pageId to collection_editor', () => {
+  it('#questionEventListener() should set #pageId to questionset_editor', () => {
     component.isEnableCsvAction = false;
     component.telemetryService.telemetryPageId = '';
     component.objectType = 'questionSet';
     spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of({}));
     spyOn(component, 'treeEventListener').and.callFake(() => {});
     component.questionEventListener({type: 'createNewContent'});
-    expect(component.pageId).toEqual('collection_editor');
-    expect(component.telemetryService.telemetryPageId).toEqual('collection_editor');
+    expect(component.pageId).toEqual('questionset_editor');
+    expect(component.telemetryService.telemetryPageId).toEqual('questionset_editor');
     expect(component.isEnableCsvAction).toBeTruthy();
   });
 
   it('#questionEventListener() should emit event for objectType question', () => {
     const event = { actionType: 'test', identifier: 'test' };
     component.objectType = 'question';
-    const expectedParams = {close: true, library: 'collection_editor', action: event.actionType, identifier: event.identifier};
+    const expectedParams = {close: true, library: 'questionset_editor', action: event.actionType, identifier: event.identifier};
     spyOn(component.editorEmitter, 'emit').and.callFake(() => {});
     component.questionEventListener(event);
     expect(component.editorEmitter.emit).toHaveBeenCalledWith(expectedParams);
@@ -1499,8 +1408,8 @@ describe('EditorComponent', () => {
     const event = { type: 'updateHierarchy' };
     component.hanndleCsvEmitter(event);
     expect(component.mergeCollectionExternalProperties).toHaveBeenCalled();
-    expect(component.pageId).toEqual('collection_editor');
-    expect(component.telemetryService.telemetryPageId).toEqual('collection_editor');
+    expect(component.pageId).toEqual('questionset_editor');
+    expect(component.telemetryService.telemetryPageId).toEqual('questionset_editor');
     expect(component.isEnableCsvAction).toBeTruthy();
   });
 
@@ -1540,13 +1449,12 @@ describe('EditorComponent', () => {
   it('#assignPageEmitterListener should call', () => {
     spyOn(component, 'assignPageEmitterListener').and.callThrough();
     component.assignPageEmitterListener({});
-    expect(component.pageId).toEqual('collection_editor');
+    expect(component.pageId).toEqual('questionset_editor');
   });
 
   it('#ngOnDestroy should call modal.deny()', () => {
     component.telemetryService = undefined;
     component.treeService = undefined;
-    component.unSubscribeShowLibraryPageEmitter = undefined;
     component.unSubscribeshowQuestionLibraryPageEmitter = undefined;
     const treeService = TestBed.inject(TreeService);
     // tslint:disable-next-line:no-string-literal

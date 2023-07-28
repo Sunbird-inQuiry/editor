@@ -345,11 +345,6 @@ lib-questionset-editor {
     border: none !important;
   }
 
-  .dialcodeModal {
-    input:focus-visible {
-      border: .0625rem solid #999999 !important;
-    }
-  }
   // Fancy tree css
   #fancytree-drop-marker.fa-long-arrow-right:before{
     content: " " !important;
@@ -530,30 +525,6 @@ lib-questionset-editor {
   }
   .sb-disable-icon{color:#ccc !important;}
   .sb-w-240px{width:240px}
-  .showCollaborator{
-    .ui.dimmer{
-      overflow-y: unset !important;
-    }
-    .ui.segment{
-      max-height: calc(80vh - 8em)  !important;
-      overflow-y: auto  !important;
-    }
-    .sb-modal-content{
-      .flex-align-item-center{
-        border-bottom: solid 1px #ccc;
-        margin: 0px -16px;
-        padding: 0 20px;
-      }
-    }
-    .ui.pointing{
-      margin: 0 -15px !important;
-      .item{
-        &.active{
-          font-weight: 600 !important;
-        }
-      }
-    }
-  }
   .publish-checklist{
     label {
       font-size: 13px !important;
@@ -574,16 +545,6 @@ lib-questionset-editor {
       tag{
         display: inline-flex !important;
       }
-    }
-  }
-  .sb-dialcode {
-    border-bottom: 0.5px solid #333333;
-    padding: 8px 5px !important;
-    border-radius: 0 !important;
-    &:focus-visible{
-      border-bottom: 0.5px solid #333333 !important;
-      border-radius: 0 !important;
-      outline: 0 !important;
     }
   }
   sb-dynamic-timer{

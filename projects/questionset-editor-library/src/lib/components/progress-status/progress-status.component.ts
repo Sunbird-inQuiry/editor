@@ -24,12 +24,8 @@ export class ProgressStatusComponent implements OnInit {
   }
 
   toolbarEventListener(event) {
-    switch (event.button) {
-      case 'backContent':
-        this.redirectToQuestionSet();
-        break;
-      default :
-        break;
+    if(event?.button === 'backContent') {
+      this.redirectToQuestionSet();
     }
   }
 

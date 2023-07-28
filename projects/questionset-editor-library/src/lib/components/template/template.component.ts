@@ -27,7 +27,7 @@ export class TemplateComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.modal && this.modal.deny) {
+    if (this?.modal && this?.modal?.deny) {
       this.modal.deny();
     }
   }

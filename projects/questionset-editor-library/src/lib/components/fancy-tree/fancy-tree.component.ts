@@ -36,7 +36,6 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
   public rootNode: any;
   public showLibraryButton = false;
   public unsubscribe$ = new Subject<void>();
-  public bulkUploadProcessingStatus = false;
   public nodeParentDependentMap = {};
   public treeData: any = [];
   public branchingObject = {};
@@ -68,13 +67,6 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!_.has(this.config, 'maxDepth')) { // TODO:: rethink this
       this.config.maxDepth = 4;
     }
-    this.editorService.bulkUploadStatus$.subscribe((status) => {
-      if (status === 'processing') {
-        this.bulkUploadProcessingStatus = true;
-      } else {
-        this.bulkUploadProcessingStatus = false;
-      }
-    });
     this.initialize();
   }
 
@@ -358,30 +350,20 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   eachNodeActionButton(node) {
     this.visibility = {};
-    if (this.bulkUploadProcessingStatus) {
-    this.visibility.addChild = false;
-    this.visibility.addSibling =  false;
-    this.visibility.addFromLibrary =  false;
-    this.visibility.addQuestionFromLibrary = false;
-    this.visibility.createNew =  false;
+    const nodeLevel = node.getLevel() - 1;
+    this.visibility.addChild = ((node.folder === false) || (nodeLevel >= this.config.maxDepth)) ? false : true;
+    // tslint:disable-next-line:max-line-length
+    this.visibility.addSibling = ((node.folder === true) && (!node.data.root) && !((node.getLevel() - 1) > this.config.maxDepth)) ? true : false;
+    if (nodeLevel === 0) {
+      this.visibility.createNew = _.isEmpty(_.get(this.config, 'children')) || _.get(this.config, 'enableQuestionCreation') === false ? false : true;
+      this.visibility.addQuestionFromLibrary = !_.isEmpty(_.get(this.config, 'children')) && _.get(this.config, 'enableAddFromLibrary') === true ? true : false;
     } else {
-      const nodeLevel = node.getLevel() - 1;
-      this.visibility.addChild = ((node.folder === false) || (nodeLevel >= this.config.maxDepth)) ? false : true;
+      const hierarchylevelData = this.config.hierarchy[`level${nodeLevel}`];
       // tslint:disable-next-line:max-line-length
-      this.visibility.addSibling = ((node.folder === true) && (!node.data.root) && !((node.getLevel() - 1) > this.config.maxDepth)) ? true : false;
-      if (nodeLevel === 0) {
-        this.visibility.addFromLibrary = _.isEmpty(_.get(this.config, 'children')) || _.get(this.config, 'enableQuestionCreation') === false ? false : true;
-        this.visibility.createNew = _.isEmpty(_.get(this.config, 'children')) || _.get(this.config, 'enableQuestionCreation') === false ? false : true;
-        this.visibility.addQuestionFromLibrary = !_.isEmpty(_.get(this.config, 'children')) && _.get(this.config, 'enableAddFromLibrary') === true ? true : false;
-      } else {
-        const hierarchylevelData = this.config.hierarchy[`level${nodeLevel}`];
-        // tslint:disable-next-line:max-line-length
-        this.visibility.addFromLibrary = ((node.folder === false) || _.isEmpty(_.get(hierarchylevelData, 'children')) || _.get(this.config, 'enableQuestionCreation') === false) ? false : true;
-        // tslint:disable-next-line:max-line-length
-        this.visibility.createNew = ((node.folder === false) || _.isEmpty(_.get(hierarchylevelData, 'children')) || _.get(this.config, 'enableQuestionCreation') === false) ? false : true;
-        this.visibility.addQuestionFromLibrary = ((node.folder === true) && !_.isEmpty(_.get(hierarchylevelData, 'children')) && _.get(this.config, 'enableAddFromLibrary') === true) ? true : false;
-      }
+      this.visibility.createNew = ((node.folder === false) || _.isEmpty(_.get(hierarchylevelData, 'children')) || _.get(this.config, 'enableQuestionCreation') === false) ? false : true;
+      this.visibility.addQuestionFromLibrary = ((node.folder === true) && !_.isEmpty(_.get(hierarchylevelData, 'children')) && _.get(this.config, 'enableAddFromLibrary') === true) ? true : false;
     }
+
     if (_.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true) {
       this.visibility.addChild = false;
       this.visibility.addSibling = false;
@@ -417,10 +399,6 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   attachContextMenu(node, activeNode?) {
-    // tslint:disable-next-line:max-line-length
-    if (this.bulkUploadProcessingStatus || _.get(this.config, 'mode') !== 'edit' || (node.data.root === true && _.isEmpty(this.config.hierarchy) )) {
-      return;
-    }
     const $nodeSpan = $(node.span);
     // tslint:disable-next-line:max-line-length   // TODO:: (node.data.contentType === 'CourseUnit') check this condition
     const menuTemplate = node.data.root === true ? this.rootMenuTemplate : (node.data.root === false && node.folder === true  ? this.folderMenuTemplate : this.contentMenuTemplate);
@@ -576,9 +554,6 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  addFromLibrary() {
-    this.editorService.emitshowLibraryPageEvent('showLibraryPage');
-  }
   addQuestionFromLibrary() {
     this.editorService.emitshowQuestionLibraryPageEvent('showQuestionLibraryPage');
   }

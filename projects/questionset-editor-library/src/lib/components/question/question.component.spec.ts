@@ -159,7 +159,6 @@ describe("QuestionComponent", () => {
   it("should create", () => {
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "true",
     });
     expect(component).toBeTruthy();
@@ -200,7 +199,6 @@ describe("QuestionComponent", () => {
     });
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "",
     });
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
@@ -241,7 +239,6 @@ describe("QuestionComponent", () => {
     component.creationContext.objectType = "question";
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "",
     });
     spyOn(editorService, "fetchCollectionHierarchy").and.returnValue(
@@ -266,7 +263,6 @@ describe("QuestionComponent", () => {
     component.questionPrimaryCategory = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -301,7 +297,6 @@ describe("QuestionComponent", () => {
     component.leafFormConfig = leafFormConfigMock;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -324,7 +319,6 @@ describe("QuestionComponent", () => {
     component.leafFormConfig = leafFormConfigMock;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -354,7 +348,6 @@ describe("QuestionComponent", () => {
     editorService.parentIdentifier = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -384,7 +377,6 @@ describe("QuestionComponent", () => {
     editorService.parentIdentifier = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -413,7 +405,6 @@ describe("QuestionComponent", () => {
     component.childFormData = childMetaData;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -487,7 +478,6 @@ describe("QuestionComponent", () => {
     editorService.parentIdentifier = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -514,7 +504,6 @@ describe("QuestionComponent", () => {
     editorService.parentIdentifier = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -541,7 +530,6 @@ describe("QuestionComponent", () => {
     editorService.parentIdentifier = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
