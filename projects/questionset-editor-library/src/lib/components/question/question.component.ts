@@ -951,16 +951,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       metaData.responseDeclaration.response1.cardinality = 'multiple';
     }
 
-    _.forEach(this.subMenus, (el: any) => {
-      if (el.id === 'addHint') {
-        metaData.hints = metaData.hints ? metaData.hints : {};
-        metaData.hints[this.uuid] = {en: el.value}
-        this.getOutcomeDeclaration(metaData)
-      }
-      if (el.id === 'addTip') {
-        metaData.instructions = el.value;
-      }
-    });
+    this.InsertHintAndInstructions(metaData)
 
     if (!_.isEmpty(this.sliderDatas) && this.questionInteractionType === 'slider') {
       metaData.interactionTypes = [this.questionInteractionType];
@@ -1004,6 +995,20 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       };
     }
     //  return metaData;
+  }
+
+  InsertHintAndInstructions(metaData) {
+    _.forEach(this.subMenus, (el: any) => {
+      if (el.id === 'addHint') {
+        metaData.hints = metaData.hints ? metaData.hints : {};
+        metaData.hints[this.uuid] = {en: el.value}
+        this.getOutcomeDeclaration(metaData)
+      }
+      if (el.id === 'addTip') {
+        metaData.instructions = el.value;
+      }
+    });
+    return metaData
   }
 
   prepareRequestBody() {
@@ -1396,52 +1401,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   subMenuConfig() {
     this.subMenus = [
-      {
-        id: 'addHint',
-        name: 'Add Hint',
-        value:(() => { 
-          if(this.questionMetaData?.outcomeDeclaration ) {
-            return this.questionMetaData?.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en;
-          }
-          else {
-             return '';
-          }
-        })(),
-        label: 'Hint',
-        enabled:(() => { 
-          if(this.questionMetaData?.outcomeDeclaration && this.questionMetaData?.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en.length > 0) {
-            return true;
-          }
-          else {
-            return false;
-          }
-        })(),
-        type: 'input',
-        show: _.get(this.sourcingSettings, 'showAddHints')
-      },
-      {
-        id: 'addTip',
-        name: 'Add Tip',
-        value: (() => { 
-          if(this.questionMetaData) {
-            return this.questionMetaData?.instructions
-          }
-          else {
-            return '';
-          }
-        })(),
-        label: 'Tip',
-        enabled: (() => { 
-          if(this.questionMetaData && this.questionMetaData?.instructions?.length > 0) {
-            return true;
-          }
-          else {
-             return false;
-          }
-        })(),
-        type: 'input',
-        show: _.get(this.sourcingSettings, 'showAddTips')
-      },
+      this.getHints(),
+      this.getInstructions(),
       {
         id: 'addDependantQuestion',
         name: 'Add Dependant Question',
@@ -1450,13 +1411,64 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         enabled: false,
         type: '',
         show: _.get(this.sourcingSettings, 'showAddSecondaryQuestion') && !this.questionInput.setChildQueston
-      },
+      }
     ];
     if (!_.get(this.sourcingSettings, 'showAddSecondaryQuestion') && !this.questionInput.setChildQueston) {
       this.showOptions = false;
     } else {
     this.showOptions = (this.questionInput.setChildQueston === true) ? true : false;
+    }
   }
+  getHints() {
+    return {
+      id: 'addHint',
+      name: 'Add Hint',
+      value:(() => { 
+        if(this.questionMetaData?.outcomeDeclaration ) {
+          return this.questionMetaData?.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en;
+        }
+        else {
+           return '';
+        }
+      })(),
+      label: 'Hint',
+      enabled:(() => { 
+        if(this.questionMetaData?.outcomeDeclaration && this.questionMetaData?.hints[this.questionMetaData.outcomeDeclaration.hint.defaultValue].en.length > 0) {
+          return true;
+        }
+        else {
+          return false;
+        }
+      })(),
+      type: 'input',
+      show: _.get(this.sourcingSettings, 'showAddHints')
+    }
+  }
+
+  getInstructions() {
+    return {
+      id: 'addTip',
+      name: 'Add Tip',
+      value: (() => { 
+        if(this.questionMetaData) {
+          return this.questionMetaData?.instructions
+        }
+        else {
+          return '';
+        }
+      })(),
+      label: 'Tip',
+      enabled: (() => { 
+        if(this.questionMetaData && this.questionMetaData?.instructions?.length > 0) {
+          return true;
+        }
+        else {
+           return false;
+        }
+      })(),
+      type: 'input',
+      show: _.get(this.sourcingSettings, 'showAddTips')
+    }
   }
   ngOnDestroy() {
     this.onComponentDestroy$.next();
