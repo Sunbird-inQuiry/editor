@@ -213,14 +213,14 @@ export class OptionsComponent implements OnInit, OnChanges {
           name: 'Add Hint',
           value: (():any => {
             if(this.hints[uuid]) {
-              this.hints[uuid].en
+              return this.hints[uuid].en
             }
             else {
-              this.editorState?.hints?.[uuid] ? this.editorState.hints[uuid].en : ''
+              return this.editorState?.hints?.[uuid] ? this.editorState.hints[uuid].en : ''
             }
           })(),
           label: 'Hint',
-          enabled: uuid ? true : false,
+          enabled: _.get(this.editorState, `interactions.response1.options[${index}].hint`) ? true : false,
           type: 'input',
           show: _.get(this.sourcingSettings, 'showAddHints'),
         },
