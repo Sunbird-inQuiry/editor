@@ -423,9 +423,7 @@ export const mockData = {
                   },
                 shuffle: true,
                 board: 'CBSE',
-                instructions: {
-                    default: '<p>Chapter 1:&nbsp;<i><strong>माता का अँचल</strong></i></p><p>Chapter 2:&nbsp;<i><strong>जॉर्ज पंचम की नाक</strong></i></p><p>Chapter 3:&nbsp;<i><strong>साना – साना हाथ जोड़ि</strong></i></p><p>Chapter 4:&nbsp;<i><strong>एही ठैयाँ झुलनी हेरानी हो रामा!</strong></i></p><p>Chapter 5:&nbsp;<i><strong>मैं क्यों लिखता हूँ?</strong></i></p><p>Chapter 6:<i><strong>&nbsp;लेखक परिचय</strong></i></p><p>Chapter 7:<i><strong>&nbsp;लेखक परिचय</strong></i></p>'
-                },
+                instructions:'<p>Chapter 1:&nbsp;<i><strong>माता का अँचल</strong></i></p><p>Chapter 2:&nbsp;<i><strong>जॉर्ज पंचम की नाक</strong></i></p><p>Chapter 3:&nbsp;<i><strong>साना – साना हाथ जोड़ि</strong></i></p><p>Chapter 4:&nbsp;<i><strong>एही ठैयाँ झुलनी हेरानी हो रामा!</strong></i></p><p>Chapter 5:&nbsp;<i><strong>मैं क्यों लिखता हूँ?</strong></i></p><p>Chapter 6:<i><strong>&nbsp;लेखक परिचय</strong></i></p><p>Chapter 7:<i><strong>&nbsp;लेखक परिचय</strong></i></p>',
                 level: 1
             },
             root: true

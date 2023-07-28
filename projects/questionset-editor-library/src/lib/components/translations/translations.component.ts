@@ -43,9 +43,7 @@ export class TranslationsComponent {
     hints: {
       en: ["hints in the specified language"],
     },
-    instructions: {
-      en: "instructions in the specified language",
-    },
+    instructions: "instructions in the specified language",
     interactions: {
       response1: {
         type: "choice",
