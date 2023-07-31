@@ -115,7 +115,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   showQualityParameterPopup: boolean =false;
   public qualityFormConfig: any;
   requestChangesPopupAction: string;
-  uuid:string = '' // to store question hint uuid to maintain state of the ID.
+  hintsUUID:string = ''
   constructor(
     private questionService: QuestionService, public editorService: EditorService, public telemetryService: EditorTelemetryService,
     public playerService: PlayerService, private toasterService: ToasterService, private treeService: TreeService,
@@ -254,10 +254,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.editorState.primaryCategory = _.get(this.questionMetaData, 'primaryCategory');
               }
               if(this.questionMetaData?.outcomeDeclaration?.hint) {
-                this.uuid = this.questionMetaData?.outcomeDeclaration?.hint?.defaultValue
+                this.hintsUUID = this.questionMetaData?.outcomeDeclaration?.hint?.defaultValue
               }
               else {
-                this.uuid = uuidv4()
+                this.hintsUUID = uuidv4()
               }
               this.setQuestionTitle(this.questionId);
               if (!_.isEmpty(this.editorState.solutions)) {
@@ -298,7 +298,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       if (_.isUndefined(this.questionId)) {
         this.tempQuestionId = uuidv4();
-        this.uuid = uuidv4();
+        this.hintsUUID = uuidv4();
         this.populateFormData();
         this.setQuestionTitle();
         let editorState = {}
@@ -1001,7 +1001,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     _.forEach(this.subMenus, (el: any) => {
       if (el.id === 'addHint') {
         metaData.hints = metaData.hints ? metaData.hints : {};
-        metaData.hints[this.uuid] = {en: el.value}
+        metaData.hints[this.hintsUUID] = {en: el.value}
         this.getOutcomeDeclaration(metaData)
       }
       if (el.id === 'addTip') {
@@ -1220,7 +1220,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       hint: {
         cardinality: "single",
         type: "string",
-        defaultValue: this.uuid ? this.uuid : ''
+        defaultValue: this.hintsUUID ? this.hintsUUID : ''
       }
     };
     return outcomeDeclaration;
