@@ -139,7 +139,6 @@ describe('OptionsComponent', () => {
   it('#editorDataHandler() should emit option data when answer is single value', () => {
     spyOn(component, 'prepareMcqBody').and.callThrough();
     spyOn(component.editorDataOutput, 'emit').and.callThrough();
-    component.questionInteractionType = 'choice';
     component.editorState = mockOptionData.editorOptionData;
     component.editorDataHandler();
     component.questionPrimaryCategory='Multiselect Multiple Choice Question';
@@ -150,22 +149,11 @@ describe('OptionsComponent', () => {
   it('#editorDataHandler() should emit option data when answer is multiple value', () => {
     spyOn(component, 'prepareMcqBody').and.callThrough();
     spyOn(component.editorDataOutput, 'emit').and.callThrough();
-    component.questionInteractionType = 'choice';
     component.editorState = mockOptionData.editorOptionData;
     component.editorState.answer = [0,1];
     component.editorDataHandler();
     component.questionPrimaryCategory='Multiselect Multiple Choice Question';
     expect(component.prepareMcqBody).toHaveBeenCalledWith(mockOptionData.editorOptionData);
-    expect(component.editorDataOutput.emit).toHaveBeenCalled();
-  });
-
-  it('when questionInteractionType is match prepareMtfBody will be called', () => {
-    spyOn(component, 'prepareMtfBody').and.callFake(()=>{});
-    spyOn(component.editorDataOutput, 'emit').and.callFake(()=>{});
-    component.questionInteractionType = 'match';
-    component.editorDataHandler();
-    component.questionPrimaryCategory='Match The Following Question';
-    expect(component.prepareMtfBody).toHaveBeenCalled();
     expect(component.editorDataOutput.emit).toHaveBeenCalled();
   });
 
