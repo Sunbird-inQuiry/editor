@@ -15,7 +15,6 @@ export class OptionsComponent implements OnInit, OnChanges {
   @Input() showFormError;
   @Input() sourcingSettings;
   @Input() questionPrimaryCategory;
-  @Input() questionInteractionType;
   @Input() mapping = [];
   @Input() isReadOnlyMode;
   @Input() maxScore;
@@ -76,16 +75,8 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   editorDataHandler(event?) {
-    let body: any;
-    if (this.questionInteractionType === 'choice') {
-      body = this.prepareMcqBody(this.editorState);
-    } else if (this.questionInteractionType === 'match') {
-      body = this.prepareMtfBody(this.editorState);
-    }
-    this.editorDataOutput.emit({
-      body,
-      mediaobj: event ? event.mediaobj : undefined,
-    });
+    const body = this.prepareMcqBody(this.editorState);
+    this.editorDataOutput.emit({ body, mediaobj: event ? event.mediaobj : undefined });
   }
 
   prepareMcqBody(editorState) {
@@ -128,40 +119,11 @@ export class OptionsComponent implements OnInit, OnChanges {
     return metadata;
   }
 
-  prepareMtfBody(editorState) {
-    let metadata: any;
-    const correctAnswer = editorState.answer;
-    let options: any;
-    if (!_.isEmpty(correctAnswer)) {
-      options = _.reduce(this.editorState.options,function (acc, obj) {
-          acc.leftOption.push(obj.leftOption);
-          acc.rightOption.push(obj.rightOption);
-          return acc;
-        },{ leftOption: [], rightOption: [] }
-      );
-    }
-    console.log(options);
-    console.log(editorState.answer);
-    metadata = {
-      templateId: this.templateType,
-      name: this.questionPrimaryCategory || 'Match The Following Question',
-      responseDeclaration: this.getResponseDeclaration(editorState),
-      outcomeDeclaration: this.getOutcomeDeclaration(),
-      interactionTypes: ['match'],
-      interactions: this.getInteractions(editorState.options),
-      editorState: {
-        options,
-      },
-      qType: 'MTF',
-      primaryCategory: this.questionPrimaryCategory || "Match The Following Question",
-    };
-    return metadata;
-  }
   getResponseDeclaration(editorState) {
     const responseDeclaration = {
       response1: {
         cardinality: this.getCardinality(),
-        type: this.questionInteractionType === 'choice' ? 'integer' : 'map',
+        type: 'integer',
         correctResponse: {
           value: editorState.answer,
         },
@@ -191,74 +153,36 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   setMapping() {
-    if (this.questionInteractionType === 'choice') {
-      if (!_.isEmpty(this.selectedOptions)) {
-        this.mapping = [];
-        const scoreForEachOption = _.round((this.maxScore/this.selectedOptions.length), 2);
-        _.forEach(this.selectedOptions, (value) => {
-          const optionMapping = {
-            value: value,
-            score: scoreForEachOption,
-          };
-          this.mapping.push(optionMapping);
-        });
-      }      
-    } else if(this.questionInteractionType === 'match') {
-      if (!_.isEmpty(this.editorState.answer)) {
-        this.mapping = [];
-        const scoreForEachMatch = _.round(
-          this.maxScore / this.editorState.answer.length,
-          2
-        );
-        _.forEach(this.editorState.answer, (value) => {
-          const optionMapping = {
-            value: value,
-            score: scoreForEachMatch,
-          };
-          this.mapping.push(optionMapping);
-        })
-      }
+    if(!_.isEmpty(this.selectedOptions)) {
+      this.mapping = [];
+      const scoreForEachOption = _.round((this.maxScore/this.selectedOptions.length), 2);
+      _.forEach(this.selectedOptions, (value) => {
+        const optionMapping = {
+          value: value,
+          score: scoreForEachOption,
+        }
+        this.mapping.push(optionMapping)
+      })     
     } else {
       this.mapping = [];
     }
   }
 
   getInteractions(options) {
-    if (this.questionInteractionType === 'choice') {
-      let index;
-      const interactOptions = _.map(options, (opt, key) => {
-        index = Number(key);
-        const hints  = _.get(this.editorState, `interactions.response1.options[${index}].hints`)
-        return { label: opt.body, value: index, hints };
-      });
-      this.subMenuConfig(options);
-      const interactions = {
-        response1: {
-          type: 'choice',
-          options: interactOptions,
-        },
-      };      
-      return interactions;
-    }
-    else if (this.questionInteractionType === 'match') {
-      const optionSet = {
-        left: options.map((option) => ({
-          label: option.leftOption,
-          value: option.leftOption.replace(/<\/?[^>]+(>|$)/g, ""),
-        })),
-        right: options.map((option) => ({
-          label: option.rightOption,
-          value: option.rightOption.replace(/<\/?[^>]+(>|$)/g, ""),
-        })),
-      }
-      const interactions = {
-        response1: {
-          type: 'match',
-          optionSet: optionSet,
-        }
-      };
-      return interactions;
-    }
+    let index;
+    const interactOptions = _.map(options, (opt, key) => {
+    index = Number(key);
+    const hints  = _.get(this.editorState, `interactions.response1.options[${index}].hints`)
+    return { label: opt.body, value: index, hints };
+    });
+    this.subMenuConfig(options);
+    const interactions = {
+      response1: {
+        type: 'choice',
+        options: interactOptions,
+      },
+    };      
+    return interactions;
   }
 
   setTemplete(template) {
@@ -307,22 +231,7 @@ export class OptionsComponent implements OnInit, OnChanges {
       this.setMapping();
       this.editorDataHandler();
   }
-  
-  onMatchCheck(event) {
-    if (event.target.checked) {
-      this.editorState.answer = this.editorState.options.map((option) => {
-        const obj = {};
-        let leftOption = option.leftOption.replace(/<\/?[^>]+(>|$)/g, "");
-        let rightOption = option.rightOption.replace(/<\/?[^>]+(>|$)/g, "");
-        obj[leftOption] = rightOption;
-        return obj;
-      });
-    } else {
-      this.editorState.answer = undefined;
-    }
-    this.setMapping();
-    this.editorDataHandler();
-  }
+
   setScore(value, scoreIndex) {
     const obj = {
       response: scoreIndex,
