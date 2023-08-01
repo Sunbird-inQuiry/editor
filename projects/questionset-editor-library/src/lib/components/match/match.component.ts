@@ -2,7 +2,6 @@ import { Component, Input, OnInit, OnChanges, Output, EventEmitter, SimpleChange
 import * as _ from 'lodash-es';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { ConfigService } from '../../services/config/config.service';
-import { SubMenu } from '../question-option-sub-menu/question-option-sub-menu.component';
 import { TreeService } from '../../services/tree/tree.service';
 import { EditorService } from '../../services/editor/editor.service';
 
@@ -23,11 +22,7 @@ export class MatchComponent implements OnInit, OnChanges {
   public setCharacterLimit = 160;
   public setImageLimit = 1;
   public templateType = 'default';
-  subMenus: SubMenu[][];
-  hints = [];
-  showSubMenu: boolean = false;
   parentMeta: any;
-  selectedOptions = [];
   constructor(
     public telemetryService: EditorTelemetryService,
     public configService: ConfigService,
@@ -36,27 +31,17 @@ export class MatchComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit() {
-    if (!_.isUndefined(this.editorState.answer)) {
-      this.addSelectedOptions();
-    }
     if (!_.isUndefined(this.editorState.templateId)) {
       this.templateType = this.editorState.templateId;
     }
     this.mapping = _.get(this.editorState, 'responseDeclaration.response1.mapping') || [];
     this.editorDataHandler();
-    if (!_.isUndefined(this.editorService.editorConfig.config.renderTaxonomy)) {
-      this.parentMeta = this.treeService.getFirstChild().data.metadata;
-      this.showSubMenu = true;
-    }
   }
   ngOnChanges(changes: SimpleChanges){
     if (!_.isUndefined(changes.maxScore.previousValue) && !_.isNaN(changes.maxScore.currentValue)) {
       this.setMapping();
       this.editorDataHandler();
     }
-  }
-  addSelectedOptions() {
-    this.selectedOptions = this.editorState.answer;
   }
 
   editorDataHandler(event?) {
@@ -68,9 +53,16 @@ export class MatchComponent implements OnInit, OnChanges {
   }
   prepareMtfBody(editorState) {
     let metadata: any;
-    const correctAnswer = editorState.answer;
+    if (_.isEmpty(editorState.correctMatchPair) && !_.isEmpty(editorState.options)) {
+      editorState.correctMatchPair = editorState.options.map((option, index) => {
+        const correctMatchPair = {};
+        correctMatchPair[index.toString()] = index;
+        return correctMatchPair;
+      });
+    }
+    this.setMapping();
     let options: any;
-    if (!_.isEmpty(correctAnswer)) {
+    if (!_.isEmpty(editorState.correctMatchPair)) {
       options = {
         leftOptions: editorState.options.map((option, index) => {
           return {
@@ -112,7 +104,7 @@ export class MatchComponent implements OnInit, OnChanges {
         cardinality: 'multiple',
         type: 'map',
         correctResponse: {
-          value: editorState.answer,
+          value: editorState.correctMatchPair,
         },
         mapping: this.mapping,
       },
@@ -130,15 +122,15 @@ export class MatchComponent implements OnInit, OnChanges {
     };
     return outcomeDeclaration;
   }
-  
+
   setMapping() {
-      if (!_.isEmpty(this.editorState.answer)) {
+      if (!_.isEmpty(this.editorState.correctMatchPair)) {
         this.mapping = [];
         const scoreForEachMatch = _.round(
-          this.maxScore / this.editorState.answer.length,
+          this.maxScore / this.editorState.correctMatchPair.length,
           2
         );
-        _.forEach(this.editorState.answer, (value) => {
+        _.forEach(this.editorState.correctMatchPair, (value) => {
           const optionMapping = {
             value: value,
             score: scoreForEachMatch,
@@ -168,25 +160,8 @@ export class MatchComponent implements OnInit, OnChanges {
         }
       };
       return interactions;
-    }
-
-  onOptionChange(event,index) {
-      if(event.body!=='' && !_.includes(this.selectedOptions, index)) {
-        this.selectedOptions.push(index);
-      } else if(event.body === '') {
-        _.remove(this.selectedOptions, (n) => {
-          return n === index;
-        });
-      }
-      if(this.selectedOptions === undefined){
-        this.editorState.answer = undefined;
-      }
-      else {
-        this.editorState.answer = this.selectedOptions.map((value) => ({ [value]: value }));
-      }
-      this.setMapping();
-      this.editorDataHandler();
   }
+  
   setScore(value, scoreIndex) {
     const obj = {
       response: scoreIndex,

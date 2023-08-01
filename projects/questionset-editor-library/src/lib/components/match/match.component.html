@@ -1,0 +1,52 @@
+<ng-container *ngIf="!isReadOnlyMode">
+  <div class="pt-10 fs-0-92 sb-w-85">
+    <label class="fs-0-92 font-weight-bold">{{configService.labelConfig?.lbl?.setAnswers}}<span class="sb-required">*</span></label>
+    <label class="fs-0-92 d-inline-block">{{configService.labelConfig?.lbl?.addQuestionAnswerPairText}}</label>
+    <i class="icon info circle ml-8" suiPopup popupDelay="500" popupText={{configService.labelConfig?.lbl?.optionsPopupText}}></i>
+  </div>
+    <div class="d-flex flex-w-wrap" *ngFor="let option of editorState.options; let i = index">
+      <div style="width: 100%; display: flex; gap: 2%;">
+        <div class="d-flex flex-w-wrap" style="justify-content: space-between; width: 80%;">
+          <div style="width: 40%;">
+            <lib-ckeditor-tool
+              [setCharacterLimit]="setCharacterLimit" (editorDataOutput)="option.leftOption= $event.body; editorDataHandler($event);"
+              [editorDataInput]="option.leftOption" class="ckeditor-tool__option mb-10"
+              [class.mb-5]="showFormError && option.leftOption.length > setCharacterLimit">
+            </lib-ckeditor-tool>
+            <label *ngIf="option.leftOption.length > setCharacterLimit" class="ui basic red error label pt-1">
+              {{configService.labelConfig?.lbl?.reduceSize}}</label>
+            <label *ngIf="showFormError && (option.leftOption === undefined || option.leftOption === '')" 
+              class="sb-color-error fs-0-785">{{configService.labelConfig?.lbl?.fillThisOption}}</label>
+          </div>
+          <div style="width: 40%;">
+            <lib-ckeditor-tool
+              [setCharacterLimit]="setCharacterLimit" (editorDataOutput)="option.rightOption = $event.body; editorDataHandler($event);"
+              [editorDataInput]="option.rightOption" class="ckeditor-tool__option mb-10"
+              [class.mb-5]="showFormError && option.righOption.length > setCharacterLimit">
+            </lib-ckeditor-tool>
+            <label *ngIf="option.rightOption.length > setCharacterLimit" class="ui basic red error label pt-1">
+              {{configService.labelConfig?.lbl?.reduceSize}}</label>
+            <label *ngIf="showFormError && (option.rightOption === undefined || option.rightOption === '')" 
+              class="sb-color-error fs-0-785">{{configService.labelConfig?.lbl?.fillThisOption}}</label>
+          </div>
+        </div>
+        <div style="height: 100%; width: 4%;">
+          <button [disabled]="editorState.options.length < 3" class="" style="height: 30%; width: 100%;"
+              (click)="editorState.deleteOptions(i);editorDataHandler($event);"
+              libTelemetryInteract
+              [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('delete_option','click','submit',telemetryService.telemetryPageId)">
+              <i class="icon close"></i>
+          </button>        
+        </div>
+      </div>
+    </div>
+    <div class="d-flex">
+      <button *ngIf="editorState.options.length < editorState.maximumOptions"
+      class="sb-btn sb-btn-outline-primary sb-btn-xs sb-left-icon-btn text-inherit b-0 bg-none no-hover p-0 mb-10 mt-10"
+      (click)="editorState.addOptions();editorDataHandler($event);"
+      libTelemetryInteract
+      [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('add_option','click','submit',telemetryService.telemetryPageId)" >
+      <i class="plus circle icon fs-1-286 pull-left mr-0" aria-hidden="true"></i><span class="sb-line-height-24">{{configService.labelConfig?.lbl?.addPair}}</span>
+    </button>
+  </div>
+</ng-container>

@@ -260,7 +260,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 const question = this.questionMetaData?.editorState?.question;
                 const interactions = this.questionMetaData?.interactions;
                 this.editorState = new MtfForm({
-                  question, options, answer: _.get(responseDeclaration, 'response1.correctResponse.value')
+                  question, options, correctMatchPair: _.get(responseDeclaration, 'response1.correctResponse.value')
                 }, { templateId, numberOfOptions, maximumOptions });
                 this.editorState.solutions = this.questionMetaData?.editorState?.solutions;
                 this.editorState.interactions = interactions;
@@ -630,7 +630,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       const rightOptionValid = _.find(this.editorState.options, option => (option.rightOption === undefined || option.rightOption === '' || option.rightOption.length > this.setCharacterLimit));
       const leftOptionValid = _.find(this.editorState.options, option => (option.leftOption === undefined || option.leftOption === '' || option.leftOption.length > this.setCharacterLimit));
-      if (rightOptionValid || leftOptionValid || (_.isUndefined(this.editorState.answer) && this.sourcingSettings?.enforceCorrectAnswer)) {
+      if (rightOptionValid || leftOptionValid || (_.isUndefined(this.editorState.correctMatchPair) && this.sourcingSettings?.enforceCorrectAnswer)) {
         this.showFormError = true;
         return;
       } else {
@@ -852,9 +852,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.questionInteractionType === 'match') {
       metadata.body = this.getMatchQuestionHtmlBody(this.editorState.question);
-      const leftOptions = metadata.interactions.response1.optionSet.left;
-      const rightOptions = metadata.interactions.response1.optionSet.right;
-      metadata.answer = this.getMatchAnswerContainerHtml(leftOptions, rightOptions);
+      const leftOptions = metadata.interactions.response1.options.leftOptions;
+      const rightOptions = metadata.interactions.response1.options.rightOptions;
+      metadata.correctMatchPair = this.getMatchAnswerContainerHtml(leftOptions, rightOptions);
     }
 
     if (!_.isUndefined(this.selectedSolutionType) && !_.isEmpty(this.selectedSolutionType)) {
@@ -885,7 +885,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     const optionHtml = answerHtml.replace('{answer}', optionLabel);
     return optionHtml;
   }
-
   
   getMatchAnswerContainerHtml(leftOptions, rightOptions) {
     const matchContainerTemplate = '<div class=\'match-container\'>{leftOptions}{rightOptions}</div>';
@@ -895,7 +894,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     .replace('{leftOptions}', leftOptionsHtml)
     .replace('{rightOptions}', rightOptionsHtml);
     return matchContainer;
-  }
+  } 
   
   getOptionWrapperHtml(options, type) {
     const wrapperTemplate = `<div class='option-wrapper ${type}-options'>{options}</div>`;

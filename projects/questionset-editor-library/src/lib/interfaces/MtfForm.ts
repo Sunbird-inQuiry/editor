@@ -7,7 +7,7 @@ export class MtfOption {
 export interface MtfData {
   question: string;
   options: Array<MtfOption>;
-  answer?: string;
+  correctMatchPair?: string;
   learningOutcome?: string;
   complexityLevel?: string;
   maxScore?: number;
@@ -17,25 +17,24 @@ export interface MtfConfig {
   templateId?: string;
   numberOfOptions?: number;
   maximumOptions?: number;
-
 }
 
 export class MtfForm {
   public question: string;
   public options: Array<MtfOption>;
   public templateId: string;
-  public answer: string;
+  public correctMatchPair: string;
   public learningOutcome?: string;
   public complexityLevel?: string;
   public maxScore?: number;
   public maximumOptions;
   public numberOfOptions;
 
-  constructor({question, options, answer, learningOutcome, complexityLevel, maxScore,}: MtfData,{ templateId, numberOfOptions, maximumOptions }: MtfConfig) {
+  constructor({question, options, correctMatchPair, learningOutcome, complexityLevel, maxScore,}: MtfData,{ templateId, numberOfOptions, maximumOptions }: MtfConfig) {
     this.question = question;
     this.options = options || [];
     this.templateId = templateId;
-    this.answer = answer;
+    this.correctMatchPair = correctMatchPair;
     this.learningOutcome = learningOutcome;
     this.complexityLevel = complexityLevel;
     this.numberOfOptions = numberOfOptions || 2;
