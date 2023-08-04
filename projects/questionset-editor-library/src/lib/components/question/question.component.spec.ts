@@ -1155,13 +1155,13 @@ describe("QuestionComponent", () => {
   it('#getAnswerHtml() should return answer html', () => {
     spyOn(component, 'getAnswerHtml').and.callThrough();
     const answerHtml = component.getAnswerHtml('<p>Sample Answer</p>');
-    expect(answerHtml).toBe('<div class=\'anwser-body\'><p>Sample Answer</p></div>');
+    expect(answerHtml).toBe('<div class=\'answer-body\'><p>Sample Answer</p></div>');
   });
 
   it('#getAnswerWrapperHtml() should return answer html', () => {
     spyOn(component, 'getAnswerWrapperHtml').and.callThrough();
-    const answerWrappedHtml = component.getAnswerWrapperHtml('<div class=\'anwser-body\'><p>Sample Answer</p></div>');
-    expect(answerWrappedHtml).toBe('<div class=\'anwser-container\'><div class=\'anwser-body\'><p>Sample Answer</p></div></div>');
+    const answerWrappedHtml = component.getAnswerWrapperHtml('<div class=\'answer-body\'><p>Sample Answer</p></div>');
+    expect(answerWrappedHtml).toBe('<div class=\'answer-container\'><div class=\'answer-body\'><p>Sample Answer</p></div></div>');
   });
 
   it('#getInteractionValues() should return correct answer object', () => {
