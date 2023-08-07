@@ -1,7 +1,7 @@
 import * as _ from "lodash-es";
 
 export class MtfOption {
-  constructor(public leftOption: string, public rightOption: string) {}
+  constructor(public left: string, public right: string) {}
 }
 
 export interface MtfData {

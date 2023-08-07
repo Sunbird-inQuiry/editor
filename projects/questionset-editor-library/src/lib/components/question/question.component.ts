@@ -253,9 +253,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 const maximumOptions = _.get(this.questionInput, 'config.maximumOptions');
                 this.editorService.optionsLength = numberOfOptions;
                 // converting the options to the format required by the editor
-                const options = _.map(this.questionMetaData?.editorState?.options?.leftOption, (leftOption, index) => ({
-                  leftOption,
-                  rightOption:this.questionMetaData?.editorState?.options?.rightOption?.[index]
+                const options = _.map(this.questionMetaData?.editorState?.options?.left, (left, index) => ({
+                  left,
+                  right:this.questionMetaData?.editorState?.options?.right?.[index]
                 }));
                 const question = this.questionMetaData?.editorState?.question;
                 const interactions = this.questionMetaData?.interactions;
@@ -628,8 +628,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.showFormError = false;
       }
-      const rightOptionValid = _.find(this.editorState.options, option => (option.rightOption === undefined || option.rightOption === '' || option.rightOption.length > this.setCharacterLimit));
-      const leftOptionValid = _.find(this.editorState.options, option => (option.leftOption === undefined || option.leftOption === '' || option.leftOption.length > this.setCharacterLimit));
+      const rightOptionValid = _.find(this.editorState.options, option => (option.right === undefined || option.right === '' || option.right.length > this.setCharacterLimit));
+      const leftOptionValid = _.find(this.editorState.options, option => (option.left === undefined || option.left === '' || option.left.length > this.setCharacterLimit));
       if (rightOptionValid || leftOptionValid || (_.isUndefined(this.editorState.correctMatchPair) && this.sourcingSettings?.enforceCorrectAnswer)) {
         this.showFormError = true;
         return;
@@ -851,10 +851,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.questionInteractionType === 'match') {
-      metadata.body = this.getMatchQuestionHtmlBody(this.editorState.question);
-      const leftOptions = metadata.interactions.response1.options.leftOptions;
-      const rightOptions = metadata.interactions.response1.options.rightOptions;
-      metadata.correctMatchPair = this.getMatchAnswerContainerHtml(leftOptions, rightOptions);
+      metadata.body = this.getMtfQuestionHtmlBody(this.editorState.question, this.editorState.templateId);
+      const leftOptions = metadata.interactions.response1.options.left;
+      const rightOptions = metadata.interactions.response1.options.right;
+      metadata.correctMatchPair = this.getMtfAnswerContainerHtml(leftOptions, rightOptions);
     }
 
     if (!_.isUndefined(this.selectedSolutionType) && !_.isEmpty(this.selectedSolutionType)) {
@@ -886,7 +886,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return optionHtml;
   }
   
-  getMatchAnswerContainerHtml(leftOptions, rightOptions) {
+  getMtfAnswerContainerHtml(leftOptions, rightOptions) {
     const matchContainerTemplate = '<div class=\'match-container\'>{leftOptions}{rightOptions}</div>';
     const leftOptionsHtml = this.getOptionWrapperHtml(leftOptions, 'left');
     const rightOptionsHtml = this.getOptionWrapperHtml(rightOptions, 'right');
@@ -897,18 +897,18 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   } 
   
   getOptionWrapperHtml(options, type) {
-    const wrapperTemplate = `<div class='option-wrapper ${type}-options'>{options}</div>`;
+    const wrapperTemplate = `<div class='${type}-options'>{options}</div>`;
     let optionsHtml = '';
     options.forEach((option) => {
-      const optionHtml = this.getMatchAnswerHtml(option.label, option.value);
+      const optionHtml = this.getMtfAnswerHtml(option.label, type);
       optionsHtml = optionsHtml.concat(optionHtml);
     });
     const wrapper = wrapperTemplate.replace('{options}', optionsHtml);
     return wrapper;
   }
-  getMatchAnswerHtml(label, value) {
-    const answerHtml = '<div class=\'answer-body\' data-value=\'{value}\'>{label}</div>';
-    const optionHtml = answerHtml.replace('{label}', label).replace('{value}', value);
+  getMtfAnswerHtml(label, type) {
+    const answerHtml = `<div class='${type}-option'>{label}</div>`;
+    const optionHtml = answerHtml.replace('{label}', label);
     return optionHtml;
   }
 
@@ -955,13 +955,13 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return videoSolutionValue;
   }
 
-  getMatchQuestionHtmlBody(question) {
+  getMtfQuestionHtmlBody(question, templateId) {
     const matchTemplateConfig = {
       // tslint:disable-next-line:max-line-length
-      matchBody: '<div class=\'question-body\' tabindex=\'-1\'><div class=\'match-title\' tabindex=\'0\'>{question}</div><div data-match-interaction=\'response1\' class=\'match-container\'></div></div>'
+      matchBody: '<div class=\'question-body\' tabindex=\'-1\'><div class=\'mtf-title\' tabindex=\'0\'>{question}</div><div data-match-interaction=\'response1\' class=\'{templateClass}\'></div></div>'
     };
     const { matchBody } = matchTemplateConfig;
-    const questionBody = matchBody.replace('{question}', question);
+    const questionBody = matchBody.replace('{templateClass}', templateId).replace('{question}', question);
     return questionBody;
   }
 

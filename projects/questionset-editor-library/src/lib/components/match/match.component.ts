@@ -2,8 +2,6 @@ import { Component, Input, OnInit, OnChanges, Output, EventEmitter, SimpleChange
 import * as _ from 'lodash-es';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { ConfigService } from '../../services/config/config.service';
-import { TreeService } from '../../services/tree/tree.service';
-import { EditorService } from '../../services/editor/editor.service';
 
 @Component({
   selector: 'lib-match',
@@ -21,13 +19,11 @@ export class MatchComponent implements OnInit, OnChanges {
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
   public setCharacterLimit = 160;
   public setImageLimit = 1;
-  public templateType = 'default';
-  parentMeta: any;
+  public templateType = 'mtf-horizontal';
+  
   constructor(
     public telemetryService: EditorTelemetryService,
     public configService: ConfigService,
-    public treeService: TreeService,
-    private editorService: EditorService
   ) {}
 
   ngOnInit() {
@@ -53,7 +49,7 @@ export class MatchComponent implements OnInit, OnChanges {
   }
   prepareMtfBody(editorState) {
     let metadata: any;
-    if (_.isEmpty(editorState.correctMatchPair) && !_.isEmpty(editorState.options)) {
+    if (!_.isEmpty(editorState.options)) {
       editorState.correctMatchPair = editorState.options.map((option, index) => {
         const correctMatchPair = {};
         correctMatchPair[index.toString()] = index;
@@ -64,18 +60,18 @@ export class MatchComponent implements OnInit, OnChanges {
     let options: any;
     if (!_.isEmpty(editorState.correctMatchPair)) {
       options = {
-        leftOptions: editorState.options.map((option, index) => {
+        left: editorState.options.map((option, index) => {
           return {
             value: {
-              body: option.leftOption,
+              body: option.left,
               value: index,
             }
           }
         }),
-        rightOptions: editorState.options.map((option, index) => {
+        right: editorState.options.map((option, index) => {
           return {
             value: {
-              body: option.rightOption,
+              body: option.right,
               value: index,
             }
           }
@@ -144,12 +140,12 @@ export class MatchComponent implements OnInit, OnChanges {
 
   getInteractions(options) {
       const optionSet = {
-        leftOptions: options.map((option,index) => ({
-          label: option.leftOption,
+        left: options.map((option,index) => ({
+          label: option.left,
           value: index,
         })),
-        rightOptions: options.map((option,index) => ({
-          label: option.rightOption,
+        right: options.map((option,index) => ({
+          label: option.right,
           value: index,
         })),
       }
@@ -160,16 +156,5 @@ export class MatchComponent implements OnInit, OnChanges {
         }
       };
       return interactions;
-  }
-  
-  setScore(value, scoreIndex) {
-    const obj = {
-      response: scoreIndex,
-      outcomes: {
-        score: value,
-      },
-    };
-    this.mapping[scoreIndex] = obj;
-    this.editorDataHandler();
   }
 }

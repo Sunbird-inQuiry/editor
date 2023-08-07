@@ -162,7 +162,7 @@ export class OptionsComponent implements OnInit, OnChanges {
           score: scoreForEachOption,
         }
         this.mapping.push(optionMapping)
-      })     
+      })
     } else {
       this.mapping = [];
     }
@@ -171,9 +171,9 @@ export class OptionsComponent implements OnInit, OnChanges {
   getInteractions(options) {
     let index;
     const interactOptions = _.map(options, (opt, key) => {
-    index = Number(key);
-    const hints  = _.get(this.editorState, `interactions.response1.options[${index}].hints`)
-    return { label: opt.body, value: index, hints };
+      index = Number(key);
+      const hints  = _.get(this.editorState, `interactions.response1.options[${index}].hints`)
+      return { label: opt.body, value: index, hints };
     });
     this.subMenuConfig(options);
     const interactions = {
@@ -181,7 +181,7 @@ export class OptionsComponent implements OnInit, OnChanges {
         type: 'choice',
         options: interactOptions,
       },
-    };      
+    };
     return interactions;
   }
 
