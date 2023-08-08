@@ -14,8 +14,8 @@
       "DEFAULT_PARAMS_FIELDS": "instructions,outcomeDeclaration"
     },
     "Question": {
-      "LIST":"question/v2/list",
-      "READ":"question/v2/read/",
+      "LIST":"question/v1/list",
+      "READ":"question/v1/read/",
       "CREATE": "question/v2/create",
       "UPDATE": "question/v2/update/",
       "REVIEW" : "question/v2/review/",

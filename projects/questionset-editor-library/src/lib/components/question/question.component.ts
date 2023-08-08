@@ -186,14 +186,14 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   initialize() {
     this.editorService.fetchCollectionHierarchy(this.questionSetId).subscribe((response) => {
-      this.questionSetHierarchy = _.get(response, 'result.questionset');
+      this.questionSetHierarchy = _.get(response, 'result.questionSet');
       const parentId = this.editorService.parentIdentifier ? this.editorService.parentIdentifier : this.questionId;
       //only for observation,survey,observation with rubrics
       if (!_.isUndefined(parentId) && !_.isUndefined(this.editorService.editorConfig.config.renderTaxonomy)) {
         this.getParentQuestionOptions(parentId);
         const sectionData = this.treeService.getNodeById(parentId);
-        const children = _.get(response, 'result.questionset.children');
-        this.sectionPrimaryCategory = _.get(response, 'result.questionset.primaryCategory');
+        const children = _.get(response, 'result.questionSet.children');
+        this.sectionPrimaryCategory = _.get(response, 'result.questionSet.primaryCategory');
         this.selectedSectionId = _.get(sectionData, 'data.metadata.parent');
         this.getBranchingLogic(children);
       }
@@ -1003,6 +1003,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     this.editorService.data = {};
     this.editorService.selectedSection = selectedUnitId;
     let metaData = this.getQuestionMetadata();
+    metaData.eval = activeNode?.data.metadata?.eval || data?.data?.eval;
     this.setQuestionTypeValues(metaData);
     return {
       nodesModified: {
