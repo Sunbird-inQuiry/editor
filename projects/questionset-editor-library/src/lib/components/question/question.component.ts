@@ -820,7 +820,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     metadata.body = metadata.question;
     if (!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)) {
       const treeNodeData = _.get(this.treeNodeData, 'data.metadata');
-      _.get(treeNodeData,'allowScoring') === 'Yes' ? '' : _.set(metadata,'responseDeclaration.response1.mapping',[]);
+      const allowScoring = _.get(treeNodeData, 'allowScoring');
+      if (allowScoring !== 'Yes') {
+        _.set(metadata, "responseDeclaration.response1.mapping", []);
+      }
     }
 
     if (this.questionInteractionType != 'choice' && this.questionInteractionType != 'match') {
@@ -846,17 +849,15 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       })
       const finalAnswer = this.getAnswerWrapperHtml(concatenatedAnswers);
       metadata.answer = finalAnswer;
-    } else if (this.questionInteractionType != 'default' && this.questionInteractionType != 'choice' && this.questionInteractionType != 'match') {
+    } else if (this.questionInteractionType === 'match') {
+      const { question, templateId } = this.editorState;
+      const { left, right } = this.editorState.interactions.response1.options;
+      metadata.body = this.getMtfQuestionHtmlBody(question, templateId);
+      metadata.correctMatchPair = this.getMtfAnswerContainerHtml(left, right);
+    } else if (this.questionInteractionType !== 'default') {
       metadata.responseDeclaration = this.getResponseDeclaration(this.questionInteractionType);
     }
-
-    if (this.questionInteractionType === 'match') {
-      metadata.body = this.getMtfQuestionHtmlBody(this.editorState.question, this.editorState.templateId);
-      const leftOptions = metadata.interactions.response1.options.left;
-      const rightOptions = metadata.interactions.response1.options.right;
-      metadata.correctMatchPair = this.getMtfAnswerContainerHtml(leftOptions, rightOptions);
-    }
-
+    
     if (!_.isUndefined(this.selectedSolutionType) && !_.isEmpty(this.selectedSolutionType)) {
       const solutionObj = this.getSolutionObj(this.solutionUUID, this.selectedSolutionType, this.editorState.solutions);
       metadata.editorState.solutions = [solutionObj];
@@ -870,12 +871,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       metadata.programId = _.get(this.editorService, 'editorConfig.context.programId');
       metadata.collectionId = _.get(this.editorService, 'editorConfig.context.collectionIdentifier');
       metadata.organisationId = _.get(this.editorService, 'editorConfig.context.contributionOrgId');
+      metadata.isReviewModificationAllowed = !!_.get(this.questionMetaData, 'isReviewModificationAllowed');
     }
     metadata['outcomeDeclaration'] = this.getOutcomeDeclaration(metadata);
     metadata = _.merge(metadata, _.pickBy(this.childFormData, _.identity));
-    if (_.get(this.creationContext, 'objectType') === 'question') {
-      metadata.isReviewModificationAllowed = !!_.get(this.questionMetaData, 'isReviewModificationAllowed');
-    }
     // tslint:disable-next-line:max-line-length
     return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions']);
   }
