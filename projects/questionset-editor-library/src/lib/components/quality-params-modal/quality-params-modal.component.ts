@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ConfigService} from '../../services/config/config.service';
 
 @Component({
@@ -6,7 +6,7 @@ import {ConfigService} from '../../services/config/config.service';
     templateUrl: './quality-params-modal.component.html',
     styleUrls: ['./quality-params-modal.component.css']
 })
-export class QualityParamsModalComponent implements OnInit {
+export class QualityParamsModalComponent {
     @Input() qualityFormConfig: any;
     @Input() showQualityParameterPopup: boolean;
     @Output() qualityParamChanged = new EventEmitter<any>();
@@ -17,9 +17,6 @@ export class QualityParamsModalComponent implements OnInit {
     totalScoreValue = 0;
 
     constructor(public configService: ConfigService) {
-    }
-
-    ngOnInit(): void {
     }
 
     onStatusChanges(event) {
