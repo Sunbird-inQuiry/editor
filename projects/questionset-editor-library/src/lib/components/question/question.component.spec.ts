@@ -25,6 +25,7 @@ import {
   BranchingLogic,
   mockEditorCursor,
   interactionChoiceEditorState,
+  interactionMatchEditorState,
   RubricData,
   videoSolutionObject,
   mediaVideoArray
@@ -292,7 +293,7 @@ describe("QuestionComponent", () => {
     component.previewFormData(true);
     expect(component.initialize).toHaveBeenCalled();
   });
-
+  
   it("#initialize should call when question page for question mcq api fail", () => {
     spyOn(component, "initialize").and.callThrough();
     component.questionId = "do_11330103476396851218";
@@ -313,7 +314,44 @@ describe("QuestionComponent", () => {
     component.initialize();
     expect(component.initialize).toHaveBeenCalled();
   });
-
+  
+  it("#initialize should call when question page for question mtf", () => {
+    component.initialLeafFormConfig = leafFormConfigMock;
+    component.leafFormConfig = leafFormConfigMock;
+    component.questionFormConfig=leafFormConfigMock;
+    spyOn(component, "initialize").and.callThrough();
+    component.questionId = "do_11330103476396851218";
+    editorService.parentIdentifier = undefined;
+    component.questionPrimaryCategory = undefined;
+    spyOn(editorService, "getToolbarConfig").and.returnValue({
+      title: "abcd",
+      showDialcode: "No",
+      showPreview: "false",
+    });
+    component.toolbarConfig.showPreview = false;
+    spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
+      return of(collectionHierarchyMock);
+    });
+    component.questionId = "do_127";
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
+    spyOn(questionService, "readQuestion").and.returnValue(
+      of(mockData.mtfQuestionMetaData)
+    );
+    component.questionMetaData = mockData.mtfQuestionMetaData.result.question;
+    component.questionInteractionType = "match";
+    component.scoreMapping =
+      mockData.mcqQuestionMetaData.result.question.responseDeclaration.response1.mapping;
+    component.sourcingSettings = sourcingSettingsMock;
+    component.questionInput.setChildQuestion = false;
+    component.editorState.solutions = [{
+      id: '1',
+      type: 'vedio'
+    }]
+    component.initialize();
+    component.previewFormData(true);
+    expect(component.initialize).toHaveBeenCalled();
+  });
+  
   it("#initialize should call when question page for question slider", () => {
     spyOn(component, "initialize").and.callThrough();
     component.questionId = "do_11330103476396851218";
@@ -458,6 +496,54 @@ describe("QuestionComponent", () => {
     let questionMetadata = mockData.mcqQuestionMetaData.result.question;
     questionMetadata = _.omit(questionMetadata, ['interactionTypes', 'primaryCategory'])
     component.questionSetId = "do_12345";
+    spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
+      return of(collectionHierarchyMock);
+    });
+    editorService.parentIdentifier = undefined;
+    component.questionId = "do_11330103476396851218";
+    component.leafFormConfig = leafFormConfigMock;
+    spyOn(questionService, "readQuestion").and.returnValue(
+      of({result: {question: {questionMetadata}}})
+    );
+    spyOn(component, 'setQuestionTitle').and.callFake(() => {});
+    spyOn(component, 'populateFormData').and.callFake(() => {});
+    component.leafFormConfig = leafFormConfigMock;
+    spyOn(component, "initialize").and.callThrough();
+    component.initialize();
+    expect(component.initialize).toHaveBeenCalled();
+    expect(component.questionPrimaryCategory).toBeUndefined();
+    expect(component.questionInteractionType).toEqual("default");
+    expect(component.populateFormData).toHaveBeenCalled();
+    expect(component.setQuestionTitle).toHaveBeenCalled();
+  });
+
+  it("#initialize should call when question page for question mtf with interactionTypes", () => {
+    component.questionSetId = "do_1278";
+    spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
+      return of(collectionHierarchyMock);
+    });
+    editorService.parentIdentifier = undefined;
+    component.questionId = "do_11330103476396851218";
+    component.leafFormConfig = leafFormConfigMock;
+    spyOn(questionService, "readQuestion").and.returnValue(
+      of(mockData.mtfQuestionMetaData)
+    );
+    spyOn(component, 'setQuestionTitle').and.callFake(() => {});
+    spyOn(component, 'populateFormData').and.callFake(() => {});
+    component.leafFormConfig = leafFormConfigMock;
+    spyOn(component, "initialize").and.callThrough();
+    component.initialize();
+    expect(component.initialize).toHaveBeenCalled();
+    expect(component.questionPrimaryCategory).toBeDefined();
+    expect(component.questionInteractionType).toBeDefined();
+    expect(component.populateFormData).toHaveBeenCalled();
+    expect(component.setQuestionTitle).toHaveBeenCalled();
+  });
+
+  it("#initialize should call when question page for question mtf without interactionTypes", () => {
+    let questionMetadata = mockData.mtfQuestionMetaData.result.question;
+    questionMetadata = _.omit(questionMetadata, ['interactionTypes', 'primaryCategory'])
+    component.questionSetId = "do_1278";
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);
     });
@@ -780,6 +866,12 @@ describe("QuestionComponent", () => {
     const question = '<div class=\'question-body\' tabindex=\'-1\'><div class=\'mcq-title\' tabindex=\'0\'>{question}</div><div data-choice-interaction=\'response1\' class=\'{templateClass}\'></div></div>';
     const templateId = "mcq-vertical";
     component.getMcqQuestionHtmlBody(question, templateId);
+  });
+  
+  it("call #getMtfQuestionHtmlBody() to verify questionBody", () => {
+    const question = '<div class=\'question-body\' tabindex=\'-1\'><div class=\'mtf-title\' tabindex=\'0\'>{question}</div><div data-match-interaction=\'response1\' class=\'{templateClass}\'></div></div>';
+    const templateId = "mtf-horizontal";
+    component.getMtfQuestionHtmlBody(question, templateId);
   });
 
   it("Unit test for #sendForReview", () => {
@@ -1169,6 +1261,30 @@ describe("QuestionComponent", () => {
     expect(metadata['outcomeDeclaration'].maxScore.defaultValue).toEqual(1);
   });
 
+  it('#getQuestionMetadata() should return question metata when interactionType is match', () => {
+    component.mediaArr = [];
+    component.editorState = interactionMatchEditorState;
+    component.selectedSolutionType = 'video';
+    component.creationContext = undefined;
+    component.questionInteractionType = 'match';
+    component.childFormData = {
+      name: 'MTF',
+      bloomsLevel: null,
+      board: 'CBSE',
+      maxScore: 1
+    };
+    component.maxScore = 4;
+    spyOn(component, 'getDefaultSessionContext').and.returnValue({
+        creator: 'Vaibahv Bhuva',
+        createdBy: '5a587cc1-e018-4859-a0a8-e842650b9d64'
+      }
+    );
+    spyOn(component, 'getQuestionSolution').and.returnValue({});
+    spyOn(component, 'getQuestionMetadata').and.callThrough();
+    const metadata = component.getQuestionMetadata();
+    expect(metadata['outcomeDeclaration'].maxScore.defaultValue).toEqual(4);
+  });
+
   it('#getAnswerHtml() should return answer html', () => {
     spyOn(component, 'getAnswerHtml').and.callThrough();
     const answerHtml = component.getAnswerHtml('<p>Sample Answer</p>');
@@ -1180,6 +1296,54 @@ describe("QuestionComponent", () => {
     const answerWrappedHtml = component.getAnswerWrapperHtml('<div class=\'anwser-body\'><p>Sample Answer</p></div>');
     expect(answerWrappedHtml).toBe('<div class=\'anwser-container\'><div class=\'anwser-body\'><p>Sample Answer</p></div></div>');
   });
+
+  it('#getMtfAnswerContainerHtml() should return answer html', () => {
+    spyOn(component, 'getMtfAnswerContainerHtml').and.callThrough();
+    const leftOptions = [
+      {
+        label: "<p>a</p>",
+        value: "0",
+      },
+      {
+        label: "<p>b</p>",
+        value: "1",
+      },
+    ];
+    const rightOptions = [
+      {
+        label: "<p>c</p>",
+        value: "0",
+      },
+      {
+        label: "<p>d</p>",
+        value: "1",
+      },
+    ];
+    const matchContainer = component.getMtfAnswerContainerHtml(leftOptions, rightOptions);
+    expect(matchContainer).toBe('<div class=\'match-container\'><div class=\'left-options\'><div class=\'left-option\'><p>a</p></div><div class=\'left-option\'><p>b</p></div></div><div class=\'right-options\'><div class=\'right-option\'><p>c</p></div><div class=\'right-option\'><p>d</p></div></div></div>')
+  })
+
+  it('#getOptionWrapperHtml() should return wrapper html', () => { 
+    spyOn(component, 'getOptionWrapperHtml').and.callThrough();
+    const leftOptions = [
+      {
+        label: "<p>a</p>",
+        value: "0",
+      },
+      {
+        label: "<p>b</p>",
+        value: "1",
+      },
+    ];
+    const wrapperHtml = component.getOptionWrapperHtml(leftOptions, 'left');
+    expect(wrapperHtml).toBe('<div class=\'left-options\'><div class=\'left-option\'><p>a</p></div><div class=\'left-option\'><p>b</p></div></div>');
+  })
+
+  it('#getMtfAnswerHtml() should return answer html', () => {
+    spyOn(component, 'getMtfAnswerHtml').and.callThrough();
+    const answerHtml = component.getMtfAnswerHtml('<p>Sample Answer</p>', 'left');
+    expect(answerHtml).toBe('<div class=\'left-option\'><p>Sample Answer</p></div>');
+  })
 
   it('#getInteractionValues() should return correct answer object', () => {
     spyOn(component, 'getInteractionValues').and.callThrough();
@@ -1398,6 +1562,20 @@ describe("QuestionComponent", () => {
     component.questionInteractionType = "choice";
     component.validateQuestionData();
     expect(component.showFormError).toBeFalsy();
+  });
+
+  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is mtf", () => {
+    component.sourcingSettings = sourcingSettingsMock;
+    spyOn(treeService, "getFirstChild").and.callFake(() => {
+      return { data: { metadata: { identifier: "0123",allowScoring:'Yes' } } };
+    });
+    component.editorState = mockData.mtfQuestionMetaData.result.question;
+    editorService = TestBed.inject(EditorService);
+    editorService.editorConfig.renderTaxonomy=false;
+    component.editorState.question = "<p> Hi how are you </p>";
+    component.editorState.correctMatchPair = "";
+    component.questionInteractionType = "match";
+    component.validateQuestionData();
   });
 
   it("#validateQuestionData() should call validateQuestionData and questionInteractionType is text", () => {
