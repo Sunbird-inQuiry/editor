@@ -4,8 +4,8 @@
     <label class="fs-0-92 d-inline-block">{{configService.labelConfig?.lbl?.selectLayout}}</label>
     <i class="icon info circle ml-8" suiPopup popupDelay="500" popupText={{configService.labelConfig?.lbl?.optionsPopupText}}></i>
     <span class="divider mr-8"></span>
-    <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-single" [ngClass]="{active: 'mtf-horizontal' === templateType}" (click)="setTemplete('mtf-horizontal')"><i class="mr-10 h-7"></i> {{configService.labelConfig?.lbl?.horizontal}}</button></span>
-    <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-two" [ngClass]="{active: 'mtf-vertical' === templateType}" (click)="setTemplete('mtf-vertical')"><i class="mr-10 h-7 w-20"></i>{{configService.labelConfig?.lbl?.vertical}}</button></span>
+    <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-single" [ngClass]="{active: 'mtf-horizontal' === templateType}" (click)="setTemplate('mtf-horizontal')"><i class="mr-10 h-7"></i> {{configService.labelConfig?.lbl?.horizontal}}</button></span>
+    <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-two" [ngClass]="{active: 'mtf-vertical' === templateType}" (click)="setTemplate('mtf-vertical')"><i class="mr-10 h-7 w-20"></i>{{configService.labelConfig?.lbl?.vertical}}</button></span>
   </div>
   <div class="d-flex pt-10 flex-dc sb-mcq-form">
     <div class="d-flex flex-w-wrap" *ngFor="let option of editorState.options; let i = index">
