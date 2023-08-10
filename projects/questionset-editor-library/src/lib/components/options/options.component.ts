@@ -220,7 +220,7 @@ export class OptionsComponent implements OnInit, OnChanges {
             }
           })(),
           label: 'Hint',
-          enabled: _.get(this.editorState, `interactions.response1.options[${index}].hint`) ? true : false,
+          enabled: this.editorState?.interactions?.response1?.options[index]?.hint ? true : false,
           type: 'input',
           show: _.get(this.sourcingSettings, 'showAddHints'),
         },
