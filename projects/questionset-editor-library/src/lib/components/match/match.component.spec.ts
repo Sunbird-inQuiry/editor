@@ -25,7 +25,6 @@ describe('MatchComponent', () => {
     fixture = TestBed.createComponent(MatchComponent);
     component = fixture.componentInstance;
     component.editorState = mockOptionData.editorOptionData;
-    // fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -86,7 +85,7 @@ describe('MatchComponent', () => {
     spyOn(component, 'setMapping').and.callThrough();
     spyOn(component, "getResponseDeclaration").and.callThrough();
     spyOn(component, "getInteractions").and.callThrough();
-    const result = component.prepareMtfBody(mockOptionData.editorOptionData);
+    component.prepareMtfBody(mockOptionData.editorOptionData);
     expect(component.getResponseDeclaration).toHaveBeenCalledWith(
       mockOptionData.editorOptionData
     );
@@ -109,6 +108,13 @@ describe('MatchComponent', () => {
     component.setMapping();
     expect(component.mapping).toEqual(mockOptionData.prepareMtfBody.responseDeclaration.response1.mapping);
   })
+
+  it('#setMapping should set mapping with empty array when correctMatchPair is empty', () => { 
+    spyOn(component, 'setMapping').and.callThrough();
+    component.editorState.correctMatchPair = [];
+    component.setMapping();
+    expect(component.mapping).toEqual([]);
+  });
 
   it('#getOutcomeDeclaration should return expected outcomeDeclaration', () => { 
     component.maxScore = 4;
@@ -137,4 +143,13 @@ describe('MatchComponent', () => {
     const responseDeclaration = component.getResponseDeclaration(mockOptionData.editorOptionData);
     expect(responseDeclaration.response1.cardinality).toEqual('multiple');
   })
+
+  it('#setTemplate() should set #templateType to "mtf-vertical"', () => {
+    spyOn(component, "editorDataHandler").and.callThrough();
+    const templateType = "mtf-vertical";
+    component.editorState = mockOptionData.editorOptionData;
+    component.setTemplate(templateType);
+    expect(component.templateType).toEqual(templateType);
+    expect(component.editorDataHandler).toHaveBeenCalled();
+  });
 });

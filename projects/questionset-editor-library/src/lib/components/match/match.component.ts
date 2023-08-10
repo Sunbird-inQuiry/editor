@@ -157,4 +157,9 @@ export class MatchComponent implements OnInit, OnChanges {
       };
       return interactions;
   }
+
+  setTemplate(template) {
+    this.templateType = template;
+    this.editorDataHandler();
+  }
 }
