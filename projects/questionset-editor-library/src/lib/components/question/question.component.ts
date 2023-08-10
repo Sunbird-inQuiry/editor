@@ -851,13 +851,13 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getAnswerHtml(optionLabel) {
-    const answerHtml = '<div class=\'anwser-body\'>{answer}</div>';
+    const answerHtml = '<div class=\'answer-body\'>{answer}</div>';
     const optionHtml = answerHtml.replace('{answer}', optionLabel);
     return optionHtml;
   }
 
   getAnswerWrapperHtml(concatenatedAnswers) {
-    const answerTemplate = '<div class=\'anwser-container\'>{answers}</div>';
+    const answerTemplate = '<div class=\'answer-container\'>{answers}</div>';
     const answer = answerTemplate.replace('{answers}', concatenatedAnswers);
     return answer;
   }
