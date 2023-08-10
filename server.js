@@ -4,10 +4,12 @@ var express = require('express'),
     proxy = require('express-http-proxy'),
     urlHelper = require('url');
 const latexService = require('./latexService.js')
+const dotenv = require('dotenv');
+dotenv.config();
 
-const BASE_URL = "dev.inquiry.sunbird.org";
-const API_AUTH_TOKEN = "";
-const USER_TOKEN = "";
+const BASE_URL = process.env.BASE_URL || "dev.inquiry.sunbird.org";
+const API_AUTH_TOKEN = process.env.AUTH_API_TOKEN;
+const USER_TOKEN = process.env.USER_API_TOKEN;
 const PORTAL_COOKIES= ""
 
 var app = express();
@@ -16,6 +18,8 @@ app.use(express.json())
 app.get("/latex/convert", latexService.convert)
 app.post("/latex/convert", bodyParser.json({ limit: '1mb' }), latexService.convert);
 app.use(express.static(__dirname + '/web-component-examples/vanilla-js'));
+
+
 app.all(['/api/framework/v1/read/*',
      '/learner/framework/v1/read/*', 
      '/api/channel/v1/read/*',
