@@ -888,7 +888,6 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
   }
   countCharactersInElement(node) {
     let chars = 0;
-    const forEach = Array.prototype.forEach;
     const forE = node.getChildren();
     let child;
 

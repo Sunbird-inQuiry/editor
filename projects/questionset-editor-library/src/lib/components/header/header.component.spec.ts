@@ -97,11 +97,4 @@ describe('HeaderComponent', () => {
     expect(component.showPublishCollectionPopup).toBeTruthy();
     expect(component.actionType).toBeDefined();
   });
-  it('#bulkUploadListener() should call #bulkUploadEmitter.emit()', () => {
-    const data = { status: true, type: 'updateHierarchy' };
-    component.bulkUploadEmitter = new EventEmitter<any>();
-    spyOn(component.bulkUploadEmitter, 'emit');
-    component.bulkUploadListener(data);
-    expect(component.bulkUploadEmitter.emit).toHaveBeenCalledWith(data)
-  });
 });

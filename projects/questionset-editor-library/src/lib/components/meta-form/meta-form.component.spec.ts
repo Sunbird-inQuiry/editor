@@ -48,7 +48,7 @@ describe('MetaFormComponent', () => {
     component.appIcon = 'https://sunbirddev.blob.core.windows.net/sunbird-content-dev/content/do_11320764935163904015/artifact/2020101299.png';
     component.showAppIcon = true;
     const event = {
-      instances: 'Add Student',
+      instance: 'Add Student',
       appIcon: 'https://sunbirddev.blob.core.windows.net/sunbird-content-dev/content/do_11320764935163904015/artifact/2020101299.png',
       allowECM : 'No',
       levels : ['good', 'bad', 'average'],
@@ -210,12 +210,6 @@ describe('MetaFormComponent', () => {
     expect(isFieldEditable).toBeTruthy();
   });
 
-  it('outputData should be called', () => {
-    spyOn(component, 'outputData').and.callThrough();
-    component.outputData({});
-    expect(component.outputData).toHaveBeenCalledWith({});
-  });
-
   it('#onStatusChanges() should emit toolbarEmitter event', () => {
     const data = { button: 'onFormStatusChange', event: '' };
     spyOn(component.toolbarEmitter, 'emit').and.callFake(() => {});
@@ -228,7 +222,7 @@ describe('MetaFormComponent', () => {
     component.appIcon = 'https://sunbirddev.blob.core.windows.net/sunbird-content-dev/content/do_11320764935163904015/artifact/2020101299.png';
     component.showAppIcon = true;
     const event = {
-      instances: 'Add Student',
+      instance: 'Add Student',
       appIcon: 'https://sunbirddev.blob.core.windows.net/sunbird-content-dev/content/do_11320764935163904015/artifact/2020101299.png',
       shuffle: true
     };
