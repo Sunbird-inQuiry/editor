@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import 'jquery.fancytree';
 import { v4 as uuidv4 } from 'uuid';
-declare var $: any;
+declare let $: any;
 import * as _ from 'lodash-es';
 import { IEditorConfig } from '../../interfaces/editor';
 import { ToasterService } from '../toaster/toaster.service';
@@ -233,7 +233,7 @@ export class TreeService {
     } else if (action === 'remove') {
       nodeElem.span.childNodes[1].classList.remove('highlightNode');
       nodeElem.span.childNodes[2].classList.remove('highlightNode');
-    } else {}
+    }
   }
 
   setTreeCache(nodeId, metadata, activeNode?) {

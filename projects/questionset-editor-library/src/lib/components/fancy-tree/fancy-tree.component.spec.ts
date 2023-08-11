@@ -53,37 +53,28 @@ describe('FancyTreeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('#ngOnInit() should set bulkUploadProcessingStatus to true', () => {
+  it('#ngOnInit() should set call initialize', () => {
     component.config = { mode: undefined };
-    // tslint:disable-next-line:no-shadowed-variable
     const editorService: any = TestBed.inject(EditorService);
-    component.bulkUploadProcessingStatus = false;
     spyOnProperty(editorService, 'editorConfig', 'get').and.returnValue(editorConfig);
-    // tslint:disable-next-line:no-string-literal
-    editorService['bulkUploadStatus$'] = of('processing');
     spyOn(component, 'initialize').and.callFake(() => {});
     spyOn(component, 'ngOnInit').and.callThrough();
     component.ngOnInit();
     expect(component.config.mode).toEqual(editorConfig.config.mode);
-    expect(component.bulkUploadProcessingStatus).toBeTruthy();
     expect(component.initialize).toHaveBeenCalled();
   });
 
-  it('#ngOnInit() should set bulkUploadProcessingStatus to false', () => {
+  it('#ngOnInit() should set maxDepth', () => {
     component.config = { mode: undefined, maxDepth: 0 };
     // tslint:disable-next-line:no-shadowed-variable
     const editorService: any = TestBed.inject(EditorService);
-    component.bulkUploadProcessingStatus = true;
     const mockEditorConfig = _.omit(editorConfig, 'config.maxDepth');
     spyOnProperty(editorService, 'editorConfig', 'get').and.returnValue(mockEditorConfig);
-    // tslint:disable-next-line:no-string-literal
-    editorService['bulkUploadStatus$'] = of('completed');
     spyOn(component, 'initialize').and.callFake(() => {});
     spyOn(component, 'ngOnInit').and.callThrough();
     component.ngOnInit();
     expect(component.config.mode).toEqual(editorConfig.config.mode);
     expect(component.config.maxDepth).toEqual(4);
-    expect(component.bulkUploadProcessingStatus).toBeFalsy();
     expect(component.initialize).toHaveBeenCalled();
   });
 
@@ -223,13 +214,6 @@ describe('FancyTreeComponent', () => {
     expect(component.removeIntermediateLevelsFromFramework).toHaveBeenCalledWith(RubricstreeData);
     expect(retunedObject).toBeDefined();
   });
-  
-  it('#addFromLibrary() should call #emitshowLibraryPageEvent()', () => {
-    const editorService: EditorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'emitshowLibraryPageEvent').and.callFake(() => {});
-    component.addFromLibrary();
-    expect(editorService.emitshowLibraryPageEvent).toHaveBeenCalledWith('showLibraryPage');
-  });
 
   it('#ngAfterViewInit() should call #getTreeConfig() and #renderTree()', () => {
     spyOn(component, 'getTreeConfig').and.callFake(() => {});
@@ -250,7 +234,6 @@ describe('FancyTreeComponent', () => {
     };
     spyOnProperty(editorService, 'editorConfig', 'get').and.returnValue(editorConfig);
     component.eachNodeActionButton(rootNode);
-    expect(component.visibility.addFromLibrary).toBeFalsy();
     expect(component.visibility.createNew).toBeFalsy();
     expect(component.visibility.addChild).toBeFalsy();
     expect(component.visibility.addSibling).toBeFalsy();
@@ -267,7 +250,6 @@ describe('FancyTreeComponent', () => {
     component.eachNodeActionButton(node);
     expect(component.visibility.addChild).toBeTruthy();
     expect(component.visibility.addSibling).toBeTruthy();
-    expect(component.visibility.addFromLibrary).toBeFalsy();
     expect(component.visibility.createNew).toBeFalsy();
   });
 
@@ -281,33 +263,7 @@ describe('FancyTreeComponent', () => {
     component.eachNodeActionButton(node);
     expect(component.visibility.addChild).toBeFalsy();
     expect(component.visibility.addSibling).toBeTruthy();
-    expect(component.visibility.addFromLibrary).toBeFalsy();
     expect(component.visibility.createNew).toBeFalsy();
-  });
-
-  it('call #eachNodeActionButton() to verify #visibility when #bulkUploadProcessingStatus is true', () => {
-    component.config = mockData.config;
-    component.bulkUploadProcessingStatus = true;
-    const node = {
-      getLevel: () => 2,
-      folder: true,
-      data: { root: false },
-    };
-    component.eachNodeActionButton(node);
-    expect(component.visibility).toEqual({
-      addChild: false,
-      addSibling: false,
-      addFromLibrary: false,
-      addQuestionFromLibrary: false,
-      createNew: false
-    });
-  });
-
-  it('#addFromLibrary() should call #emitshowLibraryPageEvent()', () => {
-    const editorService: EditorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'emitshowLibraryPageEvent');
-    component.addFromLibrary();
-    expect(editorService.emitshowLibraryPageEvent).toHaveBeenCalled();
   });
 
   it('#handleActionButtons() should call #removeNode() if action is delete', () => {

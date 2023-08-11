@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { mergeMap, skipWhile, tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { skipWhile } from 'rxjs/operators';
 import * as _ from 'lodash-es';
 import { ServerResponse } from '../../interfaces/serverResponse';
-import { Framework } from '../../interfaces/framework';
-import { FrameworkData } from '../../interfaces/framework';
+import { Framework, FrameworkData } from '../../interfaces/framework';
 import { DataService } from '../data/data.service';
 import { ConfigService } from '../config/config.service';
 import { PublicDataService } from '../public-data/public-data.service';

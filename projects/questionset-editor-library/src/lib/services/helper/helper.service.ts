@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { catchError, map, skipWhile, tap} from 'rxjs/operators';
+import { catchError, map, skipWhile} from 'rxjs/operators';
 import * as _ from 'lodash-es';
 import { PublicDataService} from '../public-data/public-data.service';
 import { DataService} from '../data/data.service';
@@ -141,20 +141,6 @@ export class HelperService {
     };
 
     return this.publicDataService.post(req);
-  }
-
-  updateCollaborator(contentId, collaboratorList) {
-    const req = {
-      url: _.get(this.configService.urlConFig, 'URLS.CONTENT.UPDATE_COLLABORATOR') + contentId,
-      data: {
-          request: {
-              content: {
-                  collaborators: collaboratorList
-              }
-          }
-      }
-    };
-    return this.publicDataService.patch(req);
   }
 
   addDepthToHierarchy(arr, depth = 0, index = 0) {

@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { Input } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import {ILoaderMessage} from '../../interfaces/loader';
 import { ConfigService } from '../../services/config/config.service';
 import * as _ from 'lodash-es';
