@@ -589,27 +589,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       this.validateChoiceQuestionData();
     }
 
-    //to handle when question type is match
+    //to handle when question type is mtf
     if (this.questionInteractionType === 'match') {
-      const data = _.get(this.treeNodeData, 'data.metadata');
-      if (_.get(this.editorState, 'interactionTypes[0]') === 'match' &&
-        _.isEmpty(this.editorState?.responseDeclaration?.response1?.mapping) &&
-        !_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy) &&
-        _.get(data,'allowScoring') === 'Yes') {
-        this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
-        this.showFormError = true;
-        return;
-      } else {
-        this.showFormError = false;
-      }
-      const rightOptionValid = _.find(this.editorState.options, option => (option.right === undefined || option.right === '' || option.right.length > this.setCharacterLimit));
-      const leftOptionValid = _.find(this.editorState.options, option => (option.left === undefined || option.left === '' || option.left.length > this.setCharacterLimit));
-      if (rightOptionValid || leftOptionValid || (_.isUndefined(this.editorState.correctMatchPair) && this.sourcingSettings?.enforceCorrectAnswer)) {
-        this.showFormError = true;
-        return;
-      } else {
-        this.showFormError = false;
-      }
+      this.validateMatchQuestionData();
     }
 
     if (this.questionInteractionType === 'slider') {
@@ -647,6 +629,28 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.showFormError = false;
     }
+  }
+
+  validateMatchQuestionData() {
+    const data = _.get(this.treeNodeData, 'data.metadata');
+      if (_.get(this.editorState, 'interactionTypes[0]') === 'match' &&
+        _.isEmpty(this.editorState?.responseDeclaration?.response1?.mapping) &&
+        !_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy) &&
+        _.get(data,'allowScoring') === 'Yes') {
+        this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
+        this.showFormError = true;
+        return;
+      } else {
+        this.showFormError = false;
+      }
+      const rightOptionValid = _.find(this.editorState.options, option => (option.right === undefined || option.right === '' || option.right.length > this.setCharacterLimit));
+      const leftOptionValid = _.find(this.editorState.options, option => (option.left === undefined || option.left === '' || option.left.length > this.setCharacterLimit));
+      if (rightOptionValid || leftOptionValid || (_.isUndefined(this.editorState.correctMatchPair) && this.sourcingSettings?.enforceCorrectAnswer)) {
+        this.showFormError = true;
+        return; //NOSONAR
+      } else {
+        this.showFormError = false;
+      }
   }
 
   validateSliderQuestionData() {
@@ -817,7 +821,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setQuestionProperties(metadata) {
-    if (this.questionInteractionType != 'choice') {
+    if (this.questionInteractionType != 'choice' && this.questionInteractionType != 'match') {
       if (!_.isUndefined(metadata.answer)) {
         const answerHtml = this.getAnswerHtml(metadata.answer);
         const finalAnswer = this.getAnswerWrapperHtml(answerHtml);

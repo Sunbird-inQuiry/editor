@@ -1244,7 +1244,7 @@ describe("QuestionComponent", () => {
     expect(metadata['outcomeDeclaration'].maxScore.defaultValue).toEqual(1);
   });
 
-  it('#getQuestionMetadata() should return question metata when interactionType is match', () => {
+  it('#getQuestionMetadata() should return question metadata when interactionType is match', () => {
     component.mediaArr = [];
     component.editorState = interactionMatchEditorState;
     component.selectedSolutionType = 'video';
@@ -1564,6 +1564,39 @@ describe("QuestionComponent", () => {
     spyOn(toasterService, 'error').and.callFake(() => {});
     spyOn(component, 'validateChoiceQuestionData').and.callThrough();
     component.validateChoiceQuestionData();
+    expect(component.showFormError).toBeFalsy();
+  });
+
+  it("#validateMatchQuestionData() should validate and set showFormError to true", () => {
+    component.sourcingSettings = sourcingSettingsMock;
+    component.treeNodeData = { data: { metadata: { allowScoring: "Yes" } } };
+    component.editorState = mockData.mtfQuestionMetaData.result.question;
+    component.editorState.responseDeclaration.response1.mapping = [];
+    editorService = TestBed.inject(EditorService);
+    editorService.editorConfig.renderTaxonomy = false;
+    component.editorState.question = "<p> Match each object with its correct type </p>";
+    component.editorState.correctMatchPair = "";
+    component.questionInteractionType = "match";
+    const toasterService = TestBed.inject(ToasterService);
+    spyOn(toasterService, "error").and.callFake(() => {});
+    spyOn(component, "validateMatchQuestionData").and.callThrough();
+    component.validateMatchQuestionData();
+    expect(component.showFormError).toBeTruthy();
+  });
+
+  it("#validateMatchQuestionData() should validate and set showFormError to false when allowScoring is No", () => {
+    component.sourcingSettings = sourcingSettingsMock;
+    component.treeNodeData = { data: { metadata: { allowScoring: "No" } } };
+    component.editorState = mockData.mtfQuestionMetaData.result.question;
+    editorService = TestBed.inject(EditorService);
+    editorService.editorConfig.renderTaxonomy = false;
+    component.editorState.question = "<p> Match each object with its correct type </p>";
+    component.editorState.correctMatchPair = "";
+    component.questionInteractionType = "match";
+    const toasterService = TestBed.inject(ToasterService);
+    spyOn(toasterService, "error").and.callFake(() => {});
+    spyOn(component, "validateMatchQuestionData").and.callThrough();
+    component.validateMatchQuestionData();
     expect(component.showFormError).toBeFalsy();
   });
 
