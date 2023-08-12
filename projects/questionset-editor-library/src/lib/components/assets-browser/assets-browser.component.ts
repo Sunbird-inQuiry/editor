@@ -7,7 +7,8 @@ import { ConfigService } from '../../services/config/config.service';
 import { QuestionService } from '../../services/question/question.service';
 import { config } from 'projects/questionset-editor-library/src/lib/components/asset-browser/asset-browser.data';
 import { ToasterService } from '../../services/toaster/toaster.service';
-
+import * as RecordRTC from 'recordrtc';
+import { DomSanitizer } from '@angular/platform-browser';
 @Component({
   selector: 'lib-assets-browser',
   templateUrl: './assets-browser.component.html',
@@ -48,7 +49,10 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   astSize: string;
   astSizeType: string;
   acceptedFileType: string;
-  
+  record: any;
+  url: any;
+  fileType: any;
+  recording = false;
   public assetData = {};
   public assetFile: any;
   public formData: any;
@@ -66,7 +70,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   public searchAllInput: any;
   public assetUploadLoader = false;
   constructor(private editorService: EditorService, public configService: ConfigService,
-                private questionService: QuestionService, public toasterService: ToasterService) { }
+                private questionService: QuestionService, public toasterService: ToasterService, private domSanitizer: DomSanitizer) { }
   
   ngOnInit() {
     this.assetProxyUrl = _.get(this.editorService.editorConfig, 'config.assetProxyUrl') || _.get(this.configService.urlConFig, 'URLS.assetProxyUrl');
@@ -146,6 +150,60 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
       removePlugins: ['ImageCaption', 'mathtype', 'ChemType', 'ImageResizeHandles']
     };
   }
+
+ // Record and Upload 
+  sanitize(url: string) {
+    return this.domSanitizer.bypassSecurityTrustUrl(url);
+  }
+
+  startRecording() {
+    this.recording = true;
+    let mediaConstraints = {
+      video: false,
+      audio: true,
+    };
+    navigator.mediaDevices.getUserMedia(mediaConstraints).then(this.successCallback.bind(this), this.errorCallBack.bind(this));
+  }
+
+  successCallback(stream) {
+    var options = {
+      mimeType : 'audio/wav',
+    };
+    var stereoAudioRecorder = RecordRTC.StereoAudioRecorder;
+    this.record = new stereoAudioRecorder(stream, options);
+    this.record.record();
+  }
+
+  stopRecording() {
+    this.recording = false;
+    this.record.stop(this.processRecording.bind(this));
+    this.assetUploadLoader = true;
+    this.assetFormValid = true;
+  }
+
+  processRecording(blob) {
+    this.url = URL.createObjectURL(blob);
+    // console.log(this.url);
+    const fileName = "recoding.wav";
+    const fileType = blob['type'];
+    this.fileType = fileType;
+    this.assetType = "audio"
+    const reader = new FileReader();
+    this.formData = new FormData();
+    this.errorMsg = '';
+    this.showErrorMsg = false;
+    reader.readAsDataURL(blob);
+    this.formData.append('file', blob);
+    this.assetUploadLoader = true;
+    this.assetFormValid = true;
+    this.assetData = this.generateAssetCreateRequest(fileName, fileType, this.assetType);
+    this.populateFormData(this.assetData);
+    this.assetName = fileName;
+  }
+
+  errorCallBack() {
+    const error = "Unable to play audio in your browser";
+  }  
 
   ngOnChanges() {
     if (this.assetShow) {
@@ -499,7 +557,13 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
                 this.dismissPops(modal);
               })   
             } else {
-              this.updateContentWithURL(fileURL, this.assetFile.type, contentId, modal);
+              let fileType;
+              if (this.assetFile!==undefined) {
+                fileType = this.assetFile.type;
+              } else {
+                fileType = this.fileType;
+              }
+              this.updateContentWithURL(fileURL, fileType, contentId, modal);
             }
           })
         })

@@ -87,6 +87,26 @@
         </div>
       </ng-container>
     </div>
+<!-- Record and Upload  -->
+    <!-- <div class="upload-image-modal-section d-flex flex-ai-center flex-jc-center flex-dc" *ngIf="assetType==='audio'">
+      <ng-container>
+            <button class="upload-input-button sb-btn sb-btn-success sb-btn-normal" (click)="startRecording()" *ngIf="!recording">
+              Record and Upload
+           </button>
+            <button class="sb-btn sb-btn-primary sb-btn-normal" (click)="stopRecording()" type="file" [accept]="acceptAssetType" name="assetfile" *ngIf="recording">
+                Stop
+            </button>
+            <br>        
+            <audio class="audio-file" controls *ngIf="url">
+              <source [src]="sanitize(url)" type="audio/wav"/>
+            </audio>
+          <span class="fsmall mt-8">{{configService.labelConfig?.lbl?.upload}} {{acceptedFileType}} ({{configService.labelConfig?.lbl?.maxFileSize}}
+            {{astSize}}{{astSizeType}})</span>
+          <div *ngIf="showErrorMsg" class="sb-color-error fsmall mt-8">
+            <p>{{errorMsg}}</p>
+          </div> 
+      </ng-container>
+    </div> -->
     <div class="ui info message sb-info-bx">
       <ul class="list">
         <li class="fs-0785">{{configService.labelConfig?.lbl?.allowedFileTypes}} {{acceptedFileType}}</li>

@@ -98,7 +98,7 @@ export class TranslationsComponent {
     showEvidence: "Yes/No",
     evidence: {
       required: "Yes/No",
-      mimeType: ["image/png", "audio/mp3", "video/mp4", "video/webm"],
+      mimeType: ["image/png", "audio/mp3", "audio/wav", "video/mp4", "video/webm"],
       minCount: 1,
       maxCount: 1,
       sizeLimit: "20480",

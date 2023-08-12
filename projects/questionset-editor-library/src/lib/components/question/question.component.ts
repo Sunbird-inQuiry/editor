@@ -258,12 +258,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.solutionUUID = this.editorState.solutions[0].id;
                 this.showSolutionDropDown = false;
                 this.showSolution = true;
-                console.log(this.selectedSolutionType);
                 if (this.selectedSolutionType === 'video' || this.selectedSolutionType === 'audio') {
                   const index = _.findIndex(this.questionMetaData.media, (o) => {
                     return o.type === this.selectedSolutionType && o.id === this.editorState.solutions[0].value;
                   });
-                  console.log(this.questionMetaData.media[index]);
                   this.assetSolutionName = this.questionMetaData.media[index].name;
                   this.assetThumbnail = this.questionMetaData.media[index].thumbnail;
                 } 
@@ -692,9 +690,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   assetDataOutput(event) {
-    console.log("check");
     if (event) {
-      console.log(event);
       this.assetSolutionData = event;
       this.assetSolutionName = event.name;
       this.editorState.solutions = event.identifier;
@@ -745,6 +741,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     } 
     this.showSolutionDropDown = true;
     this.selectedSolutionType = '';
+    this.assetType = '';
     this.assetSolutionName = '';
     this.editorState.solutions = '';
     this.assetThumbnail = '';
@@ -773,8 +770,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       media: this.mediaArr,
       editorState: {}
     };
-    console.log('getQuestionMetadata');
-    console.log(this.editorState);
     metadata = _.assign(metadata, this.editorState);
     metadata.editorState.question = metadata.question;
     metadata.body = metadata.question;
@@ -878,16 +873,15 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getAssetSolutionHtml(posterURL, srcUrl, solutionMediaId) {
     let assetSolutionHtml
-    if (this.assetType === 'video') {
+    if (this.selectedSolutionType === 'video') {
       assetSolutionHtml = '<video data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'video/mp4\' src=\'{sourceURL}\'><source type=\'video/webm\' src=\'{sourceURL}\'></video>'
-    } else if(this.assetType === 'audio') {
-      assetSolutionHtml = '<audio data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'audio/mp3\' src=\'{sourceURL}\'><source type=\'audio/mp3\' src=\'{sourceURL}\'></audio>'
+    } else if(this.selectedSolutionType === 'audio') {
+      assetSolutionHtml = '<audio data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'audio/mp3\' src=\'{sourceURL}\'><source type=\'audio/wav\' src=\'{sourceURL}\'></audio>'
     }
     const assetSolutionValue = assetSolutionHtml.replace('{posterUrl}', posterURL).replace('{sourceURL}', srcUrl).replace('{sourceURL}', srcUrl).replace('{solutionMediaId}', solutionMediaId);
     return assetSolutionValue;
   }
 
-  
   getMcqQuestionHtmlBody(question, templateId) {
     const mcqTemplateConfig = {
       // tslint:disable-next-line:max-line-length
@@ -1259,7 +1253,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   output(event) { }
 
   onStatusChanges(event) {
-    console.log(event);
     if (_.has(event, 'isValid')) {
       this.questionMetadataFormStatus = event.isValid;
     }

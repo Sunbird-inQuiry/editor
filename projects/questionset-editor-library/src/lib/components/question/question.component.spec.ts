@@ -747,7 +747,7 @@ describe("QuestionComponent", () => {
     component.mediaArr = mediaVideoArray;
     spyOn(component, 'getQuestionSolution').and.callThrough();
     spyOn(component, 'getMediaById').and.callThrough();
-    spyOn(component, 'getVideoSolutionHtml').and.callThrough();
+    spyOn(component, 'getAssetSolutionHtml').and.callThrough();
     const solution = component.getQuestionSolution(videoSolutionObject);
     expect(solution).toBeDefined();
   })
@@ -770,9 +770,9 @@ describe("QuestionComponent", () => {
     expect(mediaobj).toBeDefined();
   });
 
-  it('#getVideoSolutionHtml() should return videoSolutionHtml', () => {
-    spyOn(component, 'getVideoSolutionHtml').and.callThrough();
-    const videoSolutionHtml = component.getVideoSolutionHtml(mediaVideoArray[0].thubmnail, mediaVideoArray[0].src, mediaVideoArray[0].id);
+  it('#getAssetSolutionHtml() should return videoSolutionHtml', () => {
+    spyOn(component, 'getAssetSolutionHtml').and.callThrough();
+    const videoSolutionHtml = component.getAssetSolutionHtml(mediaVideoArray[0].thubmnail, mediaVideoArray[0].src, mediaVideoArray[0].id);
     expect(videoSolutionHtml).toBeDefined();
   });
 
@@ -1550,34 +1550,34 @@ describe("QuestionComponent", () => {
     component.addResourceToQuestionset();
   });
 
-  it("#videoDataOutput() should call videoDataOutput and event data is empty", () => {
+  it("#assetDataOutput() should call assetDataOutput and event data is empty", () => {
     const event = "";
     spyOn(component, "deleteSolution");
-    component.videoDataOutput(event);
+    component.assetDataOutput(event);
     expect(component.deleteSolution).toHaveBeenCalled();
   });
-  it("#videoDataOutput() should call videoDataOutput and event data is not  empty", () => {
+  it("#assetDataOutput() should call assetDataOutput and event data is not  empty", () => {
     const event = { name: "event name", identifier: "1234" };
-    component.videoDataOutput(event);
-    expect(component.videoSolutionData).toBeDefined();
+    component.assetDataOutput(event);
+    expect(component.assetSolutionData).toBeDefined();
   });
-  it("#videoDataOutput() should call videoDataOutput for thumbnail", () => {
+  it("#assetDataOutput() should call assetDataOutput for thumbnail", () => {
     const event = {
       name: "event name",
       identifier: "1234",
       thumbnail: "sample data",
     };
-    component.videoDataOutput(event);
-    expect(component.videoSolutionData).toBeDefined();
+    component.assetDataOutput(event);
+    expect(component.assetSolutionData).toBeDefined();
   });
-  it("#videoDataOutput() should call videoDataOutput for thumbnail", () => {
+  it("#assetDataOutput() should call assetDataOutput for thumbnail", () => {
     const event = {
       name: "event name",
       identifier: "1234",
       thumbnail: "sample data",
     };
-    component.videoDataOutput(event);
-    expect(component.videoSolutionData).toBeDefined();
+    component.assetDataOutput(event);
+    expect(component.assetSolutionData).toBeDefined();
   });
   it("#subMenuChange() should set the sub-menu value ", () => {
     spyOn(component,'subMenuChange').and.callThrough();

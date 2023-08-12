@@ -561,7 +561,7 @@ export const editorConfig = {
       },
       audio: {
         size: "50",
-        accepted: "mp3"
+        accepted: "mp3, wav"
       }
     },
     mode: "edit",

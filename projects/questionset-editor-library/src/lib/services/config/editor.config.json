@@ -19,7 +19,7 @@
           "audio": {
             "size": "50",
             "sizeType": "MB",
-            "accepted": "mp3"
+            "accepted": "mp3, wav"
           }
     },
     "questionPrimaryCategories": ["Multiple Choice Question", "Subjective Question"],

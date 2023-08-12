@@ -717,6 +717,7 @@ export const categoryDefinition = {
                       label: 'image/png',
                     },
                     { value: 'audio/mp3', label: 'audio/mp3' },
+                    { value: 'audio/wav', label: 'audio/wav' },
                     { value: 'video/mp4', label: 'video/mp4' },
                     { value: 'video/webm', label: 'video/webm' },
                   ],
