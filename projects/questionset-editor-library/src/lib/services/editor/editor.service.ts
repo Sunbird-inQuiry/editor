@@ -10,7 +10,6 @@ import { EditorTelemetryService } from '../../services/telemetry/telemetry.servi
 import { DataService } from '../data/data.service';
 import { map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { ExportToCsv } from 'export-to-csv';
 interface SelectedChildren {
   label?: string;
   primaryCategory?: string;
