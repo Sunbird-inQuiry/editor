@@ -9,7 +9,7 @@ export const questionSetEditorConfig = {
       lastName: 'User',
       orgIds: ['01309282781705830427']
     },
-    identifier: 'do_21385722788845158418',
+    identifier: 'do_213858102169174016131',
     authToken: ' ',
     sid: 'iYO2K6dOSdA0rwq7NeT1TDzS-dbqduvV',
     did: '7e85b4967aebd6704ba1f604f20056b6',
@@ -113,6 +113,11 @@ export const questionSetEditorConfig = {
     },
     correctionComments: false,
     sourcingResourceStatus: true,
+    cloudStorage: { 
+      presigned_headers: { 
+        'x-ms-blob-type': 'BlockBlob' 
+      }
+    }
   },
   config: {
     mode: 'edit', // edit / review / read / sourcingReview // orgReview

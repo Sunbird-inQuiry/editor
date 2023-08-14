@@ -132,6 +132,11 @@
         },
         correctionComments: false,
         sourcingResourceStatus: true,
+        cloudStorage: { 
+          presigned_headers: { 
+            'x-ms-blob-type': 'BlockBlob' 
+          }
+      }
       },
       config: {
         mode: 'edit', // edit / review / read / sourcingReview // orgReview
