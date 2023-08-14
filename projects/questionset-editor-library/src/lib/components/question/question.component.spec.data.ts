@@ -152,23 +152,17 @@ export const mockData = {
               {
                 label: "<p>option 1</p>",
                 value: 0,
-                hint: {
-                  '70c82bf5-9459-4c43-8897-0e58b7e1da62':'test hint 1'
-                },
+                hint:'70c82bf5-9459-4c43-8897-0e58b7e1da62'
               },
               {
                 label: "<p>option 2</p>",
                 value: 1,
-                hint: {
-                  '70c82bf5-9459-4c43-8897-0e58b7e1as73':'test hint 2'
-                },
+                hint: '70c82bf5-9459-4c43-8897-0e58b7e1as73'
               },
               {
                 label: "<p>option 3</p>",
                 value: 2,
-                hint: {
-                  '70c82bf5-9459-4c43-8897-0e58b7e1gf87':'test hint 3'
-                },
+                hint:'70c82bf5-9459-4c43-8897-0e58b7e1gf87'
               },
             ],
             autoCapture: "Yes",
