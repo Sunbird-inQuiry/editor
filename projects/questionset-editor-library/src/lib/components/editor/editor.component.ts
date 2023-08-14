@@ -45,7 +45,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   public searchFormConfig: any;
   public leafFormConfig: any;
   public relationFormConfig: any;
-  public showLibraryPage = false;
   public questionlibraryInput: any = {};
   public editorMode;
   public collectionId;
@@ -71,7 +70,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     showReviewComment: false
   };
   public contentComment: string;
-  public showComment: boolean;
   public showReviewModal: boolean;
   public csvDropDownOptions: any = {};
   public showCsvUploadPopup = false;

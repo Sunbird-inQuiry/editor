@@ -81,7 +81,6 @@ describe('EditorComponent', () => {
     expect(component.unitFormConfig).toBeUndefined();
     expect(component.searchFormConfig).toBeUndefined();
     expect(component.leafFormConfig).toBeUndefined();
-    expect(component.showLibraryPage).toBeFalsy();
     expect(component.questionlibraryInput).toEqual({});
     expect(component.isQumlPlayer).toBeUndefined();
     expect(component.showQuestionTemplatePopup).toBeFalsy();
