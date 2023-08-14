@@ -90,12 +90,8 @@ describe('EditorComponent', () => {
     expect(component.buttonLoaders.saveAsDraftButtonLoader).toBeFalsy();
     expect(component.buttonLoaders.addFromLibraryButtonLoader).toBeFalsy();
     expect(component.buttonLoaders.showReviewComment).toBeFalsy();
-    expect(component.csvDropDownOptions).toEqual({});
-    expect(component.showCsvUploadPopup).toBeFalsy();
-    expect(component.isCreateCsv).toBeTruthy();
     expect(component.isStatusReviewMode).toBeFalsy();
     expect(component.ishierarchyConfigSet).toBeFalsy();
-    expect(component.isComponenetInitialized).toBeFalsy();
   });
 
   it('#setEditorConfig() should set editor config', () => {
@@ -133,7 +129,6 @@ describe('EditorComponent', () => {
     expect(component.editorMode).toEqual('edit');
     expect(treeService.initialize).toHaveBeenCalledWith(editorConfig);
     expect(component.collectionId).toBeDefined();
-    expect(component.isObjectTypeCollection).toBeTruthy();
     expect(component.isReviewMode).toHaveBeenCalled();
     expect(component.isStatusReviewMode).toBeTruthy();
     expect(component.mergeCollectionExternalProperties).toHaveBeenCalled();
@@ -317,14 +312,12 @@ describe('EditorComponent', () => {
   });
 
   it('#ngAfterViewInit() should call #impression()', () => {
-    component.isComponenetInitialized = false;
     const telemetryService = TestBed.inject(EditorTelemetryService);
     telemetryService.telemetryPageId = 'questionset_editor';
     spyOn(telemetryService, 'impression').and.callFake(() => { });
     spyOn(component, 'ngAfterViewInit').and.callThrough();
     component.ngAfterViewInit();
     expect(telemetryService.impression).toHaveBeenCalled();
-    expect(component.isComponenetInitialized).toBeTruthy();
   });
 
   it('#mergeCollectionExternalProperties() should call fetchCollectionHierarchy for objectType questionset', () => {
@@ -340,7 +333,6 @@ describe('EditorComponent', () => {
     expect(editorService.fetchCollectionHierarchy).toHaveBeenCalled();
     expect(editorService.readQuestionSet).toHaveBeenCalled();
     expect(component.collectionTreeNodes).toBeDefined();
-    expect(component.isTreeInitialized).toBeTruthy();
   });
 
   it('#mergeCollectionExternalProperties() should call fetchCollectionHierarchy for objectType collection', () => {
@@ -660,15 +652,11 @@ describe('EditorComponent', () => {
   });
 
   it('#libraryEventListener() should set pageId to questionset_editor', async () => {
-    component.isEnableCsvAction = false;
-    component.isComponenetInitialized = false;
     const res = {};
     spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of(res));
     spyOn(component, 'libraryEventListener').and.callThrough();
     component.libraryEventListener({});
     expect(component.pageId).toEqual('questionset_editor');
-    expect(component.isEnableCsvAction).toBeTruthy();
-    expect(component.isComponenetInitialized).toBeTruthy();
   });
 
   it('#onQuestionLibraryChange() should call #addResourceToQuestionset()', () => {
@@ -1000,7 +988,6 @@ describe('EditorComponent', () => {
         }
       }
     };
-    component.isObjectTypeCollection = false;
     component.editorConfig = editorConfig;
     spyOn(component, 'updateTreeNodeData').and.callFake(() => {
       return true;
@@ -1226,7 +1213,6 @@ describe('EditorComponent', () => {
   });
 
   it('#questionEventListener() should set #pageId to questionset_editor', () => {
-    component.isEnableCsvAction = false;
     component.telemetryService.telemetryPageId = '';
     component.objectType = 'questionSet';
     spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of({}));
@@ -1234,7 +1220,6 @@ describe('EditorComponent', () => {
     component.questionEventListener({type: 'createNewContent'});
     expect(component.pageId).toEqual('questionset_editor');
     expect(component.telemetryService.telemetryPageId).toEqual('questionset_editor');
-    expect(component.isEnableCsvAction).toBeTruthy();
   });
 
   it('#questionEventListener() should emit event for objectType question', () => {
@@ -1290,147 +1275,10 @@ describe('EditorComponent', () => {
     expect(result).toBeTruthy();
   });
 
-  it('#handleCsvDropdownOptionsOnCollection should set dropdown status initially', () => {
-    spyOn(component, 'setCsvDropDownOptionsDisable').and.callFake(() => {});
-    component.isTreeInitialized = true;
-    component.handleCsvDropdownOptionsOnCollection();
-    expect(component.isEnableCsvAction).toBeTruthy();
-    expect(component.isTreeInitialized).toBeFalsy();
-    expect(component.setCsvDropDownOptionsDisable).toHaveBeenCalledWith(true);
-  });
-
-  it('#handleCsvDropdownOptionsOnCollection should set isEnableCsvAction status false', () => {
-    component.isEnableCsvAction = true;
-    component.isTreeInitialized = false;
-    spyOn(component, 'setCsvDropDownOptionsDisable').and.callFake(() => {});
-    component.handleCsvDropdownOptionsOnCollection();
-    expect(component.isEnableCsvAction).toBeFalsy();
-    expect(component.isTreeInitialized).toBeFalsy();
-    expect(component.setCsvDropDownOptionsDisable).toHaveBeenCalledWith(true);
-  });
-
-  it('#onClickFolder() should call setCsvDropDownOptionsDisable when isComponenetInitialized is true', () => {
-    component.isComponenetInitialized = true;
-    spyOn(component, 'setCsvDropDownOptionsDisable').and.callFake(() => {});
-    spyOn(component, 'onClickFolder').and.callThrough();
-    component.onClickFolder();
-    expect(component.setCsvDropDownOptionsDisable).toHaveBeenCalledWith();
-    expect(component.isComponenetInitialized).toBeFalsy();
-  });
-
-  it('#onClickFolder() should call setCsvDropDownOptionsDisable when isEnableCsvAction is true', () => {
-    component.isEnableCsvAction = true;
-    component.isComponenetInitialized = false;
-    spyOn(component, 'setCsvDropDownOptionsDisable').and.callFake(() => {});
-    component.onClickFolder();
-    expect(component.setCsvDropDownOptionsDisable).toHaveBeenCalledWith();
-  });
-
-  it('#onClickFolder() should not call setCsvDropDownOptionsDisable', () => {
-    component.isEnableCsvAction = false;
-    component.isComponenetInitialized = false;
-    spyOn(component, 'setCsvDropDownOptionsDisable').and.callFake(() => {});
-    component.onClickFolder();
-    expect(component.setCsvDropDownOptionsDisable).not.toHaveBeenCalledWith();
-  });
-
-  it('#setCsvDropDownOptionsDisable and should set csv dropdown options', () => {
-    component.csvDropDownOptions = {
-      isDisableCreateCsv: true,
-      isDisableUpdateCsv: true,
-      isDisableDownloadCsv: true
-    };
-    // tslint:disable-next-line:no-string-literal
-    spyOn(component['editorService'], 'getHierarchyFolder').and.returnValue([1]);
-    component.setCsvDropDownOptionsDisable(true);
-    expect(component.csvDropDownOptions.isDisableCreateCsv).toBeTruthy();
-    expect(component.csvDropDownOptions.isDisableUpdateCsv).toBeTruthy();
-    expect(component.csvDropDownOptions.isDisableDownloadCsv).toBeTruthy();
-  });
-
-  it('#setCsvDropDownOptionsDisable and should set csv dropdown options for empty childs', () => {
-    component.csvDropDownOptions = {
-      isDisableCreateCsv: true,
-      isDisableUpdateCsv: true,
-      isDisableDownloadCsv: true
-    };
-    // tslint:disable-next-line:no-string-literal
-    spyOn(component['editorService'], 'getHierarchyFolder').and.returnValue([]);
-    component.setCsvDropDownOptionsDisable();
-    expect(component.csvDropDownOptions.isDisableCreateCsv).toBeFalsy();
-    expect(component.csvDropDownOptions.isDisableUpdateCsv).toBeTruthy();
-    expect(component.csvDropDownOptions.isDisableDownloadCsv).toBeTruthy();
-  });
-
-  it('#downloadHierarchyCsv() should call downloadHierarchyCsv and success case', () => {
-    // tslint:disable-next-line:no-string-literal
-    spyOn(component['editorService'], 'downloadHierarchyCsv').and.returnValue(of(csvExport.successExport));
-    spyOn(component, 'downloadCSVFile').and.callThrough();
-    component.downloadHierarchyCsv();
-    expect(component.downloadCSVFile).toHaveBeenCalledWith(csvExport.successExport.result.collection.tocUrl);
-  });
-
-  it('#downloadHierarchyCsv() should call downloadHierarchyCsv and error case', () => {
-    component.collectionId = 'do_11331581945782272012';
-    spyOn(toasterService, 'error').and.callFake(() => {});
-    // tslint:disable-next-line:no-string-literal
-    spyOn(component['editorService'], 'downloadHierarchyCsv').and.returnValue(throwError(csvExport.errorExport));
-    spyOn(component, 'downloadCSVFile').and.callThrough();
-    component.downloadHierarchyCsv();
-    expect(toasterService.error).toHaveBeenCalled();
-  });
-
   it('#isReviewMode should return editor mode status', () => {
     spyOn(component, 'isReviewMode').and.returnValue(true);
     const value = component.isReviewMode();
     expect(value).toBeTruthy();
-  });
-
-  it('#downloadFile() should download the file', () => {
-    component.collectionId = 'do_113274017771085824116';
-    // tslint:disable-next-line:max-line-length
-    const blobUrl = 'https://sunbirddev.blob.core.windows.net/sunbird-content-dev/content/course/toc/do_11331579492804198413_untitled-course_1625465046239.csv';
-    const editorService = TestBed.inject(EditorService);
-    // spyOn(window, 'open').and.callFake(() => {});
-    component.downloadCSVFile(blobUrl);
-    // expect(window.open).toHaveBeenCalled();
-  });
-
-  it('#hanndleCsvEmitter should check for closeModal conditions', () => {
-    const event = { type: 'closeModal' };
-    component.hanndleCsvEmitter(event);
-    expect(component.showCsvUploadPopup).toBeFalsy();
-  });
-
-  it('#hanndleCsvEmitter should check for downloadCsv conditions', () => {
-    spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of(hirearchyGet));
-    const event = { type: 'updateHierarchy' };
-    component.hanndleCsvEmitter(event);
-    expect(component.mergeCollectionExternalProperties).toHaveBeenCalled();
-    expect(component.pageId).toEqual('questionset_editor');
-    expect(component.telemetryService.telemetryPageId).toEqual('questionset_editor');
-    expect(component.isEnableCsvAction).toBeTruthy();
-  });
-
-  it('#hanndleCsvEmitter should check for create csv conditions', () => {
-    const event = { type: 'createCsv' };
-    component.hanndleCsvEmitter(event);
-    expect(component.showCsvUploadPopup).toBeTruthy();
-    expect(component.isCreateCsv).toBeTruthy();
-  });
-
-  it('#hanndleCsvEmitter should check for updateCsv conditions', () => {
-    const event = { type: 'updateCsv' };
-    component.hanndleCsvEmitter(event);
-    expect(component.showCsvUploadPopup).toBeTruthy();
-    expect(component.isCreateCsv).toBeFalsy();
-  });
-
-  it('#hanndleCsvEmitter should check for downloadCsv conditions', () => {
-    spyOn(component, 'downloadHierarchyCsv').and.callFake(() => {});
-    const event = { type: 'downloadCsv' };
-    component.hanndleCsvEmitter(event);
-    expect(component.downloadHierarchyCsv).toHaveBeenCalled();
   });
 
   it('#onFormStatusChange() should store form status when form state changed', () => {

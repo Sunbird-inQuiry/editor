@@ -583,21 +583,6 @@ export class EditorService {
   }
     return contents;
   }
-  validateCSVFile(formData, collectionnId: any) {
-    const url = _.get(this.configService.urlConFig, 'URLS.CSV.UPLOAD');
-    const reqParam = {
-      url: `${url}${collectionnId}`,
-      data: formData.data
-    };
-    return this.publicDataService.post(reqParam);
-  }
-  downloadHierarchyCsv(collectionId) {
-    const url = _.get(this.configService.urlConFig, 'URLS.CSV.DOWNLOAD');
-    const req = {
-      url: `${url}${collectionId}`,
-    };
-    return this.publicDataService.get(req);
-  }
   generatePreSignedUrl(req, contentId: any, type) {
     const reqParam = {
       url: `${this.configService.urlConFig.URLS.CONTENT.UPLOAD_URL}${contentId}?type=${type}`,
@@ -628,26 +613,6 @@ export class EditorService {
     } catch (error) {
       console.error( _.replace(_.get(this.configService, 'labelConfig.messages.error.033'), '{FILE_TYPE}', config.fileType ) + error);
     }
-  }
-
-  generateCSV(config) {
-    const tableData = config.tableData;
-    delete config.tableData;
-    let options = {
-      fieldSeparator: ',',
-      quoteStrings: '"',
-      decimalSeparator: '.',
-      showLabels: true,
-      useTextFile: false,
-      useBom: true,
-      showTitle: true,
-      title: '',
-      filename: '',
-      headers: []
-    };
-    options = _.merge(options, config);
-    const csvExporter = new ExportToCsv(options);
-    csvExporter.generateCsv(tableData);
   }
 
   getBranchingLogicByFolder(identifier) {
