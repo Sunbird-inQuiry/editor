@@ -3786,9 +3786,7 @@ export const nodesModifiedData = {
           appIcon: '',
           name: 'questionset',
           description: 'questionset',
-          instructions: {
-              default: '<p>quuestionset</p>'
-          },
+          instructions: '<p>quuestionset</p>',
           primaryCategory: 'Practice Question Set',
           additionalCategories: [],
           board: 'CBSE',

@@ -91,9 +91,7 @@ export const treeNode = {
         },
         "shuffle": true,
         "board": "CBSE",
-        "instructions": {
-            "default": "New instructions "
-        },
+        "instructions": "New instructions ",
         "level": 1,
         "maxTime": "00:06:00",
         "warningTime": "00:00:10",
