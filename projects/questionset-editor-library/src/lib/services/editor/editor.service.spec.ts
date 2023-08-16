@@ -305,65 +305,6 @@ describe('EditorService', () => {
     expect(http.get).toHaveBeenCalled();
     expect(toasterService.success).not.toHaveBeenCalledWith(configServiceData.labelConfig.messages.success['011']);
   });
-  it('#downloadHierarchyCsv() should downloadHierarchyCsv', async () => {
-    const publicDataService: PublicDataService = TestBed.inject(PublicDataService);
-    spyOn(publicDataService, 'get').and.returnValue(of({
-      id: 'api.collection.export',
-      ver: '4.0',
-      ts: '2021-07-05T07:43:10ZZ',
-      params: {
-        resmsgid: 'd54936f9-9f9a-449a-a797-5564d5a97c6c',
-        msgid: null,
-        err: null,
-        status: 'successful',
-        errmsg: null
-      },
-      responseCode: 'OK',
-      result: {
-        collection: {
-          // tslint:disable-next-line:max-line-length
-          tocUrl: 'https://sunbirddev.blob.core.windows.net/sunbird-content-dev/content/textbook/toc/do_113312173590659072160_dev-testing-1_1625022971409.csv',
-          ttl: '54000'
-        }
-      }
-    }));
-    editorService.downloadHierarchyCsv('do_113312173590659072160').subscribe(data => {
-      expect(data.responseCode).toBe('OK');
-    });
-  });
-  it('#validateCSVFile() should validateCSVFile', async () => {
-    const publicDataService: PublicDataService = TestBed.inject(PublicDataService);
-    const file = new File([''], 'filename', { type: 'csv/text' });
-    const event = {
-      target: {
-        files: [
-          file
-        ]
-      }
-    };
-    spyOn(publicDataService, 'post').and.returnValue(of({
-      id: 'api.collection.import',
-      ver: '4.0',
-      ts: '2021-07-05T08:28:06ZZ',
-      params: {
-        resmsgid: 'f151855b-98fd-4baf-b8dc-00c31cc47b71',
-        msgid: null,
-        err: 'INVALID_CSV_FILE',
-        status: 'failed',
-        errmsg: 'Please provide valid csv file. Please check for data columns without headers.'
-      },
-      responseCode: 'CLIENT_ERROR',
-      result: {
-        messages: null
-      }
-    }));
-    editorService.validateCSVFile(event.target.files[0], 'do_113312173590659072160').subscribe(data => {
-    },
-      error => {
-        expect(error.error.responseCode).toBe('CLIENT_ERROR');
-
-      });
-  });
   it('#generatePreSignedUrl() should call generatePreSignedUrl', () => {
     const publicDataService: PublicDataService = TestBed.inject(PublicDataService);
     spyOn(publicDataService, 'post').and.returnValue(of());

@@ -266,7 +266,6 @@ editorConfig_question = {
     showOriginPreviewUrl: false,
     showSourcingStatus: false,
     showCorrectionComments: false,
-    publicStorageAccount: 'https://dockstorage.blob.core.windows.net/',
     hideSubmitForReviewBtn: false,
     questionSet: {
       maxQuestionsLimit: 500,
@@ -3787,9 +3786,7 @@ export const nodesModifiedData = {
           appIcon: '',
           name: 'questionset',
           description: 'questionset',
-          instructions: {
-              default: '<p>quuestionset</p>'
-          },
+          instructions: '<p>quuestionset</p>',
           primaryCategory: 'Practice Question Set',
           additionalCategories: [],
           board: 'CBSE',
@@ -4167,7 +4164,6 @@ export const questionSetEditorConfig = {
       collection: {
           maxContentsLimit: 1200
       },
-      publicStorageAccount: 'https://sunbirddev.blob.core.windows.net/',
       maxDepth: 1,
       addFromLibraryEnabled: true,
       enableAddFromLibrary: true,

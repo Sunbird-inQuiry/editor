@@ -589,9 +589,7 @@ export const mockData = {
             },
             "shuffle": true,
             "board": "CBSE",
-            "instructions": {
-                "default": "<ol><li><i><strong><u>The instructions</u></strong></i></li></ol><figure class=\"table\"><table><tbody><tr><td>Header</td><td>Instruction1</td><td>Instruction1</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table></figure><p>&nbsp;</p>"
-            },
+            "instructions": "<ol><li><i><strong><u>The instructions</u></strong></i></li></ol><figure class=\"table\"><table><tbody><tr><td>Header</td><td>Instruction1</td><td>Instruction1</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table></figure><p>&nbsp;</p>",
             "level": 1,
             "topic": "",
             "maxTime": "00:05:00",

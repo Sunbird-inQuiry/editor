@@ -250,9 +250,10 @@ describe('OptionsComponent', () => {
 
   it('#subMenuChange() should set the sub-menu value ', () => {
     component.subMenus =  mockOptionData.subMenus;
+    component.hints = mockOptionData.hints;
     spyOn(component, 'subMenuChange').and.callThrough();
-    component.subMenuChange({index:1,value:'test'},1)
-    expect(component.subMenus[0][0].value).toBe('test');
+    component.subMenuChange({index:1,value:'first'},1)
+    expect(component.subMenus[0][0].value).toBe('first');
   })
 
   it('#subMenuConfig() should set on initialize', () => {
