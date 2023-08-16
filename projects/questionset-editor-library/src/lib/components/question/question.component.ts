@@ -18,7 +18,6 @@ import { filter, finalize, take, takeUntil } from 'rxjs/operators';
 import { SubMenu } from '../question-option-sub-menu/question-option-sub-menu.component';
 import { ICreationContext } from '../../interfaces/CreationContext';
 
-const evidenceMimeType='';
 const evidenceSizeLimit='20480';
 const DEFAULT_SCORE = 1;
 
@@ -29,7 +28,6 @@ const DEFAULT_SCORE = 1;
   encapsulation: ViewEncapsulation.None,
 })
 export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
-  QumlPlayerConfig: any = {};
   @Input() questionInput: any;
   @Input() leafFormConfig: any;
   @Input() sourcingSettings: any;
@@ -38,7 +36,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() questionEmitter = new EventEmitter<any>();
   private onComponentDestroy$ = new Subject<any>();
   toolbarConfig: any = {};
-  public terms = false;
   public editorState: any = {};
   public showPreview = false;
   public mediaArr: any = [];
@@ -46,14 +43,11 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   public showFormError = false;
   public actionType: string;
   selectedSolutionType: string;
-  selectedSolutionTypeIndex: string;
   showSolutionDropDown = true;
   showSolution = false;
   videoSolutionName: string;
-  videoSolutionData: any;
   videoThumbnail: string;
   solutionUUID: string;
-  solutionValue: string;
   solutionTypes: any = [{
     type: 'html',
     value: 'Text+Image'
@@ -79,7 +73,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   questionSetHierarchy: any;
   showConfirmPopup = false;
   showSubmitConfirmPopup = false;
-  validQuestionData = false;
   questionPrimaryCategory: string;
   pageId = 'question';
   pageStartTime: any;
@@ -326,10 +319,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       };
       this.editorService.apiErrorHandling(err, errInfo);
     });
-  }
-
-  get contentPolicyUrl() {
-    return this.editorService.contentPolicyUrl;
   }
 
   toolbarEventListener(event) {
@@ -709,7 +698,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   videoDataOutput(event) {
     if (event) {
-      this.videoSolutionData = event;
       this.videoSolutionName = event.name;
       this.editorState.solutions = event.identifier;
       this.videoThumbnail = event.thumbnail;
@@ -1225,14 +1213,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return outcomeDeclaration;
   }
 
-  getPlayerEvents(event) {
-    console.log('get player events', JSON.stringify(event));
-  }
-
-  getTelemetryEvents(event) {
-    console.log('event is for telemetry', JSON.stringify(event));
-  }
-
   setQuestionId(questionId) {
     this.questionId = questionId;
   }
@@ -1317,16 +1297,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
     this.questionFormConfig = formConfig;
-  }
-
-  isEditable(fieldCode) {
-    if (this.creationMode === 'edit') {
-      return true;
-    }
-    if (!this.questionId) {
-      return true;
-    }
-    return false;
   }
 
   populateFormData() {

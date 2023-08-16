@@ -266,7 +266,6 @@ editorConfig_question = {
     showOriginPreviewUrl: false,
     showSourcingStatus: false,
     showCorrectionComments: false,
-    publicStorageAccount: 'https://dockstorage.blob.core.windows.net/',
     hideSubmitForReviewBtn: false,
     questionSet: {
       maxQuestionsLimit: 500,
@@ -4165,7 +4164,6 @@ export const questionSetEditorConfig = {
       collection: {
           maxContentsLimit: 1200
       },
-      publicStorageAccount: 'https://sunbirddev.blob.core.windows.net/',
       maxDepth: 1,
       addFromLibraryEnabled: true,
       enableAddFromLibrary: true,

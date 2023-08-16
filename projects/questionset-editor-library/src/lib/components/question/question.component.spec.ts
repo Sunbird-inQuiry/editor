@@ -545,13 +545,6 @@ describe("QuestionComponent", () => {
     expect(component.initialize).toHaveBeenCalled();
   });
 
-  it('#contentPolicyUrl() should return content policy url', () => {
-    editorService.contentPolicyUrl = 'https://preprod.ntp.net.in/term-of-use.html';
-    spyOn(component, 'contentPolicyUrl').and.callThrough();
-    const contentPolicyURL = component.contentPolicyUrl;
-    expect(contentPolicyURL).toBeDefined();
-  });
-
   it("#toolbarEventListener() should call toolbarEventListener for saveContent", () => {
     const event = { button: "saveContent" };
     component.actionType = event.button;
@@ -971,15 +964,6 @@ describe("QuestionComponent", () => {
     expect(outcomeDeclaration.maxScore.cardinality).toEqual('single');
   });
 
-  it("Unit test for #isEditable without queston id", () => {
-    component.creationContext = creationContextMock;
-    component.questionId=undefined;
-    expect(component.isEditable("bloomsLevel")).toBeTruthy();
-  });
-  it("Unit test for #isEditable with queston id", () => {
-    component.creationContext = creationContextMock;
-    expect(component.isEditable("bloomsLevel")).toBeFalsy();
-  });
   it("Unit test for #prepareQuestionBody", () => {
     component.questionId = 'do_12345';
     const editorService = TestBed.inject(EditorService);
@@ -1577,7 +1561,6 @@ describe("QuestionComponent", () => {
   it("#videoDataOutput() should call videoDataOutput and event data is not  empty", () => {
     const event = { name: "event name", identifier: "1234" };
     component.videoDataOutput(event);
-    expect(component.videoSolutionData).toBeDefined();
   });
   it("#videoDataOutput() should call videoDataOutput for thumbnail", () => {
     const event = {
@@ -1586,7 +1569,6 @@ describe("QuestionComponent", () => {
       thumbnail: "sample data",
     };
     component.videoDataOutput(event);
-    expect(component.videoSolutionData).toBeDefined();
   });
   it("#videoDataOutput() should call videoDataOutput for thumbnail", () => {
     const event = {
@@ -1595,7 +1577,6 @@ describe("QuestionComponent", () => {
       thumbnail: "sample data",
     };
     component.videoDataOutput(event);
-    expect(component.videoSolutionData).toBeDefined();
   });
   it("#subMenuChange() should set the sub-menu value ", () => {
     spyOn(component,'subMenuChange').and.callThrough();

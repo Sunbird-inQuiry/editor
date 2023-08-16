@@ -45,7 +45,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   public searchFormConfig: any;
   public leafFormConfig: any;
   public relationFormConfig: any;
-  public showLibraryPage = false;
   public questionlibraryInput: any = {};
   public editorMode;
   public collectionId;
@@ -71,19 +70,11 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     showReviewComment: false
   };
   public contentComment: string;
-  public showComment: boolean;
   public showReviewModal: boolean;
-  public csvDropDownOptions: any = {};
-  public showCsvUploadPopup = false;
   public objectType: string;
-  public isObjectTypeCollection: any;
-  public isCreateCsv = true;
   public isStatusReviewMode = false;
-  public isEnableCsvAction: any;
-  public isTreeInitialized: any;
   public ishierarchyConfigSet =  false;
   public publishchecklist: any;
-  public isComponenetInitialized = false;
   public unSubscribeshowQuestionLibraryPageEmitter: Subscription;
   public sourcingSettings: any;
   public setChildQuestion: any;
@@ -122,7 +113,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.objectType = this.configService.categoryConfig[this.editorConfig.config.objectType];
     this.collectionId = _.get(this.editorConfig, 'context.identifier');
     this.toolbarConfig = this.editorService.getToolbarConfig();
-    this.isObjectTypeCollection = this.objectType === 'questionset' ? false : true;
     this.isStatusReviewMode = this.isReviewMode();
 
     if (this.objectType === 'question') {
@@ -338,13 +328,11 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       type: 'edit', pageid: this.telemetryService.telemetryPageId, uri: this.router.url,
       duration: (Date.now() - this.pageStartTime) / 1000
     });
-    this.isComponenetInitialized = true;
   }
 
   mergeCollectionExternalProperties(): Observable<any> {
     const requests = [];
     this.collectionTreeNodes = null;
-    this.isTreeInitialized = true;
     requests.push(this.editorService.fetchCollectionHierarchy(this.collectionId));
     if (this.objectType === 'questionset') {
       requests.push(this.editorService.readQuestionSet(this.collectionId));
@@ -438,7 +426,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.saveContent().then((message: string) => {
           this.buttonLoaders.saveAsDraftButtonLoader = false;
           this.toasterService.success(message);
-          this.isEnableCsvAction = true;
           if (_.get(this.editorConfig, 'config.enableQuestionCreation') === false) {
             this.mergeCollectionExternalProperties().subscribe(response => {
               this.redirectToChapterListTab({
@@ -449,7 +436,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         }).catch(((error: string) => {
           this.buttonLoaders.saveAsDraftButtonLoader = false;
-          this.isEnableCsvAction = false;
           this.toasterService.error(error);
         }));
         break;
@@ -477,9 +463,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         break;
       case 'onFormStatusChange':
         this.onFormStatusChange(event.event);
-        if (this.isObjectTypeCollection) {
-          this.handleCsvDropdownOptionsOnCollection();
-        }
         break;
       case 'onFormValueChange':
         this.updateToolbarTitle(event);
@@ -576,8 +559,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.mergeCollectionExternalProperties().subscribe((res: any) => {
       this.pageId = 'questionset_editor';
       this.telemetryService.telemetryPageId = this.pageId;
-      this.isEnableCsvAction = true;
-      this.isComponenetInitialized = true;
     });
   }
 
@@ -798,9 +779,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   treeEventListener(event: any) {
     this.actionType = event.type;
     this.updateTreeNodeData();
-    if (this.isObjectTypeCollection) {
-      this.handleCsvDropdownOptionsOnCollection();
-    }
     switch (event.type) {
       case 'nodeSelect':
         this.updateSubmitBtnVisibility();
@@ -1041,7 +1019,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.mergeCollectionExternalProperties().subscribe((res: any) => {
         this.pageId = 'questionset_editor';
         this.telemetryService.telemetryPageId = this.pageId;
-        this.isEnableCsvAction = true;
       });
     }
   }
@@ -1065,77 +1042,10 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     return false;
   }
-  handleCsvDropdownOptionsOnCollection() {
-    if (this.isTreeInitialized) {
-      this.isEnableCsvAction = true;
-      this.isTreeInitialized = false;
-    } else {
-      this.isEnableCsvAction = false;
-    }
-    this.setCsvDropDownOptionsDisable(true);
-  }
-  onClickFolder() {
-    if (this.isComponenetInitialized) {
-      this.isComponenetInitialized = false;
-      this.setCsvDropDownOptionsDisable();
-    } else if (this.isEnableCsvAction) {
-     this.setCsvDropDownOptionsDisable();
-  }
-  }
-  setCsvDropDownOptionsDisable(disable?) {
-    const status = this.editorService.getHierarchyFolder().length ? true : false;
-    this.csvDropDownOptions.isDisableCreateCsv = disable ? disable : status;
-    this.csvDropDownOptions.isDisableUpdateCsv = disable ? disable : !status;
-    this.csvDropDownOptions.isDisableDownloadCsv = disable ? disable : !status;
-  }
-  downloadHierarchyCsv() {
-    this.editorService.downloadHierarchyCsv(this.collectionId).subscribe(res => {
-      const tocUrl = _.get(res, 'result.collection.tocUrl');
-      this.downloadCSVFile(tocUrl);
-    }, error => {
-      this.toasterService.error(_.get(error, 'error.params.errmsg'));
-    });
-  }
+
   isReviewMode() {
     return  _.includes([ 'review', 'read', 'sourcingreview', 'orgreview' ], this.editorService.editorMode);
    }
-  downloadCSVFile(tocUrl) {
-    const downloadConfig = {
-      blobUrl: tocUrl,
-      successMessage: false,
-      fileType: 'csv',
-      fileName: this.collectionId
-    };
-    window.open(downloadConfig.blobUrl, '_blank');
-    /*this.editorService.downloadBlobUrlFile(downloadConfig);*/
-  }
-  hanndleCsvEmitter(event) {
-    switch (event.type) {
-      case 'closeModal':
-        this.showCsvUploadPopup = false;
-        break;
-      case 'updateHierarchy':
-        this.mergeCollectionExternalProperties().subscribe((res: any) => {
-          this.pageId = 'questionset_editor';
-          this.telemetryService.telemetryPageId = this.pageId;
-          this.isEnableCsvAction = true;
-        });
-        break;
-      case 'createCsv':
-        this.showCsvUploadPopup = true;
-        this.isCreateCsv = true;
-        break;
-      case 'updateCsv':
-        this.showCsvUploadPopup = true;
-        this.isCreateCsv = false;
-        break;
-      case 'downloadCsv':
-        this.downloadHierarchyCsv();
-        break;
-      default:
-        break;
-    }
-  }
 
   onFormStatusChange(form) {
     const selectedNode = this.treeService.getActiveNode();

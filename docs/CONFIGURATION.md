@@ -132,7 +132,6 @@ config: {
       review: string[],
     },
     maxDepth: number, //Ex.: 1
-    publicStorageAccount: 'url', //Ex.: https://dockstorage.blob.core.windows.net/
     assetConfig: object,
     objectType: 'string', //Ex.: QuestionSet
     primaryCategory: 'string', //Ex.: Practice Question Set
@@ -180,7 +179,6 @@ Description of the properties for the config:
 | `iconClass` |  It is `string` and that defines the icon of root node  | true | `fa fa-book` |
 | `children` |  It is an `object` and If maxdepth is 0 than children inside the root node defines the content type. **For example:** `children: {Question: ["Multiple Choice Question", "Subjective Question"]}` | true |  |
 | `contentPolicyUrl` |  It is `string` and It defines where should the content policy link will be redirected.  | true | `/term-of-use.html`  |
-| `publicStorageAccount` |  It is `url` and URL of the blob storage **For example:** `https://dockstorage.blob.core.windows.net/`  | true |  |
 | `mode` |  It is `string` and that defines the mode in editor is to be loaded. **For example:** `edit / review / read / sourcingReview / orgReview`  | false | `edit` |
 | `editableFields` |  It is an `object` and that defines the mode in editor is to be loaded.  | false | `{ sourcingreview: [],       orgreview: [],       review: [], }` |
 | `maxDepth` |  It is `number` and Defines the depth to which the textbook is to be created. If the depth is 1, hierarchy should have level1 described.  | false | **For example:** `1` |
