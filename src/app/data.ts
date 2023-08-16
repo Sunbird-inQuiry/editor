@@ -133,7 +133,6 @@ export const questionSetEditorConfig = {
     primaryCategory: 'Practice Question Set',
     isRoot: true,
     iconClass: 'fa fa-book',
-    publicStorageAccount: 'https://dockstorage.blob.core.windows.net/',
     hideSubmitForReviewBtn: false,
     children: {
       Question: [
@@ -449,7 +448,6 @@ export const observationEditorConfig = {
     primaryCategory: 'Observation',
     isRoot: true,
     iconClass: 'fa fa-book',
-    publicStorageAccount: 'https://dockstorage.blob.core.windows.net/',
     children: {
       Question: [
         'Multiple Choice Question',
@@ -641,7 +639,6 @@ export const surveyEditorConfig = {
     isRoot: true,
     iconClass: 'fa fa-book',
     enablePagination: true,
-    publicStorageAccount: 'https://dockstorage.blob.core.windows.net/',
     children: {
       Question: [
         'Multiple Choice Question',
@@ -834,7 +831,6 @@ export const observationRubricsEditorConfig = {
     isRoot: true,
     iconClass: 'fa fa-book',
     enablePagination:true,
-    publicStorageAccount: 'https://dockstorage.blob.core.windows.net/',
     children: {
       Question: [
         'Multiple Choice Question',
