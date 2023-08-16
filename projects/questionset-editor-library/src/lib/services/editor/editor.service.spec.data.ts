@@ -238,9 +238,7 @@ export const questionsData = [
         author: 'N11',
         solutions: [],
         hints: {
-            en: [
-                null
-            ]
+            "70c82bf5-9459-4c43-8897-0e58b7e1da64": { en: "test hint 1" },
         },
         qType: 'SA',
         languageCode: [
@@ -356,9 +354,7 @@ export const questionsData = [
         author: 'N11',
         solutions: [],
         hints: {
-            en: [
-                null
-            ]
+            "70c82bf5-9459-4c43-8897-0e58b7e1da64": { en: "test hint 1" },
         },
         qType: 'MCQ',
         languageCode: [

@@ -19,6 +19,22 @@ export const mockOptionData = {
     templateId: 'mcq-split-grid',
     answer: 0,
     numberOfOptions: 4,
+    interactions:{
+      response1:{
+        options:[
+          {
+              "label": "<p>Option1</p>",
+              "value": 'first',
+              "hint": "82baa452-62dc-4906-b63c-48e459f4589d"
+          },
+          {
+              "label": "<p>Option 222</p>",
+              "value": 'second',
+              "hint": "dce993df-3b74-48ad-b3b1-0cd7d739af2b"
+          }
+      ]
+      }
+    }
   },
   prepareMcqBody: {
     templateId: 'mcq-vertical',
@@ -101,13 +117,17 @@ export const mockOptionData = {
     [{
       id: 'addHint',
       name: 'Add Hint',
-      value: 'test',
+      value: 'first',
       enabled: false,
       type: 'input',
       label: 'label',
       show:true
     }]
-  ]
+  ],
+  hints:{
+    '82baa452-62dc-4906-b63c-48e459f4589d':{en:'first'},
+    'dce993df-3b74-48ad-b3b1-0cd7d739af2b':{en:'second'}
+  }
 };
 
 export const sourcingSettingsMock = {
