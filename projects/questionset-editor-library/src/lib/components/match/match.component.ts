@@ -11,14 +11,12 @@ import { ConfigService } from '../../services/config/config.service';
 export class MatchComponent implements OnInit, OnChanges {
   @Input() editorState: any;
   @Input() showFormError;
-  @Input() sourcingSettings;
   @Input() questionPrimaryCategory;
   @Input() mapping = [];
   @Input() isReadOnlyMode;
   @Input() maxScore;
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
   public setCharacterLimit = 160;
-  public setImageLimit = 1;
   public templateType = 'mtf-horizontal';
   
   constructor(

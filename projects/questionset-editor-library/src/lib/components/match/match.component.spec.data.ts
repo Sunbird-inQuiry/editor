@@ -16,7 +16,7 @@ export const mockOptionData = {
     numberOfOptions: 4,
   },
   prepareMtfBody: {
-    templateId: "default",
+    templateId: "mtf-horizontal",
     name: "Match The Following Question",
     responseDeclaration: {
       response1: {
