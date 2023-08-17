@@ -547,19 +547,10 @@ export class EditorService {
     if (_.get(this.editorConfig, 'config.objectType') === 'QuestionSet') {
       config.maxLimit = _.get(this.editorConfig, 'config.questionSet.maxQuestionsLimit');
       if (buttonAction === 'add') {
-        config.errorMessage = _.get(this.configService, 'labelConfig.messages.error.041');
-      }
-      if (buttonAction === 'create') {
-        config.errorMessage = _.get(this.configService, 'labelConfig.messages.error.031');
-      }
-
-    } else {
-      config.maxLimit = _.get(this.editorConfig, 'config.collection.maxContentsLimit');
-      if (buttonAction === 'add') {
         config.errorMessage = _.get(this.configService, 'labelConfig.messages.error.032');
       }
       if (buttonAction === 'create') {
-        config.errorMessage = _.get(this.configService, 'labelConfig.messages.error.042');
+        config.errorMessage = _.get(this.configService, 'labelConfig.messages.error.031');
       }
     }
     const childrenCount = this.getContentChildrens().length + this.contentsCount;

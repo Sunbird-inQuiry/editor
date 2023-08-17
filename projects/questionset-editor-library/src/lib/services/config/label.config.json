@@ -215,7 +215,7 @@
          "029": "Please fill the required metadata",
          "030": "search failed",
          "031": "Cannot create question. reached limit of maximum number of questions allowed.",
-         "032": "Cannot add content. reached limit of maximum number of contents allowed.",
+         "032": "Cannot add question. reached limit of maximum number of questions allowed.",
          "033": "failed to convert url to blob ",
          "034": "failed to download {FILE_TYPE} file using blob url ",
          "035": "Unable to get pre_signed_url and Question bulk upload Failed, Please Try Again",
@@ -224,10 +224,8 @@
          "038": "Unable to approve content",
          "039": "Unable to reject content",
          "040": "Unable to send content back for corrections",
-         "041": "Cannot add question. reached limit of maximum number of questions allowed.",
-         "042": "Cannot create content. reached limit of maximum number of contents allowed.",
-         "043": "Adding question to questionset failed. Please try again.",
-         "044": "Please fill valid question details."
+         "041": "Adding question to questionset failed. Please try again.",
+         "042": "Please fill valid question details."
       },
       "success": {
          "001": "Content is saved",

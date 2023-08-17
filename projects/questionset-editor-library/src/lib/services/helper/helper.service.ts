@@ -131,18 +131,6 @@ export class HelperService {
     }
   }
 
-  getAllUser(userSearchBody) {
-    const req = {
-      url:  _.get(this.configService.urlConFig, 'URLS.USER.SEARCH'),
-      param: {fields: 'orgName'},
-      data: {
-        request: userSearchBody.request
-      }
-    };
-
-    return this.publicDataService.post(req);
-  }
-
   addDepthToHierarchy(arr, depth = 0, index = 0) {
     if (arr && index < arr.length) {
       _.forEach(arr, child => {
