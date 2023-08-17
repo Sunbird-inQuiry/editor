@@ -225,45 +225,32 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
               }
 
-              if (this.questionInteractionType === 'choice') {
+              if (this.questionInteractionType === 'choice' || this.questionInteractionType === 'match') {
                 const responseDeclaration = this.questionMetaData.responseDeclaration;
                 this.scoreMapping = _.get(responseDeclaration, 'response1.mapping');
                 const templateId = this.questionMetaData.templateId;
                 const numberOfOptions = this.questionMetaData?.editorState?.options?.length || 0;
                 const maximumOptions = _.get(this.questionInput, 'config.maximumOptions');
-                this.editorService.optionsLength = numberOfOptions;
-                const options = _.map(this.questionMetaData?.editorState?.options, option => ({ body: option.value.body }));
+                this.editorService.optionsLength = numberOfOptions;                
                 const question = this.questionMetaData?.editorState?.question;
                 const interactions = this.questionMetaData?.interactions;
-                this.editorState = new McqForm({
-                  question, options, answer: _.get(responseDeclaration, 'response1.correctResponse.value')
-                }, { templateId, numberOfOptions,maximumOptions });
-                this.editorState.solutions = this.questionMetaData?.editorState?.solutions;
                 this.editorState.interactions = interactions;
-                if (_.has(this.questionMetaData, 'responseDeclaration')) {
-                  this.editorState.responseDeclaration = _.get(this.questionMetaData, 'responseDeclaration');
+                if (this.questionInteractionType === 'choice') {
+                  const options = _.map(this.questionMetaData?.editorState?.options, option => ({ body: option.value.body }));
+                  this.editorState = new McqForm({
+                    question, options, answer: _.get(responseDeclaration, 'response1.correctResponse.value')
+                  }, { templateId, numberOfOptions, maximumOptions });
                 }
-              }
-
-              if (this.questionInteractionType === 'match') {
-                const responseDeclaration = this.questionMetaData.responseDeclaration;
-                this.scoreMapping = _.get(responseDeclaration, 'response1.mapping');
-                const templateId = this.questionMetaData.templateId;
-                const numberOfOptions = this.questionMetaData?.editorState?.options?.length || 0;
-                const maximumOptions = _.get(this.questionInput, 'config.maximumOptions');
-                this.editorService.optionsLength = numberOfOptions;
-                // converting the options to the format required by the editor
-                const options = _.map(this.questionMetaData?.editorState?.options?.left, (left, index) => ({
-                  left,
-                  right:this.questionMetaData?.editorState?.options?.right?.[index]
-                }));
-                const question = this.questionMetaData?.editorState?.question;
-                const interactions = this.questionMetaData?.interactions;
-                this.editorState = new MtfForm({
-                  question, options, correctMatchPair: _.get(responseDeclaration, 'response1.correctResponse.value')
-                }, { templateId, numberOfOptions, maximumOptions });
+                else if (this.questionInteractionType === 'match') { 
+                  const options = _.map(this.questionMetaData?.editorState?.options?.left, (left, index) => ({
+                    left,
+                    right:this.questionMetaData?.editorState?.options?.right?.[index]
+                  }));
+                  this.editorState = new MtfForm({
+                    question, options, correctMatchPair: _.get(responseDeclaration, 'response1.correctResponse.value')
+                  }, { templateId, numberOfOptions, maximumOptions });
+                }
                 this.editorState.solutions = this.questionMetaData?.editorState?.solutions;
-                this.editorState.interactions = interactions;
                 if (_.has(this.questionMetaData, 'responseDeclaration')) {
                   this.editorState.responseDeclaration = _.get(this.questionMetaData, 'responseDeclaration');
                 }
