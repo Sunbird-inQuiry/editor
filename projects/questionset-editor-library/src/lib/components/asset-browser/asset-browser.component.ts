@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import * as _ from 'lodash-es';
-import { catchError, map } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { throwError, Observable } from 'rxjs';
 import { EditorService } from '../../services/editor/editor.service';
 import { QuestionService } from '../../services/question/question.service';
@@ -214,10 +214,6 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
         return throwError(this.editorService.apiErrorHandling(err, errInfo));
       })).subscribe((response) => {
         const signedURL = response.result.pre_signed_url;
-        let blobConfig = {
-          processData: false,
-          contentType: 'Asset'
-        };
         this.uploadToBlob(signedURL, this.imageFile).subscribe(() => {
           const fileURL = signedURL.split('?')[0];
           const data = new FormData();
