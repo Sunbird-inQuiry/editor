@@ -3016,6 +3016,7 @@ export const mockTreeService = {
 export const mockEditorCursor = {
   setQuestionMap: () => {},
   clearQuestionMap: () => {},
+  removeQuestionMap: () => {}
 };
 
 export const childMetaData = {

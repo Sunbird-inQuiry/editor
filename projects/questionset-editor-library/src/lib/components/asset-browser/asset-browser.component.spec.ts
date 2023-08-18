@@ -10,6 +10,7 @@ import { EditorService } from '../../services/editor/editor.service';
 import { of, throwError } from 'rxjs';
 import * as _ from 'lodash-es';
 
+
 const mockEditorService = {
   editorConfig: {
     config: {
@@ -28,9 +29,6 @@ const mockEditorService = {
       },
       channel: 'sunbird'
     }
-  },
-  appendCloudStorageHeaders: (config) => {
-    return {...config, headers: { 'x-ms-blob-type': 'BlockBlob' }};
   }
 };
 describe('AssetBrowserComponent', () => {
@@ -121,48 +119,50 @@ describe('AssetBrowserComponent', () => {
     spyOn(component.allImages, 'push');
     expect(component.assetsCount).toEqual(1);
   });
+
   it('#resetFormData() should reset the form data', () => {
     component.resetFormData();
     expect(component.imageUploadLoader).toEqual(false);
     expect(component.imageFormValid).toEqual(false);
     expect(component.formConfig).toBeTruthy();
   })
+
   it('#uploadAndUseImage should upload image on API success', async () => {
-    const createMediaAssetResponse = mockData.serverResponse;
+    const createMediaAssetResponse = {...mockData.serverResponse};
     createMediaAssetResponse.result = {
       node_id: 'do_123'
     }
-    const preSignedResponse = mockData.serverResponse;
+    const preSignedResponse = {...mockData.serverResponse};
     preSignedResponse.result = {
       node_id: 'do_234',
-      pre_signed_url: '/test'
+      pre_signed_url: 'https://test.blob.core.windows.net/sunbird-content-test/content/assets/do_2138637821867458561248/ggd.png?sv=2017-04-17&se=2023-08-19T01%3A57%3A04Z&sr=b&sp=w&sig=c1jWuT%2BbM0Ex%2BMAs2xWr%2Bw0l7z3TQWqOF/ouMvWMnqo%3D'
     }
     let questionService: QuestionService = TestBed.inject(QuestionService);
     let modal = true;
     spyOn(questionService, 'createMediaAsset').and.returnValue(of(createMediaAssetResponse));
     spyOn(questionService, 'generatePreSignedUrl').and.returnValue(of(preSignedResponse));
+    component.imageFile =  new File(['mock content'], 'test.png', { type: 'image/png' });
     const editorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'appendCloudStorageHeaders').and.callThrough();
     spyOn(component, 'addImageInEditor').and.callThrough();
     spyOn(component, 'dismissPops').and.callThrough();
     component.uploadAndUseImage(modal);
     expect(questionService.createMediaAsset).toHaveBeenCalled();
-    expect(editorService.appendCloudStorageHeaders).toHaveBeenCalled();
     expect(component.loading).toEqual(true);
     expect(component.isClosable).toEqual(false);
     expect(component.imageFormValid).toEqual(false);
   });
-  xit('#uploadAndUseImage should upload image and call upload to blob', async () => {
-    const createMediaAssetResponse = mockData.serverResponse;
+
+  it('#uploadAndUseImage should upload image and call upload to blob', async () => {
+    const createMediaAssetResponse = {...mockData.serverResponse};
     createMediaAssetResponse.result = {
       node_id: 'do_123'
     }
-    const preSignedResponse = mockData.serverResponse;
+    const preSignedResponse = {...mockData.serverResponse};
     preSignedResponse.result = {
       node_id: 'do_234',
-      pre_signed_url: '/test?'
+      pre_signed_url: 'https://test.blob.core.windows.net/sunbird-content-test/content/assets/do_2138637821867458561248/ggd.png?sv=2017-04-17&se=2023-08-19T01%3A57%3A04Z&sr=b&sp=w&sig=c1jWuT%2BbM0Ex%2BMAs2xWr%2Bw0l7z3TQWqOF/ouMvWMnqo%3D'
     }
-    const uploadMediaResponse = mockData.serverResponse;
+    const uploadMediaResponse = {...mockData.serverResponse};
     uploadMediaResponse.result = {
       node_id: 'do_234',
       content_url: '/test'
@@ -170,6 +170,7 @@ describe('AssetBrowserComponent', () => {
     component.showImageUploadModal = false;
     let questionService: QuestionService = TestBed.inject(QuestionService);
     let modal = true;
+    component.imageFile =  new File(['mock content'], 'test.png', { type: 'image/png' });
     spyOn(questionService, 'createMediaAsset').and.returnValue(of(createMediaAssetResponse));
     spyOn(questionService, 'generatePreSignedUrl').and.returnValue(of(preSignedResponse));
     spyOn(component, 'uploadToBlob').and.returnValue(of(true));
@@ -182,6 +183,7 @@ describe('AssetBrowserComponent', () => {
     expect(questionService.generatePreSignedUrl).toHaveBeenCalled();
     expect(component.uploadToBlob).toHaveBeenCalled();
   });
+
   it('#generateAssetCreateRequest() should return asset create request', () => {
     let fileName = 'test';
     let fileType = 'image/png';
@@ -200,10 +202,9 @@ describe('AssetBrowserComponent', () => {
   it('#uploadToBlob() should upload blob on API success', () => {
     let signedURL = '/test';
     let file = new File([], 'filename');
-    let config = {};
     let questionService: QuestionService= TestBed.inject(QuestionService);
     spyOn(questionService.http, 'put').and.returnValue(of({"responseCode": "OK"}));
-    component.uploadToBlob(signedURL, file, config).subscribe(data => {
+    component.uploadToBlob(signedURL, file).subscribe(data => {
       expect(data.responseCode).toEqual('OK');
     })
   })
@@ -219,16 +220,19 @@ describe('AssetBrowserComponent', () => {
     component.dismissImageUploadModal();
     expect(component.showImageUploadModal).toBeFalsy();
   });
+
   it('#lazyloadMyImages() should get my images ', () => {
     spyOn(component, 'getMyImages');
     component.lazyloadMyImages();
     expect(component.getMyImages).toHaveBeenCalledWith(0, undefined, true);
   });
+
   it('#lazyloadMyImages() should get all images', () => {
     spyOn(component, 'getAllImages');
     component.lazyloadAllImages();
     expect(component.getAllImages).toHaveBeenCalledWith(0, undefined, true);
   });
+
   it('#uploadImage() should create asset on API success', () => {
     const file = new File([''], 'filename', { type: 'image' });
     const event = {
@@ -258,6 +262,7 @@ describe('AssetBrowserComponent', () => {
     expect(component.generateAssetCreateRequest).toHaveBeenCalled();
     expect(component.populateFormData).toHaveBeenCalled();
   })
+ 
   it('#dismissImagePicker() should emit modalDismissEmitter  ', () => {
     component.showImagePicker = true;
     spyOn(component, 'getMyImages');
@@ -266,6 +271,7 @@ describe('AssetBrowserComponent', () => {
     expect(component.showImagePicker).toBeFalsy();
     expect(component.modalDismissEmitter.emit).toHaveBeenCalledWith({});
   });
+
   it('#ngOnDestroy() should call modal deny ', () => {
     component['modal'] = {
       deny: jasmine.createSpy('deny')
@@ -273,6 +279,7 @@ describe('AssetBrowserComponent', () => {
     component.ngOnDestroy();
     expect(component['modal'].deny).toHaveBeenCalled();
   });
+
   it('#searchImages() should call  getMyImages for my images', () => {
     spyOn(component, 'getMyImages');
     component.searchImages('clearInput', 'myImages');
@@ -280,6 +287,7 @@ describe('AssetBrowserComponent', () => {
     expect(component.searchMyInput).toEqual('');
     expect(component.getMyImages).toHaveBeenCalledWith(0, '', true);
   });
+
   it('#searchImages() should call allImages for all images ', () => {
     spyOn(component, 'getAllImages');
     component.searchImages('clearInput', 'allImages');
@@ -287,10 +295,12 @@ describe('AssetBrowserComponent', () => {
     expect(component.searchAllInput).toEqual('');
     expect(component.getAllImages).toHaveBeenCalledWith(0, '', true);
   });
+
   it('#ngOnInit() should call ngOnInit and define formConfig', () => {
     component.ngOnInit();
     expect(component.formConfig).toBeDefined();
   });
+  
   it('#onStatusChanges() should call onStatusChanges and imageUploadLoader is false', () => {
     component.imageUploadLoader = false;
     const data = {
@@ -303,6 +313,7 @@ describe('AssetBrowserComponent', () => {
     component.onStatusChanges(data);
     expect(component.imageFormValid).toBeFalsy();
   });
+
   it('#onStatusChanges() should call onStatusChanges and imageUploadLoader is true and is form valid false', () => {
     component.imageUploadLoader = true;
     const data = {
@@ -315,6 +326,7 @@ describe('AssetBrowserComponent', () => {
     component.onStatusChanges(data);
     expect(component.imageFormValid).toBeFalsy();
   });
+
   it('#onStatusChanges() should call onStatusChanges and imageUploadLoader is true and is form valid true', () => {
     component.imageUploadLoader = true;
     const data = {
@@ -327,6 +339,7 @@ describe('AssetBrowserComponent', () => {
     component.onStatusChanges(data);
     expect(component.imageFormValid).toBeTruthy();
   });
+
   it('#valueChanges() should define assestRequestBody ', () => {
     component.imageUploadLoader = true;
     component.assestData = mockData.formData;
@@ -338,6 +351,7 @@ describe('AssetBrowserComponent', () => {
     component.valueChanges(data);
     expect(component.assestData).toBeDefined();
   });
+
   it('#openImageUploadModal() should reset upload image form  ', () => {
     component.openImageUploadModal();
     expect(component.imageUploadLoader).toBeFalsy();
@@ -345,6 +359,7 @@ describe('AssetBrowserComponent', () => {
     expect(component.showImageUploadModal).toBeTruthy();
     expect(component.formData).toBeNull();
   });
+
   it('#dismissPops() should close both pops  ', () => {
     spyOn(component, 'dismissImagePicker');
     const modal = {
@@ -354,6 +369,7 @@ describe('AssetBrowserComponent', () => {
     expect(component.dismissImagePicker).toHaveBeenCalled();
     expect(modal.deny).toHaveBeenCalled();
   });
+
   it('#dismissImagePicker() should emit modalDismissEmitter event  ', () => {
     spyOn(component, 'dismissImagePicker');
     component.dismissImagePicker();

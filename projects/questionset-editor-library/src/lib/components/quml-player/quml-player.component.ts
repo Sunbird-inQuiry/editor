@@ -52,7 +52,6 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit {
         this.qumlPlayerConfig.config.showLegend = false;
       }
     }
-    console.log('qumlPlayerConfig:: ', this.qumlPlayerConfig);
   }
 
   ngAfterViewInit() {

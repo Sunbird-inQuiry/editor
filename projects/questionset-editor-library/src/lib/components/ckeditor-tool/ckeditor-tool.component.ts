@@ -8,6 +8,7 @@ import { EditorService } from '../../services/editor/editor.service';
 import { ToasterService } from '../../services/toaster/toaster.service';
 import { ConfigService } from '../../services/config/config.service';
 import { config } from '../asset-browser/asset-browser.data';
+declare const SunbirdFileUploadLib: any;
 @Component({
   selector: 'lib-ckeditor-tool',
   templateUrl: './ckeditor-tool.component.html',
@@ -619,8 +620,7 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
           processData: false,
           contentType: 'Asset'
         };
-        blobConfig = this.editorService.appendCloudStorageHeaders(blobConfig);
-        this.uploadToBlob(signedURL, this.imageFile, blobConfig).subscribe(() => {
+        this.uploadToBlob(signedURL, this.imageFile).subscribe(() => {
           const fileURL = signedURL.split('?')[0];
           const data = new FormData();
           data.append('fileUrl', fileURL);
@@ -769,8 +769,7 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
             processData: false,
             contentType: 'Asset'
           };
-          blobConfig = this.editorService.appendCloudStorageHeaders(blobConfig);
-          this.uploadToBlob(signedURL, this.videoFile, blobConfig).subscribe(() => {
+          this.uploadToBlob(signedURL, this.videoFile).subscribe(() => {
             const fileURL = signedURL.split('?')[0];
             this.updateContentWithURL(fileURL, this.videoFile.type, contentId, videoModal);
           });
@@ -790,14 +789,23 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
     };
   }
 
-  uploadToBlob(signedURL, file, config): Observable<any> {
-    return this.questionService.http.put(signedURL, file, config).pipe(catchError(err => {
-      const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.018') };
-      this.isClosable = true;
-      this.loading = false;
-      this.imageFormValid = true;
-      return throwError(this.editorService.apiErrorHandling(err, errInfo));
-    }), map(data => data));
+  uploadToBlob(signedURL, file): Observable<any> {
+    const csp = _.get(this.editorService.editorConfig, 'context.cloudStorage.provider', 'azure');
+    return new Observable((observer) => {
+      const uploaderLib = new SunbirdFileUploadLib.FileUploader();
+      uploaderLib.upload({ url: signedURL, file, csp })
+      .on("error", (error) => {
+        const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.018') };
+        this.isClosable = true;
+        this.loading = false;
+        this.imageFormValid = true;
+        observer.error(this.editorService.apiErrorHandling(error, errInfo));
+      }).on("completed", (completed) => {
+        observer.next(completed);
+        observer.complete();
+      })
+    });
+
   }
 
   updateContentWithURL(fileURL, mimeType, contentId, videoModal?) {
