@@ -1534,41 +1534,38 @@ describe("QuestionComponent", () => {
     expect(component.validateChoiceQuestionData).toHaveBeenCalled();
   });
 
-  it('#validateChoiceQuestionData() should validate and set showFormError to true', () => {
+  it('#validateChoiceQuestionData() should validate choice question data when all options are valid and set showFormError to false', () => {
     component.sourcingSettings = sourcingSettingsMock;
-    component.treeNodeData = {data: {metadata: {allowScoring: 'Yes'}}}
-    component.editorState = mockData.mcqQuestionMetaData.result.question;
-    component.editorState.responseDeclaration.response1.mapping = [];
-    editorService = TestBed.inject(EditorService);
-    editorService.editorConfig.renderTaxonomy = false;
     component.editorState.question = "<p> Hi how are you </p>";
+    component.editorState.options = [
+      { body: "<p>1</p>" },
+      { body: "<p>2</p>" },
+    ]
     component.editorState.answer = "";
     component.questionInteractionType = "choice";
-    const toasterService = TestBed.inject(ToasterService);
-    spyOn(toasterService, 'error').and.callFake(() => {});
-    spyOn(component, 'validateChoiceQuestionData').and.callThrough();
-    component.validateChoiceQuestionData();
-    expect(component.showFormError).toBeTruthy();
-  });
-
-  it('#validateChoiceQuestionData() should validate and set showFormError to false when allowScoring is No', () => {
-    component.sourcingSettings = sourcingSettingsMock;
-    component.treeNodeData = {data: {metadata: {allowScoring: 'No'}}}
-    component.editorState = mockData.mcqQuestionMetaData.result.question;
-    editorService = TestBed.inject(EditorService);
-    editorService.editorConfig.renderTaxonomy = false;
-    component.editorState.question = "<p> Hi how are you </p>";
-    component.editorState.answer = "";
-    component.questionInteractionType = "choice";
-    const toasterService = TestBed.inject(ToasterService);
-    spyOn(toasterService, 'error').and.callFake(() => {});
     spyOn(component, 'validateChoiceQuestionData').and.callThrough();
     component.validateChoiceQuestionData();
     expect(component.showFormError).toBeFalsy();
   });
 
-  it("#validateMatchQuestionData() should validate and set showFormError to true", () => {
+  it("#validateMatchQuestionData() should validate match question data when all options have valid left and right values and set showFormError to false", () => {
     component.sourcingSettings = sourcingSettingsMock;
+    component.editorState.question = "<p> Match each object with its correct type </p>";
+    component.editorState.options = [
+      { left: "<p>1</p>", right: "<p>a</p>" },
+      { left: "<p>2</p>", right: "<p>b</p>"},
+    ]
+    component.editorState.correctMatchPair = [
+      { "0": "0" },
+      { "1": "1"},
+    ];
+    component.questionInteractionType = "match";
+    spyOn(component, "validateMatchQuestionData").and.callThrough();
+    component.validateMatchQuestionData();
+    expect(component.showFormError).toBeFalsy();
+  });
+
+  it("#validateData() should validate and set showFormError to true when allowScoring is Yes", () => {
     component.treeNodeData = { data: { metadata: { allowScoring: "Yes" } } };
     component.editorState = mockData.mtfQuestionMetaData.result.question;
     component.editorState.responseDeclaration.response1.mapping = [];
@@ -1579,13 +1576,12 @@ describe("QuestionComponent", () => {
     component.questionInteractionType = "match";
     const toasterService = TestBed.inject(ToasterService);
     spyOn(toasterService, "error").and.callFake(() => {});
-    spyOn(component, "validateMatchQuestionData").and.callThrough();
-    component.validateMatchQuestionData();
+    spyOn(component, "validateData").and.callThrough();
+    component.validateData(component.questionInteractionType);
     expect(component.showFormError).toBeTruthy();
   });
 
-  it("#validateMatchQuestionData() should validate and set showFormError to false when allowScoring is No", () => {
-    component.sourcingSettings = sourcingSettingsMock;
+  it("#validateData() should validate and set showFormError to false when allowScoring is No", () => {
     component.treeNodeData = { data: { metadata: { allowScoring: "No" } } };
     component.editorState = mockData.mtfQuestionMetaData.result.question;
     editorService = TestBed.inject(EditorService);
@@ -1595,8 +1591,8 @@ describe("QuestionComponent", () => {
     component.questionInteractionType = "match";
     const toasterService = TestBed.inject(ToasterService);
     spyOn(toasterService, "error").and.callFake(() => {});
-    spyOn(component, "validateMatchQuestionData").and.callThrough();
-    component.validateMatchQuestionData();
+    spyOn(component, "validateData").and.callThrough();
+    component.validateData(component.questionInteractionType);
     expect(component.showFormError).toBeFalsy();
   });
 

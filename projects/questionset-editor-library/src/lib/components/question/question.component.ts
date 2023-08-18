@@ -597,17 +597,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   validateChoiceQuestionData() {
-    const data = _.get(this.treeNodeData, 'data.metadata');
-    if (_.get(this.editorState, 'interactionTypes[0]') === 'choice' &&
-      _.isEmpty(this.editorState?.responseDeclaration?.response1?.mapping) &&
-      !_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy) &&
-      _.get(data,'allowScoring') === 'Yes') {
-      this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
-      this.showFormError = true;
-      return;
-    } else {
-      this.showFormError = false;
-    }
+    this.validateData('choice');
     const optionValid = _.find(this.editorState.options, option =>
       (option.body === undefined || option.body === '' || option.length > this.setCharacterLimit));
     if (optionValid || (_.isUndefined(this.editorState.answer) && this.sourcingSettings?.enforceCorrectAnswer)) {
@@ -619,27 +609,18 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   validateMatchQuestionData() {
-    const data = _.get(this.treeNodeData, 'data.metadata');
-      if (_.get(this.editorState, 'interactionTypes[0]') === 'match' &&
-        _.isEmpty(this.editorState?.responseDeclaration?.response1?.mapping) &&
-        !_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy) &&
-        _.get(data,'allowScoring') === 'Yes') {
-        this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
-        this.showFormError = true;
-        return;
-      } else {
-        this.showFormError = false;
-      }
-      const rightOptionValid = _.find(this.editorState.options, option => (option.right === undefined || option.right === '' || option.right.length > this.setCharacterLimit));
-      const leftOptionValid = _.find(this.editorState.options, option => (option.left === undefined || option.left === '' || option.left.length > this.setCharacterLimit));
-      if (rightOptionValid || leftOptionValid || (_.isUndefined(this.editorState.correctMatchPair) && this.sourcingSettings?.enforceCorrectAnswer)) {
-        this.showFormError = true;
-        return; //NOSONAR
-      } else {
-        this.showFormError = false;
-      }
+    this.validateData('match');
+    const rightOptionValid = _.find(this.editorState.options, option => (option.right === undefined || option.right === '' || option.right.length > this.setCharacterLimit));
+    const leftOptionValid = _.find(this.editorState.options, option => (option.left === undefined || option.left === '' || option.left.length > this.setCharacterLimit));
+    if (rightOptionValid || leftOptionValid || (_.isUndefined(this.editorState.correctMatchPair) && this.sourcingSettings?.enforceCorrectAnswer)) {
+      this.showFormError = true;
+      return; //NOSONAR
+    } else {
+      this.showFormError = false;
+    }
   }
 
+  
   validateSliderQuestionData() {
     const min = _.get(this.sliderDatas, 'validation.range.min');
     const max = _.get(this.sliderDatas, 'validation.range.max');
@@ -651,7 +632,21 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       this.showFormError = false;
     }
   }
-
+  
+  validateData(interactionType) {
+    const data = _.get(this.treeNodeData, 'data.metadata');
+    if (_.get(this.editorState, 'interactionTypes[0]') === interactionType &&
+      _.isEmpty(this.editorState?.responseDeclaration?.response1?.mapping) &&
+      !_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy) &&
+      _.get(data,'allowScoring') === 'Yes') {
+      this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.005'));
+      this.showFormError = true;
+      return; //NOSONAR
+    } else {
+      this.showFormError = false;
+    }
+  }
+  
   redirectToQuestionset() {
     this.showConfirmPopup = false;
     this.treeService.clearTreeCache();
