@@ -243,8 +243,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
                 else if (this.questionInteractionType === 'match') { 
                   const options = _.map(this.questionMetaData?.editorState?.options?.left, (left, index) => ({
-                    left,
-                    right:this.questionMetaData?.editorState?.options?.right?.[index]
+                    left: left.value.body,
+                    right:this.questionMetaData?.editorState?.options?.right?.[index].value.body
                   }));
                   this.editorState = new MtfForm({
                     question, options, correctMatchPair: _.get(responseDeclaration, 'response1.correctResponse.value')
@@ -830,7 +830,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       const { question, templateId } = this.editorState;
       const { left, right } = this.editorState.interactions.response1.options;
       metadata.body = this.getMtfQuestionHtmlBody(question, templateId);
-      metadata.correctMatchPair = this.getMtfAnswerContainerHtml(left, right);
+      metadata['answer'] = metadata['correctMatchPair'];
+      delete metadata['correctMatchPair'];
+      metadata.answer = this.getMtfAnswerContainerHtml(left, right);
     } else if (this.questionInteractionType !== 'default') {
       metadata.responseDeclaration = this.getResponseDeclaration(this.questionInteractionType);
     }
