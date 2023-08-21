@@ -199,11 +199,11 @@ describe('AssetBrowserComponent', () => {
     })
   })
 
-  xit('#uploadToBlob() should upload blob on API success', () => {
+  it('#uploadToBlob() should upload blob on API success', () => {
     let signedURL = '/test';
     let file = new File([], 'filename');
     let questionService: QuestionService= TestBed.inject(QuestionService);
-    spyOn(questionService.http, 'put').and.returnValue(of({"responseCode": "OK"}));
+    spyOn(questionService, 'uploadtoBlob').and.returnValue(of({"responseCode": "OK"}));
     component.uploadToBlob(signedURL, file).subscribe(data => {
       expect(data.responseCode).toEqual('OK');
     })

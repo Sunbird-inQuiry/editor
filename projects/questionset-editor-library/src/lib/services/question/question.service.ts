@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { HttpClient } from '@angular/common/http';
 import { ConfigService } from '../config/config.service';
 import { EditorService } from '../editor/editor.service';
+declare const SunbirdFileUploadLib: any;
 @Injectable({
   providedIn: 'root'
 })
@@ -135,6 +136,19 @@ export class QuestionService {
       }
     };
     return this.publicDataService.post(reqParam);
+  }
+
+  uploadtoBlob(signedURL, file, csp) {
+    return new Observable((observer) => {
+      const uploaderLib = new SunbirdFileUploadLib.FileUploader();
+      uploaderLib.upload({ url: signedURL, file, csp })
+      .on("error", (error) => {
+        observer.error(error);
+      }).on("completed", (completed) => {
+        observer.next(completed);
+        observer.complete();
+      })
+    });
   }
 
   getVideo(videoId) {

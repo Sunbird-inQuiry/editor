@@ -1,12 +1,11 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import * as _ from 'lodash-es';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { throwError, Observable } from 'rxjs';
 import { EditorService } from '../../services/editor/editor.service';
 import { QuestionService } from '../../services/question/question.service';
 import {config} from './asset-browser.data';
 import { ConfigService } from '../../services/config/config.service';
-declare const SunbirdFileUploadLib: any;
 @Component({
   selector: 'lib-asset-browser',
   templateUrl: './asset-browser.component.html',
@@ -258,19 +257,12 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
 
   uploadToBlob(signedURL, file): Observable<any> {
     const csp = _.get(this.editorService.editorConfig, 'context.cloudStorage.provider', 'azure');
-    return new Observable((observer) => {
-      const uploaderLib = new SunbirdFileUploadLib.FileUploader();
-      uploaderLib.upload({ url: signedURL, file, csp })
-      .on("error", (error) => {
-        const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.018') };
-        this.isClosable = true;
-        this.loading = false;
-        observer.error(this.editorService.apiErrorHandling(error, errInfo));
-      }).on("completed", (completed) => {
-        observer.next(completed);
-        observer.complete();
-      })
-    });
+    return this.questionService.uploadtoBlob(signedURL, file, csp).pipe(catchError(err => {
+      const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.018') };
+      this.isClosable = true;
+      this.loading = false;
+      return throwError(this.editorService.apiErrorHandling(err, errInfo));
+    }), map(data => data));
   }
 
   dismissImageUploadModal() {

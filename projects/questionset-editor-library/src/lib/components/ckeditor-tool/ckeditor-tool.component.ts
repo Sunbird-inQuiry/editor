@@ -8,7 +8,6 @@ import { EditorService } from '../../services/editor/editor.service';
 import { ToasterService } from '../../services/toaster/toaster.service';
 import { ConfigService } from '../../services/config/config.service';
 import { config } from '../asset-browser/asset-browser.data';
-declare const SunbirdFileUploadLib: any;
 @Component({
   selector: 'lib-ckeditor-tool',
   templateUrl: './ckeditor-tool.component.html',
@@ -783,21 +782,13 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
 
   uploadToBlob(signedURL, file): Observable<any> {
     const csp = _.get(this.editorService.editorConfig, 'context.cloudStorage.provider', 'azure');
-    return new Observable((observer) => {
-      const uploaderLib = new SunbirdFileUploadLib.FileUploader();
-      uploaderLib.upload({ url: signedURL, file, csp })
-      .on("error", (error) => {
-        const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.018') };
-        this.isClosable = true;
-        this.loading = false;
-        this.imageFormValid = true;
-        observer.error(this.editorService.apiErrorHandling(error, errInfo));
-      }).on("completed", (completed) => {
-        observer.next(completed);
-        observer.complete();
-      })
-    });
-
+    return this.questionService.uploadtoBlob(signedURL, file, csp).pipe(catchError(err => {
+      const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.018') };
+      this.isClosable = true;
+      this.loading = false;
+      this.imageFormValid = true;
+      return throwError(this.editorService.apiErrorHandling(err, errInfo));
+    }), map(data => data));
   }
 
   updateContentWithURL(fileURL, mimeType, contentId, videoModal?) {
