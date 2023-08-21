@@ -150,4 +150,43 @@ describe('QuestionService', () => {
         );
       });
 
+      it('should handle upload error', (done) => {
+        const signedURL = 'mockSignedURL';
+        const file = 'mockFile';
+        const csp = 'mockCSP';
+        const expectedError = 'Upload error';
+    
+        // Mock the FileUploader behavior
+        spyOn(SunbirdFileUploadLib.FileUploader.prototype, 'upload').and.callFake(() => {
+          return {
+            on: (eventName, callback) => {
+              if (eventName === 'completed') {
+                callback('mock-completed-response');
+              }
+              return {
+                on: (eventName, callback) => {
+                  if (eventName === 'completed') {
+                    callback('mock-completed-response');
+                  }
+                  return {
+                    on: () => {},
+                  };
+                }
+              }
+            }
+          }
+        });
+    
+        questionService.uploadToBlob(signedURL, file, csp).subscribe(
+          (response) => {
+            expect(response).toBe('mock-completed-response');
+            done();
+          },
+          (error) => {
+            fail('Should not have encountered an error');
+            done();
+          }
+        );
+        
+      });
 });
