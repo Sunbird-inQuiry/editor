@@ -29,7 +29,8 @@ const mockEditorService = {
       },
       channel: 'sunbird'
     }
-  }
+  },
+  apiErrorHandling: () => {},
 };
 describe('AssetBrowserComponent', () => {
   let component: AssetBrowserComponent;
