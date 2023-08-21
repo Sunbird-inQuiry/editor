@@ -114,6 +114,7 @@ export const questionSetEditorConfig = {
     correctionComments: false,
     sourcingResourceStatus: true,
     cloudStorage: { 
+      provider: 'azure',
       presigned_headers: { 
         'x-ms-blob-type': 'BlockBlob' 
       }

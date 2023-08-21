@@ -32,6 +32,7 @@
     "@project-sunbird/common-form-elements-full": "^6.0.3",
     "@project-sunbird/sb-styles": "0.0.9",
     "@project-sunbird/sunbird-quml-player-web-component": "2.1.0",
+    "@project-sunbird/sunbird-file-upload-library": "1.0.2",
     "@project-sunbird/sunbird-resource-library": "6.1.0",
     "@project-sunbird/telemetry-sdk": "0.0.29",
     "@types/jquery": "^3.5.5",
