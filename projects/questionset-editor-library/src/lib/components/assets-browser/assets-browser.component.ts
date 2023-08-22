@@ -212,6 +212,14 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  initializeAssetPicker() {
+    this.showAssetPicker = true;
+  }
+
+  outputEventHandler(event) {
+    console.log(JSON.stringify(event));
+  }
+
   getAcceptType(typeList, type) {
     const acceptTypeList = typeList.split(', ');
     const result = [];
@@ -346,18 +354,22 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
         src,
         baseUrl
       };
-      this.editorInstance.model.change(writer => {
-        const imageElement = writer.createElement('image', {
-          src,
-          alt: assetName,
-          'data-asset-variable': assetId
-        });
-        this.editorInstance.model.insertContent(imageElement, this.editorInstance.model.document.selection);
-      });
+      this.assetBrowserEmitter.emit({type: this.assetType, url: videoModal})
+      // this.editorInstance.model.change(writer => {
+      //   const imageElement = writer.createElement('image', {
+      //     src,
+      //     alt: assetName,
+      //     'data-asset-variable': assetId
+      //   });
+      //   this.editorInstance.model.insertContent(imageElement, this.editorInstance.model.document.selection);
+      // });
       this.showAssetPicker = false;
       this.showAssetUploadModal = false;
     } else {
         const assetData: any = _.cloneDeep(this.selectedAsset);
+        if(this.url!=undefined){
+          assetData.downloadUrl = this.url;
+        }
         assetData.src = this.getMediaOriginURL(assetData.downloadUrl);
         assetData.thumbnail = (assetData.thumbnail) && this.getMediaOriginURL(assetData.thumbnail);
         this.showAssetPicker = false;
