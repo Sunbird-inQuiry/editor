@@ -10,7 +10,7 @@ import { PublicDataService } from '../public-data/public-data.service';
 import { EditorService } from '../../services/editor/editor.service';
 import { editorConfig } from './../../components/editor/editor.component.spec.data';
 import { mockRes } from "./question.service.spec.data";
-
+declare const SunbirdFileUploadLib: any;
 
 describe('QuestionService', () => {
     let questionService: QuestionService;
@@ -123,4 +123,70 @@ describe('QuestionService', () => {
         });
     });
 
+    it('#uploadToBlob should handle error during upload', (done) => {
+        const mockSignedURL = 'mock-signed-url';
+        const mockFile = new File(['mock content'], 'mock.png', { type: 'image/png' });
+        const mockCSP = 'azure';
+    
+        spyOn(SunbirdFileUploadLib.FileUploader.prototype, 'upload')
+          .and.returnValue({
+            on: (eventName, callback) => {
+              if (eventName === 'error') {
+                callback('mock-error');
+              }
+              return this;
+            },
+          });
+    
+        questionService.uploadToBlob(mockSignedURL, mockFile, mockCSP).subscribe(
+          (response) => {
+            fail('Should not have succeeded');
+            done();
+          },
+          (error) => {
+            expect(error).toBe('mock-error');
+            done();
+          }
+        );
+      });
+
+      it('should handle upload error', (done) => {
+        const signedURL = 'mockSignedURL';
+        const file = 'mockFile';
+        const csp = 'mockCSP';
+        const expectedError = 'Upload error';
+    
+        // Mock the FileUploader behavior
+        spyOn(SunbirdFileUploadLib.FileUploader.prototype, 'upload').and.callFake(() => {
+          return {
+            on: (eventName, callback) => {
+              if (eventName === 'completed') {
+                callback('mock-completed-response');
+              }
+              return {
+                on: (eventName, callback) => {
+                  if (eventName === 'completed') {
+                    callback('mock-completed-response');
+                  }
+                  return {
+                    on: () => {},
+                  };
+                }
+              }
+            }
+          }
+        });
+    
+        questionService.uploadToBlob(signedURL, file, csp).subscribe(
+          (response) => {
+            expect(response).toBe('mock-completed-response');
+            done();
+          },
+          (error) => {
+            fail('Should not have encountered an error');
+            done();
+          }
+        );
+        
+      });
 });
