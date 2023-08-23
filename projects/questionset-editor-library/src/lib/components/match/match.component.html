@@ -30,7 +30,7 @@
             <lib-ckeditor-tool
               [setCharacterLimit]="setCharacterLimit" (editorDataOutput)="option.left= $event.body; editorDataHandler($event);"
               [editorDataInput]="option.left" class="ckeditor-tool__option mb-10"
-              [class.mb-5]="showFormError && option.left.length > setCharacterLimit">
+              [class.mb-5]="showFormError && ([undefined, ''].includes(option.left.body) || option.left.length > setCharacterLimit)">
             </lib-ckeditor-tool>
             <label class="ui basic red error label pt-1" *ngIf="option.left.length > setCharacterLimit">
               {{configService.labelConfig?.lbl?.reduceSize}}
@@ -44,7 +44,7 @@
               [setCharacterLimit]="setCharacterLimit"
               (editorDataOutput)="option.right = $event.body; editorDataHandler($event);"
               [editorDataInput]="option.right" class="ckeditor-tool__option mb-10"
-              [class.mb-5]="showFormError && option.righOption.length > setCharacterLimit">
+              [class.mb-5]="showFormError && ([undefined, ''].includes(option.right.body) || option.right.length > setCharacterLimit)">
             </lib-ckeditor-tool>
             <label class="ui basic red error label pt-1" *ngIf="option.right.length > setCharacterLimit">
               {{configService.labelConfig?.lbl?.reduceSize}}
