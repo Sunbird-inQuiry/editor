@@ -48,9 +48,6 @@
     "frameworkRead":"framework/v1/read/",
     "channelRead":"channel/v1/read/",
     "telemetry":"/data/v3/telemetry",
-    "USER": {
-      "SEARCH":"user/v1/search"
-    },
     "ASSET": {
       "READ":"asset/v1/read/",
       "CREATE":"asset/v1/create",

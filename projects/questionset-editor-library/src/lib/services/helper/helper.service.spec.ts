@@ -130,22 +130,6 @@ describe('HelperService', () => {
     expect(result).toEqual('HH:mm:ss');
   });
 
-  it('#getAllUser() should call publicDataService.post()', () => {
-    const publicDataService: PublicDataService = TestBed.inject(PublicDataService);
-    const userSearchBody = {
-      request: {
-        filters: {
-            'organisations.roles': 'CONTENT_CREATOR',
-            rootOrgId: '12345'
-        }
-      }
-    };
-    spyOn(publicDataService, 'post').and.returnValue(of(serverResponse));
-    spyOn(service, 'getAllUser').and.callThrough();
-    service.getAllUser(userSearchBody);
-    expect(publicDataService.post).toHaveBeenCalled();
-  });
-
   it('#addDepthToHierarchy should call', () => {
     spyOn(service, 'addDepthToHierarchy').and.callThrough();
     const data = [

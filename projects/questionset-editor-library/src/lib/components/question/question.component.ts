@@ -397,7 +397,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.showFormError === false && this.questionMetadataFormStatus === true) {
       this.saveQuestion();
     } else {
-      this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.044'));
+      this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.042'));
     }
   }
 
@@ -1164,7 +1164,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       this.showPreview = true;
       this.toolbarConfig.showPreview = true;
     } else {
-      this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.044'));
+      this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.042'));
     }
   }
 

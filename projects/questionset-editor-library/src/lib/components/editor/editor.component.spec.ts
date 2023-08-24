@@ -101,27 +101,29 @@ describe('EditorComponent', () => {
     component.setEditorConfig();
   })
 
-  it('#ngOnInit() should call all methods inside it (for objectType Collection)', () => {
+  it('#ngOnInit() should call all methods inside it (for objectType QuestionSet)', () => {
     const sampleEditorConfig: any = JSON.stringify(editorConfig);
     component.editorConfig = sampleEditorConfig;
-    component.objectType = 'questionSet';
+    component.objectType = 'questionset';
     const editorService = TestBed.inject(EditorService);
     spyOn(editorService, 'initialize').and.callThrough();
     const treeService = TestBed.inject(TreeService);
     spyOn(treeService, 'initialize').and.callThrough();
     const configService = TestBed.inject(ConfigService);
     component.configService = configService;
-    spyOn(component, 'isReviewMode').and.returnValue(true);
+    spyOn(editorService, 'getToolbarConfig').and.callThrough();
+    spyOn(component, 'isReviewMode').and.returnValue(false);
     spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of(hierarchyResponse));
     spyOn(component, 'initializeFrameworkAndChannel').and.callFake(() => {});
-    spyOn(editorService, 'getCategoryDefinition').and.returnValue(of(getCategoryDefinitionResponse));
+    spyOn(editorService, 'getCategoryDefinition').and.returnValue(of(categoryDefinitionData));
+    spyOn(component, 'sethierarchyConfig').and.callFake(() => {});
     const telemetryService = TestBed.inject(EditorTelemetryService);
     spyOn(telemetryService, 'initializeTelemetry').and.callFake(() => { });
     spyOn(telemetryService, 'start').and.callFake(() => { });
-    const libraryPage: EventEmitter<any> = new EventEmitter();
     const questionLibraryPage: EventEmitter<any> = new EventEmitter();
     spyOn(editorService, 'getshowQuestionLibraryPageEmitter').and.callFake(() => {return questionLibraryPage});
     spyOn(component, 'showQuestionLibraryComponentPage').and.callFake(() => {});
+    spyOn(component, 'getFrameworkDetails').and.callFake(() => {})
     component.ngOnInit();
     expect(component.editorConfig).toBeDefined();
     expect(editorService.initialize).toHaveBeenCalledWith(editorConfig);
@@ -130,19 +132,15 @@ describe('EditorComponent', () => {
     expect(treeService.initialize).toHaveBeenCalledWith(editorConfig);
     expect(component.collectionId).toBeDefined();
     expect(component.isReviewMode).toHaveBeenCalled();
-    expect(component.isStatusReviewMode).toBeTruthy();
+    expect(component.isStatusReviewMode).toBeFalsy();
     expect(component.mergeCollectionExternalProperties).toHaveBeenCalled();
     expect(component.toolbarConfig).toBeDefined();
-    expect(component.toolbarConfig.title).toEqual(hierarchyResponse[0].result.content.name);
+    expect(component.toolbarConfig.title).toEqual(hierarchyResponse[0].result.questionset.name);
     expect(component.initializeFrameworkAndChannel).toHaveBeenCalled();
     expect(editorService.getCategoryDefinition).toHaveBeenCalled();
     expect(telemetryService.initializeTelemetry).toHaveBeenCalled();
     expect(telemetryService.telemetryPageId).toEqual('questionset_editor');
     expect(telemetryService.start).toHaveBeenCalled();
-    // expect(editorService.getshowLibraryPageEmitter).toHaveBeenCalled();
-    // expect(component.showLibraryComponentPage).toHaveBeenCalled();
-    // expect(editorService.getshowQuestionLibraryPageEmitter).toHaveBeenCalled();
-    // expect(component.showQuestionLibraryComponentPage).toHaveBeenCalled();
   });
 
   it('#ngOnInit() should call all methods inside it (for objectType Question)', () => {

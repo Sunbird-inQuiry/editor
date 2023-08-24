@@ -22,7 +22,8 @@ describe('EditorService', () => {
   const configStub = {
     urlConFig: (urlConfig as any).default,
     labelConfig: (labelConfig as any).default,
-    categoryConfig: (categoryConfig as any).default
+    categoryConfig: (categoryConfig as any).default,
+    editorConfig: (editorConfig as any).default
   };
   const configServiceData = {
     labelConfig: {
