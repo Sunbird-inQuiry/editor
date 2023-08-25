@@ -354,6 +354,15 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.visibility.addChild = ((node.folder === false) || (nodeLevel >= this.config.maxDepth)) ? false : true;
     // tslint:disable-next-line:max-line-length
     this.visibility.addSibling = ((node.folder === true) && (!node.data.root) && !((node.getLevel() - 1) > this.config.maxDepth)) ? true : false;
+    this.handleCreateAddVisibility(node, nodeLevel);
+    if (_.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true) {
+      this.visibility.addChild = false;
+      this.visibility.addSibling = false;
+    }
+    this.cdr.detectChanges();
+  }
+
+  handleCreateAddVisibility(node, nodeLevel) {
     if (nodeLevel === 0) {
       this.visibility.createNew = _.isEmpty(_.get(this.config, 'children')) || _.get(this.config, 'enableQuestionCreation') === false ? false : true;
       this.visibility.addQuestionFromLibrary = !_.isEmpty(_.get(this.config, 'children')) && _.get(this.config, 'enableAddFromLibrary') === true ? true : false;
@@ -363,12 +372,6 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.visibility.createNew = ((node.folder === false) || _.isEmpty(_.get(hierarchylevelData, 'children')) || _.get(this.config, 'enableQuestionCreation') === false) ? false : true;
       this.visibility.addQuestionFromLibrary = ((node.folder === true) && !_.isEmpty(_.get(hierarchylevelData, 'children')) && _.get(this.config, 'enableAddFromLibrary') === true) ? true : false;
     }
-
-    if (_.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true) {
-      this.visibility.addChild = false;
-      this.visibility.addSibling = false;
-    }
-    this.cdr.detectChanges();
   }
 
   addChild() {

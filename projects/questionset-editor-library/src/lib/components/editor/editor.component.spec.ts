@@ -11,11 +11,11 @@ import { TreeService } from '../../services/tree/tree.service';
 import {
   editorConfig, editorConfig_question, toolbarConfig_question,
   nativeElement, getCategoryDefinitionResponse, hierarchyResponse,
-  categoryDefinition, categoryDefinitionData, csvExport, hirearchyGet,
-  SelectedNodeMockData, outcomeDeclarationData, observationAndRubericsField,
+  categoryDefinition, categoryDefinitionData,
+  SelectedNodeMockData, observationAndRubericsField,
   questionsetRead, questionsetHierarchyRead, nodesModifiedData, treeNodeData,
-  questionSetEditorConfig, mockOutcomeDeclaration, categoryDefinitionPublishCheckList,
-  frameworkData, serverResponse, } from './editor.component.spec.data';
+  questionSetEditorConfig, categoryDefinitionPublishCheckList,
+  frameworkData, serverResponse } from './editor.component.spec.data';
 import { ConfigService } from '../../services/config/config.service';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { treeData } from './../fancy-tree/fancy-tree.component.spec.data';
