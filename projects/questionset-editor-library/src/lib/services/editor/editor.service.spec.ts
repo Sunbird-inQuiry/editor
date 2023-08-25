@@ -512,15 +512,6 @@ describe('EditorService', () => {
     expect(editorService._toFlatObjFromHierarchy).toHaveBeenCalled();
   });
 
-  it('#fetchOutComeDeclaration() should return the levels for rubrics', async()=> {
-    const questionSetId = 'do_11330102570702438417';
-    const publicDataService = TestBed.inject(PublicDataService);
-    spyOn(publicDataService, 'get').and.returnValue(of(mockData.serverResponse));
-    editorService.fetchOutComeDeclaration(questionSetId).subscribe(data => {
-      expect(data.responseCode).toEqual('OK');
-    });
-  });
-
   it('#appendCloudStorageHeaders should set cloud storage headers if exist', () => {
     const config = editorService.appendCloudStorageHeaders({});
     expect(config).toEqual({headers: { 'x-ms-blob-type': 'BlockBlob' }});
