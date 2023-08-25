@@ -7,14 +7,14 @@ export const questionSetEditorConfig = {
       fullName: 'Test User',
       firstName: 'Test',
       lastName: 'User',
-      orgIds: ['01309282781705830427']
+      orgIds: ['0138325860604395527']
     },
-    identifier: 'do_113856505592119296113', //do_1138559490270085121125
+    identifier: 'do_113867262426406912171', //do_113866448761913344127
     authToken: ' ',
     sid: 'iYO2K6dOSdA0rwq7NeT1TDzS-dbqduvV',
     did: '7e85b4967aebd6704ba1f604f20056b6',
     uid: 'bf020396-0d7b-436f-ae9f-869c6780fc45',
-    channel: '01309282781705830427',
+    channel: '0138325860604395527',
     pdata: {
       id: 'dev.dock.portal',
       ver: '2.8.0',

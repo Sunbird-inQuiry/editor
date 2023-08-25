@@ -186,14 +186,14 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   initialize() {
     this.editorService.fetchCollectionHierarchy(this.questionSetId).subscribe((response) => {
-      this.questionSetHierarchy = _.get(response, 'result.questionSet');
+      this.questionSetHierarchy = _.get(response, 'result.questionset');
       const parentId = this.editorService.parentIdentifier ? this.editorService.parentIdentifier : this.questionId;
       //only for observation,survey,observation with rubrics
       if (!_.isUndefined(parentId) && !_.isUndefined(this.editorService.editorConfig.config.renderTaxonomy)) {
         this.getParentQuestionOptions(parentId);
         const sectionData = this.treeService.getNodeById(parentId);
-        const children = _.get(response, 'result.questionSet.children');
-        this.sectionPrimaryCategory = _.get(response, 'result.questionSet.primaryCategory');
+        const children = _.get(response, 'result.questionset.children');
+        this.sectionPrimaryCategory = _.get(response, 'result.questionset.primaryCategory');
         this.selectedSectionId = _.get(sectionData, 'data.metadata.parent');
         this.getBranchingLogic(children);
       }
@@ -836,13 +836,13 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getAnswerHtml(optionLabel) {
-    const answerHtml = '<div class=\'anwser-body\'>{answer}</div>';
+    const answerHtml = '<div class=\'answer-body\'>{answer}</div>';
     const optionHtml = answerHtml.replace('{answer}', optionLabel);
     return optionHtml;
   }
 
   getAnswerWrapperHtml(concatenatedAnswers) {
-    const answerTemplate = '<div class=\'anwser-container\'>{answers}</div>';
+    const answerTemplate = '<div class=\'answer-container\'>{answers}</div>';
     const answer = answerTemplate.replace('{answers}', concatenatedAnswers);
     return answer;
   }

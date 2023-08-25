@@ -338,6 +338,7 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
       data.appIcon = this.appIcon;
     }
     this.toolbarEmitter.emit({ button: 'onFormValueChange', data });
+    delete data.selectedQuestionType;
     this.treeService.updateNode(data);
   }
 
