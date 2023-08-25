@@ -888,6 +888,10 @@ export const categoryDefinitionData = {
           "identifier": "obj-cat:practice-question-set_questionset_all",
           "objectMetadata": {
               "config": {
+                  "frameworkMetadata": {
+                    "orgFWType": ['K-12', 'TPD'],
+                    "targetFWType": ['K-12'],
+                  },
                   "sourcingSettings": {
                       "collection": {
                           "maxDepth": 1,
@@ -4142,4 +4146,29 @@ export const serverResponse = {
     ts: '',
     ver: '',
     headers: {}
+};
+
+export  const categoryDefinitionPublishCheckList = {
+  "result": {
+      "objectCategoryDefinition": {
+          "name": "Practice Question Set",
+          "forms": {
+              "publishchecklist": {
+                  "templateName": "",
+                  "required": [],
+                  "properties": [{
+                    name: 'publish check lists',
+                    fields: [{
+                        "code": "Quality Check",
+                        "name": "Quality Check",
+                        "label": "Quality Check",
+                        "default": "false",
+                        "dataType": "boolean",
+                        "inputType": "checkbox"
+                    }]
+                  }]
+              }
+          }
+      }
+  }
 };

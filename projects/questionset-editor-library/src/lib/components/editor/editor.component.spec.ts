@@ -14,8 +14,8 @@ import {
   categoryDefinition, categoryDefinitionData, csvExport, hirearchyGet,
   SelectedNodeMockData, outcomeDeclarationData, observationAndRubericsField,
   questionsetRead, questionsetHierarchyRead, nodesModifiedData, treeNodeData,
-  questionSetEditorConfig, mockOutcomeDeclaration,
-  frameworkData, serverResponse} from './editor.component.spec.data';
+  questionSetEditorConfig, mockOutcomeDeclaration, categoryDefinitionPublishCheckList,
+  frameworkData, serverResponse, } from './editor.component.spec.data';
 import { ConfigService } from '../../services/config/config.service';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { treeData } from './../fancy-tree/fancy-tree.component.spec.data';
@@ -208,62 +208,200 @@ describe('EditorComponent', () => {
   });
 
   it('Unit test for #getFrameworkDetails()', () => {
-    const treeService = TestBed.inject(TreeService);
-    const frameworkService = TestBed.inject(FrameworkService);
-    const editorService = TestBed.inject(EditorService);
-    component.organisationFramework = 'dummy';
-    spyOn(component, 'getFrameworkDetails').and.callThrough();
-    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => { });
-    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => { });
-    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(serverResponse));
-    spyOn(component, 'setEditorForms').and.callFake(() => { });
+    spyOn(component, 'setPublishCheckList').and.callFake(() => {});
+    component.targetFramework = '';
+    spyOn(component, 'setTargetFrameworkData').and.callFake(() => {});
+    spyOn(component, 'setOrgFrameworkData').and.callFake(()=> {});
     component.getFrameworkDetails(categoryDefinitionData);
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
-    expect(frameworkService.getFrameworkData).toHaveBeenCalled();
-    expect(component.targetFramework).toBeUndefined();
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
+    expect(component.setPublishCheckList).toHaveBeenCalled();
+    expect(component.setTargetFrameworkData).toHaveBeenCalled();
+    expect(component.setOrgFrameworkData).toHaveBeenCalled();
+  });
+
+  it('unit test for #setOrgFrameworkData() having channelFrameworksType same as orgFWType', () => {
+    spyOn(component, 'setOrgFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(questionSetEditorConfig.context.channelData);
+    const frameworkService = TestBed.inject(FrameworkService);
+    frameworkService.frameworkValues = undefined;
+    spyOn(component, 'setEditorForms').and.callFake(() => {});
+    component.setOrgFrameworkData(categoryDefinitionData);
+    expect(frameworkService.frameworkValues).toBeDefined();
     expect(component.setEditorForms).toHaveBeenCalled();
   });
 
-  it('Unit test for #getFrameworkDetails() when primaryCategory is Obs with rubrics api success', () => {
-    const treeService = TestBed.inject(TreeService);
+  it('unit test for #setOrgFrameworkData() having channelFrameworksType not same as orgFWType', () => {
+    spyOn(component, 'setOrgFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    let channelData = {frameworks: ['NIT']}
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(channelData);
     const frameworkService = TestBed.inject(FrameworkService);
-    component.organisationFramework = 'dummy';
-    editorConfig.config.renderTaxonomy = true;
-    component.editorConfig = editorConfig;
-    spyOn(component, 'getFrameworkDetails').and.callThrough();
-    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => { });
-    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => { });
-    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(serverResponse));
-    spyOn(component, 'setEditorForms').and.callFake(() => { });
-    component.getFrameworkDetails(categoryDefinitionData);
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
-    expect(component.targetFramework).toBeUndefined();
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
+    let frameworkResponse = serverResponse;
+    frameworkResponse.result = { Framework: [{
+          name: 'NIT',
+          identifier: 'nit-12',
+          objectType: 'Framework',
+          status: 'Live',
+          type: 'nit'
+      }]
+    }
+    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(frameworkResponse))
+    spyOn(component, 'setEditorForms').and.callFake(() => {});
+    component.setOrgFrameworkData(categoryDefinitionData);
+    expect(component.setEditorForms).toHaveBeenCalled();
   });
 
-  it('Unit test for #getFrameworkDetails() when primaryCategory is Obs with rubrics outcome declaration api fail', () => {
-    const treeService = TestBed.inject(TreeService);
+  it('unit test for #setOrgFrameworkData() when orgFWIdentifiers is set', () => {
+    const categoryDefResponse = {
+      result: {
+        objectCategoryDefinition: {
+          objectMetadata: {
+            schema: {properties: {'framework': {default: 'nit-12'}}}
+          }
+        }
+      }
+    };
+    spyOn(component, 'setOrgFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    let channelData = {frameworks: ['NIT']}
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(channelData);
     const frameworkService = TestBed.inject(FrameworkService);
-    component.organisationFramework = 'dummy';
-    editorConfig.config.renderTaxonomy = true;
-    component.editorConfig = editorConfig;
-    spyOn(component, 'getFrameworkDetails').and.callThrough();
-    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => { });
-    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => { });
-    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(serverResponse));
-    spyOn(component, 'setEditorForms').and.callFake(() => { });
-    component.getFrameworkDetails(categoryDefinitionData);
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
-    expect(component.targetFramework).toBeUndefined();
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
+    let frameworkResponse = serverResponse;
+    frameworkResponse.result = { Framework: [{
+          name: 'NIT',
+          identifier: 'nit-12',
+          objectType: 'Framework',
+          status: 'Live',
+          type: 'nit'
+      }]
+    }
+    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(frameworkResponse))
+    spyOn(component, 'setEditorForms').and.callFake(() => {});
+    component.setOrgFrameworkData(categoryDefResponse);
+    expect(component.setEditorForms).toHaveBeenCalled();
   });
+
+  it('unit test for #setTargetFrameworkData() having channelFrameworksType same as targetFWType', () => {
+    const categoryDefResponse = {
+      result: {
+        objectCategoryDefinition: {
+          objectMetadata: {
+            config: {
+              frameworkMetadata: {
+                targetFWType: ['TPD']
+            }}
+          }
+        }
+      }
+    };
+    spyOn(component, 'setTargetFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    let channelData = questionSetEditorConfig.context.channelData;
+    channelData.frameworks = [{
+      name: 'nit_tpd',
+      relation: 'hasSequenceMember',
+      identifier: 'nit_tpd',
+      description: 'nit_tpd Framework',
+      objectType: 'Framework',
+      status: 'Live',
+      type: 'TPD'
+    }];
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(channelData);
+    const treeService= TestBed.inject(TreeService);
+    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => {});
+    const frameworkService = TestBed.inject(FrameworkService);
+    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => {});
+    component.setTargetFrameworkData(categoryDefResponse);
+    expect(treeService.updateMetaDataProperty).toHaveBeenCalled();
+    expect(frameworkService.getTargetFrameworkCategories).toHaveBeenCalled();
+  });
+
+  it('unit test for #setTargetFrameworkData() having channelFrameworksType not same as targetFWType', () => {
+    const categoryDefResponse = {
+      result: {
+        objectCategoryDefinition: {
+          objectMetadata: {
+            config: {
+              frameworkMetadata: {
+                targetFWType: ['TPD', 'NCERT']
+            }}
+          }
+        }
+      }
+    };
+    spyOn(component, 'setTargetFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    let channelData = questionSetEditorConfig.context.channelData;
+    channelData.frameworks = [{
+      name: 'nit_tpd',
+      relation: 'hasSequenceMember',
+      identifier: 'nit_tpd',
+      description: 'nit_tpd Framework',
+      objectType: 'Framework',
+      status: 'Live',
+      type: 'TPD'
+    }];
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(channelData);
+    const treeService= TestBed.inject(TreeService);
+    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => {});
+    const frameworkService = TestBed.inject(FrameworkService);
+    let frameworkResponse = serverResponse;
+    frameworkResponse.result = { Framework: [{
+      name: 'CBSE',
+      identifier: 'ncert-k12',
+      objectType: 'Framework',
+      status: 'Live',
+      type: 'NCERT'
+      }]
+    }
+    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(frameworkResponse))
+    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => {});
+    component.setTargetFrameworkData(categoryDefResponse);
+    expect(treeService.updateMetaDataProperty).toHaveBeenCalled();
+    expect(frameworkService.getTargetFrameworkCategories).toHaveBeenCalled();
+  });
+
+  it('unit test for #setTargetFrameworkData() when targetFWIdentifiers is set', () => {
+    const categoryDefResponse = {
+      result: {
+        objectCategoryDefinition: {
+          objectMetadata: {
+            schema: {properties: {'targetFWIds': {default: 'nit-12'}}}
+          }
+        }
+      }
+    };
+    spyOn(component, 'setTargetFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    let channelData = {frameworks: ['NIT']}
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(channelData);
+    const treeService= TestBed.inject(TreeService);
+    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => {});
+    const frameworkService = TestBed.inject(FrameworkService);
+    let frameworkResponse = serverResponse;
+    frameworkResponse.result = { Framework: [{
+          name: 'NIT',
+          identifier: 'nit-12',
+          objectType: 'Framework',
+          status: 'Live',
+          type: 'nit'
+      }]
+    }
+    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(frameworkResponse));
+    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => {});
+    spyOn(component, 'setEditorForms').and.callFake(() => {});
+    component.setTargetFrameworkData(categoryDefResponse);
+    expect(treeService.updateMetaDataProperty).toHaveBeenCalled();
+    expect(frameworkService.getTargetFrameworkCategories).toHaveBeenCalled();
+  });
+
+  it('Unit test for #setPublishCheckList()', () => {
+    component.publishchecklist = undefined;
+    spyOn(component, 'setPublishCheckList').and.callThrough();
+    component.setPublishCheckList(categoryDefinitionPublishCheckList);
+    expect(component.publishchecklist).toBeDefined();
+
+  })
 
   it('#setEditorForms() should set variable values for questionset', () => {
     component.objectType = 'questionset';
