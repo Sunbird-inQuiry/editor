@@ -1332,7 +1332,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     _.forEach(this.leafFormConfig, (formFieldCategory) => {
       if (formFieldCategory.code === 'maxScore' && this.questionInteractionType === 'choice') {
         const defaultValue = _.get(this.questionMetaData, 'outcomeDeclaration.maxScore.defaultValue');
-        this.childFormData[formFieldCategory.code] = defaultValue ? defaultValue : this.maxScore;
+        this.childFormData[formFieldCategory.code] = defaultValue || this.maxScore;
       }
       else if (formFieldCategory.code === 'allowMultiSelect' && this.questionInteractionType === 'choice') {
         const defaultValue = _.get(this.questionMetaData, 'responseDeclaration.response1.cardinality')
