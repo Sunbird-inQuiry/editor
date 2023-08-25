@@ -1301,40 +1301,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   populateFormData() {
     this.childFormData = {};
-    _.forEach(this.leafFormConfig, (formFieldCategory) => {
       if (!_.isUndefined(this.questionId)) {
-        if (formFieldCategory.code === 'maxScore' && this.questionInteractionType === 'choice') {
-          this.childFormData[formFieldCategory.code] = _.has(this.questionMetaData, 'outcomeDeclaration.maxScore.defaultValue') ?
-          _.get(this.questionMetaData, 'outcomeDeclaration.maxScore.defaultValue') : this.maxScore;
-        } else if (formFieldCategory.code === 'allowMultiSelect' && this.questionInteractionType === 'choice') {
-          this.childFormData[formFieldCategory.code] = _.get(this.questionMetaData, 'responseDeclaration.response1.cardinality') === 'multiple' ? 'Yes' : 'No';
-        }
-        else if (this.questionMetaData && _.has(this.questionMetaData, formFieldCategory.code)) {
-          formFieldCategory.default = this.questionMetaData[formFieldCategory.code];
-          this.childFormData[formFieldCategory.code] = this.questionMetaData[formFieldCategory.code];
-        }
-        try {
-          const availableAlias = {
-            dateFormat: 'interactions.response1.validation.pattern',
-            autoCapture: 'interactions.response1.autoCapture',
-            markAsNotMandatory: 'interactions.validation.required',
-            numberOnly: 'interactions.response1.type.number',
-            characterLimit: 'interactions.response1.validation.limit.maxLength',
-            remarksLimit: 'remarks.maxLength',
-            evidenceMimeType: 'evidence.mimeType'
-          };
-          if (this.questionMetaData && _.has(availableAlias, formFieldCategory.code)) {
-            let defaultValue = _.get(this.questionMetaData, availableAlias[formFieldCategory.code]);
-            if (formFieldCategory.code === 'markAsNotMandatory') {
-              defaultValue === 'Yes' ? (defaultValue = 'No') : (defaultValue = 'Yes');
-            }
-            formFieldCategory.default = defaultValue;
-            this.childFormData[formFieldCategory.code] = defaultValue;
-          }
-        } catch (error) {
-
-        }
+        this.setExistingQuestionData();
       } else {
+        _.forEach(this.leafFormConfig, (formFieldCategory) => {
         // tslint:disable-next-line:max-line-length
         const questionSetDefaultValue = _.get(this.questionSetHierarchy, formFieldCategory.code) ? _.get(this.questionSetHierarchy, formFieldCategory.code) : '';
         const defaultEditStatus = _.find(this.initialLeafFormConfig, {code: formFieldCategory.code}).editable === true;
@@ -1343,10 +1313,48 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         if (formFieldCategory.code === 'maxScore' && this.questionInteractionType === 'choice') {
           this.childFormData[formFieldCategory.code] = this.maxScore;
         }
-      }
-    });
+      });
+    }
     this.fetchFrameWorkDetails();
     (this.isReadOnlyMode ===true && !_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)) ? this.previewFormData(false) : this.previewFormData(true);
+  }
+
+  setExistingQuestionData() {
+    const availableAlias = {
+      dateFormat: 'interactions.response1.validation.pattern',
+      autoCapture: 'interactions.response1.autoCapture',
+      markAsNotMandatory: 'interactions.validation.required',
+      numberOnly: 'interactions.response1.type.number',
+      characterLimit: 'interactions.response1.validation.limit.maxLength',
+      remarksLimit: 'remarks.maxLength',
+      evidenceMimeType: 'evidence.mimeType'
+    };
+    _.forEach(this.leafFormConfig, (formFieldCategory) => {
+      if (formFieldCategory.code === 'maxScore' && this.questionInteractionType === 'choice') {
+        const defaultValue = _.get(this.questionMetaData, 'outcomeDeclaration.maxScore.defaultValue');
+        this.childFormData[formFieldCategory.code] = defaultValue ? defaultValue : this.maxScore;
+      }
+      else if (formFieldCategory.code === 'allowMultiSelect' && this.questionInteractionType === 'choice') {
+        const defaultValue = _.get(this.questionMetaData, 'responseDeclaration.response1.cardinality')
+        this.childFormData[formFieldCategory.code] =  defaultValue === 'multiple' ? 'Yes' : 'No';
+      }
+      else if (this.questionMetaData && _.has(availableAlias, formFieldCategory.code)) {
+        this.setChildAliasData(availableAlias, formFieldCategory);
+      }
+      else if (this.questionMetaData && _.has(this.questionMetaData, formFieldCategory.code)) {
+        formFieldCategory.default = this.questionMetaData[formFieldCategory.code];
+        this.childFormData[formFieldCategory.code] = this.questionMetaData[formFieldCategory.code];
+      }
+    });
+  }
+
+  setChildAliasData(availableAlias, formFieldCategory) {
+    let defaultValue = _.get(this.questionMetaData, availableAlias[formFieldCategory.code]);
+        if (formFieldCategory.code === 'markAsNotMandatory') {
+          defaultValue === 'Yes' ? (defaultValue = 'No') : (defaultValue = 'Yes');
+        }
+        formFieldCategory.default = defaultValue;
+        this.childFormData[formFieldCategory.code] = defaultValue;
   }
 
   subMenuChange({ index, value }) {
