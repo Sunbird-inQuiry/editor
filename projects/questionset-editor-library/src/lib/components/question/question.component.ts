@@ -1085,7 +1085,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   saveQuestions(requestBody, type) {
     this.showHideSpinnerLoader(true);
-    this.questionService.updateHierarchyQuestionCreate(requestBody).pipe(
+    this.questionService.updateQuestionHierarchy(requestBody).pipe(
       finalize(() => {
         this.showHideSpinnerLoader(false);
       })).subscribe((response: ServerResponse) => {
@@ -1120,7 +1120,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
  saveUpdateQuestions() {
     const requestBody = this.prepareRequestBody();
     this.showHideSpinnerLoader(true);
-    this.questionService.updateHierarchyQuestionUpdate(requestBody).pipe(
+    this.questionService.updateQuestionHierarchy(requestBody).pipe(
       finalize(() => {
         this.showHideSpinnerLoader(false);
       })).subscribe((response: ServerResponse) => {

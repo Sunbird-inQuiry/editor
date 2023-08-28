@@ -166,7 +166,7 @@ describe("QuestionComponent", () => {
   it("#saveQuestions call on click save button", () => {
     spyOn(component, "saveQuestions");
     const metaData = mockData.textQuestionNetaData.result.question;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1080,7 +1080,7 @@ describe("QuestionComponent", () => {
         },
       })
     );
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1201,7 +1201,7 @@ describe("QuestionComponent", () => {
     component.setQuestionTypeValues(
       mockData.mcqQuestionMetaData.result.question
     );
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.returnValue(
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(
       throwError("error")
     );
     component.saveQuestion();
@@ -1218,7 +1218,7 @@ describe("QuestionComponent", () => {
     component.setQuestionTypeValues(
       mockData.mcqQuestionMetaData.result.question
     );
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1244,7 +1244,7 @@ describe("QuestionComponent", () => {
     component.isChildQuestion = true;
     component.condition = "eq";
     component.selectedOptions = 1;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1273,7 +1273,7 @@ describe("QuestionComponent", () => {
     component.subMenus = mockData.subMenus;
     component.questionInteractionType = "choice";
     component.showOptions = false;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.returnValue(
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(
       throwError("error")
     );
     component.createQuestion();
@@ -1286,7 +1286,7 @@ describe("QuestionComponent", () => {
     component.subMenus = mockData.subMenus;
     component.questionInteractionType = "choice";
     component.showOptions = false;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1652,7 +1652,7 @@ describe("QuestionComponent", () => {
 
   it("#saveQuestions call on click save button", () => {
     spyOn(component, "saveQuestions");
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1669,7 +1669,7 @@ describe("QuestionComponent", () => {
   });
 
   it("#saveQuestions call on click save button for update api success", () => {
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1685,7 +1685,7 @@ describe("QuestionComponent", () => {
   });
 
   it("#saveQuestions call on click save button for update api success", () => {
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.returnValue(
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(
       throwError("error")
     );
     component.saveQuestions(
@@ -1803,7 +1803,7 @@ describe("QuestionComponent", () => {
     component.questionInteractionType = "choice";
     component.getQuestionMetadata();
     component.setQuestionTypeValues(metaData);
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.returnValue(
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(
       throwError("error")
     );
     component.saveUpdateQuestions();
@@ -1820,7 +1820,7 @@ describe("QuestionComponent", () => {
     component.questionInteractionType = "choice";
     component.getQuestionMetadata();
     component.setQuestionTypeValues(metaData);
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1881,7 +1881,7 @@ describe("QuestionComponent", () => {
   it("#saveQuestions call on click save button", () => {
     spyOn(component, "saveQuestions");
     const metaData = mockData.textQuestionNetaData.result.question;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1897,7 +1897,7 @@ describe("QuestionComponent", () => {
   it("#saveQuestions call on click save button api fail", () => {
     spyOn(component, "saveQuestions");
     const metaData = mockData.textQuestionNetaData.result.question;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.returnValue(
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(
       throwError("error")
     );
     component.saveQuestions(metaData, "update");
@@ -2067,7 +2067,7 @@ describe("QuestionComponent", () => {
       BranchingLogic,
       component.selectedSectionId
     );
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -2087,7 +2087,7 @@ describe("QuestionComponent", () => {
     component.isChildQuestion=false;
     component.questionId='1245'
     component.showAddSecondaryQuestionCat=true;
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -2108,7 +2108,7 @@ describe("QuestionComponent", () => {
     component.isChildQuestion=false;
     component.questionId='1245'
     component.showAddSecondaryQuestionCat=true;
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.returnValue(throwError('error'))
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(throwError('error'))
    component.saveUpdateQuestions();  
    component.updateQuestion(); 
   });

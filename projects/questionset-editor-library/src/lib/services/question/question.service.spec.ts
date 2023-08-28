@@ -51,18 +51,10 @@ describe('QuestionService', () => {
         });
     });
 
-    it('#updateHierarchyQuestionCreate() it should update hierarchy on question create', () => {
+    it('#updateQuestionHierarchy() it should update hierarchy on question create and update', () => {
         const hierarchyBody = {};
         spyOn(publicDataService, 'patch').and.returnValue(of(mockRes.serverResponse));
-        questionService.updateHierarchyQuestionCreate(hierarchyBody).subscribe(data => {
-            expect(data.responseCode).toEqual('OK');
-        });
-    });
-
-    it('#updateHierarchyQuestionUpdate() it should update hierarchy on question update', () => {
-        const hierarchyBody = {};
-        spyOn(publicDataService, 'patch').and.returnValue(of(mockRes.serverResponse));
-        questionService.updateHierarchyQuestionUpdate(hierarchyBody).subscribe(data => {
+        questionService.updateQuestionHierarchy(hierarchyBody).subscribe(data => {
             expect(data.responseCode).toEqual('OK');
         });
     });

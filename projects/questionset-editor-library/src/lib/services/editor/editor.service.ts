@@ -47,7 +47,7 @@ export class EditorService {
 
   public initialize(config: IEditorConfig) {
     this._editorConfig = config;
-    if (this.configService.editorConfig && this.configService.editorConfig.default) {
+    if (this.configService?.editorConfig && this.configService?.editorConfig?.default) {
       this._editorConfig.config = _.assign(this.configService.editorConfig.default, this._editorConfig.config);
     }
     this._editorMode = _.get(this._editorConfig, 'config.mode').toLowerCase();
@@ -85,7 +85,7 @@ export class EditorService {
   }
 
   private setIsReviewerEditEnable(value: boolean) {
-    return this._isReviewerEditEnable = value;
+    this._isReviewerEditEnable = value;
   }
 
   get isReviewModificationAllowed() {
@@ -93,7 +93,7 @@ export class EditorService {
   }
 
   setIsReviewModificationAllowed(value: boolean) {
-    return this._isReviewModificationAllowed = value;
+    this._isReviewModificationAllowed = value;
   }
 
   get contentPolicyUrl() {
@@ -344,10 +344,8 @@ export class EditorService {
             if (!_.isEmpty(children, 'children')) {
               if (children.children[i].data.objectType === 'QuestionSet') {
                 self.setQuestionIds([children.children[i]]);
-              } else {
-                if (!_.includes(this.questionIds, children.children[i].data.id)) {
-                  this.questionIds.push(children.children[i].data.id);
-                }
+              } else if (!_.includes(this.questionIds, children.children[i].data.id)) {
+                this.questionIds.push(children.children[i].data.id);
               }
             }
           }
@@ -379,12 +377,10 @@ export class EditorService {
       const nodeData = this.treeService.getNodeById(question.identifier);
       if (_.has(nodeData.parent.data.metadata, 'shuffle') && nodeData.parent.data.metadata.shuffle === true) {
         return sum + 1;
+      } else if (question?.responseDeclaration?.response1) {
+        return sum + (question?.outcomeDeclaration?.maxScore?.defaultValue ? _.get(question, 'outcomeDeclaration.maxScore.defaultValue') : 0);
       } else {
-        if (question?.responseDeclaration?.response1) {
-          return sum + (question?.outcomeDeclaration?.maxScore?.defaultValue ? _.get(question, 'outcomeDeclaration.maxScore.defaultValue') : 0);
-        } else {
-          return sum + 0;
-        }
+        return sum + 0;
       }
     }, 0);
   }
@@ -401,7 +397,7 @@ export class EditorService {
 
   getHierarchyObj(data, questionId?, selectUnitId?, parentId?) {
     const instance = this;
-    if (data && data.data) {
+    if (data && data?.data) {
       const relationalMetadata = this.getRelationalMetadataObj(data.children);
       instance.data[data.data.id] = {
         name: data.title,
@@ -434,7 +430,7 @@ export class EditorService {
 
  _toFlatObjFromHierarchy(data) {
     const instance = this;
-    if (data && data.children) {
+    if (data && data?.children) {
       instance.data[data.identifier] = {
         name: data.name,
         children: _.map(data.children, (child) => {
@@ -683,7 +679,7 @@ getDependentNodes(identifier) {
   }
 
   private setQualityFormConfig(value: any){
-    return this._qualityFormConfig = value;
+    this._qualityFormConfig = value;
   }
 
   get isReviewerQualityCheckEnabled(){
@@ -691,7 +687,7 @@ getDependentNodes(identifier) {
     }
   
     private setIsReviewerQualityCheckEnabled(value: boolean){
-      return this._isReviewerQualityCheckEnabled = value;
+      this._isReviewerQualityCheckEnabled = value;
     }
 
   appendCloudStorageHeaders(config) {
