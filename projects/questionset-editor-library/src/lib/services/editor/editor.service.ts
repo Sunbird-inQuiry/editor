@@ -430,7 +430,7 @@ export class EditorService {
 
  _toFlatObjFromHierarchy(data) {
     const instance = this;
-    if (data && data?.children) {
+    if (data?.children) {
       instance.data[data.identifier] = {
         name: data.name,
         children: _.map(data.children, (child) => {
