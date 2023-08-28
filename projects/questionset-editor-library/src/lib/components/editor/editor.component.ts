@@ -783,7 +783,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.selectedNodeData = _.cloneDeep(event.data);
         this.isCurrentNodeFolder = _.get(this.selectedNodeData, 'folder');
         this.isCurrentNodeRoot = _.get(this.selectedNodeData, 'data.root');
-        // TODO: rethink below line code
         this.isQumlPlayer = _.get(this.selectedNodeData, 'data.metadata.mimeType') === 'application/vnd.sunbird.question';
         this.setTemplateList();
         this.changeDetectionRef.detectChanges();

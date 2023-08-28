@@ -397,7 +397,7 @@ export class EditorService {
 
   getHierarchyObj(data, questionId?, selectUnitId?, parentId?) {
     const instance = this;
-    if (data && data?.data) {
+    if (data?.data) {
       const relationalMetadata = this.getRelationalMetadataObj(data.children);
       instance.data[data.data.id] = {
         name: data.title,
@@ -577,28 +577,6 @@ export class EditorService {
       }
     };
     return this.publicDataService.post(reqParam);
-  }
-  downloadBlobUrlFile(config) {
-    try {
-      this.httpClient.get(config.blobUrl, {responseType: 'blob'})
-      .subscribe(blob => {
-        const objectUrl: string = URL.createObjectURL(blob);
-        const a: HTMLAnchorElement = document.createElement('a') as HTMLAnchorElement;
-        a.href = objectUrl;
-        a.download = config.fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(objectUrl);
-        if (config.successMessage) {
-          this.toasterService.success(config.successMessage);
-        }
-      }, (error) => {
-        console.error(_.get(this.configService, 'labelConfig.messages.error.034') + error);
-      });
-    } catch (error) {
-      console.error( _.replace(_.get(this.configService, 'labelConfig.messages.error.033'), '{FILE_TYPE}', config.fileType ) + error);
-    }
   }
 
   getBranchingLogicByFolder(identifier) {

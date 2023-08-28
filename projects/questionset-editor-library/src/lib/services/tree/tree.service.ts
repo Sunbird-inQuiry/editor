@@ -242,7 +242,7 @@ export class TreeService {
       this.treeCache.nodesModified[nodeId].metadata = _.assign(this.treeCache.nodesModified[nodeId].metadata, _.omit(metadata, 'objectType'));
     } else {
       this.treeCache.nodesModified[nodeId] = {
-        root: activeNode && activeNode?.root ? true : false,
+        root: activeNode?.root ? true : false,
         objectType: metadata.objectType,
         metadata: { ..._.omit(metadata, ['objectType']) },
         ...(nodeId.includes('do_') ? { isNew: false } : { isNew: true })

@@ -377,8 +377,6 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
   addChild() {
     this.telemetryService.interact({ edata: this.getTelemetryInteractEdata('add_child') });
     const tree = $(this.tree.nativeElement).fancytree('getTree');
-    const nodeConfig = this.config.hierarchy[tree.getActiveNode().getLevel()];
-    const childrenTypes = _.get(nodeConfig, 'children.Content');
     if ((((tree.getActiveNode().getLevel() - 1) >= this.config.maxDepth))) {
       return this.toasterService.error(_.get(this.configService, 'labelConfig.messages.error.007'));
     }
@@ -505,7 +503,7 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
     let current = buffer.pop();
     let max = 0;
 
-    while (current && current.node) {
+    while (current?.node) {
       // Find all children of this node.
       _.forEach(current.node.children, (child) => {
         buffer.push({ node: child, depth: current.depth + 1 });
