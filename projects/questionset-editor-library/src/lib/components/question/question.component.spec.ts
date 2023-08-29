@@ -637,49 +637,41 @@ describe("QuestionComponent", () => {
     expect(component.toolbarEventListener).toHaveBeenCalledWith(data);
   });
 
-  it("Unit test for #populateFormData question markAsNotMandatory reqired yes", () => {
-    spyOn(component,'populateFormData').and.callThrough();
-    component.childFormData = {};
-    component.isReadOnlyMode=false;
-    component.questionInteractionType="choice";
-    component.questionMetaData=mockData.mcqQuestionMetaData.result.question;
-    component.leafFormConfig = leafFormConfigMock;
-    component.questionId = "do_123";
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
-    spyOn(component,'fetchFrameWorkDetails').and.callFake(()=>{});
-    spyOn(component,'previewFormData').and.callFake(()=>{})
+  it('Unit test for #populateFormData() for existing question', () => {
+    spyOn(component, 'populateFormData').and.callThrough();
+    component.questionId = 'do_12345';
+    spyOn(component, 'setExistingQuestionData').and.callFake(() => {});
+    spyOn(component, 'fetchFrameWorkDetails').and.callFake(() => {});
+    component.isReadOnlyMode = false;
+    spyOn(component, 'previewFormData').and.callFake(() => {});
     component.populateFormData();
+    expect(component.setExistingQuestionData).toHaveBeenCalled();
     expect(component.previewFormData).toHaveBeenCalled();
   });
 
-  it("Unit test for #populateFormData without Question Id", () => {
-    component.childFormData = {};
+  it('Unit test for #populateFormData() for new question', () => {
+    spyOn(component, 'populateFormData').and.callThrough();
     component.questionId = undefined;
-    component.questionInteractionType="choice";
-    component.isReadOnlyMode=false;
     component.leafFormConfig = leafFormConfigMock;
-    component.initialLeafFormConfig = leafFormConfigMock;
-    component.questionFormConfig = leafFormConfigMock;
-    component.questionMetaData=mockData.mcqQuestionMetaData.result.question;
     component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
-    spyOn(component,'fetchFrameWorkDetails').and.callFake(()=>{});
+    component.initialLeafFormConfig = leafFormConfigMock;
+    component.maxScore = 1;
+    spyOn(component, 'setExistingQuestionData').and.callFake(() => {});
+    spyOn(component, 'fetchFrameWorkDetails').and.callFake(() => {});
+    component.isReadOnlyMode = true;
+    spyOn(component, 'previewFormData').and.callFake(() => {});
     component.populateFormData();
-   });
+    expect(component.setExistingQuestionData).not.toHaveBeenCalled();
+    expect(component.previewFormData).toHaveBeenCalled();
+  });
 
-  it("Unit test for #populateFormData readonly mode true ", () => {
-    spyOn(component,'populateFormData').and.callThrough();
-    component.childFormData = {};
-    component.isReadOnlyMode=true;
-    component.questionInteractionType="choice";
-    component.questionMetaData=mockData.mcqQuestionMetaData.result.question;
+  it('Unit test for #setExistingQuestionData()', () => {
+    spyOn(component, 'setExistingQuestionData').and.callThrough();
     component.leafFormConfig = leafFormConfigMock;
-    component.initialLeafFormConfig = leafFormConfigMock;
-    component.questionFormConfig = leafFormConfigMock;
-    component.questionId = "do_123";
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
-    spyOn(component,'previewFormData').and.callFake(()=>{})
-    component.populateFormData();
-    expect(component.previewFormData).toHaveBeenCalled(); 
+    component.questionMetaData = mockData.mcqQuestionMetaData.result.question;
+    component.childFormData = {};
+    spyOn(component, 'setChildAliasData').and.callThrough();
+    component.setExistingQuestionData();
   });
 
   it("should call previewFormData ", () => {
@@ -692,10 +684,12 @@ describe("QuestionComponent", () => {
     expect(component.leafFormConfig).toEqual(mockData.childMetadata.properties);
     expect(component.previewFormData).toHaveBeenCalled();
   });
+
   it("should call valueChanges", () => {
     component.valueChanges(childMetaData);
     expect(component.childFormData).toEqual(childMetaData);
   });
+
   it("should call validateFormFields", () => {
     component.leafFormConfig = mockData.childMetadata;
     component.childFormData = childMetaData;
