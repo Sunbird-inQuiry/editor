@@ -11,7 +11,6 @@ export class CollectionIconComponent implements OnInit {
   @Input() appIconConfig;
   @Output() iconEmitter = new EventEmitter<any>();
   public showImagePicker = false;
-  assetType = 'image'
   constructor(public configService: ConfigService) { }
 
   ngOnInit() {

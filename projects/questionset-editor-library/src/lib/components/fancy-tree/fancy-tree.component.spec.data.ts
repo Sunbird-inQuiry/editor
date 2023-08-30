@@ -558,10 +558,6 @@ export const editorConfig = {
       video: {
         size: "50",
         accepted: "mp4, webm",
-      },
-      audio: {
-        size: "50",
-        accepted: "mp3, wav"
       }
     },
     mode: "edit",

@@ -39,7 +39,7 @@
                   [editorDataInput]="editorState.question"
                   ></lib-ckeditor-tool>
                     <lib-assets-browser
-                    *ngIf="(!isReadOnlyMode && assetType==='audio') || (!isReadOnlyMode && assetType==='video')" [showAssetPicker]="showAssetPicker" 
+                    *ngIf="(assetType==='video' || assetType==='audio') && !isReadOnlyMode" [showAssetPicker]="showAssetPicker" 
                     (editorDataOutput)="editorDataHandler($event, 'question')"
                     [editorDataInput]="editorState.question"
                     (assetDataOutput)="assetDataOutput($event)" [assetShow]="assetShow"
@@ -117,7 +117,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="solution_video" *ngIf="(selectedSolutionType == 'audio' && showSolution) || (selectedSolutionType == 'video' && showSolution)">
+                <div class="solution_video" *ngIf="(selectedSolutionType == 'audio' || selectedSolutionType == 'video') && showSolution">
                   <div class="ckeditor-tool__solution sb-bg-color-white sb-ckeditor relative">
                     <div class="solution-media p-16 d-flex flex-ai-center ckeditor-tool__option p-16">
                       <div class="mcq-checkbox-answer">
@@ -129,7 +129,7 @@
                       </div>
                       <div class="solution-media__video relative position">
                         <div class="overlay-image" [ngStyle]="
-                        audioThumbnail
+                        assetThumbnail
                           ? { background: 'url(' + assetThumbnail + ')' }
                           : { background: 'rgba(0,0,0,0.3)' }
                       ">
@@ -142,33 +142,6 @@
                   </div>
                  </div>
                 </div>
-                <!-- <div class="solution_video" *ngIf="selectedSolutionType == 'video' && showSolution">
-                  <div class="ckeditor-tool__solution sb-bg-color-white sb-ckeditor relative">
-                    <div class="solution-media p-16 d-flex flex-ai-center ckeditor-tool__option p-16">
-                      <div class="mcq-checkbox-answer">
-                        <button class="sb-btn sb-ckeditor-close absolute" (click)="deleteSolution()"
-                          libTelemetryInteract
-                          [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('delete_solution','click','cancel', this.telemetryService.telemetryPageId, {solution_type:'video'})">
-                          <i class="icon close"></i>
-                        </button>
-                      </div>
-                      <div class="solution-media__video relative position">
-                        <div class="overlay-image" [ngStyle]="
-                        assetThumbnail
-                              ? { background: 'url(' + assetThumbnail + ')' }
-                              : { background: 'rgba(0,0,0,0.3)' }
-                          ">
-                          <i class="play circle icon"></i>
-                        </div>
-                      </div>
-                      <div class="solution-media__desc ml-16 sb-color-primary">
-                        {{ assetSolutionName
-                        }} -->
-                        <!-- <i class="icon ellipsis vertical sb-color-black"></i> -->
-                      <!-- </div>
-                    </div>
-                  </div>
-                </div> -->
               </ng-container>
               <ng-template #readOnlySolutionsContainer>
                 <div class="row" *ngIf="editorState.solutions">

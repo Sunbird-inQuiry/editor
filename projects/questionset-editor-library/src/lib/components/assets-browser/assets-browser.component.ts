@@ -16,7 +16,6 @@ import { DomSanitizer } from '@angular/platform-browser';
 })
 export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('editor') public editorRef: ElementRef;
-  @Output() videoDataOutput = new EventEmitter<any>();
   @Output() editorDataOutput = new EventEmitter<any>();
   @Output() assetDataOutput = new EventEmitter<any>();
   @Input() editorDataInput: any;
@@ -24,7 +23,6 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   @Input() assetType;
   @Input() showAssetPicker;
   @Output() assetBrowserEmitter = new EventEmitter<any>();
-  @Output() modalDismissEmitter = new EventEmitter<any>();
   @ViewChild('modal') private modal;
   myAssets = [];
   allAssets = [];
@@ -49,10 +47,8 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   astSize: string;
   astSizeType: string;
   acceptedFileType: string;
-  record: any;
   url: any;
   fileType: any;
-  recording = false;
   public assetData = {};
   public assetFile: any;
   public formData: any;
@@ -151,64 +147,10 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
     };
   }
 
- // Record and Upload 
-  sanitize(url: string) {
-    return this.domSanitizer.bypassSecurityTrustUrl(url);
-  }
-
-  startRecording() {
-    this.recording = true;
-    let mediaConstraints = {
-      video: false,
-      audio: true,
-    };
-    navigator.mediaDevices.getUserMedia(mediaConstraints).then(this.successCallback.bind(this), this.errorCallBack.bind(this));
-  }
-
-  successCallback(stream) {
-    var options = {
-      mimeType : 'audio/wav',
-    };
-    var stereoAudioRecorder = RecordRTC.StereoAudioRecorder;
-    this.record = new stereoAudioRecorder(stream, options);
-    this.record.record();
-  }
-
-  stopRecording() {
-    this.recording = false;
-    this.record.stop(this.processRecording.bind(this));
-    this.assetUploadLoader = true;
-    this.assetFormValid = true;
-  }
-
-  processRecording(blob) {
-    this.url = URL.createObjectURL(blob);
-    // console.log(this.url);
-    const fileName = "recoding.wav";
-    const fileType = blob['type'];
-    this.fileType = fileType;
-    this.assetType = "audio"
-    const reader = new FileReader();
-    this.formData = new FormData();
-    this.errorMsg = '';
-    this.showErrorMsg = false;
-    reader.readAsDataURL(blob);
-    this.formData.append('file', blob);
-    this.assetUploadLoader = true;
-    this.assetFormValid = true;
-    this.assetData = this.generateAssetCreateRequest(fileName, fileType, this.assetType);
-    this.populateFormData(this.assetData);
-    this.assetName = fileName;
-  }
-
-  errorCallBack() {
-    const error = "Unable to play audio in your browser";
-  }  
-
   ngOnChanges() {
     if (this.assetShow) {
       this.showAssetPicker = true;
-      this.selectAsset(undefined);
+      // this.selectAsset(undefined);
     }
   }
 
@@ -232,31 +174,15 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   dismissAssetPicker() {
     this.showAssetPicker = false;
     this.assetShow=false;
-    this.videoDataOutput.emit(false);
     this.showAssetPicker = false;
-    this.modalDismissEmitter.emit({});
     this.assetDataOutput.emit(false);
   }
   
-  selectAsset(data) {
-    if (data) {
-      this.showAddButton = true;
-      this.selectedAssetId = data.identifier;
-      this.selectedAsset = data;
-    } else {
-      this.showAddButton = false;
-      this.selectedAssetId = '';
-      this.selectedAsset = {};
-    }
-  }
   
   getMyAssets(offset, query?, search?) {
   this.assetsCount = 0;
   if (!search) {
     this.searchMyInput = '';
-    if(this.assetType != 'image' ) {
-      this.selectAsset(undefined);
-    }
   }
   if (offset === 0) {
     this.myAssets.length = 0;
@@ -345,27 +271,6 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   }
   
   addAssetInEditor(videoModal?, assetUrl?, assetId?, assetName?) {
-    if (this.assetType == 'image'){
-      const src = this.getMediaOriginURL(assetUrl);
-      const baseUrl = _.get(this.editorService.editorConfig, 'context.host') || document.location.origin;
-      this.mediaobj = {
-        id: assetId,
-        type: 'image',
-        src,
-        baseUrl
-      };
-      this.assetBrowserEmitter.emit({type: this.assetType, url: videoModal})
-      // this.editorInstance.model.change(writer => {
-      //   const imageElement = writer.createElement('image', {
-      //     src,
-      //     alt: assetName,
-      //     'data-asset-variable': assetId
-      //   });
-      //   this.editorInstance.model.insertContent(imageElement, this.editorInstance.model.document.selection);
-      // });
-      this.showAssetPicker = false;
-      this.showAssetUploadModal = false;
-    } else {
         const assetData: any = _.cloneDeep(this.selectedAsset);
         if(this.url!=undefined){
           assetData.downloadUrl = this.url;
@@ -377,7 +282,6 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
         if (videoModal) {
           videoModal.deny();
       }
-    } 
   }
   
   getMediaOriginURL(src) {
@@ -543,32 +447,6 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
           blobConfig = this.editorService.appendCloudStorageHeaders(blobConfig);
           this.uploadToBlob(signedURL, this.assetFile, blobConfig).subscribe(() => {
             const fileURL = signedURL.split('?')[0];
-           if (this.assetType ==='image') {
-              const data = new FormData();
-              data.append('fileUrl', fileURL);
-              data.append('mimeType', _.get(this.assetFile, 'type'));
-              const config1 = {
-                enctype: 'multipart/form-data',
-                processData: false,
-                contentType: false,
-                cache: false
-              };
-              const uploadMediaConfig = {
-                data,
-                param: config1
-              };
-              this.questionService.uploadMedia(uploadMediaConfig, contentId).pipe(catchError(err => {
-                const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.019') };
-                this.isClosable = true;
-                this.loading = false;
-                this.assetFormValid = true;
-                return throwError(this.editorService.apiErrorHandling(err, errInfo));              
-              })).subscribe((res) => {
-                this.addAssetInEditor(res.result.content_url, res.result.node_id);
-                this.showAssetUploadModal = false;
-                this.dismissPops(modal);
-              })   
-            } else {
               let fileType;
               if (this.assetFile!==undefined) {
                 fileType = this.assetFile.type;
@@ -576,7 +454,6 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
                 fileType = this.fileType;
               }
               this.updateContentWithURL(fileURL, fileType, contentId, modal);
-            }
           })
         })
       })
