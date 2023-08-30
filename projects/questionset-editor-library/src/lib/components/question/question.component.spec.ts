@@ -745,6 +745,7 @@ describe("QuestionComponent", () => {
 
   it('#getQuestionSolution() should return video solution', () => {
     component.mediaArr = mediaVideoArray;
+    component.selectedSolutionType = "video";
     spyOn(component, 'getQuestionSolution').and.callThrough();
     spyOn(component, 'getMediaById').and.callThrough();
     spyOn(component, 'getAssetSolutionHtml').and.callThrough();
@@ -770,10 +771,11 @@ describe("QuestionComponent", () => {
     expect(mediaobj).toBeDefined();
   });
 
-  it('#getAssetSolutionHtml() should return videoSolutionHtml', () => {
+  it('#getAssetSolutionHtml() should return assetSolutionHtml', () => {
     spyOn(component, 'getAssetSolutionHtml').and.callThrough();
-    const videoSolutionHtml = component.getAssetSolutionHtml(mediaVideoArray[0].thubmnail, mediaVideoArray[0].src, mediaVideoArray[0].id);
-    expect(videoSolutionHtml).toBeDefined();
+    component.selectedSolutionType = "video";
+    const assetSolutionHtml = component.getAssetSolutionHtml(mediaVideoArray[0].thubmnail, mediaVideoArray[0].src, mediaVideoArray[0].id);
+    expect(assetSolutionHtml).toBeDefined();
   });
 
   it("call #getMcqQuestionHtmlBody() to verify questionBody", () => {

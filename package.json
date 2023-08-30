@@ -56,7 +56,6 @@
     "ngx-bootstrap": "^10.0.0",
     "ngx-chips": "^2.2.2",
     "ngx-infinite-scroll": "^14.0.0",
-    "recorder-js": "^1.0.7",
     "rxjs": "~6.6.3",
     "svg2img": "^0.6.1",
     "tslib": "^2.0.0",

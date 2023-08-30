@@ -5,10 +5,8 @@ import { throwError, Observable } from 'rxjs';
 import { EditorService } from '../../services/editor/editor.service';
 import { ConfigService } from '../../services/config/config.service';
 import { QuestionService } from '../../services/question/question.service';
-import { config } from 'projects/questionset-editor-library/src/lib/components/asset-browser/asset-browser.data';
+import { config } from '../asset-browser/asset-browser.data';
 import { ToasterService } from '../../services/toaster/toaster.service';
-import * as RecordRTC from 'recordrtc';
-import { DomSanitizer } from '@angular/platform-browser';
 @Component({
   selector: 'lib-assets-browser',
   templateUrl: './assets-browser.component.html',
@@ -22,7 +20,6 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   @Input() assetShow;
   @Input() assetType;
   @Input() showAssetPicker;
-  @Output() assetBrowserEmitter = new EventEmitter<any>();
   @ViewChild('modal') private modal;
   myAssets = [];
   allAssets = [];
@@ -66,7 +63,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   public searchAllInput: any;
   public assetUploadLoader = false;
   constructor(private editorService: EditorService, public configService: ConfigService,
-                private questionService: QuestionService, public toasterService: ToasterService, private domSanitizer: DomSanitizer) { }
+                private questionService: QuestionService, public toasterService: ToasterService) { }
   
   ngOnInit() {
     this.assetProxyUrl = _.get(this.editorService.editorConfig, 'config.assetProxyUrl') || _.get(this.configService.urlConFig, 'URLS.assetProxyUrl');

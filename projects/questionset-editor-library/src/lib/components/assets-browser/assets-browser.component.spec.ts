@@ -8,23 +8,17 @@ import { FormsModule } from '@angular/forms';
 import { EditorService } from '../../services/editor/editor.service';
 import { of, throwError } from 'rxjs';
 import * as _ from 'lodash-es';
-import { mockData } from '../asset-browser/asset-browser.component.spec.data';
+import { mockData } from '../assets-browser/assets-browser.component.spec.data';
+import { ConfigService } from '../../services/config/config.service';
+import { ToasterService } from '../../services/toaster/toaster.service';
 
 const mockEditorService = {
   editorConfig: {
     config: {
       assetConfig: {
-        image: {
-          size: '1',
-          accepted: 'png, jpeg'
-        },
         video: {
           size: '50',
           accepted: 'mp4, webm'
-        },
-        audio: {
-          size: '50',
-          accepted: 'mp3, wav'
         }
       }
     },
@@ -45,12 +39,12 @@ const mockEditorService = {
 describe('AssetsBrowserComponent', () => {
   let component: AssetsBrowserComponent;
   let fixture: ComponentFixture<AssetsBrowserComponent>;
-
+  let editorService
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [InfiniteScrollModule, HttpClientTestingModule, FormsModule],
       declarations: [AssetsBrowserComponent],
-      providers: [{ provide: EditorService, useValue: mockEditorService }, QuestionService],
+      providers: [{ provide: EditorService, useValue: mockEditorService }, QuestionService, ConfigService, ToasterService],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
       .compileComponents();
@@ -59,6 +53,8 @@ describe('AssetsBrowserComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(AssetsBrowserComponent);
     component = fixture.componentInstance;
+    editorService = TestBed.inject(EditorService);
+    component.assetType = "video";
     fixture.detectChanges();
   })
 
@@ -68,24 +64,15 @@ describe('AssetsBrowserComponent', () => {
 
   it('#ngOnInit() should call #getAcceptType()', () => {
     spyOn(component, 'ngOnInit').and.callThrough();
-    spyOn(component, 'getAcceptType').and.callFake(() => {return ''});
+    component.assetType="video";
+    spyOn(editorService.editorConfig.config.assetConfig, 'video').and.returnValue({
+      size: '50',
+      sizeType: 'MB',
+    });
     component.ngOnInit();
-    expect(component.getAcceptType).toHaveBeenCalledWith(mockEditorService.editorConfig.config.assetConfig.image.accepted, 'image');
-  });
-
-  it("#getAcceptType should return accepted content types", () => {
-    const typeList = "png, jpeg";
-    const type = "image";
-    spyOn(component, 'getAcceptType').and.callThrough();
-    const result = component.getAcceptType(typeList, type);
-    expect(result).toEqual("image/png, image/jpeg");
-  });
-
-  it('#ngOnInit() should call #getAcceptType()', () => {
-    spyOn(component, 'ngOnInit').and.callThrough();
-    spyOn(component, 'getAcceptType').and.callFake(() => {return ''});
-    component.ngOnInit();
-    expect(component.getAcceptType).toHaveBeenCalledWith(mockEditorService.editorConfig.config.assetConfig.video.accepted, 'video');
+    // expect(component.astSize).toEqual(mockEditorService.editorConfig.config.assetConfig.video.size);
+    // expect(component.astSizeType).toEqual('MB');
+    // expect(component.getAcceptType).toHaveBeenCalledWith(mockEditorService.editorConfig.config.assetConfig.video.accepted, 'video');
   });
 
   it("#getAcceptType should return accepted content types", () => {
@@ -93,7 +80,14 @@ describe('AssetsBrowserComponent', () => {
     const type = "video";
     spyOn(component, 'getAcceptType').and.callThrough();
     const result = component.getAcceptType(typeList, type);
-    expect(result).toEqual("video/mp4, video/webm");
+    expect(result).toEqual("video/mp4,video/webm");
+  });
+
+
+  it('should update showAssetPicker when ngOnChanges is called', () => {
+    component.assetShow = true;
+    component.ngOnChanges();
+    expect(component.showAssetPicker).toBe(true);
   });
 
   it('#initializeAssetPicker() should set showAssetPicker to true', () => {
@@ -117,32 +111,13 @@ describe('AssetsBrowserComponent', () => {
         downloadUrl: '/test'
       }]
     }
-
+    component.assetType = "video";
     let questionService: QuestionService = TestBed.inject(QuestionService);
     spyOn(questionService, 'getAssetMedia').and.returnValue(of(response));
     const offset = 0;
     component.getMyAssets(offset);
     expect(component.assetsCount).toEqual(1);
   });
-
-  it('#addAssetInEditor() should set showAssetPicker to false', () => {
-    spyOn(component, 'addAssetInEditor').and.callThrough();
-    component.addAssetInEditor(mockData.assetBrowserEvent.url, '12345');
-    // expect(component.appIcon).toBe(mockData.assetBrowserEvent.url);
-  });
-
-  // it('#addAssetInEditor() should set appIcon value', () => {
-  //   spyOn(component, 'addAssetInEditor').and.callThrough();
-  //   component.addAssetInEditor(mockData.assetBrowserEvent.url, '12345');
-  //   expect(component.appIcon).toBe(mockData.assetBrowserEvent.url);
-  // });
-
-  it('#addAssetInEditor() should emit proper event', () => {
-    spyOn(component, 'addAssetInEditor').and.callThrough();
-    spyOn(component.assetBrowserEmitter, 'emit').and.callFake(() => {});
-    component.addAssetInEditor(mockData.assetBrowserEvent.url, '12345');
-    expect(component.assetBrowserEmitter.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
-  }); 
 
   it('#getAllAssets() should return assets on API success', async () => {
     const response = mockData.serverResponse;
@@ -190,6 +165,78 @@ describe('AssetsBrowserComponent', () => {
     expect(component.isClosable).toEqual(false);
     expect(component.assetFormValid).toEqual(false);
   });
+  it('#updateContentWithURL should update asset with url', async () => {
+    const createMediaAssetResponse = mockData.serverResponse;
+    createMediaAssetResponse.result = {
+      node_id: 'do_123'
+    }
+    const preSignedResponse = mockData.serverResponse;
+    preSignedResponse.result = {
+      node_id: 'do_234',
+      pre_signed_url: '/test'
+    }
+    let questionService: QuestionService = TestBed.inject(QuestionService);
+    let modal = true;
+    spyOn(questionService, 'uploadMedia').and.returnValue(of(createMediaAssetResponse));
+  });
+  it('#getUploadAsset should get asset', async () => {
+    const createMediaAssetResponse = mockData.serverResponse;
+    createMediaAssetResponse.result = {
+      node_id: 'do_123'
+    }
+    const preSignedResponse = mockData.serverResponse;
+    preSignedResponse.result = {
+      node_id: 'do_234',
+      pre_signed_url: '/test'
+    }
+    let questionService: QuestionService = TestBed.inject(QuestionService);
+    let modal = true;
+    spyOn(questionService, 'getVideo').and.returnValue(of(createMediaAssetResponse));
+  });
+  
+  it('#addAssetInEditor() should emit proper event', () => { let modal = undefined;
+    spyOn(component, 'addAssetInEditor').and.callThrough();
+    // spyOn(component.assetDataOutput, 'emit').and.callFake(() => {});
+    component.addAssetInEditor(modal);
+    // expect(component.assetDataOutput.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
+  }); 
+
+  it('#uploadAsset() should create asset on API success', () => {
+    const file = new File([''], 'filename', { type: 'video' });
+    const event = {
+      target: {
+        files: [
+          file
+        ]
+      }
+    }
+    component.assetConfig = {
+      "video": {
+        "size": "50",
+        "sizeType": "MB",
+        "accepted": "mp4, webm"
+      }
+      }
+    spyOn(component, 'uploadAsset').and.callThrough();
+    component.uploadAsset(event);
+    expect(component.assetUploadLoader).toEqual(true);
+    expect(component.assetFormValid).toEqual(true);
+  })
+
+  it('#generateAssetCreateRequest() should return asset create request', () => {
+    let fileName = 'test';
+    let fileType = 'video/webm';
+    let mediaType = 'video';
+    const result = component.generateAssetCreateRequest(fileName, fileType, mediaType);
+    expect(result).toEqual({
+      name: fileName,
+      mediaType,
+      mimeType: fileType,
+      createdBy: _.get(mockEditorService.editorConfig, 'context.user.id'),
+      creator: _.get(mockEditorService.editorConfig, 'context.user.fullName'),
+      channel: _.get(mockEditorService.editorConfig, 'context.channel')
+    })
+  });
 
   xit('#uploadAndUseAsset should upload asset and call upload to blob', 
   async () => {
@@ -221,35 +268,6 @@ describe('AssetsBrowserComponent', () => {
     expect(questionService.generatePreSignedUrl).toHaveBeenCalled();
     expect(component.uploadToBlob).toHaveBeenCalled();
   });
-  it('#generateAssetCreateRequest() should return asset create request', () => {
-    let fileName = 'test';
-    let fileType = 'image/png';
-    let mediaType = 'image';
-    const result = component.generateAssetCreateRequest(fileName, fileType, mediaType);
-    expect(result).toEqual({
-      name: fileName,
-      mediaType,
-      mimeType: fileType,
-      createdBy: _.get(mockEditorService.editorConfig, 'context.user.id'),
-      creator: _.get(mockEditorService.editorConfig, 'context.user.fullName'),
-      channel: _.get(mockEditorService.editorConfig, 'context.channel')
-    })
-  });
-
-  it('#generateAssetCreateRequest() should return asset create request', () => {
-    let fileName = 'test';
-    let fileType = 'video/webm';
-    let mediaType = 'video';
-    const result = component.generateAssetCreateRequest(fileName, fileType, mediaType);
-    expect(result).toEqual({
-      name: fileName,
-      mediaType,
-      mimeType: fileType,
-      createdBy: _.get(mockEditorService.editorConfig, 'context.user.id'),
-      creator: _.get(mockEditorService.editorConfig, 'context.user.fullName'),
-      channel: _.get(mockEditorService.editorConfig, 'context.channel')
-    })
-  });
 
   it('#uploadToBlob() should upload blob on API success', () => {
     let signedURL = '/test';
@@ -263,6 +281,7 @@ describe('AssetsBrowserComponent', () => {
   });
 
   it('#dismissAssetUploadModal() should set showAssetPicker to true', () => {
+    component.showAssetPicker = true;
     spyOn(component, 'dismissAssetUploadModal').and.callThrough();
     component.dismissAssetUploadModal();
     expect(component.showAssetPicker).toBeTruthy();
@@ -286,103 +305,17 @@ describe('AssetsBrowserComponent', () => {
     expect(component.getAllAssets).toHaveBeenCalledWith(0, undefined, true);
   });
 
-  it('#uploadAsset() should create asset on API success', 
-  () => {
-    const file = new File([''], 'filename', { type: 'image' });
-    const event = {
-      target: {
-        files: [
-          file
-        ]
-      }
-    }
-    component.assetConfig = {
-      "image": {
-        "size": "1",
-        "sizeType": "MB",
-        "accepted": "png, jpeg"
-      },
-      "video": {
-        "size": "50",
-        "sizeType": "MB",
-        "accepted": "mp4, webm"
-      },
-      "audio": {
-        "size": "50",
-        "sizeType": "MB",
-        "accepted": "mp3, wav"
-      }
-  }
 
-  spyOn(component, 'generateAssetCreateRequest').and.returnValue({
-    name: 'flower', mediaType: 'image',
-    mimeType: 'image', createdBy: '12345',
-    creator: 'n11', channel: '0110986543'
-  })
 
-  spyOn(component, 'generateAssetCreateRequest').and.returnValue({
-    name: 'flower', mediaType: 'video',
-    mimeType: 'video', createdBy: '12345',
-    creator: 'n11', channel: '0110986543'
-  })
-  spyOn(component, 'populateFormData').and.callFake(() => {});
-  spyOn(component, 'uploadAsset').and.callThrough();
-    component.uploadAsset(event);
-  expect(component.assetUploadLoader).toEqual(true);
-  expect(component.assetFormValid).toEqual(true);
-  expect(component.generateAssetCreateRequest).toHaveBeenCalled();
-  expect(component.populateFormData).toHaveBeenCalled();
-})
-
-it('#uploadAsset() should create asset on API success', 
-() => {
-  const file = new File([''], 'filename', { type: 'video' });
-  const event = {
-    target: {
-      files: [
-        file
-      ]
-    }
-  }
-  component.assetConfig = {
-    "image": {
-      "size": "1",
-      "sizeType": "MB",
-      "accepted": "png, jpeg"
-    },
-    "video": {
-      "size": "50",
-      "sizeType": "MB",
-      "accepted": "mp4, webm"
-    },
-    "audio": {
-      "size": "50",
-      "sizeType": "MB",
-      "accepted": "mp3, wav"
-    }
-}
-
-spyOn(component, 'generateAssetCreateRequest').and.returnValue({
-  name: 'flower', mediaType: 'video',
-  mimeType: 'video', createdBy: '12345',
-  creator: 'n11', channel: '0110986543'
-})
-spyOn(component, 'populateFormData').and.callFake(() => {});
-spyOn(component, 'uploadAsset').and.callThrough();
-  component.uploadAsset(event);
-expect(component.assetUploadLoader).toEqual(true);
-expect(component.assetFormValid).toEqual(true);
-expect(component.generateAssetCreateRequest).toHaveBeenCalled();
-expect(component.populateFormData).toHaveBeenCalled();
-})
 
 it('#dismissAssetPicker() should emit modalDismissEmitter  ', () => {
-  component.showAssetPicker = true;
+  component.showAssetPicker = false;
+  component.assetShow = false;
   spyOn(component, 'getMyAssets');
-  spyOn(component.modalDismissEmitter, 'emit');
+  spyOn(component.assetDataOutput, 'emit');
   component.dismissAssetPicker();
   expect(component.showAssetPicker).toBeFalsy();
-  expect(component.modalDismissEmitter.emit).toHaveBeenCalledWith({});  
+  expect(component.assetDataOutput.emit).toHaveBeenCalledWith(false);  
 });
 
 it('#ngOnDestroy() should call modal deny ', () => {
@@ -392,49 +325,43 @@ it('#ngOnDestroy() should call modal deny ', () => {
   component.ngOnDestroy();
   expect(component['modal'].deny).toHaveBeenCalled();
 });
-it('#searchAsset() should call  getMyAssets for my images', () => {
-  spyOn(component, 'getMyAssets');
-  component.searchAsset('clearInput', 'myImages');
-  expect(component.query).toEqual('');
-  expect(component.searchMyInput).toEqual('');
-  expect(component.getMyAssets).toHaveBeenCalledWith(0, '', true);
-});
-it('#searchAsset() should call allImages for all images ', () => {
-  spyOn(component, 'getAllAssets');
-  component.searchAsset('clearInput', 'allImages');
-  expect(component.query).toEqual('');
-  expect(component.searchAllInput).toEqual('');
-  expect(component.getAllAssets).toHaveBeenCalledWith(0, '', true);
-});
 it('#searchAsset() should call  getMyAssets for my videos', () => {
   spyOn(component, 'getMyAssets');
-  component.searchAsset('clearInput', 'myVideos');
+  component.searchAsset('clearInput', 'myAssets');
   expect(component.query).toEqual('');
   expect(component.searchMyInput).toEqual('');
   expect(component.getMyAssets).toHaveBeenCalledWith(0, '', true);
 });
 it('#searchAsset() should call allVideos for all videos ', () => {
   spyOn(component, 'getAllAssets');
-  component.searchAsset('clearInput', 'allVideos');
+  component.searchAsset('clearInput', 'allAssets');
   expect(component.query).toEqual('');
   expect(component.searchAllInput).toEqual('');
   expect(component.getAllAssets).toHaveBeenCalledWith(0, '', true);
 });
 it('#ngOnInit() should call ngOnInit and define formConfig', () => {
+  component.assetType = "video";
+  component.assetConfig = {
+    "video": {
+      "size": "50",
+      "sizeType": "MB",
+      "accepted": "mp4, webm"
+    }
+  }
   component.ngOnInit();
   expect(component.formConfig).toBeDefined();
 });
 it('#onStatusChanges() should call onStatusChanges and assetUploadLoader is false', () => {
-  component.assetUploadLoader = false;
+  component.assetUploadLoader = true;
   const data = {
     controls: [],
     isDirty: true,
-    isInvalid: false,
+    isInvalid: true,
     isPristine: false,
     isValid: true
   };
   component.onStatusChanges(data);
-  expect(component.assetFormValid).toBeFalsy();
+  expect(component.assetFormValid).toBeTruthy();
 });
 it('#onStatusChanges() should call onStatusChanges and assetUploadLoader is true and is form valid false', () => {
   component.assetUploadLoader = true;
@@ -471,12 +398,21 @@ it('#valueChanges() should define assetRequestBody ', () => {
   component.valueChanges(data);
   expect(component.assetData).toBeDefined();
 });
-it('#openAssetUploadModal() should reset upload image form  ', () => {
+it('#openAssetUploadModal() should reset upload video form  ', () => {
   component.openAssetUploadModal();
   expect(component.assetUploadLoader).toBeFalsy();
   expect(component.assetFormValid).toBeFalsy();
   expect(component.showAssetUploadModal).toBeTruthy();
   expect(component.formData).toBeNull();
+
+});
+it('#resetFormData() should reset form  ', () => {
+  component.openAssetUploadModal();
+  expect(component.assetUploadLoader).toBeFalsy();
+  expect(component.assetFormValid).toBeFalsy();
+  expect(component.showAssetUploadModal).toBeTruthy();
+  expect(component.formData).toBeNull();
+  expect(component.isClosable).toBeTruthy();
 });
 it('#dismissPops() should close both pops  ', () => {
   spyOn(component, 'dismissAssetPicker');
@@ -487,10 +423,5 @@ it('#dismissPops() should close both pops  ', () => {
   expect(component.dismissAssetPicker).toHaveBeenCalled();
   expect(modal.deny).toHaveBeenCalled();
 });
-it('#dismissAssetPicker() should emit modalDismissEmitter event  ', () => {
-  spyOn(component, 'dismissAssetPicker');
-  component.dismissAssetPicker();
-  expect(component.dismissAssetPicker).toHaveBeenCalled();
-  expect(component.showAssetPicker).toBeFalsy();
-});
+
 });

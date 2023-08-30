@@ -558,7 +558,7 @@ export const editorConfig = {
       video: {
         size: "50",
         accepted: "mp4, webm",
-      }
+      },
     },
     mode: "edit",
     maxDepth: 2,
