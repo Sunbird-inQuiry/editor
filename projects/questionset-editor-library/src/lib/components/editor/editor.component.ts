@@ -80,8 +80,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   public setChildQuestion: any;
   public unsubscribe$ = new Subject<void>();
   public onComponentDestroy$ = new Subject<any>();
-  public outcomeDeclaration: any;
-  public levelsArray: any;
   constructor(private editorService: EditorService, public treeService: TreeService, private frameworkService: FrameworkService,
               private helperService: HelperService, public telemetryService: EditorTelemetryService, private router: Router,
               private toasterService: ToasterService,
@@ -194,63 +192,19 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getFrameworkDetails(categoryDefinitionData) {
-    let orgFWIdentifiers: any;
-    let targetFWIdentifiers: any;
-    let orgFWType: any;
-    let targetFWType: any;
-    orgFWIdentifiers = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.framework.enum') ||
-      _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.framework.default');
-    if (_.get(this.editorConfig, 'config.renderTaxonomy') === true) {
-      const orgId = _.get(this.editorConfig, 'context.identifier');
-      this.editorService.fetchOutComeDeclaration(orgId).toPromise()
-      .then(data => {
-        if (data?.result) {
-          this.outcomeDeclaration = _.get(data?.result, 'questionset.outcomeDeclaration');
-          this.levelsArray = Object.keys(this.outcomeDeclaration);
-        }
-      });
-    }
-    // tslint:disable-next-line:max-line-length
-    this.publishchecklist = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.forms.publishchecklist.properties') || _.get(categoryDefinitionData, 'result.objectCategoryDefinition.forms.review.properties') || [];
+    this.setPublishCheckList(categoryDefinitionData);
     if (_.isEmpty(this.targetFramework || _.get(this.editorConfig, 'context.targetFWIds'))) {
-      // tslint:disable-next-line:max-line-length
-      targetFWIdentifiers = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.targetFWIds.default');
-      if (_.isEmpty(targetFWIdentifiers)) {
-        // tslint:disable-next-line:max-line-length
-        targetFWType = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.config.frameworkMetadata.targetFWType');
-        const channelFrameworks = _.get(this.helperService.channelInfo, 'frameworks');
-        const channelFrameworksType = _.map(channelFrameworks, 'type');
-        const difference = _.difference(targetFWType, _.uniq(channelFrameworksType));
-
-        if (targetFWType && channelFrameworksType && _.isEmpty(difference)) {
-          this.targetFramework = _.get(_.first(_.filter(channelFrameworks, framework => {
-            return framework.type === _.first(targetFWType);
-          })), 'identifier');
-          this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
-          this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
-        } else if ((targetFWType && channelFrameworksType && !_.isEmpty(difference)) || _.isEmpty(channelFrameworksType)) {
-          this.frameworkService.getFrameworkData(undefined, difference, undefined, 'Yes').subscribe(
-            (targetResponse) => {
-              this.targetFramework = _.get(_.first(_.get(targetResponse, 'result.Framework')), 'identifier');
-              if (!_.isEmpty(this.targetFramework)) {
-                this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
-                this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
-              }
-            }
-          );
-        }
-      } else {
-        this.frameworkService.getFrameworkData(undefined, undefined, targetFWIdentifiers).subscribe(
-          (targetResponse) => {
-            this.targetFramework = _.get(_.first(_.get(targetResponse, 'result.Framework')), 'identifier');
-            if (!_.isEmpty(this.targetFramework)) {
-              this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
-              this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
-            }
-          }
-        );
-      }
+      this.setTargetFrameworkData(categoryDefinitionData);
     }
+    this.setOrgFrameworkData(categoryDefinitionData)
+
+  }
+
+  setOrgFrameworkData(categoryDefinitionData) {
+    let orgFWIdentifiers: any;
+    let orgFWType: any;
+    orgFWIdentifiers = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.framework.enum') ||
+    _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.framework.default');
 
     if (_.isEmpty(orgFWIdentifiers)) {
       let orgFrameworkList = [];
@@ -292,6 +246,50 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       );
     }
+  }
+
+  setTargetFrameworkData(categoryDefinitionData) {
+    let targetFWIdentifiers;
+    let targetFWType;
+    targetFWIdentifiers = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.targetFWIds.default');
+    if (_.isEmpty(targetFWIdentifiers)) {
+      targetFWType = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.config.frameworkMetadata.targetFWType');
+      const channelFrameworks = _.get(this.helperService.channelInfo, 'frameworks');
+      const channelFrameworksType = _.map(channelFrameworks, 'type');
+      const difference = _.difference(targetFWType, _.uniq(channelFrameworksType));
+
+      if (targetFWType && channelFrameworksType && _.isEmpty(difference)) {
+        this.targetFramework = _.get(_.first(_.filter(channelFrameworks, framework => {
+          return framework.type === _.first(targetFWType);
+        })), 'identifier');
+        this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
+        this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
+      } else if ((targetFWType && channelFrameworksType && !_.isEmpty(difference)) || _.isEmpty(channelFrameworksType)) {
+        this.frameworkService.getFrameworkData(undefined, difference, undefined, 'Yes').subscribe(
+          (targetResponse) => {
+            this.targetFramework = _.get(_.first(_.get(targetResponse, 'result.Framework')), 'identifier');
+            if (!_.isEmpty(this.targetFramework)) {
+              this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
+              this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
+            }
+          }
+        );
+      }
+    } else {
+      this.frameworkService.getFrameworkData(undefined, undefined, targetFWIdentifiers).subscribe(
+        (targetResponse) => {
+          this.targetFramework = _.get(_.first(_.get(targetResponse, 'result.Framework')), 'identifier');
+          if (!_.isEmpty(this.targetFramework)) {
+            this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
+            this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
+          }
+        }
+      );
+    }
+  }
+
+  setPublishCheckList(categoryDefinitionData) {
+    this.publishchecklist = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.forms.publishchecklist.properties') || _.get(categoryDefinitionData, 'result.objectCategoryDefinition.forms.review.properties') || [];
   }
 
   setEditorForms(categoryDefinitionData) {
@@ -785,7 +783,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.selectedNodeData = _.cloneDeep(event.data);
         this.isCurrentNodeFolder = _.get(this.selectedNodeData, 'folder');
         this.isCurrentNodeRoot = _.get(this.selectedNodeData, 'data.root');
-        // TODO: rethink below line code
         this.isQumlPlayer = _.get(this.selectedNodeData, 'data.metadata.mimeType') === 'application/vnd.sunbird.question';
         this.setTemplateList();
         this.changeDetectionRef.detectChanges();

@@ -56,20 +56,7 @@ export class QuestionService {
     return this.publicDataService.patch(req);
   }
 
-  updateHierarchyQuestionCreate(hierarchyBody): Observable<ServerResponse> {
-    const requestObj = {
-      data: hierarchyBody
-    };
-    const req = {
-      url: this.configService.urlConFig.URLS[this.editorService.editorConfig.config.objectType].HIERARCHY_UPDATE,
-      data: {
-        request: requestObj
-      }
-    };
-    return this.publicDataService.patch(req);
-  }
-
-  updateHierarchyQuestionUpdate(hierarchyBody): Observable<ServerResponse> {
+  updateQuestionHierarchy(hierarchyBody): Observable<ServerResponse> {
     const requestObj = {
       data: hierarchyBody
     };
