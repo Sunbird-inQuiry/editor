@@ -107,7 +107,7 @@ export class OptionsComponent implements OnInit, OnChanges {
       templateId: this.templateType,
       name: this.questionPrimaryCategory || 'Multiple Choice Question',
       responseDeclaration: this.getResponseDeclaration(editorState),
-      outcomeDeclaration: this.getOutcomeDeclaration(),
+      outcomeDeclaration: this.getOutcomeDeclaration(), 
       interactionTypes: ['choice'],
       interactions: this.getInteractions(editorState.options),
       editorState: {

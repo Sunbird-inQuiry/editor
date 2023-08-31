@@ -11,6 +11,8 @@ import { DataService } from '../data/data.service';
 import { map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { ExportToCsv } from 'export-to-csv';
+import 'jquery.fancytree';
+declare var $: any;
 interface SelectedChildren {
   label?: string;
   primaryCategory?: string;
@@ -395,9 +397,41 @@ export class EditorService {
     this.data = {};
     const data = this.treeService.getFirstChild();
     return {
-      nodesModified: this.treeService.treeCache.nodesModified,
+      nodesModified: this.getUpdatedNodeMetaData(),
       hierarchy: instance.getHierarchyObj(data)
     };
+  }
+
+  getUpdatedNodeMetaData() {
+    const parentNodeId = _.findKey(this.treeService.treeCache.nodesModified,(node)=>{
+      return node.root;
+    });
+    const parentNode = $(this.treeService.treeNativeElement).fancytree('getRootNode').getFirstChild().data;
+    if(parentNode?.objectType === 'QuestionSet' && parentNode?.metadata?.primaryCategory === 'Blueprint Question Set'){
+      _.forEach(this.treeService.treeCache.nodesModified, (node, nodeId)=>{
+        if(!node.root){
+          const {board, medium, gradeLevel, subject, difficultyLevel, selectedQuestionType, requiredQuestionCount} = this.treeService.treeCache.nodesModified[nodeId]?.metadata;
+          this.treeService.treeCache.nodesModified[nodeId].metadata.criterias = [{
+          board:board,
+          medium:medium,
+          gradeLevel:gradeLevel,
+          subject:subject,
+          difficultyLevel:difficultyLevel,
+          selectedQuestionType:selectedQuestionType,
+          requiredQuestionCount:requiredQuestionCount,
+          }]
+        }
+      })    
+    } 
+    _.forEach(this.treeService.treeCache.nodesModified, (node, nodeId)=>{
+      if(!node.root && parentNode?.eval || parentNode?.metadata.eval){
+        this.treeService.treeCache.nodesModified[nodeId].metadata.eval = parentNode.eval || parentNode?.metadata.eval;
+      }
+
+    })
+    this.treeService.treeCache.nodesModified[parentNodeId]?.metadata.hasOwnProperty('mode')? 
+    delete this.treeService.treeCache.nodesModified[parentNodeId]?.metadata?.mode:''
+    return this.treeService.treeCache.nodesModified;
   }
 
   getHierarchyObj(data, questionId?, selectUnitId?, parentId?) {

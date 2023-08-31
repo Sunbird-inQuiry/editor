@@ -240,6 +240,7 @@ export class TreeService {
     if (this.treeCache.nodesModified[nodeId]) {
       // tslint:disable-next-line:max-line-length
       this.treeCache.nodesModified[nodeId].metadata = _.assign(this.treeCache.nodesModified[nodeId].metadata, _.omit(metadata, 'objectType'));
+      this.updateEvaluable(nodeId);
     } else {
       this.treeCache.nodesModified[nodeId] = {
         root: activeNode && activeNode.root ? true : false,
@@ -249,6 +250,34 @@ export class TreeService {
       };
       this.treeCache.nodes.push(nodeId); // To track sequence of modifiation
     }
+  }
+
+  updateEvaluable(nodeId){
+    this.treeCache.nodesModified[nodeId].metadata.eval = this.treeCache.nodesModified[nodeId].metadata.primaryCategory === this.configService.editorConfig.evaluableQuestionSet ? 
+    this.configService.editorConfig.server:this.configService.editorConfig.client;
+      if(!this.treeCache.nodesModified[nodeId].root){
+          this.treeCache.nodesModified[nodeId].metadata.eval = this.getFirstChild().data.primaryCategory === this.configService.editorConfig.evaluableQuestionSet? 
+          this.configService.editorConfig.server:this.configService.editorConfig.client;
+          this.overrideEvaluable(nodeId);
+        } else {
+          if(this.getFirstChild().data?.metadata.mode) {
+            this.treeCache.nodesModified[nodeId].metadata.eval = this.getFirstChild().data.metadata.mode === this.configService.editorConfig.editorModeCheck ? 
+            this.configService.editorConfig.server:this.configService.editorConfig.client;
+          }
+          this.updateFirstChild(this.treeCache.nodesModified[nodeId].metadata.eval)
+      }
+  }
+
+  updateFirstChild(evalMode:any) {
+    $(this.treeNativeElement).fancytree('getRootNode').getFirstChild().data.eval = evalMode;
+  }
+
+  overrideEvaluable(nodeId){
+   const firstNode = this.getFirstChild()
+   if(this.getFirstChild().data.metadata.mode) {
+      this.treeCache.nodesModified[nodeId].metadata.eval = firstNode.data.metadata.mode === this.configService.editorConfig.editorModeCheck ? 
+      this.configService.editorConfig.server:this.configService.editorConfig.client;
+   }
   }
 
   clearTreeCache(node?) {
