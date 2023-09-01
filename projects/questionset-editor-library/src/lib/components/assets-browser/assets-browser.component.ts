@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, Output, Input, EventEmitter, OnChanges, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, Output, Input, EventEmitter, OnChanges, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import * as _ from 'lodash-es';
 import { catchError, map } from 'rxjs/operators';
 import { throwError, Observable } from 'rxjs';
@@ -14,9 +14,7 @@ import { ToasterService } from '../../services/toaster/toaster.service';
 })
 export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('editor') public editorRef: ElementRef;
-  @Output() editorDataOutput = new EventEmitter<any>();
   @Output() assetDataOutput = new EventEmitter<any>();
-  @Input() editorDataInput: any;
   @Input() assetShow;
   @Input() assetType;
   @Input() showAssetPicker;
@@ -147,7 +145,6 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges() {
     if (this.assetShow) {
       this.showAssetPicker = true;
-      // this.selectAsset(undefined);
     }
   }
 
@@ -357,7 +354,8 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       this.showErrorMsg = true;
       this.errorMsg = _.get(this.configService.labelConfig?.chooseFileMsg[this.assetType]);
-    } if (!this.showErrorMsg) {
+    } 
+    if (!this.showErrorMsg) {
       this.assetUploadLoader = true;
       this.assetFormValid = true;
       this.assetData = this.generateAssetCreateRequest(fileName, fileType, this.assetType);
@@ -512,7 +510,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.modal && this.modal.deny) {
+    if (this.modal?.deny) {
       this.modal.deny();
     }
   }
