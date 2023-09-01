@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { EditorService } from '../../services/editor/editor.service';
 import { of, throwError } from 'rxjs';
 import * as _ from 'lodash-es';
-import { mockData } from '../assets-browser/assets-browser.component.spec.data';
+import { mockData } from '../asset-browser/asset-browser.component.spec.data';
 import { ConfigService } from '../../services/config/config.service';
 import { ToasterService } from '../../services/toaster/toaster.service';
 
