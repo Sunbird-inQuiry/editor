@@ -40,8 +40,6 @@
                   ></lib-ckeditor-tool>
                     <lib-assets-browser
                     *ngIf="(assetType==='video' || assetType==='audio') && !isReadOnlyMode" [showAssetPicker]="showAssetPicker" 
-                    (editorDataOutput)="editorDataHandler($event, 'question')"
-                    [editorDataInput]="editorState.question"
                     (assetDataOutput)="assetDataOutput($event)" [assetShow]="assetShow"
                     [assetType]="assetType"
                     ></lib-assets-browser>

@@ -15,7 +15,6 @@ import { ToasterService } from '../../services/toaster/toaster.service';
 export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('editor') public editorRef: ElementRef;
   @Output() assetDataOutput = new EventEmitter<any>();
-  @Input() editorDataInput: any;
   @Input() assetShow;
   @Input() assetType;
   @Input() showAssetPicker;
