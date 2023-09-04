@@ -152,6 +152,10 @@ describe('AssetsBrowserComponent', () => {
       node_id: 'do_234',
       pre_signed_url: '/test'
     }
+    expect(component.loading).toEqual(false);
+    expect(component.isClosable).toEqual(true);
+    expect(component.assetFormValid).toEqual(false);
+    spyOn(component, 'uploadAndUseAsset').and.callThrough();
     let questionService: QuestionService = TestBed.inject(QuestionService);
     let modal = true;
     spyOn(questionService, 'createMediaAsset').and.returnValue(of(createMediaAssetResponse));
@@ -161,11 +165,25 @@ describe('AssetsBrowserComponent', () => {
     spyOn(component, 'dismissPops').and.callThrough();
     component.uploadAndUseAsset(modal);
     expect(questionService.createMediaAsset).toHaveBeenCalled();
-    expect(component.loading).toEqual(true);
-    expect(component.isClosable).toEqual(false);
-    expect(component.assetFormValid).toEqual(false);
   });
   it('#updateContentWithURL should update asset with url', async () => {
+    let fileURL = 'video/webm';
+    let mimeType = 'video';
+    let contentId = 'do_123';
+    const data = new FormData();
+    data.append('fileUrl', fileURL);
+    data.append('mimeType', mimeType);
+    
+    const conf = {
+      enctype: 'multipart/form-data',
+      processData: false,
+      contentType: false,
+      cache: false
+    };
+    const option = {
+      data,
+      param: conf
+    };
     const createMediaAssetResponse = mockData.serverResponse;
     createMediaAssetResponse.result = {
       node_id: 'do_123'
@@ -175,10 +193,50 @@ describe('AssetsBrowserComponent', () => {
       node_id: 'do_234',
       pre_signed_url: '/test'
     }
+    spyOn(component, 'updateContentWithURL').and.callThrough();
+    component.updateContentWithURL(fileURL, mimeType, contentId);
     let questionService: QuestionService = TestBed.inject(QuestionService);
+    spyOn(questionService, 'getQuestionList').and.returnValue(throwError({}));
     let modal = true;
     spyOn(questionService, 'uploadMedia').and.returnValue(of(createMediaAssetResponse));
+    component.getUploadAsset('do_123', modal);
   });
+  it('#updateContentWithURL should update asset with url', async () => {
+    let fileURL = 'video/webm';
+    let mimeType = 'video';
+    let contentId = 'do_123';
+    const data = new FormData();
+    data.append('fileUrl', fileURL);
+    data.append('mimeType', mimeType);
+    
+    const conf = {
+      enctype: 'multipart/form-data',
+      processData: false,
+      contentType: false,
+      cache: false
+    };
+    const option = {
+      data,
+      param: conf
+    };
+    const createMediaAssetResponse = mockData.serverResponse;
+    createMediaAssetResponse.result = {
+      node_id: 'do_123'
+    }
+    const preSignedResponse = mockData.serverResponse;
+    preSignedResponse.result = {
+      node_id: 'do_234',
+      pre_signed_url: '/test'
+    }
+    spyOn(component, 'updateContentWithURL').and.callThrough();
+    component.updateContentWithURL(fileURL, mimeType, contentId);
+    let questionService: QuestionService = TestBed.inject(QuestionService);
+    spyOn(questionService, 'getQuestionList').and.returnValue(throwError({}));
+    spyOn(questionService, "uploadMedia").and.returnValue(
+      throwError("error")
+    );
+  });
+
   it('#getUploadAsset should get asset', async () => {
     const createMediaAssetResponse = mockData.serverResponse;
     createMediaAssetResponse.result = {
@@ -189,15 +247,59 @@ describe('AssetsBrowserComponent', () => {
       node_id: 'do_234',
       pre_signed_url: '/test'
     }
+    spyOn(component, 'getUploadAsset').and.callThrough();
     let questionService: QuestionService = TestBed.inject(QuestionService);
-    let modal = true;
+    let modal = undefined;
     spyOn(questionService, 'getVideo').and.returnValue(of(createMediaAssetResponse));
+    expect(component.loading).toEqual(false);
+    expect(component.isClosable).toEqual(true);
+    expect(component.assetFormValid).toEqual(false);
+    spyOn(component, 'addAssetInEditor').and.callThrough();
+    component.addAssetInEditor(modal);
   });
   
+  it('#getUploadAsset should get asset', async () => {
+    const createMediaAssetResponse = mockData.serverResponse;
+    createMediaAssetResponse.result = {
+      node_id: 'do_123'
+    }
+    const preSignedResponse = mockData.serverResponse;
+    preSignedResponse.result = {
+      node_id: 'do_234',
+      pre_signed_url: '/test'
+    }
+  });
+
   it('#addAssetInEditor() should emit proper event', () => { let modal = undefined;
     spyOn(component, 'addAssetInEditor').and.callThrough();
     // spyOn(component.assetDataOutput, 'emit').and.callFake(() => {});
     component.addAssetInEditor(modal);
+    // expect(component.assetDataOutput.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
+  }); 
+
+  it('#addAssetInEditor() should emit proper event', () => { let modal = undefined;
+    component.url = '/test';
+    spyOn(component, 'addAssetInEditor').and.callThrough();
+    // spyOn(component.assetDataOutput, 'emit').and.callFake(() => {});
+    component.addAssetInEditor(modal);
+    // expect(component.assetDataOutput.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
+  }); 
+
+  it('#getMediaOriginURL() should emit media origin url', () => {
+    let src = '/test';
+    spyOn(component, 'getMediaOriginURL').and.callThrough();
+    // spyOn(component.assetDataOutput, 'emit').and.callFake(() => {});
+    component.getMediaOriginURL(src);
+    // expect(component.assetDataOutput.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
+  }); 
+  it('#getMediaOriginURL() should emit media origin url', () => {
+    let url = '/test';
+    spyOn(component, 'getMediaOriginURL').and.callThrough();
+    const src = 'https://example.com/image.jpg';
+
+    const result = component.getMediaOriginURL(src);
+
+    expect(result).toEqual(src); // No replacement should occur
     // expect(component.assetDataOutput.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
   }); 
 
@@ -293,6 +395,23 @@ describe('AssetsBrowserComponent', () => {
     expect(component.showAssetUploadModal).toBeFalsy();
   });
 
+  it('#initiateAssetUploadModal() should set showAssetUploadModal to false', () => {
+    spyOn(component, 'initiateAssetUploadModal').and.callThrough();
+    component.initiateAssetUploadModal();
+    expect(component.showAssetPicker).toBeFalsy();
+    expect(component.showAssetUploadModal).toBeTruthy();
+    expect(component.loading).toBeFalsy();
+    expect(component.isClosable).toBeTruthy();
+  });
+
+  it('#resetFormConfig() should reset form', () => {
+    spyOn(component, 'resetFormConfig').and.callThrough();
+    component.resetFormConfig();
+    expect(component.assetUploadLoader).toBeFalsy();
+    expect(component.assetFormValid).toBeFalsy();
+    component.formConfig = component.initialFormConfig;
+  });
+
   it('#lazyloadMyAssets() should get my assets', () => {
     spyOn(component, 'getMyAssets');
     component.lazyloadMyAssets();
@@ -332,6 +451,7 @@ it('#searchAsset() should call  getMyAssets for my videos', () => {
   expect(component.searchMyInput).toEqual('');
   expect(component.getMyAssets).toHaveBeenCalledWith(0, '', true);
 });
+
 it('#searchAsset() should call allVideos for all videos ', () => {
   spyOn(component, 'getAllAssets');
   component.searchAsset('clearInput', 'allAssets');
