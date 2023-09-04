@@ -324,12 +324,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
     this.loading = false;
     this.isClosable = true;
   }
-  
-  public isEditorReadOnly(state) {
-    this.editorInstance.isReadOnly = state;
-    this.isAssetBrowserReadOnly = state;
-  }
-  
+    
   uploadAsset(event) {
     this.assetFile = event.target.files[0];
     this.assetName = this.assetFile.name;

@@ -30,7 +30,7 @@ const mockEditorService = {
       channel: 'sunbird'
     }
   },
-
+  apiErrorHandling: () => {},
   appendCloudStorageHeaders: (config) => {
     return {...config, headers: {'x-ms-blob-type': 'BlockBlob'}};
   }
@@ -119,6 +119,24 @@ describe('AssetsBrowserComponent', () => {
     expect(component.assetsCount).toEqual(1);
   });
 
+  it('#getMyAssets() should return assets on API success',
+  async () => {
+    const response = mockData.serverResponse;
+    response.result = {
+      count: 1,
+      content: [{
+        downloadUrl: '/test'
+      }]
+    }
+    component.assetType = "video";
+    let questionService: QuestionService = TestBed.inject(QuestionService);
+    spyOn(questionService, 'getAssetMedia').and.returnValue(of(response));
+    const offset = 0;
+    const query = "test";
+    component.getMyAssets(offset, query);
+    expect(component.assetsCount).toEqual(1);
+  });
+  
   it('#getAllAssets() should return assets on API success', async () => {
     const response = mockData.serverResponse;
     response.result = {
@@ -131,6 +149,27 @@ describe('AssetsBrowserComponent', () => {
     spyOn(questionService, 'getAssetMedia').and.returnValue(of(response));
     const offset = 0;
     component.getAllAssets(offset);
+    spyOn(component.allAssets, 'push');
+    expect(component.assetsCount).toEqual(1);
+  });
+
+  it('#getAllAssets() should return assets on API success', async () => {
+    const response = mockData.serverResponse;
+    response.result = {
+      count: 1,
+      content: [{
+        downloadUrl: '/test'
+      }]
+    }
+    let questionService: QuestionService = TestBed.inject(QuestionService);
+    spyOn(questionService, 'getAssetMedia').and.returnValue(of(response));
+    const offset = 0;
+    const query = "test";
+    component.getAllAssets(offset, query);
+    let modal = undefined;
+    spyOn(component, 'addAssetInEditor').and.callThrough();
+    // spyOn(component.assetDataOutput, 'emit').and.callFake(() => {});
+    component.addAssetInEditor(modal);
     spyOn(component.allAssets, 'push');
     expect(component.assetsCount).toEqual(1);
   });
@@ -268,21 +307,44 @@ describe('AssetsBrowserComponent', () => {
       node_id: 'do_234',
       pre_signed_url: '/test'
     }
+    spyOn(component, 'getUploadAsset').and.callThrough();
+    let questionService: QuestionService = TestBed.inject(QuestionService);
+    let editorService: EditorService = TestBed.inject(EditorService);
+    const mockModal = {}; // You can create a mock modal as needed
+    spyOn(questionService, 'getVideo').and.returnValue(of(createMediaAssetResponse));
+    spyOn(editorService, 'apiErrorHandling').and.callFake(() => {});
+    component.getUploadAsset('assetId', mockModal);
+
+    expect(questionService.getVideo).toHaveBeenCalledWith('assetId');
   });
 
-  it('#addAssetInEditor() should emit proper event', () => { let modal = undefined;
-    spyOn(component, 'addAssetInEditor').and.callThrough();
-    // spyOn(component.assetDataOutput, 'emit').and.callFake(() => {});
-    component.addAssetInEditor(modal);
-    // expect(component.assetDataOutput.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
-  }); 
+  // it('#addAssetInEditor() should emit proper event', () => {  const videoModal = {
+  //   deny: jasmine.createSpy('deny'),
+  // };
+  //   spyOn(component, 'addAssetInEditor').and.callThrough();
+  //   // spyOn(component.assetDataOutput, 'emit').and.callFake(() => {});
+  //   component.addAssetInEditor(videoModal);
+  //   // expect(component.assetDataOutput.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
+  // }); 
 
-  it('#addAssetInEditor() should emit proper event', () => { let modal = undefined;
-    component.url = '/test';
+
+  it('#addAssetInEditor() should add asset and emit data', () => {  
+    const videoModal = {
+      deny: jasmine.createSpy('deny'),
+    };
+    const assetUrl = 'testAssetUrl';
+    const assetId = 'testAssetId';
+    const assetName = 'testAssetName';
     spyOn(component, 'addAssetInEditor').and.callThrough();
-    // spyOn(component.assetDataOutput, 'emit').and.callFake(() => {});
-    component.addAssetInEditor(modal);
-    // expect(component.assetDataOutput.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
+    component.addAssetInEditor(videoModal, assetUrl, assetId, assetName);
+    expect(component.showAssetPicker).toBe(false);
+    // spyOn(component.assetDataOutput, 'emit');
+    // expect(component.assetDataOutput.emit).toHaveBeenCalledWith({
+    //   downloadUrl: 'testAssetUrl',
+    //   src: 'mockMediaOriginURL',
+    //   thumbnail: null, 
+    // });
+    expect(videoModal.deny).toHaveBeenCalled();
   }); 
 
   it('#getMediaOriginURL() should emit media origin url', () => {
@@ -292,15 +354,46 @@ describe('AssetsBrowserComponent', () => {
     component.getMediaOriginURL(src);
     // expect(component.assetDataOutput.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
   }); 
-  it('#getMediaOriginURL() should emit media origin url', () => {
-    let url = '/test';
-    spyOn(component, 'getMediaOriginURL').and.callThrough();
-    const src = 'https://example.com/image.jpg';
+  it('#getMediaOriginURL() should replace cloud storage URL with assetProxyUrl', () => {
+    component.assetProxyUrl = 'https://asset-proxy.com/';
+    editorService.editorConfig.context.cloudStorageUrls = [
+      'https://storage-url1.com/',
+      'https://storage-url2.com/'
+    ];
+    const src = 'https://storage-url1.com/video.mp3';
 
+    // Act
     const result = component.getMediaOriginURL(src);
 
-    expect(result).toEqual(src); // No replacement should occur
-    // expect(component.assetDataOutput.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
+    // Assert
+    expect(result).toEqual('https://asset-proxy.com/video.mp3');
+  }); 
+
+  it('#getMediaOriginURL() should handle no matches', () => {
+    component.assetProxyUrl = 'https://asset-proxy.com/';
+    editorService.editorConfig.context.cloudStorageUrls = [
+      'https://storage-url1.com/',
+      'https://storage-url2.com/'
+    ];
+    const src = 'https://unrelated-url.com/video.mp3';
+
+    // Act
+    const result = component.getMediaOriginURL(src);
+
+    // Assert
+    expect(result).toEqual('https://unrelated-url.com/video.mp3');
+  }); 
+
+  it('#getMediaOriginURL() should handle empty cloudStorageUrls', () => {
+    component.assetProxyUrl = 'https://asset-proxy.com/';
+    editorService.editorConfig.context.cloudStorageUrls = [];
+    const src = 'https://storage-url1.com/video.mp3';
+
+    // Act
+    const result = component.getMediaOriginURL(src);
+
+    // Assert
+    expect(result).toEqual('https://storage-url1.com/video.mp3');
   }); 
 
   it('#uploadAsset() should create asset on API success', () => {
@@ -325,6 +418,8 @@ describe('AssetsBrowserComponent', () => {
     expect(component.assetFormValid).toEqual(true);
   })
 
+
+  
   it('#generateAssetCreateRequest() should return asset create request', () => {
     let fileName = 'test';
     let fileType = 'video/webm';
@@ -338,6 +433,47 @@ describe('AssetsBrowserComponent', () => {
       creator: _.get(mockEditorService.editorConfig, 'context.user.fullName'),
       channel: _.get(mockEditorService.editorConfig, 'context.channel')
     })
+  });
+
+  it('should handle a valid file upload', () => {
+    // Prepare a mock event
+    const event = {
+      target: {
+        files: [new File(['test-content'], 'filename.mp3', { type: 'video' })]
+      }
+    } as any;
+
+    component.assetType = 'video'; // Replace with your asset type
+    component.assetConfig = {
+      video: {
+        size: 50,
+        sizeType: 'MB'
+      }
+    };
+
+    component.uploadAsset(event);
+
+    expect(component.assetFile).toBeTruthy();
+    expect(component.assetName).toBe('filename.mp3');
+  });
+
+  it('should handle an invalid file type', () => {
+    const event = {
+      target: {
+        files: [new File(['test-content'], 'test-file.exe', { type: 'txt' })]
+      }
+    } as any;
+    component.assetType = 'video'; 
+    component.assetConfig = {
+      video: {
+        size: 50, 
+        sizeType: 'MB'
+      }
+    };
+
+    component.uploadAsset(event);
+
+    expect(component.showErrorMsg).toBe(true);
   });
 
   xit('#uploadAndUseAsset should upload asset and call upload to blob', 
@@ -453,12 +589,27 @@ it('#searchAsset() should call  getMyAssets for my videos', () => {
 });
 
 it('#searchAsset() should call allVideos for all videos ', () => {
+
   spyOn(component, 'getAllAssets');
   component.searchAsset('clearInput', 'allAssets');
   expect(component.query).toEqual('');
   expect(component.searchAllInput).toEqual('');
   expect(component.getAllAssets).toHaveBeenCalledWith(0, '', true);
 });
+
+it('#searchAsset() should call  getMyAssets for my videos', () => {
+  // spyOn(component, 'getMyAssets');
+  const event = {
+    target: {
+      value:"testing"
+    }
+  }
+  component.searchAsset(event, 'myAssets');
+  expect(component.query).toEqual('testing');
+  expect(component.searchMyInput).toEqual('');
+  // expect(component.getMyAssets).toHaveBeenCalledWith(0, '', true);
+});
+
 it('#ngOnInit() should call ngOnInit and define formConfig', () => {
   component.assetType = "video";
   component.assetConfig = {
