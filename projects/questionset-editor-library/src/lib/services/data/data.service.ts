@@ -4,8 +4,6 @@ import { mergeMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
-// import * as moment from 'moment';
-import * as _ from 'lodash-es';
 import { ServerResponse } from '../../interfaces/serverResponse';
 import { RequestParam } from '../../interfaces/requestParam';
 import { HttpOptions } from '../../interfaces/httpOptions';

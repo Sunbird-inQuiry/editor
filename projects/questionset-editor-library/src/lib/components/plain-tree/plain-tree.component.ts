@@ -4,7 +4,6 @@ import {
   ElementRef,
   EventEmitter,
   Input,
-  OnInit,
   Output,
   ViewChild,
 } from '@angular/core';
@@ -12,21 +11,18 @@ import 'jquery.fancytree';
 import * as _ from 'lodash-es';
 import { EditorService } from '../../services/editor/editor.service';
 
-declare var $: any;
+declare const $: any;
 
 @Component({
   selector: 'lib-plain-tree',
-  templateUrl: './plain-tree.component.html',
-  styleUrls: ['./plain-tree.component.scss'],
+  templateUrl: './plain-tree.component.html'
 })
-export class PlainTreeComponent implements OnInit, AfterViewInit {
+export class PlainTreeComponent implements AfterViewInit {
   @ViewChild('plainTree') public tree: ElementRef;
   @Input() treeData;
   @Output() treeEmitter: EventEmitter<any> = new EventEmitter<any>();
 
   constructor(private editorService: EditorService) {}
-
-  ngOnInit(): void {}
 
   ngAfterViewInit() {
     this.renderTree(this.getTreeConfig());

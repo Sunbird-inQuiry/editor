@@ -1,15 +1,13 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import * as _ from 'lodash-es';
 import { EditorService } from '../../services/editor/editor.service';
-import { ConfigService } from '../../services/config/config.service';
 import { TreeService } from '../../services/tree/tree.service';
 
 @Component({
   selector: 'lib-relational-metadata',
-  templateUrl: './relational-metadata.component.html',
-  styleUrls: ['./relational-metadata.component.css']
+  templateUrl: './relational-metadata.component.html'
 })
-export class RelationalMetadataComponent implements OnInit, OnChanges {
+export class RelationalMetadataComponent implements OnChanges {
 
   @Input() contentMetadata: any;
   @Input() formConfig: any;
@@ -18,9 +16,6 @@ export class RelationalMetadataComponent implements OnInit, OnChanges {
   @Output() valueChanges = new EventEmitter<any>();
   public formFieldProperties: any;
   constructor(private editorService: EditorService, private treeService: TreeService) { }
-
-  ngOnInit(): void {
-  }
 
   ngOnChanges() {
     this.contentMetadata = _.get(this.contentMetadata, 'data.metadata') || this.contentMetadata;

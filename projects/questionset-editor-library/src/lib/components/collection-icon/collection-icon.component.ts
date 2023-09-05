@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ConfigService } from '../../services/config/config.service';
 
 @Component({
@@ -6,15 +6,12 @@ import { ConfigService } from '../../services/config/config.service';
   templateUrl: './collection-icon.component.html',
   styleUrls: ['./collection-icon.component.scss']
 })
-export class CollectionIconComponent implements OnInit {
+export class CollectionIconComponent {
   @Input() appIcon;
   @Input() appIconConfig;
   @Output() iconEmitter = new EventEmitter<any>();
   public showImagePicker = false;
   constructor(public configService: ConfigService) { }
-
-  ngOnInit() {
-  }
 
   initializeImagePicker() {
     if (this.appIconConfig.isAppIconEditable) {
