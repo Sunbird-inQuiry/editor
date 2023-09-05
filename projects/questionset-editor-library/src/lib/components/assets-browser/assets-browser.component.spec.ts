@@ -318,20 +318,11 @@ describe('AssetsBrowserComponent', () => {
     expect(questionService.getVideo).toHaveBeenCalledWith('assetId');
   });
 
-  // it('#addAssetInEditor() should emit proper event', () => {  const videoModal = {
-  //   deny: jasmine.createSpy('deny'),
-  // };
-  //   spyOn(component, 'addAssetInEditor').and.callThrough();
-  //   // spyOn(component.assetDataOutput, 'emit').and.callFake(() => {});
-  //   component.addAssetInEditor(videoModal);
-  //   // expect(component.assetDataOutput.emit).toHaveBeenCalledWith(mockData.assetBrowserEvent);
-  // }); 
-
-
   it('#addAssetInEditor() should add asset and emit data', () => {  
     const videoModal = {
       deny: jasmine.createSpy('deny'),
     };
+    component.selectedAsset = {ownershipType: Array(1), code: '652144fc-cd68-4259-a730-a5acb1983a8f', keywords: '', channel: '01309282781705830427', downloadUrl: 'https://sunbirddevbbpublic.blob.core.windows.net/s…81612/screencast-from-25-08-23-040945-pm-ist.webm'};
     const assetUrl = 'testAssetUrl';
     const assetId = 'testAssetId';
     const assetName = 'testAssetName';
@@ -339,11 +330,7 @@ describe('AssetsBrowserComponent', () => {
     component.addAssetInEditor(videoModal, assetUrl, assetId, assetName);
     expect(component.showAssetPicker).toBe(false);
     // spyOn(component.assetDataOutput, 'emit');
-    // expect(component.assetDataOutput.emit).toHaveBeenCalledWith({
-    //   downloadUrl: 'testAssetUrl',
-    //   src: 'mockMediaOriginURL',
-    //   thumbnail: null, 
-    // });
+    // expect(component.assetDataOutput.emit).toHaveBeenCalledWith();
     expect(videoModal.deny).toHaveBeenCalled();
   }); 
 
