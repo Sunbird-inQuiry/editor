@@ -20,9 +20,6 @@
 
     <div class="mt-8 pl-20">
       <span class="sb-btn sb-btn-normal mr-10" *ngIf="visibility.showSourcingStatus" [ngClass]="sourcingStatusClass">{{ sourcingStatusText }}</span>
-      <!--span data-title="View review comments" ((click)="buttonEmitter({type: 'showReviewcomments'})" *ngIf="buttonLoaders?.showReviewComment" libTelemetryInteract [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('view_comments','click','launch', telemetryService.telemetryPageId)">
-        <i class="icon comment flex-as-baseline mr-05" aria-hidden="true"></i>{{configService.labelConfig?.lbl?.viewComments}}
-      </span-->
       <span class="fs-0-92" data-title="View review comments" (click)="buttonEmitter({type: 'showReviewcomments'})" *ngIf="buttonLoaders?.showReviewComment || visibility.showCorrectionComments" libTelemetryInteract [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('view_comments','click','launch', telemetryService.telemetryPageId)">
         <i class="icon comment alternate outline sb-color-primary flex-as-baseline mr-05" aria-hidden="true"></i>{{configService.labelConfig?.lbl?.viewComments}}
       </span>
@@ -197,8 +194,6 @@
               <textarea type="text" class="wmd-input width-100 sb-form-control" id="wmd-input" [(ngModel)]="rejectComment" placeholder="Add comment" name="rejectComment" required maxlength="{{configService?.editorConfig?.rejectCommentsMaxLength}}"></textarea>
               <label class="ui basic red error label pt-1 mt-5 width-100"
                   *ngIf="FormControl.form.controls.rejectComment?.touched && !FormControl.form.valid">{{configService.labelConfig?.lbl?.fillComments}} </label>
-              <!-- <textarea rows="4" name="moretext" class="sb-form-control" placeholder="Type here..."></textarea>
-              <span class="characters-left">1000 Characters left</span> -->
           </div>
       </div>
   </div>

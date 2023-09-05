@@ -48,14 +48,6 @@
     "frameworkRead":"framework/v1/read/",
     "channelRead":"channel/v1/read/",
     "telemetry":"/data/v3/telemetry",
-    "CSV": {
-      "UPLOAD": "collection/v1/import/",
-      "DOWNLOAD": "collection/v1/export/",
-      "SAMPLE_COLLECTION_HIERARCHY": "sourcing/collection-hierarchy/createfoldersamplecsvfile.csv"
-    },
-    "USER": {
-      "SEARCH":"user/v1/search"
-    },
     "ASSET": {
       "READ":"asset/v1/read/",
       "CREATE":"asset/v1/create",

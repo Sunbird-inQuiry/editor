@@ -2,7 +2,7 @@ export interface ICreationContext {
     objectType?: string;
     collectionObjectType?: string;
     unitIdentifier?: string;
-    isReadOnlyMode?: boolean | undefined;
+    isReadOnlyMode?: boolean;
     mode?: string;
     correctionComments?: string,
     editableFields?: any;
