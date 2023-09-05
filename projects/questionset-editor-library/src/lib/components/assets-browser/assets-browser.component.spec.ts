@@ -172,6 +172,12 @@ describe('AssetsBrowserComponent', () => {
     spyOn(component.allAssets, 'push');
     expect(component.assetsCount).toEqual(1);
   });
+  it('should handle API error gracefully', () => {
+    const mockError = { status: 500, message: 'Server Error' };
+    let questionService: QuestionService = TestBed.inject(QuestionService);
+    spyOn(questionService, 'getAssetMedia').and.returnValue(throwError(mockError));
+    spyOn(editorService, "apiErrorHandling").and.callFake(() => {});
+  });
 
   it('#resetFormData() should reset the form data', () => {
     component.resetFormData();
@@ -237,7 +243,28 @@ describe('AssetsBrowserComponent', () => {
     spyOn(questionService, 'getQuestionList').and.returnValue(throwError({}));
     let modal = true;
     spyOn(questionService, 'uploadMedia').and.returnValue(of(createMediaAssetResponse));
-    component.getUploadAsset('do_123', modal);
+    component.getUploadAsset(createMediaAssetResponse.result['node_id'], modal);
+  });
+  it('should handle error correctly', () => {
+    const fileURL = 'mockFileURL';
+    const mimeType = 'mockMimeType';
+    const contentId = 'mockContentId';
+    const modal = 'mockModal';
+    let questionService: QuestionService = TestBed.inject(QuestionService);
+    spyOn(questionService, 'uploadMedia').and.returnValue(
+      throwError({ message: 'Mock error' })
+    );
+    let configService: ConfigService = TestBed.inject(ConfigService);
+    spyOn(configService, 'labelConfig').and.returnValue({ messages: { error: { '027': 'MockErrorMessage' } } });
+
+    spyOn(editorService, "apiErrorHandling").and.callFake(() => {});
+
+    component.updateContentWithURL(fileURL, mimeType, contentId, modal);
+
+    expect(questionService.uploadMedia).toHaveBeenCalledOnceWith(jasmine.anything(), contentId);
+    expect(component.isClosable).toBe(true);
+    expect(component.loading).toBe(false);
+    expect(component.assetFormValid).toBe(true);
   });
   it('#updateContentWithURL should update asset with url', async () => {
     let fileURL = 'video/webm';
@@ -492,6 +519,36 @@ describe('AssetsBrowserComponent', () => {
     component.uploadToBlob(signedURL, file, config).subscribe(data => {
       expect(data.responseCode).toEqual('OK');
     })
+  });
+
+  it('should upload to blob and return data', () => {
+    const signedURL = 'mockedSignedURL';
+    const file = 'mockedFile'; 
+    const config = {}; 
+    let questionService: QuestionService = TestBed.inject(QuestionService);
+    spyOn(questionService.http, 'put').and.returnValue(of({ mockData: 'data' }));
+
+    component.uploadToBlob(signedURL, file, config).subscribe((data) => {
+      expect(data).toEqual({ mockData: 'data' }); // Assert the expected response
+    });
+  });
+
+  it('should handle API error and throw an error', () => {
+    const signedURL = 'mockedSignedURL';
+    const file = 'mockedFile'; 
+    const config = {}; 
+    let questionService: QuestionService = TestBed.inject(QuestionService);
+    spyOn(questionService.http, 'put').and.returnValue(throwError({ errorMessage: 'API error' }));
+
+    component.uploadToBlob(signedURL, file, config).subscribe(
+      () => {
+        // This should not be called since it's an error case
+        fail('Expected error to be thrown');
+      },
+      (error) => {
+        spyOn(editorService, "apiErrorHandling").and.callFake(() => {});
+      }
+    );
   });
 
   it('#dismissAssetUploadModal() should set showAssetPicker to true', () => {
