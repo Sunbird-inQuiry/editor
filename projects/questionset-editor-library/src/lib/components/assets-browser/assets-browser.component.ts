@@ -79,67 +79,6 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
     this.astSizeType = this.assetConfig[this.assetType].sizeType;
     this.acceptedFileType = this.assetConfig[this.assetType].accepted;
     this.acceptAssetType = this.getAcceptType(this.assetConfig[this.assetType].accepted, this.assetType);
-    this.editorConfig = {
-      toolbar: ['heading', '|', 'bold', '|', 'italic', '|', 'underline', '|', 'BulletedList', '|', 'alignment',
-        '|', 'insertTable', '|', 'numberedList', '|', 'fontSize', '|', 'subscript', '|', 'superscript', '|',
-        'MathText', '|', 'specialCharacters', '|'
-      ],
-      fontSize: {
-        options: [
-          'eight',
-          'ten',
-          'twelve',
-          'fourteen',
-          'sixteen',
-          'eighteen',
-          'twenty',
-          'twentytwo',
-          'twentyfour',
-          'twentysix',
-          'twentyeight',
-          'thirty',
-          'thirtysix'
-        ]
-      },
-      image: {
-        resizeUnit: '%',
-        resizeOptions: [{
-          name: 'resizeImage:25',
-          value: '25',
-          icon: 'small',
-          className: 'resize-25'
-        },
-        {
-          name: 'resizeImage:50',
-          value: '50',
-          icon: 'medium',
-          className: 'resize-50'
-        },
-        {
-          name: 'resizeImage:75',
-          value: '75',
-          icon: 'large',
-          className: 'resize-75'
-        },
-        {
-          name: 'resizeImage:100',
-          value: '100',
-          icon: 'full',
-          className: 'resize-100'
-        },
-        {
-          name: 'resizeImage:original',
-          value: null,
-          icon: 'original',
-          className: 'resize-original'
-        }],
-        toolbar: ['imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight', '|',
-        'resizeImage:25', 'resizeImage:50', 'resizeImage:75',  'resizeImage:100', 'resizeImage:original'],
-        styles: ['full', 'alignLeft', 'alignRight', 'alignCenter']
-      },
-      isReadOnly: false,
-      removePlugins: ['ImageCaption', 'mathtype', 'ChemType', 'ImageResizeHandles']
-    };
   }
 
   ngOnChanges() {
