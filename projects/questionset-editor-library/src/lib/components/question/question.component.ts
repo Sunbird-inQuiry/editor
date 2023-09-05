@@ -38,20 +38,22 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() questionEmitter = new EventEmitter<any>();
   private onComponentDestroy$ = new Subject<any>();
   toolbarConfig: any = {};
+  public showAssetPicker = false;
   public terms = false;
   public editorState: any = {};
   public showPreview = false;
   public mediaArr: any = [];
-  public videoShow = false;
+  public assetShow = false;
   public showFormError = false;
   public actionType: string;
+  assetType: string; 
   selectedSolutionType: string;
   selectedSolutionTypeIndex: string;
   showSolutionDropDown = true;
   showSolution = false;
-  videoSolutionName: string;
-  videoSolutionData: any;
-  videoThumbnail: string;
+  assetSolutionName: string;
+  assetSolutionData: any;
+  assetThumbnail: string;
   solutionUUID: string;
   solutionValue: string;
   solutionTypes: any = [{
@@ -61,6 +63,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   {
     type: 'video',
     value: 'video'
+  },
+  {
+    type: 'audio',
+    value: 'audio'
   }];
   questionMetaData: any;
   questionInteractionType;
@@ -252,13 +258,13 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.solutionUUID = this.editorState.solutions[0].id;
                 this.showSolutionDropDown = false;
                 this.showSolution = true;
-                if (this.selectedSolutionType === 'video') {
+                if (this.selectedSolutionType === 'video' || this.selectedSolutionType === 'audio') {
                   const index = _.findIndex(this.questionMetaData.media, (o) => {
-                    return o.type === 'video' && o.id === this.editorState.solutions[0].value;
+                    return o.type === this.selectedSolutionType && o.id === this.editorState.solutions[0].value;
                   });
-                  this.videoSolutionName = this.questionMetaData.media[index].name;
-                  this.videoThumbnail = this.questionMetaData.media[index].thumbnail;
-                }
+                  this.assetSolutionName = this.questionMetaData.media[index].name;
+                  this.assetThumbnail = this.questionMetaData.media[index].thumbnail;
+                } 
                 if (this.selectedSolutionType === 'html') {
                   this.editorState.solutions = this.editorState.solutions[0].value;
                 }
@@ -683,59 +689,62 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   }
 
-  videoDataOutput(event) {
+  assetDataOutput(event) {
     if (event) {
-      this.videoSolutionData = event;
-      this.videoSolutionName = event.name;
+      this.assetSolutionData = event;
+      this.assetSolutionName = event.name;
       this.editorState.solutions = event.identifier;
-      this.videoThumbnail = event.thumbnail;
-      const videoMedia: any = {};
-      videoMedia.id = event.identifier;
-      videoMedia.src = event.src;
-      videoMedia.type = 'video';
-      videoMedia.assetId = event.identifier;
-      videoMedia.name = event.name;
-      videoMedia.thumbnail = this.videoThumbnail;
-      videoMedia.baseUrl = _.get(this.editorService.editorConfig, 'context.host') || document.location.origin;
-      if (videoMedia.thumbnail) {
+      this.assetThumbnail = event.thumbnail;
+      const assetMedia: any = {};
+      assetMedia.id = event.identifier;
+      assetMedia.src = event.src;
+      assetMedia.type = this.assetType;
+      assetMedia.assetId = event.identifier;
+      assetMedia.name = event.name;
+      assetMedia.thumbnail = this.assetThumbnail;
+      assetMedia.baseUrl = _.get(this.editorService.editorConfig, 'context.host') || document.location.origin;
+      if (assetMedia.thumbnail) {
         const thumbnailMedia: any = {};
-        thumbnailMedia.src = this.videoThumbnail;
+        thumbnailMedia.src = this.assetThumbnail;
         thumbnailMedia.type = 'image';
-        thumbnailMedia.id = `video_${event.identifier}`;
+        thumbnailMedia.id = `${this.assetType}_${event.identifier}`;
         thumbnailMedia.baseUrl = _.get(this.editorService.editorConfig, 'context.host') || document.location.origin;
         this.mediaArr.push(thumbnailMedia);
       }
-      this.mediaArr.push(videoMedia);
+      this.mediaArr.push(assetMedia);
       this.showSolutionDropDown = false;
       this.showSolution = true;
     } else {
       this.deleteSolution();
     }
-    this.videoShow = false;
+    this.assetShow = false;
   }
 
   selectSolutionType(data: any) {
     const index = _.findIndex(this.solutionTypes, (sol: any) => {
       return sol.value === data;
     });
+    this.assetType = data;
     this.selectedSolutionType = this.solutionTypes[index].type;
-    if (this.selectedSolutionType === 'video') {
-      const showVideo = true;
-      this.videoShow = showVideo;
-    } else {
+    if (this.selectedSolutionType === 'video' || this.selectedSolutionType === 'audio') {
+      const showAsset = true;
+      this.assetShow = showAsset;
+    } 
+    else {
       this.showSolutionDropDown = false;
     }
   }
 
   deleteSolution() {
-    if (this.selectedSolutionType === 'video') {
+    if (this.selectedSolutionType === 'video' || this.selectedSolutionType === 'audio') {
       this.mediaArr = _.filter(this.mediaArr, (item: any) => item.id !== this.editorState.solutions);
-    }
+    } 
     this.showSolutionDropDown = true;
     this.selectedSolutionType = '';
-    this.videoSolutionName = '';
+    this.assetType = '';
+    this.assetSolutionName = '';
     this.editorState.solutions = '';
-    this.videoThumbnail = '';
+    this.assetThumbnail = '';
     this.showSolution = false;
   }
 
@@ -761,8 +770,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       media: this.mediaArr,
       editorState: {}
     };
-    console.log('getQuestionMetadata');
-    console.log(this.editorState);
     metadata = _.assign(metadata, this.editorState);
     metadata.editorState.question = metadata.question;
     metadata.body = metadata.question;
@@ -843,12 +850,12 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   getQuestionSolution(solutionObj) {
     if (solutionObj?.type === 'html') {
       return {[solutionObj?.id]: solutionObj.value};
-    } else if (solutionObj?.type === 'video') {
-      const videoMedia = this.getMediaById(solutionObj?.value);
-      const videoThumbnail = videoMedia?.thumbnail ? videoMedia?.thumbnail : '';
-      const videoSolution = this.getVideoSolutionHtml(videoThumbnail, videoMedia?.src, videoMedia.id);
-      return {[solutionObj.id]: videoSolution};
-    }
+    } else if (solutionObj?.type === 'video' || solutionObj?.type === 'audio') {
+      const assetMedia = this.getMediaById(solutionObj?.value);
+      const assetThumbnail = assetMedia?.thumbnail ? assetMedia?.thumbnail : '';
+      const assetSolution = this.getAssetSolutionHtml(assetThumbnail, assetMedia?.src, assetMedia.id);
+      return {[solutionObj.id]: assetSolution};
+    } 
   }
 
   getMediaById(mediaId) {
@@ -864,12 +871,16 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return responseDeclaration;
   }
 
-  getVideoSolutionHtml(posterURL, srcUrl, solutionMediaId) {
-    const videoSolutionHtml = '<video data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'video/mp4\' src=\'{sourceURL}\'><source type=\'video/webm\' src=\'{sourceURL}\'></video>'
-    const videoSolutionValue = videoSolutionHtml.replace('{posterUrl}', posterURL).replace('{sourceURL}', srcUrl).replace('{sourceURL}', srcUrl).replace('{solutionMediaId}', solutionMediaId);
-    return videoSolutionValue;
+  getAssetSolutionHtml(posterURL, srcUrl, solutionMediaId) {
+    let assetSolutionHtml
+    if (this.selectedSolutionType === 'video') {
+      assetSolutionHtml = '<video data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'video/mp4\' src=\'{sourceURL}\'><source type=\'video/webm\' src=\'{sourceURL}\'></video>'
+    } else if(this.selectedSolutionType === 'audio') {
+      assetSolutionHtml = '<audio data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'audio/mp3\' src=\'{sourceURL}\'><source type=\'audio/wav\' src=\'{sourceURL}\'></audio>'
+    }
+    const assetSolutionValue = assetSolutionHtml.replace('{posterUrl}', posterURL).replace('{sourceURL}', srcUrl).replace('{sourceURL}', srcUrl).replace('{solutionMediaId}', solutionMediaId);
+    return assetSolutionValue;
   }
-
 
   getMcqQuestionHtmlBody(question, templateId) {
     const mcqTemplateConfig = {
@@ -1242,7 +1253,6 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   output(event) { }
 
   onStatusChanges(event) {
-    console.log(event);
     if (_.has(event, 'isValid')) {
       this.questionMetadataFormStatus = event.isValid;
     }
