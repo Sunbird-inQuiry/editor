@@ -128,7 +128,6 @@ describe('MetaFormComponent', () => {
     component.rootFormConfig = mockData.rootFormConfig;
     spyOn(component, 'isReviewMode').and.returnValue(false);
     spyOn(component, 'setAppIconData').and.callThrough();
-    spyOn(component, 'ifFieldIsEditable').and.callFake(() => {return false});
     component.appIconConfig = {
       isAppIconEditable: true
     };
@@ -137,7 +136,6 @@ describe('MetaFormComponent', () => {
     expect(component.appIcon).toBeDefined();
     expect(component.isReviewMode).toHaveBeenCalled();
     expect(component.appIconConfig.isAppIconEditable).toBeTruthy();
-    expect(component.ifFieldIsEditable).toHaveBeenCalled();
   });
 
   it('#setAppIconData() should set appIcon as non editable', () => {
@@ -147,17 +145,14 @@ describe('MetaFormComponent', () => {
     component.rootFormConfig = mockData.rootFormConfigWithoutGrouping;
     spyOn(component, 'isReviewMode').and.returnValue(true);
     spyOn(component, 'setAppIconData').and.callThrough();
-    spyOn(component, 'ifFieldIsEditable').and.callFake(() => {return false});
     component.appIconConfig = {
       isAppIconEditable: true
     };
     component.setAppIconData();
     expect(component.showAppIcon).toBeTruthy();
-    // expect(component.appIcon).toBeDefined();
     expect(component.appIcon).toBeUndefined();
     expect(component.isReviewMode).toHaveBeenCalled();
     expect(component.appIconConfig.isAppIconEditable).toBeFalsy();
-    expect(component.ifFieldIsEditable).toHaveBeenCalled();
   });
 
   it('#fetchFrameWorkDetails() should set fetchFrameWorkDetails and for targetFrameworkIds', () => {
