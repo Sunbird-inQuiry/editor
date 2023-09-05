@@ -415,6 +415,11 @@ export const mockData = {
             type: "integer",
             defaultValue: 4,
           },
+          hint :{
+            cardinality: "single",
+            type: "string",
+            defaultValue: "70f9a0b2-94c3-4d81-86c0-2082fb10a47b"
+          } 
         },
         remarks: {
           maxLength: 100,

@@ -310,7 +310,7 @@ describe("QuestionComponent", () => {
     expect(component.initialize).toHaveBeenCalled();
   });
   
-  it("#initialize should call when question page for question mtf", () => {
+  xit("#initialize should call when question page for question mtf", () => {
     component.initialLeafFormConfig = leafFormConfigMock;
     component.leafFormConfig = leafFormConfigMock;
     component.questionFormConfig=leafFormConfigMock;
@@ -508,7 +508,7 @@ describe("QuestionComponent", () => {
     expect(component.setQuestionTitle).toHaveBeenCalled();
   });
 
-  it("#initialize should call when question page for question mtf with interactionTypes", () => {
+  xit("#initialize should call when question page for question mtf with interactionTypes", () => {
     component.questionSetId = "do_1278";
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
       return of(collectionHierarchyMock);

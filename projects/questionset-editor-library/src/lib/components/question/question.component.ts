@@ -245,6 +245,11 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                   }, { templateId, numberOfOptions, maximumOptions });
                 }
                 this.editorState.solutions = this.questionMetaData?.editorState?.solutions;
+                if (this.questionMetaData?.hints) {
+                  this.editorState.hints = this.questionMetaData.hints;
+                } else {
+                  this.editorState.hints = {};
+                }
                 if (_.has(this.questionMetaData, 'responseDeclaration')) {
                   this.editorState.responseDeclaration = _.get(this.questionMetaData, 'responseDeclaration');
                 }
@@ -321,6 +326,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         if(!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)){
           this.subMenuConfig();
         }
+        this.showLoader = false;
       }
     }, (err: ServerResponse) => {
       const errInfo = {
