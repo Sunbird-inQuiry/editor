@@ -15,7 +15,6 @@ export class HeaderComponent implements OnDestroy, OnInit {
   @Input() pageId: any;
   @Input() labelConfigData: any;
   @Input() buttonLoaders: any;
-  @Input() showComment: any;
   @Input() publishchecklist: any;
   @Input() set requestChange(action: string) {
     if (action) {
@@ -27,7 +26,6 @@ export class HeaderComponent implements OnDestroy, OnInit {
   @ViewChild('modal') public modal;
   @Output() qualityParamEmitter = new EventEmitter<any>();
   public visibility: any;
-  public showReviewModal: boolean;
   public showPublishCollectionPopup: boolean;
   public showRequestChangesPopup: boolean;
   public rejectComment: string;

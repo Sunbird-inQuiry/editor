@@ -137,6 +137,7 @@ export const mockData = {
           ],
           question: "<p>MCQ Question</p>",
         },
+        instructions:'',
         templateId: "mcq-vertical",
         solutions: [
           {
@@ -151,23 +152,17 @@ export const mockData = {
               {
                 label: "<p>option 1</p>",
                 value: 0,
-                hints: {
-                  en: "test hint 1",
-                },
+                hint:'70c82bf5-9459-4c43-8897-0e58b7e1da62'
               },
               {
                 label: "<p>option 2</p>",
                 value: 1,
-                hints: {
-                  en: "test hint 2",
-                },
+                hint: '70c82bf5-9459-4c43-8897-0e58b7e1as73'
               },
               {
                 label: "<p>option 3</p>",
                 value: 2,
-                hints: {
-                  en: "test hint 3",
-                },
+                hint:'70c82bf5-9459-4c43-8897-0e58b7e1gf87'
               },
             ],
             autoCapture: "Yes",
@@ -179,6 +174,12 @@ export const mockData = {
               pattern: "dd/mm/yyyy",
             },
           },
+        },
+        hints: {
+           "70c82bf5-9459-4c43-8897-0e58b7e1da64": { en: "test hint 1" },
+           "70c82bf5-9459-4c43-8897-0e58b7e1as73": { en: "test hint 2" },
+           "70c82bf5-9459-4c43-8897-0e58b7e1gf87": { en: "test hint 3" },
+           "70f9a0b2-94c3-4d81-86c0-2082fb10a47b": { en: "test hint 4" }
         },
         evidence: {
           mimeType: ["audio", "vedio"],
@@ -208,7 +209,12 @@ export const mockData = {
             cardinality: "multiple",
             type: "integer",
             defaultValue: 1
-          }
+          },
+          hint :{
+            cardinality: "single",
+            type: "string",
+            defaultValue: "70f9a0b2-94c3-4d81-86c0-2082fb10a47b"
+        }
         },
         remarks: {
           maxLength: 100,
@@ -500,11 +506,16 @@ export const mockData = {
           },
         },
         hints: {
-          en: [null],
+          "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
         },
-        instructions: {
-          en: [null],
+        outcomeDeclaration: {
+            "hint": {
+            "cardinality": "single",
+            "type": "string",
+            "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+           }
         },
+        instructions: null,
         interactionTypes: ["slider"],
         primaryCategory: "Slider",
       },
@@ -560,11 +571,16 @@ export const mockData = {
           },
         },
         hints: {
-          en: [null],
+          "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
         },
-        instructions: {
-          en: [null],
+        outcomeDeclaration: {
+            "hint": {
+            "cardinality": "single",
+            "type": "string",
+            "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+           }
         },
+        instructions: null,
         interactionTypes: ["date"],
         primaryCategory: "Date",
       },
@@ -627,11 +643,16 @@ export const mockData = {
           },
         },
         hints: {
-          en: [null],
+          "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
         },
-        instructions: {
-          en: [null],
+        outcomeDeclaration: {
+            "hint": {
+            "cardinality": "single",
+            "type": "string",
+            "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+           }
         },
+        instructions: null,
         interactionTypes: ["text"],
         primaryCategory: "Text",
       },
@@ -651,9 +672,7 @@ export const mockData = {
     responseCode: "OK",
     result: {
       question: {
-        instructions: {
-          en: [null],
-        },
+        instructions:null,
         responseDeclaration: {
           response1: {
             type: "string",
@@ -677,7 +696,14 @@ export const mockData = {
         identifier: "do_11345671149997260811",
         solutions: [],
         hints: {
-          en: [null],
+          "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
+        },
+        outcomeDeclaration: {
+            "hint": {
+            "cardinality": "single",
+            "type": "string",
+            "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+           }
         },
         languageCode: ["en"],
         interactionTypes: "",
@@ -918,9 +944,7 @@ export const readQuestionMock = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions: null,
       showRemarks: "No",
       responseDeclaration: {
         response1: {
@@ -977,7 +1001,14 @@ export const readQuestionMock = {
       identifier: "do_1134355569264885761166",
       solutions: [],
       hints: {
-        en: [null],
+        "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
+      },
+      outcomeDeclaration: {
+          "hint": {
+          "cardinality": "single",
+          "type": "string",
+          "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+         }
       },
       qType: "MCQ",
       languageCode: ["en"],
@@ -1002,9 +1033,7 @@ export const readQuestionMockSlider = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions: null,
       showRemarks: "No",
       mimeType: "application/vnd.sunbird.question",
       media: [],
@@ -1030,7 +1059,14 @@ export const readQuestionMockSlider = {
       identifier: "do_1134355571590184961168",
       solutions: [],
       hints: {
-        en: [null],
+        "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
+      },
+      outcomeDeclaration: {
+          "hint": {
+          "cardinality": "single",
+          "type": "string",
+          "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+         }
       },
       languageCode: ["en"],
       interactionTypes: ["slider"],
@@ -1054,9 +1090,7 @@ export const readQuestionMockDate = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions: null,
       mimeType: "application/vnd.sunbird.question",
       media: [],
       body: "<p>Dep Date 3</p>",
@@ -1078,7 +1112,14 @@ export const readQuestionMockDate = {
       identifier: "do_1134355574936780801170",
       solutions: [],
       hints: {
-        en: [null],
+        "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
+      },
+      outcomeDeclaration: {
+          "hint": {
+          "cardinality": "single",
+          "type": "string",
+          "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+         }
       },
       languageCode: ["en"],
       interactionTypes: ["date"],
@@ -1101,9 +1142,7 @@ export const readQuestionMockText = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions:null,
       showRemarks: "No",
       mimeType: "application/vnd.sunbird.question",
       media: [],
@@ -1130,7 +1169,14 @@ export const readQuestionMockText = {
       identifier: "do_1134347722012835841130",
       solutions: [],
       hints: {
-        en: [null],
+        "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
+      },
+      outcomeDeclaration: {
+          "hint": {
+          "cardinality": "single",
+          "type": "string",
+          "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+         }
       },
       languageCode: ["en"],
       interactionTypes: ["text"],

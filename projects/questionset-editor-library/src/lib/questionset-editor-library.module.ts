@@ -20,7 +20,6 @@ import { AnswerComponent } from './components/answer/answer.component';
 import { CkeditorToolComponent } from './components/ckeditor-tool/ckeditor-tool.component';
 import { QuestionComponent } from './components/question/question.component';
 import { TelemetryInteractDirective } from './directives/telemetry-interact/telemetry-interact.directive';
-import { DateFormatPipe } from './directives/date-format/date-format.pipe';
 import { AssetBrowserComponent } from './components/asset-browser/asset-browser.component';
 import { CollectionIconComponent } from './components/collection-icon/collection-icon.component';
 import { QumlPlayerComponent } from './components/quml-player/quml-player.component';
@@ -54,7 +53,6 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     AnswerComponent,
     CkeditorToolComponent,
     TemplateComponent,
-    DateFormatPipe,
     TelemetryInteractDirective,
     AssetBrowserComponent,
     CollectionIconComponent,

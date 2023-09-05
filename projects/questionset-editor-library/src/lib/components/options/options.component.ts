@@ -5,6 +5,7 @@ import { ConfigService } from '../../services/config/config.service';
 import { SubMenu } from '../question-option-sub-menu/question-option-sub-menu.component';
 import { TreeService } from '../../services/tree/tree.service';
 import { EditorService } from '../../services/editor/editor.service';
+import { v4 as uuidv4 } from 'uuid';
 @Component({
   selector: 'lib-options',
   templateUrl: './options.component.html',
@@ -23,7 +24,7 @@ export class OptionsComponent implements OnInit, OnChanges {
   public setImageLimit = 1;
   public templateType = 'mcq-vertical';
   subMenus: SubMenu[][];
-  hints = [];
+  hints:any = {};
   showSubMenu:boolean=false;
   parentMeta: any;
   selectedOptions = [];
@@ -35,6 +36,7 @@ export class OptionsComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit() {
+    this.hints = this.editorState.hints ? this.editorState.hints : {};
     if(!_.isUndefined(this.editorState.answer)) {
       this.addSelectedOptions();
     }
@@ -110,12 +112,14 @@ export class OptionsComponent implements OnInit, OnChanges {
       outcomeDeclaration: this.getOutcomeDeclaration(),
       interactionTypes: ['choice'],
       interactions: this.getInteractions(editorState.options),
+      hints:this.hints,
       editorState: {
         options,
       },
       qType: 'MCQ',
       primaryCategory: this.questionPrimaryCategory || 'Multiple Choice Question',
     };
+    this.subMenuConfig(editorState.options);
     return metadata;
   }
 
@@ -172,10 +176,8 @@ export class OptionsComponent implements OnInit, OnChanges {
     let index;
     const interactOptions = _.map(options, (opt, key) => {
       index = Number(key);
-      const hints  = _.get(this.editorState, `interactions.response1.options[${index}].hints`)
-      return { label: opt.body, value: index, hints };
+      return { label: opt.body, value: index,  hint: this.hints[this.editorState?.interactions?.response1?.options[index]?.hint] ? Object.keys(this.hints).find(element => element == this.editorState?.interactions?.response1?.options[index]?.hint) : '' };
     });
-    this.subMenuConfig(options);
     const interactions = {
       response1: {
         type: 'choice',
@@ -191,20 +193,34 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   subMenuChange({ index, value }, optionIndex) {
-    _.set(this.editorState, `interactions.response1.options[${optionIndex}].hints.en`, value)
+    if(value.length && Object.keys(this.hints).length < this.editorState.interactions.response1.options.length ) {
+      const hint = {[uuidv4()] : {en:value}}
+      this.hints = {...this.hints, ...hint}
+      this.editorState.interactions.response1.options[optionIndex].hint = Object.keys(hint)[0]
+    }
+    else if (value.length) {
+      this.hints[this.editorState.interactions.response1.options[optionIndex].hint].en = value;
+    }
   }
 
   subMenuConfig(options) {
     this.subMenus = []
     options.map((opt, index) => {
-      const value  = _.get(this.editorState, `interactions.response1.options[${index}].hints.en`)
+      const uuid  = _.get(this.editorState, `interactions.response1.options[${index}].hint`)
       this.subMenus[index] = [
         {
           id: 'addHint',
           name: 'Add Hint',
-          value,
+          value: (():any => {
+            if(this.hints[uuid]) {
+              return this.hints[uuid].en
+            }
+            else {
+              return this.editorState?.hints?.[uuid] ? this.editorState.hints[uuid].en : ''
+            }
+          })(),
           label: 'Hint',
-          enabled: value ? true : false,
+          enabled: uuid ? true : false,
           type: 'input',
           show: _.get(this.sourcingSettings, 'showAddHints'),
         },

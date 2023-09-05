@@ -11,11 +11,11 @@ import { TreeService } from '../../services/tree/tree.service';
 import {
   editorConfig, editorConfig_question, toolbarConfig_question,
   nativeElement, getCategoryDefinitionResponse, hierarchyResponse,
-  categoryDefinition, categoryDefinitionData, csvExport, hirearchyGet,
-  SelectedNodeMockData, outcomeDeclarationData, observationAndRubericsField,
+  categoryDefinition, categoryDefinitionData,
+  SelectedNodeMockData, observationAndRubericsField,
   questionsetRead, questionsetHierarchyRead, nodesModifiedData, treeNodeData,
-  questionSetEditorConfig, mockOutcomeDeclaration,
-  frameworkData, serverResponse} from './editor.component.spec.data';
+  questionSetEditorConfig, categoryDefinitionPublishCheckList,
+  frameworkData, serverResponse } from './editor.component.spec.data';
 import { ConfigService } from '../../services/config/config.service';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { treeData } from './../fancy-tree/fancy-tree.component.spec.data';
@@ -81,7 +81,6 @@ describe('EditorComponent', () => {
     expect(component.unitFormConfig).toBeUndefined();
     expect(component.searchFormConfig).toBeUndefined();
     expect(component.leafFormConfig).toBeUndefined();
-    expect(component.showLibraryPage).toBeFalsy();
     expect(component.questionlibraryInput).toEqual({});
     expect(component.isQumlPlayer).toBeUndefined();
     expect(component.showQuestionTemplatePopup).toBeFalsy();
@@ -91,12 +90,8 @@ describe('EditorComponent', () => {
     expect(component.buttonLoaders.saveAsDraftButtonLoader).toBeFalsy();
     expect(component.buttonLoaders.addFromLibraryButtonLoader).toBeFalsy();
     expect(component.buttonLoaders.showReviewComment).toBeFalsy();
-    expect(component.csvDropDownOptions).toEqual({});
-    expect(component.showCsvUploadPopup).toBeFalsy();
-    expect(component.isCreateCsv).toBeTruthy();
     expect(component.isStatusReviewMode).toBeFalsy();
     expect(component.ishierarchyConfigSet).toBeFalsy();
-    expect(component.isComponenetInitialized).toBeFalsy();
   });
 
   it('#setEditorConfig() should set editor config', () => {
@@ -106,27 +101,29 @@ describe('EditorComponent', () => {
     component.setEditorConfig();
   })
 
-  it('#ngOnInit() should call all methods inside it (for objectType Collection)', () => {
+  it('#ngOnInit() should call all methods inside it (for objectType QuestionSet)', () => {
     const sampleEditorConfig: any = JSON.stringify(editorConfig);
     component.editorConfig = sampleEditorConfig;
-    component.objectType = 'questionSet';
+    component.objectType = 'questionset';
     const editorService = TestBed.inject(EditorService);
     spyOn(editorService, 'initialize').and.callThrough();
     const treeService = TestBed.inject(TreeService);
     spyOn(treeService, 'initialize').and.callThrough();
     const configService = TestBed.inject(ConfigService);
     component.configService = configService;
-    spyOn(component, 'isReviewMode').and.returnValue(true);
+    spyOn(editorService, 'getToolbarConfig').and.callThrough();
+    spyOn(component, 'isReviewMode').and.returnValue(false);
     spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of(hierarchyResponse));
     spyOn(component, 'initializeFrameworkAndChannel').and.callFake(() => {});
-    spyOn(editorService, 'getCategoryDefinition').and.returnValue(of(getCategoryDefinitionResponse));
+    spyOn(editorService, 'getCategoryDefinition').and.returnValue(of(categoryDefinitionData));
+    spyOn(component, 'sethierarchyConfig').and.callFake(() => {});
     const telemetryService = TestBed.inject(EditorTelemetryService);
     spyOn(telemetryService, 'initializeTelemetry').and.callFake(() => { });
     spyOn(telemetryService, 'start').and.callFake(() => { });
-    const libraryPage: EventEmitter<any> = new EventEmitter();
     const questionLibraryPage: EventEmitter<any> = new EventEmitter();
     spyOn(editorService, 'getshowQuestionLibraryPageEmitter').and.callFake(() => {return questionLibraryPage});
     spyOn(component, 'showQuestionLibraryComponentPage').and.callFake(() => {});
+    spyOn(component, 'getFrameworkDetails').and.callFake(() => {})
     component.ngOnInit();
     expect(component.editorConfig).toBeDefined();
     expect(editorService.initialize).toHaveBeenCalledWith(editorConfig);
@@ -134,21 +131,16 @@ describe('EditorComponent', () => {
     expect(component.editorMode).toEqual('edit');
     expect(treeService.initialize).toHaveBeenCalledWith(editorConfig);
     expect(component.collectionId).toBeDefined();
-    expect(component.isObjectTypeCollection).toBeTruthy();
     expect(component.isReviewMode).toHaveBeenCalled();
-    expect(component.isStatusReviewMode).toBeTruthy();
+    expect(component.isStatusReviewMode).toBeFalsy();
     expect(component.mergeCollectionExternalProperties).toHaveBeenCalled();
     expect(component.toolbarConfig).toBeDefined();
-    expect(component.toolbarConfig.title).toEqual(hierarchyResponse[0].result.content.name);
+    expect(component.toolbarConfig.title).toEqual(hierarchyResponse[0].result.questionset.name);
     expect(component.initializeFrameworkAndChannel).toHaveBeenCalled();
     expect(editorService.getCategoryDefinition).toHaveBeenCalled();
     expect(telemetryService.initializeTelemetry).toHaveBeenCalled();
     expect(telemetryService.telemetryPageId).toEqual('questionset_editor');
     expect(telemetryService.start).toHaveBeenCalled();
-    // expect(editorService.getshowLibraryPageEmitter).toHaveBeenCalled();
-    // expect(component.showLibraryComponentPage).toHaveBeenCalled();
-    // expect(editorService.getshowQuestionLibraryPageEmitter).toHaveBeenCalled();
-    // expect(component.showQuestionLibraryComponentPage).toHaveBeenCalled();
   });
 
   it('#ngOnInit() should call all methods inside it (for objectType Question)', () => {
@@ -216,66 +208,200 @@ describe('EditorComponent', () => {
   });
 
   it('Unit test for #getFrameworkDetails()', () => {
-    const treeService = TestBed.inject(TreeService);
-    const frameworkService = TestBed.inject(FrameworkService);
-    const editorService = TestBed.inject(EditorService);
-    component.organisationFramework = 'dummy';
-    spyOn(component, 'getFrameworkDetails').and.callThrough();
-    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => { });
-    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => { });
-    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(serverResponse));
-    spyOn(component, 'setEditorForms').and.callFake(() => { });
+    spyOn(component, 'setPublishCheckList').and.callFake(() => {});
+    component.targetFramework = '';
+    spyOn(component, 'setTargetFrameworkData').and.callFake(() => {});
+    spyOn(component, 'setOrgFrameworkData').and.callFake(()=> {});
     component.getFrameworkDetails(categoryDefinitionData);
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
-    expect(frameworkService.getFrameworkData).toHaveBeenCalled();
-    expect(component.targetFramework).toBeUndefined();
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
+    expect(component.setPublishCheckList).toHaveBeenCalled();
+    expect(component.setTargetFrameworkData).toHaveBeenCalled();
+    expect(component.setOrgFrameworkData).toHaveBeenCalled();
+  });
+
+  it('unit test for #setOrgFrameworkData() having channelFrameworksType same as orgFWType', () => {
+    spyOn(component, 'setOrgFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(questionSetEditorConfig.context.channelData);
+    const frameworkService = TestBed.inject(FrameworkService);
+    frameworkService.frameworkValues = undefined;
+    spyOn(component, 'setEditorForms').and.callFake(() => {});
+    component.setOrgFrameworkData(categoryDefinitionData);
+    expect(frameworkService.frameworkValues).toBeDefined();
     expect(component.setEditorForms).toHaveBeenCalled();
   });
 
-  it('Unit test for #getFrameworkDetails() when primaryCategory is Obs with rubrics api success', () => {
-    const treeService = TestBed.inject(TreeService);
+  it('unit test for #setOrgFrameworkData() having channelFrameworksType not same as orgFWType', () => {
+    spyOn(component, 'setOrgFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    let channelData = {frameworks: ['NIT']}
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(channelData);
     const frameworkService = TestBed.inject(FrameworkService);
-    const editorService = TestBed.inject(EditorService);
-    component.organisationFramework = 'dummy';
-    editorConfig.config.renderTaxonomy = true;
-    component.editorConfig = editorConfig;
-    spyOn(editorService, 'fetchOutComeDeclaration').and.returnValue(of(mockOutcomeDeclaration));
-    spyOn(component, 'getFrameworkDetails').and.callThrough();
-    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => { });
-    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => { });
-    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(serverResponse));
-    spyOn(component, 'setEditorForms').and.callFake(() => { });
-    component.getFrameworkDetails(categoryDefinitionData);
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
-    expect(component.targetFramework).toBeUndefined();
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
+    let frameworkResponse = serverResponse;
+    frameworkResponse.result = { Framework: [{
+          name: 'NIT',
+          identifier: 'nit-12',
+          objectType: 'Framework',
+          status: 'Live',
+          type: 'nit'
+      }]
+    }
+    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(frameworkResponse))
+    spyOn(component, 'setEditorForms').and.callFake(() => {});
+    component.setOrgFrameworkData(categoryDefinitionData);
+    expect(component.setEditorForms).toHaveBeenCalled();
   });
 
-  it('Unit test for #getFrameworkDetails() when primaryCategory is Obs with rubrics outcome declaration api fail', () => {
-    const treeService = TestBed.inject(TreeService);
+  it('unit test for #setOrgFrameworkData() when orgFWIdentifiers is set', () => {
+    const categoryDefResponse = {
+      result: {
+        objectCategoryDefinition: {
+          objectMetadata: {
+            schema: {properties: {'framework': {default: 'nit-12'}}}
+          }
+        }
+      }
+    };
+    spyOn(component, 'setOrgFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    let channelData = {frameworks: ['NIT']}
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(channelData);
     const frameworkService = TestBed.inject(FrameworkService);
-    const editorService = TestBed.inject(EditorService);
-    component.organisationFramework = 'dummy';
-    editorConfig.config.renderTaxonomy = true;
-    component.editorConfig = editorConfig;
-    spyOn(editorService, 'fetchOutComeDeclaration').and.returnValue(throwError('error'));
-    spyOn(component, 'getFrameworkDetails').and.callThrough();
-    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => { });
-    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => { });
-    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(serverResponse));
-    spyOn(component, 'setEditorForms').and.callFake(() => { });
-    component.getFrameworkDetails(categoryDefinitionData);
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
-    expect(component.targetFramework).toBeUndefined();
-    expect(treeService.updateMetaDataProperty).not.toHaveBeenCalled();
-    expect(frameworkService.getTargetFrameworkCategories).not.toHaveBeenCalled();
+    let frameworkResponse = serverResponse;
+    frameworkResponse.result = { Framework: [{
+          name: 'NIT',
+          identifier: 'nit-12',
+          objectType: 'Framework',
+          status: 'Live',
+          type: 'nit'
+      }]
+    }
+    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(frameworkResponse))
+    spyOn(component, 'setEditorForms').and.callFake(() => {});
+    component.setOrgFrameworkData(categoryDefResponse);
+    expect(component.setEditorForms).toHaveBeenCalled();
   });
+
+  it('unit test for #setTargetFrameworkData() having channelFrameworksType same as targetFWType', () => {
+    const categoryDefResponse = {
+      result: {
+        objectCategoryDefinition: {
+          objectMetadata: {
+            config: {
+              frameworkMetadata: {
+                targetFWType: ['TPD']
+            }}
+          }
+        }
+      }
+    };
+    spyOn(component, 'setTargetFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    let channelData = questionSetEditorConfig.context.channelData;
+    channelData.frameworks = [{
+      name: 'nit_tpd',
+      relation: 'hasSequenceMember',
+      identifier: 'nit_tpd',
+      description: 'nit_tpd Framework',
+      objectType: 'Framework',
+      status: 'Live',
+      type: 'TPD'
+    }];
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(channelData);
+    const treeService= TestBed.inject(TreeService);
+    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => {});
+    const frameworkService = TestBed.inject(FrameworkService);
+    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => {});
+    component.setTargetFrameworkData(categoryDefResponse);
+    expect(treeService.updateMetaDataProperty).toHaveBeenCalled();
+    expect(frameworkService.getTargetFrameworkCategories).toHaveBeenCalled();
+  });
+
+  it('unit test for #setTargetFrameworkData() having channelFrameworksType not same as targetFWType', () => {
+    const categoryDefResponse = {
+      result: {
+        objectCategoryDefinition: {
+          objectMetadata: {
+            config: {
+              frameworkMetadata: {
+                targetFWType: ['TPD', 'NCERT']
+            }}
+          }
+        }
+      }
+    };
+    spyOn(component, 'setTargetFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    let channelData = questionSetEditorConfig.context.channelData;
+    channelData.frameworks = [{
+      name: 'nit_tpd',
+      relation: 'hasSequenceMember',
+      identifier: 'nit_tpd',
+      description: 'nit_tpd Framework',
+      objectType: 'Framework',
+      status: 'Live',
+      type: 'TPD'
+    }];
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(channelData);
+    const treeService= TestBed.inject(TreeService);
+    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => {});
+    const frameworkService = TestBed.inject(FrameworkService);
+    let frameworkResponse = serverResponse;
+    frameworkResponse.result = { Framework: [{
+      name: 'CBSE',
+      identifier: 'ncert-k12',
+      objectType: 'Framework',
+      status: 'Live',
+      type: 'NCERT'
+      }]
+    }
+    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(frameworkResponse))
+    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => {});
+    component.setTargetFrameworkData(categoryDefResponse);
+    expect(treeService.updateMetaDataProperty).toHaveBeenCalled();
+    expect(frameworkService.getTargetFrameworkCategories).toHaveBeenCalled();
+  });
+
+  it('unit test for #setTargetFrameworkData() when targetFWIdentifiers is set', () => {
+    const categoryDefResponse = {
+      result: {
+        objectCategoryDefinition: {
+          objectMetadata: {
+            schema: {properties: {'targetFWIds': {default: 'nit-12'}}}
+          }
+        }
+      }
+    };
+    spyOn(component, 'setTargetFrameworkData').and.callThrough();
+    const helperService = TestBed.inject(HelperService);
+    let channelData = {frameworks: ['NIT']}
+    spyOnProperty(helperService, 'channelInfo').and.returnValue(channelData);
+    const treeService= TestBed.inject(TreeService);
+    spyOn(treeService, 'updateMetaDataProperty').and.callFake(() => {});
+    const frameworkService = TestBed.inject(FrameworkService);
+    let frameworkResponse = serverResponse;
+    frameworkResponse.result = { Framework: [{
+          name: 'NIT',
+          identifier: 'nit-12',
+          objectType: 'Framework',
+          status: 'Live',
+          type: 'nit'
+      }]
+    }
+    spyOn(frameworkService, 'getFrameworkData').and.returnValue(of(frameworkResponse));
+    spyOn(frameworkService, 'getTargetFrameworkCategories').and.callFake(() => {});
+    spyOn(component, 'setEditorForms').and.callFake(() => {});
+    component.setTargetFrameworkData(categoryDefResponse);
+    expect(treeService.updateMetaDataProperty).toHaveBeenCalled();
+    expect(frameworkService.getTargetFrameworkCategories).toHaveBeenCalled();
+  });
+
+  it('Unit test for #setPublishCheckList()', () => {
+    component.publishchecklist = undefined;
+    spyOn(component, 'setPublishCheckList').and.callThrough();
+    component.setPublishCheckList(categoryDefinitionPublishCheckList);
+    expect(component.publishchecklist).toBeDefined();
+
+  })
 
   it('#setEditorForms() should set variable values for questionset', () => {
     component.objectType = 'questionset';
@@ -318,14 +444,12 @@ describe('EditorComponent', () => {
   });
 
   it('#ngAfterViewInit() should call #impression()', () => {
-    component.isComponenetInitialized = false;
     const telemetryService = TestBed.inject(EditorTelemetryService);
     telemetryService.telemetryPageId = 'questionset_editor';
     spyOn(telemetryService, 'impression').and.callFake(() => { });
     spyOn(component, 'ngAfterViewInit').and.callThrough();
     component.ngAfterViewInit();
     expect(telemetryService.impression).toHaveBeenCalled();
-    expect(component.isComponenetInitialized).toBeTruthy();
   });
 
   it('#mergeCollectionExternalProperties() should call fetchCollectionHierarchy for objectType questionset', () => {
@@ -341,7 +465,6 @@ describe('EditorComponent', () => {
     expect(editorService.fetchCollectionHierarchy).toHaveBeenCalled();
     expect(editorService.readQuestionSet).toHaveBeenCalled();
     expect(component.collectionTreeNodes).toBeDefined();
-    expect(component.isTreeInitialized).toBeTruthy();
   });
 
   it('#mergeCollectionExternalProperties() should call fetchCollectionHierarchy for objectType collection', () => {
@@ -661,15 +784,11 @@ describe('EditorComponent', () => {
   });
 
   it('#libraryEventListener() should set pageId to questionset_editor', async () => {
-    component.isEnableCsvAction = false;
-    component.isComponenetInitialized = false;
     const res = {};
     spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of(res));
     spyOn(component, 'libraryEventListener').and.callThrough();
     component.libraryEventListener({});
     expect(component.pageId).toEqual('questionset_editor');
-    expect(component.isEnableCsvAction).toBeTruthy();
-    expect(component.isComponenetInitialized).toBeTruthy();
   });
 
   it('#onQuestionLibraryChange() should call #addResourceToQuestionset()', () => {
@@ -1001,7 +1120,6 @@ describe('EditorComponent', () => {
         }
       }
     };
-    component.isObjectTypeCollection = false;
     component.editorConfig = editorConfig;
     spyOn(component, 'updateTreeNodeData').and.callFake(() => {
       return true;
@@ -1227,7 +1345,6 @@ describe('EditorComponent', () => {
   });
 
   it('#questionEventListener() should set #pageId to questionset_editor', () => {
-    component.isEnableCsvAction = false;
     component.telemetryService.telemetryPageId = '';
     component.objectType = 'questionSet';
     spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of({}));
@@ -1235,7 +1352,6 @@ describe('EditorComponent', () => {
     component.questionEventListener({type: 'createNewContent'});
     expect(component.pageId).toEqual('questionset_editor');
     expect(component.telemetryService.telemetryPageId).toEqual('questionset_editor');
-    expect(component.isEnableCsvAction).toBeTruthy();
   });
 
   it('#questionEventListener() should emit event for objectType question', () => {
@@ -1291,147 +1407,10 @@ describe('EditorComponent', () => {
     expect(result).toBeTruthy();
   });
 
-  it('#handleCsvDropdownOptionsOnCollection should set dropdown status initially', () => {
-    spyOn(component, 'setCsvDropDownOptionsDisable').and.callFake(() => {});
-    component.isTreeInitialized = true;
-    component.handleCsvDropdownOptionsOnCollection();
-    expect(component.isEnableCsvAction).toBeTruthy();
-    expect(component.isTreeInitialized).toBeFalsy();
-    expect(component.setCsvDropDownOptionsDisable).toHaveBeenCalledWith(true);
-  });
-
-  it('#handleCsvDropdownOptionsOnCollection should set isEnableCsvAction status false', () => {
-    component.isEnableCsvAction = true;
-    component.isTreeInitialized = false;
-    spyOn(component, 'setCsvDropDownOptionsDisable').and.callFake(() => {});
-    component.handleCsvDropdownOptionsOnCollection();
-    expect(component.isEnableCsvAction).toBeFalsy();
-    expect(component.isTreeInitialized).toBeFalsy();
-    expect(component.setCsvDropDownOptionsDisable).toHaveBeenCalledWith(true);
-  });
-
-  it('#onClickFolder() should call setCsvDropDownOptionsDisable when isComponenetInitialized is true', () => {
-    component.isComponenetInitialized = true;
-    spyOn(component, 'setCsvDropDownOptionsDisable').and.callFake(() => {});
-    spyOn(component, 'onClickFolder').and.callThrough();
-    component.onClickFolder();
-    expect(component.setCsvDropDownOptionsDisable).toHaveBeenCalledWith();
-    expect(component.isComponenetInitialized).toBeFalsy();
-  });
-
-  it('#onClickFolder() should call setCsvDropDownOptionsDisable when isEnableCsvAction is true', () => {
-    component.isEnableCsvAction = true;
-    component.isComponenetInitialized = false;
-    spyOn(component, 'setCsvDropDownOptionsDisable').and.callFake(() => {});
-    component.onClickFolder();
-    expect(component.setCsvDropDownOptionsDisable).toHaveBeenCalledWith();
-  });
-
-  it('#onClickFolder() should not call setCsvDropDownOptionsDisable', () => {
-    component.isEnableCsvAction = false;
-    component.isComponenetInitialized = false;
-    spyOn(component, 'setCsvDropDownOptionsDisable').and.callFake(() => {});
-    component.onClickFolder();
-    expect(component.setCsvDropDownOptionsDisable).not.toHaveBeenCalledWith();
-  });
-
-  it('#setCsvDropDownOptionsDisable and should set csv dropdown options', () => {
-    component.csvDropDownOptions = {
-      isDisableCreateCsv: true,
-      isDisableUpdateCsv: true,
-      isDisableDownloadCsv: true
-    };
-    // tslint:disable-next-line:no-string-literal
-    spyOn(component['editorService'], 'getHierarchyFolder').and.returnValue([1]);
-    component.setCsvDropDownOptionsDisable(true);
-    expect(component.csvDropDownOptions.isDisableCreateCsv).toBeTruthy();
-    expect(component.csvDropDownOptions.isDisableUpdateCsv).toBeTruthy();
-    expect(component.csvDropDownOptions.isDisableDownloadCsv).toBeTruthy();
-  });
-
-  it('#setCsvDropDownOptionsDisable and should set csv dropdown options for empty childs', () => {
-    component.csvDropDownOptions = {
-      isDisableCreateCsv: true,
-      isDisableUpdateCsv: true,
-      isDisableDownloadCsv: true
-    };
-    // tslint:disable-next-line:no-string-literal
-    spyOn(component['editorService'], 'getHierarchyFolder').and.returnValue([]);
-    component.setCsvDropDownOptionsDisable();
-    expect(component.csvDropDownOptions.isDisableCreateCsv).toBeFalsy();
-    expect(component.csvDropDownOptions.isDisableUpdateCsv).toBeTruthy();
-    expect(component.csvDropDownOptions.isDisableDownloadCsv).toBeTruthy();
-  });
-
-  it('#downloadHierarchyCsv() should call downloadHierarchyCsv and success case', () => {
-    // tslint:disable-next-line:no-string-literal
-    spyOn(component['editorService'], 'downloadHierarchyCsv').and.returnValue(of(csvExport.successExport));
-    spyOn(component, 'downloadCSVFile').and.callThrough();
-    component.downloadHierarchyCsv();
-    expect(component.downloadCSVFile).toHaveBeenCalledWith(csvExport.successExport.result.collection.tocUrl);
-  });
-
-  it('#downloadHierarchyCsv() should call downloadHierarchyCsv and error case', () => {
-    component.collectionId = 'do_11331581945782272012';
-    spyOn(toasterService, 'error').and.callFake(() => {});
-    // tslint:disable-next-line:no-string-literal
-    spyOn(component['editorService'], 'downloadHierarchyCsv').and.returnValue(throwError(csvExport.errorExport));
-    spyOn(component, 'downloadCSVFile').and.callThrough();
-    component.downloadHierarchyCsv();
-    expect(toasterService.error).toHaveBeenCalled();
-  });
-
   it('#isReviewMode should return editor mode status', () => {
     spyOn(component, 'isReviewMode').and.returnValue(true);
     const value = component.isReviewMode();
     expect(value).toBeTruthy();
-  });
-
-  it('#downloadFile() should download the file', () => {
-    component.collectionId = 'do_113274017771085824116';
-    // tslint:disable-next-line:max-line-length
-    const blobUrl = 'https://sunbirddev.blob.core.windows.net/sunbird-content-dev/content/course/toc/do_11331579492804198413_untitled-course_1625465046239.csv';
-    const editorService = TestBed.inject(EditorService);
-    // spyOn(window, 'open').and.callFake(() => {});
-    component.downloadCSVFile(blobUrl);
-    // expect(window.open).toHaveBeenCalled();
-  });
-
-  it('#hanndleCsvEmitter should check for closeModal conditions', () => {
-    const event = { type: 'closeModal' };
-    component.hanndleCsvEmitter(event);
-    expect(component.showCsvUploadPopup).toBeFalsy();
-  });
-
-  it('#hanndleCsvEmitter should check for downloadCsv conditions', () => {
-    spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of(hirearchyGet));
-    const event = { type: 'updateHierarchy' };
-    component.hanndleCsvEmitter(event);
-    expect(component.mergeCollectionExternalProperties).toHaveBeenCalled();
-    expect(component.pageId).toEqual('questionset_editor');
-    expect(component.telemetryService.telemetryPageId).toEqual('questionset_editor');
-    expect(component.isEnableCsvAction).toBeTruthy();
-  });
-
-  it('#hanndleCsvEmitter should check for create csv conditions', () => {
-    const event = { type: 'createCsv' };
-    component.hanndleCsvEmitter(event);
-    expect(component.showCsvUploadPopup).toBeTruthy();
-    expect(component.isCreateCsv).toBeTruthy();
-  });
-
-  it('#hanndleCsvEmitter should check for updateCsv conditions', () => {
-    const event = { type: 'updateCsv' };
-    component.hanndleCsvEmitter(event);
-    expect(component.showCsvUploadPopup).toBeTruthy();
-    expect(component.isCreateCsv).toBeFalsy();
-  });
-
-  it('#hanndleCsvEmitter should check for downloadCsv conditions', () => {
-    spyOn(component, 'downloadHierarchyCsv').and.callFake(() => {});
-    const event = { type: 'downloadCsv' };
-    component.hanndleCsvEmitter(event);
-    expect(component.downloadHierarchyCsv).toHaveBeenCalled();
   });
 
   it('#onFormStatusChange() should store form status when form state changed', () => {
