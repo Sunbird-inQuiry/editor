@@ -151,7 +151,6 @@ export const rootNode = {
                 contentDisposition: 'inline',
                 lastUpdatedOn: '2022-04-05T06:59:12.048+0000',
                 contentEncoding: 'gzip',
-                generateDIALCodes: 'No',
                 showSolutions: false,
                 allowAnonymousAccess: 'Yes',
                 identifier: 'do_1135097613515735041129',

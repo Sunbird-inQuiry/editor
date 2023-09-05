@@ -113,13 +113,6 @@ describe('EditorService', () => {
     expect(result).toBeTruthy();
   });
 
-  it('#emitshowLibraryPageEvent() should call #showLibraryPage.emit event', () => {
-    spyOn(editorService, 'emitshowLibraryPageEvent').and.callThrough();
-    spyOn(editorService.showLibraryPage, 'emit').and.callFake(() => { });
-    editorService.emitshowLibraryPageEvent('test');
-    expect(editorService.showLibraryPage.emit).toHaveBeenCalled();
-  });
-
   it('#emitshowQuestionLibraryPageEvent() should call #showQuestionLibraryPage.emit event', () => {
     spyOn(editorService, 'emitshowQuestionLibraryPageEvent').and.callThrough();
     spyOn(editorService.showQuestionLibraryPage, 'emit').and.callFake(() => { });
@@ -139,11 +132,6 @@ describe('EditorService', () => {
     service.contentsCount = 2;
     service.contentsCountAddedInLibraryPage(true);
     expect(service.contentsCount).toBe(0);
-  });
-
-  it('#getshowLibraryPageEmitter() should return event emitter object', () => {
-    const result: EventEmitter<number> = editorService.getshowLibraryPageEmitter();
-    expect(result).toBeTruthy();
   });
 
   it('#getshowQuestionLibraryPageEmitter() should return event emitter object', () => {

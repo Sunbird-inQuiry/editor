@@ -146,14 +146,6 @@ describe('HelperService', () => {
     expect(publicDataService.post).toHaveBeenCalled();
   });
 
-  it('#updateCollaborator() should call publicDataService.patch()', () => {
-    const publicDataService: PublicDataService = TestBed.inject(PublicDataService);
-    spyOn(publicDataService, 'patch').and.returnValue(of(serverResponse));
-    spyOn(service, 'updateCollaborator').and.callThrough();
-    service.updateCollaborator('do_12345', ['12345']);
-    expect(publicDataService.patch).toHaveBeenCalled();
-  });
-
   it('#addDepthToHierarchy should call', () => {
     spyOn(service, 'addDepthToHierarchy').and.callThrough();
     const data = [

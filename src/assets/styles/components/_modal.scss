@@ -272,38 +272,6 @@
   list-style-type: disc;
 }
 
-.ui.error.message.bulkupload-error {
-  max-height: 12.5rem;
-  overflow: auto;
-
-  .errorDiv {
-    opacity: 0.00001;
-
-    .errorTextArea {
-      height: 0.5rem;
-    }
-  }
-}
-
-// .sb-batch-update-modal .checkbox-img{
-// 	position:absolute;
-// 	top:1.5rem;
-// 	left:1.5rem;
-// 	right:1.5rem;
-// 	display:inline;
-// 	width:2rem;
-// 	height:2rem;
-// 	background-color:var(--rc-009D53);
-// 	-webkit-mask-image:url(checkbox-icon.ac8943a71bf2362fc83e.svg);
-// 	mask-image:url(checkbox-icon.ac8943a71bf2362fc83e.svg);
-// 	-webkit-mask-size:contain;
-// 	-webkit-mask-position:50% 50%;
-// 	-webkit-mask-repeat:no-repeat;
-// 	mask-size:contain;
-// 	mask-position:50% 50%;
-// 	mask-repeat:no-repeat
-// }
-
 .sb-cert-preview-modal {
 
   .sb-modal-center .sb-modal-actions,

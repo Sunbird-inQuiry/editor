@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, ViewEncapsulation } from '@angular/core';
 import { merge, of, Subject, Subscription } from 'rxjs';
 import * as _ from 'lodash-es';
 import { takeUntil, filter, switchMap, map } from 'rxjs/operators';
@@ -185,7 +185,7 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
           const channelData = this.helperService.channelInfo;
           field.default = _.get(metaDataFields, field.code);
           if (_.isEmpty(field.default) && this.editorService.editorConfig.config.setDefaultCopyRight) {
-            field.default = channelData && channelData.name;
+            field.default = channelData?.name;
           }
         }
 
@@ -270,7 +270,6 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
     }
     return false;
   }
-  outputData(eventData: any) { }
 
   onStatusChanges(event) {
     this.toolbarEmitter.emit({ button: 'onFormStatusChange', event });
@@ -330,8 +329,9 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
         levels: this.createLeavels(event.levels)
       };
     }
-    // tslint:disable-next-line:no-unused-expression
-    event?.instance ? data.instances = { label : event?.instances } : '';
+    if (event?.instance) {
+      data.instances = { label : event?.instances }
+    }
     if (!_.isEmpty(this.appIcon) && this.showAppIcon) {
       data.appIcon = this.appIcon;
     }

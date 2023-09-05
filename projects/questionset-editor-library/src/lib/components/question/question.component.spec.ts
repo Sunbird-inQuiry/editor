@@ -161,7 +161,6 @@ describe("QuestionComponent", () => {
   it("should create", () => {
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "true",
     });
     expect(component).toBeTruthy();
@@ -202,7 +201,6 @@ describe("QuestionComponent", () => {
     });
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "",
     });
     spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
@@ -243,7 +241,6 @@ describe("QuestionComponent", () => {
     component.creationContext.objectType = "question";
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "",
     });
     spyOn(editorService, "fetchCollectionHierarchy").and.returnValue(
@@ -268,7 +265,6 @@ describe("QuestionComponent", () => {
     component.questionPrimaryCategory = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -303,7 +299,6 @@ describe("QuestionComponent", () => {
     component.leafFormConfig = leafFormConfigMock;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -326,7 +321,6 @@ describe("QuestionComponent", () => {
     component.leafFormConfig = leafFormConfigMock;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -356,7 +350,6 @@ describe("QuestionComponent", () => {
     editorService.parentIdentifier = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -386,7 +379,6 @@ describe("QuestionComponent", () => {
     editorService.parentIdentifier = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -415,7 +407,6 @@ describe("QuestionComponent", () => {
     component.childFormData = childMetaData;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -489,7 +480,6 @@ describe("QuestionComponent", () => {
     editorService.parentIdentifier = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -516,7 +506,6 @@ describe("QuestionComponent", () => {
     editorService.parentIdentifier = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -543,7 +532,6 @@ describe("QuestionComponent", () => {
     editorService.parentIdentifier = undefined;
     spyOn(editorService, "getToolbarConfig").and.returnValue({
       title: "abcd",
-      showDialcode: "No",
       showPreview: "false",
     });
     component.toolbarConfig.showPreview = false;
@@ -734,11 +722,7 @@ describe("QuestionComponent", () => {
     component.populateFrameworkData();
     expect(component.leafFormConfig).toBeDefined();
   });
-  it("#outputData() should call outputData", () => {
-    spyOn(component, "output").and.callThrough();
-    component.output({});
-    expect(component.output).toHaveBeenCalled();
-  });
+
   it("#onStatusChanges() should call onStatusChanges", () => {
     spyOn(component, "onStatusChanges");
     component.onStatusChanges("");
@@ -844,7 +828,6 @@ describe("QuestionComponent", () => {
     spyOn(component, "setQuestionTitle");
     component.setQuestionId("do_11330103476396851218");
     expect(component.questionId).toEqual("do_11330103476396851218");
-    expect(component.setQuestionTitle);
   });
   it("#rejectQuestion() should call #requestForChanges", () => {
     const comment = "test comment";
@@ -1200,13 +1183,13 @@ describe("QuestionComponent", () => {
   it('#getAnswerHtml() should return answer html', () => {
     spyOn(component, 'getAnswerHtml').and.callThrough();
     const answerHtml = component.getAnswerHtml('<p>Sample Answer</p>');
-    expect(answerHtml).toBe('<div class=\'anwser-body\'><p>Sample Answer</p></div>');
+    expect(answerHtml).toBe('<div class=\'answer-body\'><p>Sample Answer</p></div>');
   });
 
   it('#getAnswerWrapperHtml() should return answer html', () => {
     spyOn(component, 'getAnswerWrapperHtml').and.callThrough();
-    const answerWrappedHtml = component.getAnswerWrapperHtml('<div class=\'anwser-body\'><p>Sample Answer</p></div>');
-    expect(answerWrappedHtml).toBe('<div class=\'anwser-container\'><div class=\'anwser-body\'><p>Sample Answer</p></div></div>');
+    const answerWrappedHtml = component.getAnswerWrapperHtml('<div class=\'answer-body\'><p>Sample Answer</p></div>');
+    expect(answerWrappedHtml).toBe('<div class=\'answer-container\'><div class=\'answer-body\'><p>Sample Answer</p></div></div>');
   });
 
   it('#getInteractionValues() should return correct answer object', () => {
@@ -1379,62 +1362,82 @@ describe("QuestionComponent", () => {
   it("#validateQuestionData() should call validateQuestionData and question is undefined", () => {
     component.editorState = mockData.editorState;
     component.editorState.question = undefined;
+    spyOn(component, 'validateQuestionData').and.callThrough();
     component.validateQuestionData();
     expect(component.showFormError).toBeTruthy();
   });
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is default", () => {
-    component.sourcingSettings = sourcingSettingsMock;
+  it("#validateQuestionData() should call validateDefaultQuestionData and questionInteractionType is default", () => {
     component.editorState = mockData.defaultQuestionMetaData.result.question;
     component.editorState.question = "<p> Hi how are you </p>";
-    component.questionInteractionType = "default";
+    component.questionInteractionType = "default";   
+    spyOn(component, 'validateQuestionData').and.callThrough();
+    spyOn(component, 'validateDefaultQuestionData').and.callFake(() => {});
+    component.validateQuestionData();
+    expect(component.validateDefaultQuestionData).toHaveBeenCalled();
+  });
+
+  it('#validateDefaultQuestionData() should validate answer and set showFormError to false', () => {
+    component.editorState = mockData.defaultQuestionMetaData.result.question;
+    component.editorState.question = "<p> Hi how are you </p>";
     component.editorState.answer = "0";
-    component.validateQuestionData();
+    spyOn(component, 'validateDefaultQuestionData').and.callThrough();
+    component.validateDefaultQuestionData();
     expect(component.showFormError).toBeFalsy();
   });
 
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is default", () => {
-    component.sourcingSettings = sourcingSettingsMock;
+  it('#validateDefaultQuestionData() should validate answer and set showFormError to true', () => {
     component.editorState = mockData.defaultQuestionMetaData.result.question;
-    component.questionInteractionType = "default";
     component.editorState.question = "<p> Hi how are you </p>";
     component.editorState.answer = "";
-    component.validateQuestionData();
+    spyOn(component, 'validateDefaultQuestionData').and.callThrough();
+    component.validateDefaultQuestionData();
     expect(component.showFormError).toBeTruthy();
   });
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is mcq", () => {
-    component.sourcingSettings = sourcingSettingsMock;
-    spyOn(treeService, "getFirstChild").and.callFake(() => {
-      return { data: { metadata: { identifier: "0123",allowScoring:'Yes' } } };
-    });
-    component.editorState = mockData.mcqQuestionMetaData.result.question;
-    editorService = TestBed.inject(EditorService);
-    editorService.editorConfig.renderTaxonomy=false;
-    component.editorState.question = "<p> Hi how are you </p>";
-    component.editorState.answer = "";
-    component.questionInteractionType = "choice";
+
+  it("#validateQuestionData() should call validateDefaultQuestionData and questionInteractionType is default", () => {
+    component.editorState = mockData.defaultQuestionMetaData.result.question;
+    component.editorState.question = "<p>2+2 = ?</p>";
+    component.questionInteractionType = "choice";   
+    spyOn(component, 'validateQuestionData').and.callThrough();
+    spyOn(component, 'validateChoiceQuestionData').and.callFake(() => {});
     component.validateQuestionData();
+    expect(component.validateChoiceQuestionData).toHaveBeenCalled();
   });
 
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is mcq when scoring is added", () => {
+  it('#validateChoiceQuestionData() should validate and set showFormError to true', () => {
     component.sourcingSettings = sourcingSettingsMock;
-    spyOn(treeService, "getFirstChild").and.callFake(() => {
-      return { data: { metadata: { identifier: "0123",allowScoring:'Yes' } } };
-    });
-    mockData.mcqQuestionMetaData.result.question.responseDeclaration.response1.mapping=[
-      {value:0,score:10},
-      {value:1,score:10}
-    ]
+    component.treeNodeData = {data: {metadata: {allowScoring: 'Yes'}}}
     component.editorState = mockData.mcqQuestionMetaData.result.question;
+    component.editorState.responseDeclaration.response1.mapping = [];
     editorService = TestBed.inject(EditorService);
-    editorService.editorConfig.renderTaxonomy=false;
+    editorService.editorConfig.renderTaxonomy = false;
     component.editorState.question = "<p> Hi how are you </p>";
     component.editorState.answer = "";
     component.questionInteractionType = "choice";
-    component.validateQuestionData();
+    const toasterService = TestBed.inject(ToasterService);
+    spyOn(toasterService, 'error').and.callFake(() => {});
+    spyOn(component, 'validateChoiceQuestionData').and.callThrough();
+    component.validateChoiceQuestionData();
+    expect(component.showFormError).toBeTruthy();
+  });
+
+  it('#validateChoiceQuestionData() should validate and set showFormError to false when allowScoring is No', () => {
+    component.sourcingSettings = sourcingSettingsMock;
+    component.treeNodeData = {data: {metadata: {allowScoring: 'No'}}}
+    component.editorState = mockData.mcqQuestionMetaData.result.question;
+    editorService = TestBed.inject(EditorService);
+    editorService.editorConfig.renderTaxonomy = false;
+    component.editorState.question = "<p> Hi how are you </p>";
+    component.editorState.answer = "";
+    component.questionInteractionType = "choice";
+    const toasterService = TestBed.inject(ToasterService);
+    spyOn(toasterService, 'error').and.callFake(() => {});
+    spyOn(component, 'validateChoiceQuestionData').and.callThrough();
+    component.validateChoiceQuestionData();
     expect(component.showFormError).toBeFalsy();
   });
 
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is text", () => {
+  it("#validateQuestionData() should call validateQuestionData when questionInteractionType is text", () => {
     component.sourcingSettings = sourcingSettingsMock;
     component.editorState = mockData.textQuestionNetaData.result.question;
     component.editorState.question = "<p> Hi how are you </p>";
@@ -1443,7 +1446,7 @@ describe("QuestionComponent", () => {
     expect(component.showFormError).toBeFalsy();
   });
 
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is date", () => {
+  it("#validateQuestionData() should call validateQuestionData when questionInteractionType is date", () => {
     component.sourcingSettings = sourcingSettingsMock;
     component.editorState = mockData.dateQuestionMetaDate.result.question;
     component.editorState.question = "<p> Hi how are you </p>";
@@ -1452,14 +1455,26 @@ describe("QuestionComponent", () => {
     expect(component.showFormError).toBeFalsy();
   });
 
-  it("#validateQuestionData() should call validateQuestionData and questionInteractionType is slider", () => {
+  it("#validateQuestionData() should call validateQuestionData when questionInteractionType is date", () => {
+    component.sourcingSettings = sourcingSettingsMock;
+    component.editorState = mockData.dateQuestionMetaDate.result.question;
+    component.editorState.question = "<p> Hi how are you </p>";
+    component.questionInteractionType = "date";
+    component.validateQuestionData();
+    expect(component.showFormError).toBeFalsy();
+  })
+
+  it("#validateQuestionData() should call validateSliderQuestionData and questionInteractionType is slider", () => {
     component.sourcingSettings = sourcingSettingsMock;
     component.editorState = mockData.sliderQuestionMetaData.result.question;
     component.editorState.question = "<p> Hi how are you </p>";
     component.questionInteractionType = "slider";
     component.sliderDatas =
       mockData.sliderQuestionMetaData.result.question.interactions.response1;
+    spyOn(component, 'validateSliderQuestionData').and.callThrough();
+    spyOn(component, 'validateQuestionData').and.callThrough();
     component.validateQuestionData();
+    expect(component.validateSliderQuestionData).toHaveBeenCalled();
     expect(component.showFormError).toBeFalsy();
   });
 
@@ -1470,7 +1485,10 @@ describe("QuestionComponent", () => {
     component.questionInteractionType = "slider";
     component.sliderDatas = {};
     component.configService = configService;
+    spyOn(component, 'validateSliderQuestionData').and.callThrough();
+    spyOn(component, 'validateQuestionData').and.callThrough();
     component.validateQuestionData();
+    expect(component.validateSliderQuestionData).toHaveBeenCalled();
     expect(component.showFormError).toBeTruthy();
   });
 
@@ -1810,18 +1828,18 @@ describe("QuestionComponent", () => {
     expect(component.sliderData).toHaveBeenCalledWith(event);
   });
 
-  it("#getResponseDeclaration() should set responseDecleration for slider", () => {
+  it("#getResponseDeclaration() should set responseDeclaration for slider", () => {
     spyOn(component, "getResponseDeclaration").and.callThrough();
-    const responseDecleration = component.getResponseDeclaration("slider");
+    const responseDeclaration = component.getResponseDeclaration("slider");
     expect(component.getResponseDeclaration).toHaveBeenCalled();
-    expect(responseDecleration.response1.type).toEqual('integer');
+    expect(responseDeclaration.response1.type).toEqual('integer');
   });
 
-  it("#getResponseDeclaration() should set responseDecleration for text", () => {
+  it("#getResponseDeclaration() should set responseDeclaration for text", () => {
     spyOn(component, "getResponseDeclaration").and.callThrough();
-    const responseDecleration = component.getResponseDeclaration("text");
+    const responseDeclaration = component.getResponseDeclaration("text");
     expect(component.getResponseDeclaration).toHaveBeenCalled();
-    expect(responseDecleration.response1.type).toEqual('string');
+    expect(responseDeclaration.response1.type).toEqual('string');
   });
 
   it("#saveUpdateQuestions call on click save button api fail case", () => {
@@ -1969,13 +1987,68 @@ describe("QuestionComponent", () => {
     component.prepareQuestionBody();
   });
 
-  it("#setQuestionTitle() should set #toolbarConfig.title for question", () => {
-    creationContextMock.objectType = "questionSet";
-    component.questionId = "do_123";
-    component.creationContext = creationContextMock;
-    component.questionPrimaryCategory = "";
+  it("#setQuestionTitle() should set #toolbarConfig.title for question editor", () => {
+    component.toolbarConfig.title = '';
+    component.creationContext = {objectType: 'question'};
+    component.questionPrimaryCategory = 'Multiple Choice Question';
+    spyOn(component, 'setQuestionTitle').and.callThrough();
     component.setQuestionTitle();
-    expect(component.questionId).toEqual("do_123");
+    expect(component.toolbarConfig.title).toEqual("Multiple Choice Question");
+  });
+
+  it("#setQuestionTitle() should set #toolbarConfig.title for questionset editor for defined questionId", () => {
+    component.toolbarConfig.title = '';
+    component.creationContext = {};
+    spyOn(component, 'getExistingQuestionTitle').and.returnValue('MCQ1');
+    spyOn(component, 'setQuestionTitle').and.callThrough();
+    component.setQuestionTitle('do_12345678910');
+    expect(component.getExistingQuestionTitle).toHaveBeenCalled();
+    expect(component.toolbarConfig.title).toEqual('MCQ1');
+  });
+
+  it("#setQuestionTitle() should set #toolbarConfig.title for questionset editor for undefined questionId", () => {
+    const treeService = TestBed.inject(TreeService);
+    spyOn(treeService, 'getChildren').and.returnValue([{'name': 'MCQ1'}])
+    component.toolbarConfig.title = '';
+    component.creationContext = {};
+    component.questionPrimaryCategory = 'Multiple Choice Question';
+    spyOn(component, 'setQuestionTitle').and.callThrough();
+    component.setQuestionTitle();
+    expect(component.toolbarConfig.title).toEqual('Q2 | Multiple Choice Question');
+  });
+
+  it('#setQuestionTitle() should set title for existingQuestion when hierarchy have children', ()=> {
+    const treeService = TestBed.inject(TreeService);
+    spyOn(treeService, 'getActiveNode').and.returnValue({
+      data: { id: '1234567891011' },
+      getParent() {
+        return {
+          getChildren() {
+            return [{children: [{identifier: 'do_12345', primaryCategory: 'Multiple Choice Question'}]}]
+          }
+        }
+      }
+    });
+    spyOn(component, 'setQuestionTitle').and.callThrough();
+    component.setQuestionTitle('do_12345');
+    expect(component.toolbarConfig.title).toEqual('Q1 | Multiple Choice Question');
+  });
+
+  it('#setQuestionTitle() should set title for existingQuestion when hierarchy have children', ()=> {
+    const treeService = TestBed.inject(TreeService);
+    spyOn(treeService, 'getActiveNode').and.returnValue({
+      data: { id: '1234567891011' },
+      getParent() {
+        return {
+          getChildren() {
+            return [{children: null, data: {id: 'do_123456', primaryCategory: 'Subjective Question'}}]
+          }
+        }
+      }
+    });
+    spyOn(component, 'setQuestionTitle').and.callThrough();
+    component.setQuestionTitle('do_123456');
+    expect(component.toolbarConfig.title).toEqual('Q1 | Subjective Question');
   });
 
   it("#upsertQuestion() should call on question save api false case", () => {
