@@ -5,6 +5,7 @@ import { ConfigService } from '../../services/config/config.service';
 import { SubMenu } from '../question-option-sub-menu/question-option-sub-menu.component';
 import { TreeService } from '../../services/tree/tree.service';
 import { EditorService } from '../../services/editor/editor.service';
+import { v4 as uuidv4 } from 'uuid';
 @Component({
   selector: 'lib-options',
   templateUrl: './options.component.html',
@@ -15,7 +16,6 @@ export class OptionsComponent implements OnInit, OnChanges {
   @Input() showFormError;
   @Input() sourcingSettings;
   @Input() questionPrimaryCategory;
-  @Input() questionInteractionType;
   @Input() mapping = [];
   @Input() isReadOnlyMode;
   @Input() maxScore;
@@ -24,7 +24,7 @@ export class OptionsComponent implements OnInit, OnChanges {
   public setImageLimit = 1;
   public templateType = 'mcq-vertical';
   subMenus: SubMenu[][];
-  hints = [];
+  hints:any = {};
   showSubMenu:boolean=false;
   parentMeta: any;
   selectedOptions = [];
@@ -36,6 +36,7 @@ export class OptionsComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit() {
+    this.hints = this.editorState.hints ? this.editorState.hints : {};
     if(!_.isUndefined(this.editorState.answer)) {
       this.addSelectedOptions();
     }
@@ -76,16 +77,8 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   editorDataHandler(event?) {
-    let body: any;
-    if (this.questionInteractionType === 'choice') {
-      body = this.prepareMcqBody(this.editorState);
-    } else if (this.questionInteractionType === 'match') {
-      body = this.prepareMtfBody(this.editorState);
-    }
-    this.editorDataOutput.emit({
-      body,
-      mediaobj: event ? event.mediaobj : undefined,
-    });
+    const body = this.prepareMcqBody(this.editorState);
+    this.editorDataOutput.emit({ body, mediaobj: event ? event.mediaobj : undefined });
   }
 
   prepareMcqBody(editorState) {
@@ -119,49 +112,22 @@ export class OptionsComponent implements OnInit, OnChanges {
       outcomeDeclaration: this.getOutcomeDeclaration(),
       interactionTypes: ['choice'],
       interactions: this.getInteractions(editorState.options),
+      hints:this.hints,
       editorState: {
         options,
       },
       qType: 'MCQ',
       primaryCategory: this.questionPrimaryCategory || 'Multiple Choice Question',
     };
+    this.subMenuConfig(editorState.options);
     return metadata;
   }
 
-  prepareMtfBody(editorState) {
-    let metadata: any;
-    const correctAnswer = editorState.answer;
-    let options: any;
-    if (!_.isEmpty(correctAnswer)) {
-      options = _.reduce(this.editorState.options,function (acc, obj) {
-          acc.leftOption.push(obj.leftOption);
-          acc.rightOption.push(obj.rightOption);
-          return acc;
-        },{ leftOption: [], rightOption: [] }
-      );
-    }
-    console.log(options);
-    console.log(editorState.answer);
-    metadata = {
-      templateId: this.templateType,
-      name: this.questionPrimaryCategory || 'Match The Following Question',
-      responseDeclaration: this.getResponseDeclaration(editorState),
-      outcomeDeclaration: this.getOutcomeDeclaration(),
-      interactionTypes: ['match'],
-      interactions: this.getInteractions(editorState.options),
-      editorState: {
-        options,
-      },
-      qType: 'MTF',
-      primaryCategory: this.questionPrimaryCategory || "Match The Following Question",
-    };
-    return metadata;
-  }
   getResponseDeclaration(editorState) {
     const responseDeclaration = {
       response1: {
         cardinality: this.getCardinality(),
-        type: this.questionInteractionType === 'choice' ? 'integer' : 'map',
+        type: 'integer',
         correctResponse: {
           value: editorState.answer,
         },
@@ -191,74 +157,34 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   setMapping() {
-    if (this.questionInteractionType === 'choice') {
-      if (!_.isEmpty(this.selectedOptions)) {
-        this.mapping = [];
-        const scoreForEachOption = _.round((this.maxScore/this.selectedOptions.length), 2);
-        _.forEach(this.selectedOptions, (value) => {
-          const optionMapping = {
-            value: value,
-            score: scoreForEachOption,
-          };
-          this.mapping.push(optionMapping);
-        });
-      }      
-    } else if(this.questionInteractionType === 'match') {
-      if (!_.isEmpty(this.editorState.answer)) {
-        this.mapping = [];
-        const scoreForEachMatch = _.round(
-          this.maxScore / this.editorState.answer.length,
-          2
-        );
-        _.forEach(this.editorState.answer, (value) => {
-          const optionMapping = {
-            value: value,
-            score: scoreForEachMatch,
-          };
-          this.mapping.push(optionMapping);
-        })
-      }
+    if(!_.isEmpty(this.selectedOptions)) {
+      this.mapping = [];
+      const scoreForEachOption = _.round((this.maxScore/this.selectedOptions.length), 2);
+      _.forEach(this.selectedOptions, (value) => {
+        const optionMapping = {
+          value: value,
+          score: scoreForEachOption,
+        }
+        this.mapping.push(optionMapping)
+      })
     } else {
       this.mapping = [];
     }
   }
 
   getInteractions(options) {
-    if (this.questionInteractionType === 'choice') {
-      let index;
-      const interactOptions = _.map(options, (opt, key) => {
-        index = Number(key);
-        const hints  = _.get(this.editorState, `interactions.response1.options[${index}].hints`)
-        return { label: opt.body, value: index, hints };
-      });
-      this.subMenuConfig(options);
-      const interactions = {
-        response1: {
-          type: 'choice',
-          options: interactOptions,
-        },
-      };      
-      return interactions;
-    }
-    else if (this.questionInteractionType === 'match') {
-      const optionSet = {
-        left: options.map((option) => ({
-          label: option.leftOption,
-          value: option.leftOption.replace(/<\/?[^>]+(>|$)/g, ""),
-        })),
-        right: options.map((option) => ({
-          label: option.rightOption,
-          value: option.rightOption.replace(/<\/?[^>]+(>|$)/g, ""),
-        })),
-      }
-      const interactions = {
-        response1: {
-          type: 'match',
-          optionSet: optionSet,
-        }
-      };
-      return interactions;
-    }
+    let index;
+    const interactOptions = _.map(options, (opt, key) => {
+      index = Number(key);
+      return { label: opt.body, value: index,  hint: this.hints[this.editorState?.interactions?.response1?.options[index]?.hint] ? Object.keys(this.hints).find(element => element == this.editorState?.interactions?.response1?.options[index]?.hint) : '' };
+    });
+    const interactions = {
+      response1: {
+        type: 'choice',
+        options: interactOptions,
+      },
+    };
+    return interactions;
   }
 
   setTemplete(template) {
@@ -267,20 +193,34 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   subMenuChange({ index, value }, optionIndex) {
-    _.set(this.editorState, `interactions.response1.options[${optionIndex}].hints.en`, value)
+    if(value.length && Object.keys(this.hints).length < this.editorState.interactions.response1.options.length ) {
+      const hint = {[uuidv4()] : {en:value}}
+      this.hints = {...this.hints, ...hint}
+      this.editorState.interactions.response1.options[optionIndex].hint = Object.keys(hint)[0]
+    }
+    else if (value.length) {
+      this.hints[this.editorState.interactions.response1.options[optionIndex].hint].en = value;
+    }
   }
 
   subMenuConfig(options) {
     this.subMenus = []
     options.map((opt, index) => {
-      const value  = _.get(this.editorState, `interactions.response1.options[${index}].hints.en`)
+      const uuid  = _.get(this.editorState, `interactions.response1.options[${index}].hint`)
       this.subMenus[index] = [
         {
           id: 'addHint',
           name: 'Add Hint',
-          value,
+          value: (():any => {
+            if(this.hints[uuid]) {
+              return this.hints[uuid].en
+            }
+            else {
+              return this.editorState?.hints?.[uuid] ? this.editorState.hints[uuid].en : ''
+            }
+          })(),
           label: 'Hint',
-          enabled: value ? true : false,
+          enabled: uuid ? true : false,
           type: 'input',
           show: _.get(this.sourcingSettings, 'showAddHints'),
         },
@@ -307,22 +247,7 @@ export class OptionsComponent implements OnInit, OnChanges {
       this.setMapping();
       this.editorDataHandler();
   }
-  
-  onMatchCheck(event) {
-    if (event.target.checked) {
-      this.editorState.answer = this.editorState.options.map((option) => {
-        const obj = {};
-        let leftOption = option.leftOption.replace(/<\/?[^>]+(>|$)/g, "");
-        let rightOption = option.rightOption.replace(/<\/?[^>]+(>|$)/g, "");
-        obj[leftOption] = rightOption;
-        return obj;
-      });
-    } else {
-      this.editorState.answer = undefined;
-    }
-    this.setMapping();
-    this.editorDataHandler();
-  }
+
   setScore(value, scoreIndex) {
     const obj = {
       response: scoreIndex,

@@ -139,7 +139,6 @@ describe('OptionsComponent', () => {
   it('#editorDataHandler() should emit option data when answer is single value', () => {
     spyOn(component, 'prepareMcqBody').and.callThrough();
     spyOn(component.editorDataOutput, 'emit').and.callThrough();
-    component.questionInteractionType = 'choice';
     component.editorState = mockOptionData.editorOptionData;
     component.editorDataHandler();
     component.questionPrimaryCategory='Multiselect Multiple Choice Question';
@@ -150,22 +149,11 @@ describe('OptionsComponent', () => {
   it('#editorDataHandler() should emit option data when answer is multiple value', () => {
     spyOn(component, 'prepareMcqBody').and.callThrough();
     spyOn(component.editorDataOutput, 'emit').and.callThrough();
-    component.questionInteractionType = 'choice';
     component.editorState = mockOptionData.editorOptionData;
     component.editorState.answer = [0,1];
     component.editorDataHandler();
     component.questionPrimaryCategory='Multiselect Multiple Choice Question';
     expect(component.prepareMcqBody).toHaveBeenCalledWith(mockOptionData.editorOptionData);
-    expect(component.editorDataOutput.emit).toHaveBeenCalled();
-  });
-
-  it('when questionInteractionType is match prepareMtfBody will be called', () => {
-    spyOn(component, 'prepareMtfBody').and.callFake(()=>{});
-    spyOn(component.editorDataOutput, 'emit').and.callFake(()=>{});
-    component.questionInteractionType = 'match';
-    component.editorDataHandler();
-    component.questionPrimaryCategory='Match The Following Question';
-    expect(component.prepareMtfBody).toHaveBeenCalled();
     expect(component.editorDataOutput.emit).toHaveBeenCalled();
   });
 
@@ -190,7 +178,6 @@ describe('OptionsComponent', () => {
   });
 
   it('#getResponseDeclaration() should return expected response declaration', () => {
-    component.questionInteractionType = 'choice';
     component.mapping = [{
       "value": 0,
       "score": 1
@@ -227,7 +214,6 @@ describe('OptionsComponent', () => {
   });
 
   it('setMapping should set the mapping for single select MCQ', () => {
-    component.questionInteractionType = 'choice';
     component.mapping = [];
     component.selectedOptions = [0];
     component.maxScore = 1;
@@ -237,7 +223,6 @@ describe('OptionsComponent', () => {
   });
 
   it('setMapping should set the mapping for single select MCQ', () => {
-    component.questionInteractionType = 'choice';
     component.mapping = [];
     component.selectedOptions = [0,1];
     component.maxScore = 1;
@@ -249,7 +234,6 @@ describe('OptionsComponent', () => {
 
   it('#getInteractions() should return expected response declaration', () => {
     spyOn(component,"getInteractions").and.callThrough();
-    component.questionInteractionType = 'choice';
     component.getInteractions(mockOptionData.editorOptionData.options);
     expect(component.getInteractions).toHaveBeenCalled();
     // expect(mockOptionData.prepareMcqBody.interactions).toEqual(result);
@@ -266,9 +250,10 @@ describe('OptionsComponent', () => {
 
   it('#subMenuChange() should set the sub-menu value ', () => {
     component.subMenus =  mockOptionData.subMenus;
+    component.hints = mockOptionData.hints;
     spyOn(component, 'subMenuChange').and.callThrough();
-    component.subMenuChange({index:1,value:'test'},1)
-    expect(component.subMenus[0][0].value).toBe('test');
+    component.subMenuChange({index:1,value:'first'},1)
+    expect(component.subMenus[0][0].value).toBe('first');
   })
 
   it('#subMenuConfig() should set on initialize', () => {

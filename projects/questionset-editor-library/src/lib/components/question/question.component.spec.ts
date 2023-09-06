@@ -25,6 +25,7 @@ import {
   BranchingLogic,
   mockEditorCursor,
   interactionChoiceEditorState,
+  interactionMatchEditorState,
   RubricData,
   videoSolutionObject,
   mediaVideoArray
@@ -166,7 +167,7 @@ describe("QuestionComponent", () => {
   it("#saveQuestions call on click save button", () => {
     spyOn(component, "saveQuestions");
     const metaData = mockData.textQuestionNetaData.result.question;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -288,7 +289,7 @@ describe("QuestionComponent", () => {
     component.previewFormData(true);
     expect(component.initialize).toHaveBeenCalled();
   });
-
+  
   it("#initialize should call when question page for question mcq api fail", () => {
     spyOn(component, "initialize").and.callThrough();
     component.questionId = "do_11330103476396851218";
@@ -308,7 +309,44 @@ describe("QuestionComponent", () => {
     component.initialize();
     expect(component.initialize).toHaveBeenCalled();
   });
-
+  
+  xit("#initialize should call when question page for question mtf", () => {
+    component.initialLeafFormConfig = leafFormConfigMock;
+    component.leafFormConfig = leafFormConfigMock;
+    component.questionFormConfig=leafFormConfigMock;
+    spyOn(component, "initialize").and.callThrough();
+    component.questionId = "do_11330103476396851218";
+    editorService.parentIdentifier = undefined;
+    component.questionPrimaryCategory = undefined;
+    spyOn(editorService, "getToolbarConfig").and.returnValue({
+      title: "abcd",
+      showDialcode: "No",
+      showPreview: "false",
+    });
+    component.toolbarConfig.showPreview = false;
+    spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
+      return of(collectionHierarchyMock);
+    });
+    component.questionId = "do_127";
+    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
+    spyOn(questionService, "readQuestion").and.returnValue(
+      of(mockData.mtfQuestionMetaData)
+    );
+    component.questionMetaData = mockData.mtfQuestionMetaData.result.question;
+    component.questionInteractionType = "match";
+    component.scoreMapping =
+      mockData.mcqQuestionMetaData.result.question.responseDeclaration.response1.mapping;
+    component.sourcingSettings = sourcingSettingsMock;
+    component.questionInput.setChildQuestion = false;
+    component.editorState.solutions = [{
+      id: '1',
+      type: 'vedio'
+    }]
+    component.initialize();
+    component.previewFormData(true);
+    expect(component.initialize).toHaveBeenCalled();
+  });
+  
   it("#initialize should call when question page for question slider", () => {
     spyOn(component, "initialize").and.callThrough();
     component.questionId = "do_11330103476396851218";
@@ -470,6 +508,54 @@ describe("QuestionComponent", () => {
     expect(component.setQuestionTitle).toHaveBeenCalled();
   });
 
+  xit("#initialize should call when question page for question mtf with interactionTypes", () => {
+    component.questionSetId = "do_1278";
+    spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
+      return of(collectionHierarchyMock);
+    });
+    editorService.parentIdentifier = undefined;
+    component.questionId = "do_11330103476396851218";
+    component.leafFormConfig = leafFormConfigMock;
+    spyOn(questionService, "readQuestion").and.returnValue(
+      of(mockData.mtfQuestionMetaData)
+    );
+    spyOn(component, 'setQuestionTitle').and.callFake(() => {});
+    spyOn(component, 'populateFormData').and.callFake(() => {});
+    component.leafFormConfig = leafFormConfigMock;
+    spyOn(component, "initialize").and.callThrough();
+    component.initialize();
+    expect(component.initialize).toHaveBeenCalled();
+    expect(component.questionPrimaryCategory).toBeDefined();
+    expect(component.questionInteractionType).toBeDefined();
+    expect(component.populateFormData).toHaveBeenCalled();
+    expect(component.setQuestionTitle).toHaveBeenCalled();
+  });
+
+  it("#initialize should call when question page for question mtf without interactionTypes", () => {
+    let questionMetadata = mockData.mtfQuestionMetaData.result.question;
+    questionMetadata = _.omit(questionMetadata, ['interactionTypes', 'primaryCategory'])
+    component.questionSetId = "do_1278";
+    spyOn(editorService, "fetchCollectionHierarchy").and.callFake(() => {
+      return of(collectionHierarchyMock);
+    });
+    editorService.parentIdentifier = undefined;
+    component.questionId = "do_11330103476396851218";
+    component.leafFormConfig = leafFormConfigMock;
+    spyOn(questionService, "readQuestion").and.returnValue(
+      of({result: {question: {questionMetadata}}})
+    );
+    spyOn(component, 'setQuestionTitle').and.callFake(() => {});
+    spyOn(component, 'populateFormData').and.callFake(() => {});
+    component.leafFormConfig = leafFormConfigMock;
+    spyOn(component, "initialize").and.callThrough();
+    component.initialize();
+    expect(component.initialize).toHaveBeenCalled();
+    expect(component.questionPrimaryCategory).toBeUndefined();
+    expect(component.questionInteractionType).toEqual("default");
+    expect(component.populateFormData).toHaveBeenCalled();
+    expect(component.setQuestionTitle).toHaveBeenCalled();
+  });
+
   it("#initialize should call when question page for question slider", () => {
     spyOn(component, "initialize").and.callThrough();
     component.initialLeafFormConfig = leafFormConfigMock;
@@ -543,13 +629,6 @@ describe("QuestionComponent", () => {
     component.questionInteractionType = "date";
     component.initialize();
     expect(component.initialize).toHaveBeenCalled();
-  });
-
-  it('#contentPolicyUrl() should return content policy url', () => {
-    editorService.contentPolicyUrl = 'https://preprod.ntp.net.in/term-of-use.html';
-    spyOn(component, 'contentPolicyUrl').and.callThrough();
-    const contentPolicyURL = component.contentPolicyUrl;
-    expect(contentPolicyURL).toBeDefined();
   });
 
   it("#toolbarEventListener() should call toolbarEventListener for saveContent", () => {
@@ -644,49 +723,41 @@ describe("QuestionComponent", () => {
     expect(component.toolbarEventListener).toHaveBeenCalledWith(data);
   });
 
-  it("Unit test for #populateFormData question markAsNotMandatory reqired yes", () => {
-    spyOn(component,'populateFormData').and.callThrough();
-    component.childFormData = {};
-    component.isReadOnlyMode=false;
-    component.questionInteractionType="choice";
-    component.questionMetaData=mockData.mcqQuestionMetaData.result.question;
-    component.leafFormConfig = leafFormConfigMock;
-    component.questionId = "do_123";
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
-    spyOn(component,'fetchFrameWorkDetails').and.callFake(()=>{});
-    spyOn(component,'previewFormData').and.callFake(()=>{})
+  it('Unit test for #populateFormData() for existing question', () => {
+    spyOn(component, 'populateFormData').and.callThrough();
+    component.questionId = 'do_12345';
+    spyOn(component, 'setExistingQuestionData').and.callFake(() => {});
+    spyOn(component, 'fetchFrameWorkDetails').and.callFake(() => {});
+    component.isReadOnlyMode = false;
+    spyOn(component, 'previewFormData').and.callFake(() => {});
     component.populateFormData();
+    expect(component.setExistingQuestionData).toHaveBeenCalled();
     expect(component.previewFormData).toHaveBeenCalled();
   });
 
-  it("Unit test for #populateFormData without Question Id", () => {
-    component.childFormData = {};
+  it('Unit test for #populateFormData() for new question', () => {
+    spyOn(component, 'populateFormData').and.callThrough();
     component.questionId = undefined;
-    component.questionInteractionType="choice";
-    component.isReadOnlyMode=false;
     component.leafFormConfig = leafFormConfigMock;
-    component.initialLeafFormConfig = leafFormConfigMock;
-    component.questionFormConfig = leafFormConfigMock;
-    component.questionMetaData=mockData.mcqQuestionMetaData.result.question;
     component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
-    spyOn(component,'fetchFrameWorkDetails').and.callFake(()=>{});
+    component.initialLeafFormConfig = leafFormConfigMock;
+    component.maxScore = 1;
+    spyOn(component, 'setExistingQuestionData').and.callFake(() => {});
+    spyOn(component, 'fetchFrameWorkDetails').and.callFake(() => {});
+    component.isReadOnlyMode = true;
+    spyOn(component, 'previewFormData').and.callFake(() => {});
     component.populateFormData();
-   });
+    expect(component.setExistingQuestionData).not.toHaveBeenCalled();
+    expect(component.previewFormData).toHaveBeenCalled();
+  });
 
-  it("Unit test for #populateFormData readonly mode true ", () => {
-    spyOn(component,'populateFormData').and.callThrough();
-    component.childFormData = {};
-    component.isReadOnlyMode=true;
-    component.questionInteractionType="choice";
-    component.questionMetaData=mockData.mcqQuestionMetaData.result.question;
+  it('Unit test for #setExistingQuestionData()', () => {
+    spyOn(component, 'setExistingQuestionData').and.callThrough();
     component.leafFormConfig = leafFormConfigMock;
-    component.initialLeafFormConfig = leafFormConfigMock;
-    component.questionFormConfig = leafFormConfigMock;
-    component.questionId = "do_123";
-    component.questionSetHierarchy = collectionHierarchyMock.result.questionset;
-    spyOn(component,'previewFormData').and.callFake(()=>{})
-    component.populateFormData();
-    expect(component.previewFormData).toHaveBeenCalled(); 
+    component.questionMetaData = mockData.mcqQuestionMetaData.result.question;
+    component.childFormData = {};
+    spyOn(component, 'setChildAliasData').and.callThrough();
+    component.setExistingQuestionData();
   });
 
   it("should call previewFormData ", () => {
@@ -699,10 +770,12 @@ describe("QuestionComponent", () => {
     expect(component.leafFormConfig).toEqual(mockData.childMetadata.properties);
     expect(component.previewFormData).toHaveBeenCalled();
   });
+
   it("should call valueChanges", () => {
     component.valueChanges(childMetaData);
     expect(component.childFormData).toEqual(childMetaData);
   });
+
   it("should call validateFormFields", () => {
     component.leafFormConfig = mockData.childMetadata;
     component.childFormData = childMetaData;
@@ -764,6 +837,12 @@ describe("QuestionComponent", () => {
     const question = '<div class=\'question-body\' tabindex=\'-1\'><div class=\'mcq-title\' tabindex=\'0\'>{question}</div><div data-choice-interaction=\'response1\' class=\'{templateClass}\'></div></div>';
     const templateId = "mcq-vertical";
     component.getMcqQuestionHtmlBody(question, templateId);
+  });
+  
+  it("call #getMtfQuestionHtmlBody() to verify questionBody", () => {
+    const question = '<div class=\'question-body\' tabindex=\'-1\'><div class=\'mtf-title\' tabindex=\'0\'>{question}</div><div data-match-interaction=\'response1\' class=\'{templateClass}\'></div></div>';
+    const templateId = "mtf-horizontal";
+    component.getMtfQuestionHtmlBody(question, templateId);
   });
 
   it("Unit test for #sendForReview", () => {
@@ -971,15 +1050,6 @@ describe("QuestionComponent", () => {
     expect(outcomeDeclaration.maxScore.cardinality).toEqual('single');
   });
 
-  it("Unit test for #isEditable without queston id", () => {
-    component.creationContext = creationContextMock;
-    component.questionId=undefined;
-    expect(component.isEditable("bloomsLevel")).toBeTruthy();
-  });
-  it("Unit test for #isEditable with queston id", () => {
-    component.creationContext = creationContextMock;
-    expect(component.isEditable("bloomsLevel")).toBeFalsy();
-  });
   it("Unit test for #prepareQuestionBody", () => {
     component.questionId = 'do_12345';
     const editorService = TestBed.inject(EditorService);
@@ -1096,7 +1166,7 @@ describe("QuestionComponent", () => {
         },
       })
     );
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1152,6 +1222,30 @@ describe("QuestionComponent", () => {
     expect(metadata['outcomeDeclaration'].maxScore.defaultValue).toEqual(1);
   });
 
+  it('#getQuestionMetadata() should return question metadata when interactionType is match', () => {
+    component.mediaArr = [];
+    component.editorState = interactionMatchEditorState;
+    component.selectedSolutionType = 'video';
+    component.creationContext = undefined;
+    component.questionInteractionType = 'match';
+    component.childFormData = {
+      name: 'MTF',
+      bloomsLevel: null,
+      board: 'CBSE',
+      maxScore: 1
+    };
+    component.maxScore = 4;
+    spyOn(component, 'getDefaultSessionContext').and.returnValue({
+        creator: 'Vaibahv Bhuva',
+        createdBy: '5a587cc1-e018-4859-a0a8-e842650b9d64'
+      }
+    );
+    spyOn(component, 'getQuestionSolution').and.returnValue({});
+    spyOn(component, 'getQuestionMetadata').and.callThrough();
+    const metadata = component.getQuestionMetadata();
+    expect(metadata['outcomeDeclaration'].maxScore.defaultValue).toEqual(4);
+  });
+
   it('#getAnswerHtml() should return answer html', () => {
     spyOn(component, 'getAnswerHtml').and.callThrough();
     const answerHtml = component.getAnswerHtml('<p>Sample Answer</p>');
@@ -1163,6 +1257,54 @@ describe("QuestionComponent", () => {
     const answerWrappedHtml = component.getAnswerWrapperHtml('<div class=\'answer-body\'><p>Sample Answer</p></div>');
     expect(answerWrappedHtml).toBe('<div class=\'answer-container\'><div class=\'answer-body\'><p>Sample Answer</p></div></div>');
   });
+
+  it('#getMtfAnswerContainerHtml() should return answer html', () => {
+    spyOn(component, 'getMtfAnswerContainerHtml').and.callThrough();
+    const leftOptions = [
+      {
+        label: "<p>a</p>",
+        value: "0",
+      },
+      {
+        label: "<p>b</p>",
+        value: "1",
+      },
+    ];
+    const rightOptions = [
+      {
+        label: "<p>c</p>",
+        value: "0",
+      },
+      {
+        label: "<p>d</p>",
+        value: "1",
+      },
+    ];
+    const matchContainer = component.getMtfAnswerContainerHtml(leftOptions, rightOptions);
+    expect(matchContainer).toBe('<div class=\'match-container\'><div class=\'left-options\'><div class=\'left-option\'><p>a</p></div><div class=\'left-option\'><p>b</p></div></div><div class=\'right-options\'><div class=\'right-option\'><p>c</p></div><div class=\'right-option\'><p>d</p></div></div></div>')
+  })
+
+  it('#getOptionWrapperHtml() should return wrapper html', () => { 
+    spyOn(component, 'getOptionWrapperHtml').and.callThrough();
+    const leftOptions = [
+      {
+        label: "<p>a</p>",
+        value: "0",
+      },
+      {
+        label: "<p>b</p>",
+        value: "1",
+      },
+    ];
+    const wrapperHtml = component.getOptionWrapperHtml(leftOptions, 'left');
+    expect(wrapperHtml).toBe('<div class=\'left-options\'><div class=\'left-option\'><p>a</p></div><div class=\'left-option\'><p>b</p></div></div>');
+  })
+
+  it('#getMtfAnswerHtml() should return answer html', () => {
+    spyOn(component, 'getMtfAnswerHtml').and.callThrough();
+    const answerHtml = component.getMtfAnswerHtml('<p>Sample Answer</p>', 'left');
+    expect(answerHtml).toBe('<div class=\'left-option\'><p>Sample Answer</p></div>');
+  })
 
   it('#getInteractionValues() should return correct answer object', () => {
     spyOn(component, 'getInteractionValues').and.callThrough();
@@ -1217,7 +1359,7 @@ describe("QuestionComponent", () => {
     component.setQuestionTypeValues(
       mockData.mcqQuestionMetaData.result.question
     );
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.returnValue(
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(
       throwError("error")
     );
     component.saveQuestion();
@@ -1234,7 +1376,7 @@ describe("QuestionComponent", () => {
     component.setQuestionTypeValues(
       mockData.mcqQuestionMetaData.result.question
     );
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1260,7 +1402,7 @@ describe("QuestionComponent", () => {
     component.isChildQuestion = true;
     component.condition = "eq";
     component.selectedOptions = 1;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1289,7 +1431,7 @@ describe("QuestionComponent", () => {
     component.subMenus = mockData.subMenus;
     component.questionInteractionType = "choice";
     component.showOptions = false;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.returnValue(
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(
       throwError("error")
     );
     component.createQuestion();
@@ -1302,7 +1444,7 @@ describe("QuestionComponent", () => {
     component.subMenus = mockData.subMenus;
     component.questionInteractionType = "choice";
     component.showOptions = false;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1370,36 +1512,65 @@ describe("QuestionComponent", () => {
     expect(component.validateChoiceQuestionData).toHaveBeenCalled();
   });
 
-  it('#validateChoiceQuestionData() should validate and set showFormError to true', () => {
+  it('#validateChoiceQuestionData() should validate choice question data when all options are valid and set showFormError to false', () => {
     component.sourcingSettings = sourcingSettingsMock;
-    component.treeNodeData = {data: {metadata: {allowScoring: 'Yes'}}}
-    component.editorState = mockData.mcqQuestionMetaData.result.question;
+    component.editorState.question = "<p> Hi how are you </p>";
+    component.editorState.options = [
+      { body: "<p>1</p>" },
+      { body: "<p>2</p>" },
+    ]
+    component.editorState.answer = "";
+    component.questionInteractionType = "choice";
+    spyOn(component, 'validateChoiceQuestionData').and.callThrough();
+    component.validateChoiceQuestionData();
+    expect(component.showFormError).toBeFalsy();
+  });
+
+  it("#validateMatchQuestionData() should validate match question data when all options have valid left and right values and set showFormError to false", () => {
+    component.sourcingSettings = sourcingSettingsMock;
+    component.editorState.question = "<p> Match each object with its correct type </p>";
+    component.editorState.options = [
+      { left: "<p>1</p>", right: "<p>a</p>" },
+      { left: "<p>2</p>", right: "<p>b</p>"},
+    ]
+    component.editorState.correctMatchPair = [
+      { "0": "0" },
+      { "1": "1"},
+    ];
+    component.questionInteractionType = "match";
+    spyOn(component, "validateMatchQuestionData").and.callThrough();
+    component.validateMatchQuestionData();
+    expect(component.showFormError).toBeFalsy();
+  });
+
+  it("#validateData() should validate and set showFormError to true when allowScoring is Yes", () => {
+    component.treeNodeData = { data: { metadata: { allowScoring: "Yes" } } };
+    component.editorState = mockData.mtfQuestionMetaData.result.question;
     component.editorState.responseDeclaration.response1.mapping = [];
     editorService = TestBed.inject(EditorService);
     editorService.editorConfig.renderTaxonomy = false;
-    component.editorState.question = "<p> Hi how are you </p>";
-    component.editorState.answer = "";
-    component.questionInteractionType = "choice";
+    component.editorState.question = "<p> Match each object with its correct type </p>";
+    component.editorState.correctMatchPair = "";
+    component.questionInteractionType = "match";
     const toasterService = TestBed.inject(ToasterService);
-    spyOn(toasterService, 'error').and.callFake(() => {});
-    spyOn(component, 'validateChoiceQuestionData').and.callThrough();
-    component.validateChoiceQuestionData();
+    spyOn(toasterService, "error").and.callFake(() => {});
+    spyOn(component, "validateData").and.callThrough();
+    component.validateData(component.questionInteractionType);
     expect(component.showFormError).toBeTruthy();
   });
 
-  it('#validateChoiceQuestionData() should validate and set showFormError to false when allowScoring is No', () => {
-    component.sourcingSettings = sourcingSettingsMock;
-    component.treeNodeData = {data: {metadata: {allowScoring: 'No'}}}
-    component.editorState = mockData.mcqQuestionMetaData.result.question;
+  it("#validateData() should validate and set showFormError to false when allowScoring is No", () => {
+    component.treeNodeData = { data: { metadata: { allowScoring: "No" } } };
+    component.editorState = mockData.mtfQuestionMetaData.result.question;
     editorService = TestBed.inject(EditorService);
     editorService.editorConfig.renderTaxonomy = false;
-    component.editorState.question = "<p> Hi how are you </p>";
-    component.editorState.answer = "";
-    component.questionInteractionType = "choice";
+    component.editorState.question = "<p> Match each object with its correct type </p>";
+    component.editorState.correctMatchPair = "";
+    component.questionInteractionType = "match";
     const toasterService = TestBed.inject(ToasterService);
-    spyOn(toasterService, 'error').and.callFake(() => {});
-    spyOn(component, 'validateChoiceQuestionData').and.callThrough();
-    component.validateChoiceQuestionData();
+    spyOn(toasterService, "error").and.callFake(() => {});
+    spyOn(component, "validateData").and.callThrough();
+    component.validateData(component.questionInteractionType);
     expect(component.showFormError).toBeFalsy();
   });
 
@@ -1577,7 +1748,6 @@ describe("QuestionComponent", () => {
   it("#videoDataOutput() should call videoDataOutput and event data is not  empty", () => {
     const event = { name: "event name", identifier: "1234" };
     component.videoDataOutput(event);
-    expect(component.videoSolutionData).toBeDefined();
   });
   it("#videoDataOutput() should call videoDataOutput for thumbnail", () => {
     const event = {
@@ -1586,7 +1756,6 @@ describe("QuestionComponent", () => {
       thumbnail: "sample data",
     };
     component.videoDataOutput(event);
-    expect(component.videoSolutionData).toBeDefined();
   });
   it("#videoDataOutput() should call videoDataOutput for thumbnail", () => {
     const event = {
@@ -1595,7 +1764,6 @@ describe("QuestionComponent", () => {
       thumbnail: "sample data",
     };
     component.videoDataOutput(event);
-    expect(component.videoSolutionData).toBeDefined();
   });
   it("#subMenuChange() should set the sub-menu value ", () => {
     spyOn(component,'subMenuChange').and.callThrough();
@@ -1671,7 +1839,7 @@ describe("QuestionComponent", () => {
 
   it("#saveQuestions call on click save button", () => {
     spyOn(component, "saveQuestions");
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1688,7 +1856,7 @@ describe("QuestionComponent", () => {
   });
 
   it("#saveQuestions call on click save button for update api success", () => {
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1704,7 +1872,7 @@ describe("QuestionComponent", () => {
   });
 
   it("#saveQuestions call on click save button for update api success", () => {
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.returnValue(
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(
       throwError("error")
     );
     component.saveQuestions(
@@ -1768,8 +1936,11 @@ describe("QuestionComponent", () => {
     component.questionMetaData = mockData.mcqQuestionMetaData.result.question;
     sourcingSettingsMock.showAddSecondaryQuestion = true;
     component.questionMetaData.hints = {
-      en: [],
-    };
+      "70c82bf5-9459-4c43-8897-0e58b7e1da64": { en: "test hint 1" },
+      "70c82bf5-9459-4c43-8897-0e58b7e1as73": { en: "test hint 2" },
+      "70c82bf5-9459-4c43-8897-0e58b7e1gf87": { en: "test hint 3" },
+      "70f9a0b2-94c3-4d81-86c0-2082fb10a47b": { en: "test hint 4" }
+   }
     sourcingSettingsMock.showAddHints = false;
     component.sourcingSettings = sourcingSettingsMock;
     component.questionInput.setChildQuestion = true;
@@ -1819,7 +1990,7 @@ describe("QuestionComponent", () => {
     component.questionInteractionType = "choice";
     component.getQuestionMetadata();
     component.setQuestionTypeValues(metaData);
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.returnValue(
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(
       throwError("error")
     );
     component.saveUpdateQuestions();
@@ -1836,7 +2007,7 @@ describe("QuestionComponent", () => {
     component.questionInteractionType = "choice";
     component.getQuestionMetadata();
     component.setQuestionTypeValues(metaData);
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1897,7 +2068,7 @@ describe("QuestionComponent", () => {
   it("#saveQuestions call on click save button", () => {
     spyOn(component, "saveQuestions");
     const metaData = mockData.textQuestionNetaData.result.question;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -1913,7 +2084,7 @@ describe("QuestionComponent", () => {
   it("#saveQuestions call on click save button api fail", () => {
     spyOn(component, "saveQuestions");
     const metaData = mockData.textQuestionNetaData.result.question;
-    spyOn(questionService, "updateHierarchyQuestionCreate").and.returnValue(
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(
       throwError("error")
     );
     component.saveQuestions(metaData, "update");
@@ -2083,7 +2254,7 @@ describe("QuestionComponent", () => {
       BranchingLogic,
       component.selectedSectionId
     );
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -2103,7 +2274,7 @@ describe("QuestionComponent", () => {
     component.isChildQuestion=false;
     component.questionId='1245'
     component.showAddSecondaryQuestionCat=true;
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.callFake(() => {
+    spyOn(questionService, "updateQuestionHierarchy").and.callFake(() => {
       return of({
         result: {
           identifiers: {
@@ -2124,7 +2295,7 @@ describe("QuestionComponent", () => {
     component.isChildQuestion=false;
     component.questionId='1245'
     component.showAddSecondaryQuestionCat=true;
-    spyOn(questionService, "updateHierarchyQuestionUpdate").and.returnValue(throwError('error'))
+    spyOn(questionService, "updateQuestionHierarchy").and.returnValue(throwError('error'))
    component.saveUpdateQuestions();  
    component.updateQuestion(); 
   });

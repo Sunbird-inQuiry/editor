@@ -20,7 +20,6 @@ import { AnswerComponent } from './components/answer/answer.component';
 import { CkeditorToolComponent } from './components/ckeditor-tool/ckeditor-tool.component';
 import { QuestionComponent } from './components/question/question.component';
 import { TelemetryInteractDirective } from './directives/telemetry-interact/telemetry-interact.directive';
-import { DateFormatPipe } from './directives/date-format/date-format.pipe';
 import { AssetBrowserComponent } from './components/asset-browser/asset-browser.component';
 import { CollectionIconComponent } from './components/collection-icon/collection-icon.component';
 import { QumlPlayerComponent } from './components/quml-player/quml-player.component';
@@ -36,6 +35,7 @@ import { PlainTreeComponent } from './components/plain-tree/plain-tree.component
 import { A11yModule } from '@angular/cdk/a11y';
 import { ProgressStatusComponent } from './components/progress-status/progress-status.component';
 import {TermAndConditionComponent} from './components/term-and-condition/term-and-condition.component';
+import { MatchComponent } from './components/match/match.component';
 
 import { QualityParamsModalComponent } from './components/quality-params-modal/quality-params-modal.component';
 @NgModule({
@@ -53,7 +53,6 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     AnswerComponent,
     CkeditorToolComponent,
     TemplateComponent,
-    DateFormatPipe,
     TelemetryInteractDirective,
     AssetBrowserComponent,
     CollectionIconComponent,
@@ -68,7 +67,8 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     PlainTreeComponent,
     ProgressStatusComponent,
     TermAndConditionComponent,
-    QualityParamsModalComponent
+    QualityParamsModalComponent,
+    MatchComponent
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule.withConfig({callSetDisabledState: 'whenDisabledForLegacyCode'}), RouterModule.forChild([]), SuiModule,
   CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule],

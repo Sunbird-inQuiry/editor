@@ -137,6 +137,7 @@ export const mockData = {
           ],
           question: "<p>MCQ Question</p>",
         },
+        instructions:'',
         templateId: "mcq-vertical",
         solutions: [
           {
@@ -151,23 +152,17 @@ export const mockData = {
               {
                 label: "<p>option 1</p>",
                 value: 0,
-                hints: {
-                  en: "test hint 1",
-                },
+                hint:'70c82bf5-9459-4c43-8897-0e58b7e1da62'
               },
               {
                 label: "<p>option 2</p>",
                 value: 1,
-                hints: {
-                  en: "test hint 2",
-                },
+                hint: '70c82bf5-9459-4c43-8897-0e58b7e1as73'
               },
               {
                 label: "<p>option 3</p>",
                 value: 2,
-                hints: {
-                  en: "test hint 3",
-                },
+                hint:'70c82bf5-9459-4c43-8897-0e58b7e1gf87'
               },
             ],
             autoCapture: "Yes",
@@ -179,6 +174,12 @@ export const mockData = {
               pattern: "dd/mm/yyyy",
             },
           },
+        },
+        hints: {
+           "70c82bf5-9459-4c43-8897-0e58b7e1da64": { en: "test hint 1" },
+           "70c82bf5-9459-4c43-8897-0e58b7e1as73": { en: "test hint 2" },
+           "70c82bf5-9459-4c43-8897-0e58b7e1gf87": { en: "test hint 3" },
+           "70f9a0b2-94c3-4d81-86c0-2082fb10a47b": { en: "test hint 4" }
         },
         evidence: {
           mimeType: ["audio", "vedio"],
@@ -208,7 +209,12 @@ export const mockData = {
             cardinality: "multiple",
             type: "integer",
             defaultValue: 1
-          }
+          },
+          hint :{
+            cardinality: "single",
+            type: "string",
+            defaultValue: "70f9a0b2-94c3-4d81-86c0-2082fb10a47b"
+        }
         },
         remarks: {
           maxLength: 100,
@@ -229,6 +235,211 @@ export const mockData = {
         framework: "nit_k-12",
         license: "CC BY 4.0",
         maxScore: "1",
+        identifier: "",
+      },
+    },
+  },
+  mtfQuestionMetaData: {
+    id: "api.question.read",
+    ver: "3.0",
+    ts: "2022-01-31T04:38:30ZZ",
+    params: {
+      resmsgid: "597b1b63-7007-435a-8b9d-68127f3c6fa8",
+      msgid: null,
+      err: null,
+      status: "successful",
+      errmsg: null,
+    },
+    responseCode: "OK",
+    result: {
+      question: {
+        mimeType: "application/vnd.sunbird.question",
+        media: [],
+        editorState: {
+          options: {
+            left: [
+              {
+                value: {
+                  body: "<p>LeftOption1</p>",
+                  value: 0,
+                },
+              },
+              {
+                value: {
+                  body: "<p>LeftOption2</p>",
+                  value: 1,
+                },
+              },
+              {
+                value: {
+                  body: "<p>LeftOption3</p>",
+                  value: 2,
+                },
+              },
+              {
+                value: {
+                  body: "<p>LeftOption4</p>",
+                  value: 3,
+                },
+              },
+            ],
+            right: [
+              {
+                value: {
+                  body: "<p>RightOption1</p>",
+                  value: 0,
+                },
+              },
+              {
+                value: {
+                  body: "<p>RightOption2</p>",
+                  value: 1,
+                },
+              },
+              {
+                value: {
+                  body: "<p>RightOption3</p>",
+                  value: 2,
+                },
+              },
+              {
+                value: {
+                  body: "<p>RightOption4</p>",
+                  value: 3,
+                },
+              },
+            ],
+          },
+          question: "<p>MTF Question</p>",
+        },
+        templateId: "mtf-horizontal",
+        solutions: {},
+        interactions: {
+          response1: {
+            type: "match",
+            options: {
+              left: [
+                {
+                  label: "<p>LeftOption1</p>",
+                  value: 0,
+                },
+                {
+                  label: "<p>LeftOption2</p>",
+                  value: 1,
+                },
+                {
+                  label: "<p>LeftOption3</p>",
+                  value: 2,
+                },
+                {
+                  label: "<p>LeftOption4</p>",
+                  value: 3,
+                },
+              ],
+              right: [
+                {
+                  label: "<p>RightOption1</p>",
+                  value: 0,
+                },
+                {
+                  label: "<p>RightOption2</p>",
+                  value: 1,
+                },
+                {
+                  label: "<p>RightOption3</p>",
+                  value: 2,
+                },
+                {
+                  label: "<p>RightOption4</p>",
+                  value: 3,
+                },
+              ],
+            },
+            validation: {
+              required: "Yes",
+            },
+          },
+        },
+        name: "MTF Question",
+        responseDeclaration: {
+          response1: {
+            cardinality: "multiple",
+            type: "map",
+            correctResponse: {
+              value: [
+                {
+                  "0": 0,
+                },
+                {
+                  "1": 1,
+                },
+                {
+                  "2": 2,
+                },
+                {
+                  "3": 3,
+                },
+              ],
+            },
+            mapping: [
+              {
+                value: {
+                  "0": 0,
+                },
+                score: 1,
+              },
+              {
+                value: {
+                  "1": 1,
+                },
+                score: 1,
+              },
+              {
+                value: {
+                  "2": 2,
+                },
+                score: 1,
+              },
+              {
+                value: {
+                  "3": 3,
+                },
+                score: 1,
+              },
+            ],
+          },
+        },
+        outcomeDeclaration: {
+          maxScore: {
+            cardinality: "multiple",
+            type: "integer",
+            defaultValue: 4,
+          },
+          hint :{
+            cardinality: "single",
+            type: "string",
+            defaultValue: "70f9a0b2-94c3-4d81-86c0-2082fb10a47b"
+          } 
+        },
+        remarks: {
+          maxLength: 100,
+        },
+        interactionTypes: ["match"],
+        qType: "MTF",
+        primaryCategory: "Match The Following Question",
+        body: "<div class='question-body' tabindex='-1'><div class='mtf-title' tabindex='0'><p>MTF Question</p></div><div data-match-interaction='response1' class='mtf-horizontal'></div></div>",
+        creator: "Arpan Gupta",
+        createdBy: "5a587cc1-e018-4859-a0a8-e842650b9d64",
+        board: "CBSE",
+        medium: ["English"],
+        gradeLevel: ["Grade 1"],
+        subject: ["English"],
+        topic: ["Forest"],
+        author: "check1@yopmail.com",
+        channel: "01309282781705830427",
+        framework: "nit_k-12",
+        license: "CC BY 4.0",
+        maxScore: "4",
         identifier: "",
       },
     },
@@ -300,11 +511,16 @@ export const mockData = {
           },
         },
         hints: {
-          en: [null],
+          "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
         },
-        instructions: {
-          en: [null],
+        outcomeDeclaration: {
+            "hint": {
+            "cardinality": "single",
+            "type": "string",
+            "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+           }
         },
+        instructions: null,
         interactionTypes: ["slider"],
         primaryCategory: "Slider",
       },
@@ -360,11 +576,16 @@ export const mockData = {
           },
         },
         hints: {
-          en: [null],
+          "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
         },
-        instructions: {
-          en: [null],
+        outcomeDeclaration: {
+            "hint": {
+            "cardinality": "single",
+            "type": "string",
+            "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+           }
         },
+        instructions: null,
         interactionTypes: ["date"],
         primaryCategory: "Date",
       },
@@ -427,11 +648,16 @@ export const mockData = {
           },
         },
         hints: {
-          en: [null],
+          "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
         },
-        instructions: {
-          en: [null],
+        outcomeDeclaration: {
+            "hint": {
+            "cardinality": "single",
+            "type": "string",
+            "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+           }
         },
+        instructions: null,
         interactionTypes: ["text"],
         primaryCategory: "Text",
       },
@@ -451,9 +677,7 @@ export const mockData = {
     responseCode: "OK",
     result: {
       question: {
-        instructions: {
-          en: [null],
-        },
+        instructions:null,
         responseDeclaration: {
           response1: {
             type: "string",
@@ -477,7 +701,14 @@ export const mockData = {
         identifier: "do_11345671149997260811",
         solutions: [],
         hints: {
-          en: [null],
+          "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
+        },
+        outcomeDeclaration: {
+            "hint": {
+            "cardinality": "single",
+            "type": "string",
+            "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+           }
         },
         languageCode: ["en"],
         interactionTypes: "",
@@ -718,9 +949,7 @@ export const readQuestionMock = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions: null,
       showRemarks: "No",
       responseDeclaration: {
         response1: {
@@ -777,7 +1006,14 @@ export const readQuestionMock = {
       identifier: "do_1134355569264885761166",
       solutions: [],
       hints: {
-        en: [null],
+        "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
+      },
+      outcomeDeclaration: {
+          "hint": {
+          "cardinality": "single",
+          "type": "string",
+          "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+         }
       },
       qType: "MCQ",
       languageCode: ["en"],
@@ -802,9 +1038,7 @@ export const readQuestionMockSlider = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions: null,
       showRemarks: "No",
       mimeType: "application/vnd.sunbird.question",
       media: [],
@@ -830,7 +1064,14 @@ export const readQuestionMockSlider = {
       identifier: "do_1134355571590184961168",
       solutions: [],
       hints: {
-        en: [null],
+        "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
+      },
+      outcomeDeclaration: {
+          "hint": {
+          "cardinality": "single",
+          "type": "string",
+          "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+         }
       },
       languageCode: ["en"],
       interactionTypes: ["slider"],
@@ -854,9 +1095,7 @@ export const readQuestionMockDate = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions: null,
       mimeType: "application/vnd.sunbird.question",
       media: [],
       body: "<p>Dep Date 3</p>",
@@ -878,7 +1117,14 @@ export const readQuestionMockDate = {
       identifier: "do_1134355574936780801170",
       solutions: [],
       hints: {
-        en: [null],
+        "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
+      },
+      outcomeDeclaration: {
+          "hint": {
+          "cardinality": "single",
+          "type": "string",
+          "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+         }
       },
       languageCode: ["en"],
       interactionTypes: ["date"],
@@ -901,9 +1147,7 @@ export const readQuestionMockText = {
   responseCode: "OK",
   result: {
     question: {
-      instructions: {
-        en: [null],
-      },
+      instructions:null,
       showRemarks: "No",
       mimeType: "application/vnd.sunbird.question",
       media: [],
@@ -930,7 +1174,14 @@ export const readQuestionMockText = {
       identifier: "do_1134347722012835841130",
       solutions: [],
       hints: {
-        en: [null],
+        "70c82bf5-9459-4c43-8897-0e58b7e2er76": { "en": "delhi" }
+      },
+      outcomeDeclaration: {
+          "hint": {
+          "cardinality": "single",
+          "type": "string",
+          "defaultValue": "70c82bf5-9459-4c43-8897-0e58b7e2er76"
+         }
       },
       languageCode: ["en"],
       interactionTypes: ["text"],
@@ -3122,6 +3373,113 @@ export const interactionChoiceEditorState = {
   },
   qType: 'MCQ',
   primaryCategory: 'Multiple Choice Question'
+};
+
+export const interactionMatchEditorState = {
+  question: "<p>q</p>",
+  options: [
+    {
+      left: "<p>a</p>",
+      right: "<p>b</p>",
+    },
+    {
+      left: "<p>c</p>",
+      right: "<p>d</p>",
+    },
+  ],
+  templateId: "mtf-horizontal",
+  corectMatchPair: [{ "0": 0 }, { "1": 1 }],
+  numberOfOptions: 2,
+  interactions: {
+    response1: {
+      type: "match",
+      options: {
+        left: [
+          {
+            label: "<p>a</p>",
+            value: 0,
+          },
+          {
+            label: "<p>b</p>",
+            value: 1,
+          },
+        ],
+        right: [
+          {
+            label: "<p>c</p>",
+            value: 0,
+          },
+          {
+            label: "<p>d</p>",
+            value: 1,
+          },
+        ],
+      },
+    },
+    validation: {
+      required: "Yes",
+    },
+  },
+  name: "Match The Following Question",
+  responseDeclaration: {
+    response1: {
+      cardinality: "multiple",
+      type: "integer",
+      correctResponse: {
+        value: [{ "0": 0 }, { "1": 1 }],
+      },
+      mapping: [
+        {
+          value: {
+            "0": 0,
+          },
+          score: 2,
+        },
+        {
+          value: {
+            "1": 1,
+          },
+          score: 2,
+        },
+      ],
+    },
+  },
+  interactionTypes: ["match"],
+  editorState: {
+    options: {
+      left: [
+        {
+          value: {
+            body: "<p>a</p>",
+            value: 0,
+          },
+        },
+        {
+          value: {
+            body: "<p>b</p>",
+            value: 1,
+          },
+        },
+      ],
+      right: [
+        {
+          value: {
+            body: "<p>c</p>",
+            value: 0,
+          },
+        },
+        {
+          value: {
+            body: "<p>d</p>",
+            value: 1,
+          },
+        },
+      ],
+    },
+    question: "<p>q</p>",
+  },
+  qType: "MTF",
+  primaryCategory: "Match The Following Question",
 };
 
 export const RubricData = [
