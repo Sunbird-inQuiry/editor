@@ -1,0 +1,81 @@
+<ng-container *ngIf="!isReadOnlyMode">
+  <div class="pt-10 fs-0-92 sb-w-85">
+    <label class="fs-0-92 font-weight-bold">
+      {{configService.labelConfig?.lbl?.setAnswers}}
+      <span class="sb-required">*</span>
+    </label>
+    <label class="fs-0-92 d-inline-block">
+      {{configService.labelConfig?.lbl?.selectLayout}}
+    </label>
+    <i class="icon info circle ml-8" suiPopup popupDelay="500" popupText={{configService.labelConfig?.lbl?.optionsPopupText}}></i>
+    <span class="divider mr-8"></span>
+    <span>
+      <button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-single" [ngClass]="{active: 'mtf-horizontal' === templateType}" (click)="setTemplate('mtf-horizontal')">
+        <i class="mr-10 h-7"></i> 
+        {{configService.labelConfig?.lbl?.horizontal}}
+      </button>
+    </span>
+    <span>
+      <button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-two" [ngClass]="{active: 'mtf-vertical' === templateType}" (click)="setTemplate('mtf-vertical')">
+        <i class="mr-10 h-7 w-20"></i>
+        {{configService.labelConfig?.lbl?.vertical}}
+      </button>
+    </span>
+  </div>
+  <div class="d-flex pt-10 flex-dc sb-mcq-form">
+    <div class="d-flex flex-w-wrap" *ngFor="let option of editorState.options; let i = index">
+      <div class="w-100 mb-24">
+        <div class="d-flex flex-w-wrap flex-jc-space-between w-100">
+          <div class="w-49">
+            <lib-ckeditor-tool
+              [setCharacterLimit]="setCharacterLimit" (editorDataOutput)="option.left= $event.body; editorDataHandler($event);"
+              [editorDataInput]="option.left" class="ckeditor-tool__option mb-10"
+              [class.mb-5]="showFormError && ([undefined, ''].includes(option.left.body) || option.left.length > setCharacterLimit)">
+            </lib-ckeditor-tool>
+            <label class="ui basic red error label pt-1" *ngIf="option.left.length > setCharacterLimit">
+              {{configService.labelConfig?.lbl?.reduceSize}}
+            </label>
+            <label class="sb-color-error fs-0-785" *ngIf="showFormError && (option.left === undefined || option.left === '')">
+              {{configService.labelConfig?.lbl?.fillThisOption}}
+            </label>
+          </div>
+          <div class="w-49">
+            <lib-ckeditor-tool
+              [setCharacterLimit]="setCharacterLimit"
+              (editorDataOutput)="option.right = $event.body; editorDataHandler($event);"
+              [editorDataInput]="option.right" class="ckeditor-tool__option mb-10"
+              [class.mb-5]="showFormError && ([undefined, ''].includes(option.right.body) || option.right.length > setCharacterLimit)">
+            </lib-ckeditor-tool>
+            <label class="ui basic red error label pt-1" *ngIf="option.right.length > setCharacterLimit">
+              {{configService.labelConfig?.lbl?.reduceSize}}
+            </label>
+            <label class="sb-color-error fs-0-785" *ngIf="showFormError && (option.right === undefined || option.right === '')">
+              {{configService.labelConfig?.lbl?.fillThisOption}}
+            </label>
+          </div>
+        </div>
+        <div>
+          <button 
+            class="sb-btn sb-btn-xs sb-left-icon-btn text-inherit b-0 bg-none no-hover p-0 mb-10 mt-10 right"
+            [disabled]="editorState.options.length < 3"
+            (click)="editorState.deleteOptions(i);editorDataHandler($event);"
+            libTelemetryInteract
+            [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('delete_option','click','submit',telemetryService.telemetryPageId)">
+            <i class="icon trash outline fs-1-286 pull-left mr-0"></i>
+            <span class="sb-line-height-24">{{configService.labelConfig?.button_labels?.delete_pair_btn_label}}</span>
+          </button>        
+        </div>
+      </div>
+    </div>
+    <div class="d-flex">
+      <button *ngIf="editorState.options.length < editorState.maximumOptions"
+        class="sb-btn sb-btn-outline-primary sb-btn-xs sb-left-icon-btn text-inherit b-0 bg-none no-hover p-0 mb-10 mt-10"
+        (click)="editorState.addOptions();editorDataHandler($event);"
+        libTelemetryInteract
+        [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('add_option','click','submit',telemetryService.telemetryPageId)" >
+        <i class="plus circle icon fs-1-286 pull-left mr-0" aria-hidden="true"></i>
+        <span class="sb-line-height-24">{{configService.labelConfig?.lbl?.addPair}}</span>
+      </button>
+    </div>
+  </div>
+</ng-container>
