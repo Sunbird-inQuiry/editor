@@ -38,6 +38,7 @@ import {TermAndConditionComponent} from './components/term-and-condition/term-an
 import { MatchComponent } from './components/match/match.component';
 
 import { QualityParamsModalComponent } from './components/quality-params-modal/quality-params-modal.component';
+import { AssetsBrowserComponent } from './components/assets-browser/assets-browser.component';
 @NgModule({
   declarations: [
     QuestionsetEditorLibraryComponent,
@@ -68,6 +69,7 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     ProgressStatusComponent,
     TermAndConditionComponent,
     QualityParamsModalComponent,
+    AssetsBrowserComponent,
     MatchComponent
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule.withConfig({callSetDisabledState: 'whenDisabledForLegacyCode'}), RouterModule.forChild([]), SuiModule,
