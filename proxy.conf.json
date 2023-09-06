@@ -1,4 +1,10 @@
 {
+    "/action/asset/v1/upload": {
+        "target": "http://localhost:3000",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    },
     "/action/program/v1": {
         "target": "http://localhost:3000",
         "secure": false,

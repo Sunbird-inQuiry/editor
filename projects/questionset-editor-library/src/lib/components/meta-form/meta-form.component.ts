@@ -62,7 +62,6 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
     } else {
       this.appIconConfig = {...this.appIconConfig , ... {isAppIconEditable: true}};
     }
-    const ifEditable = this.ifFieldIsEditable('appIcon');
   }
 
   setShuffleValue(value) {

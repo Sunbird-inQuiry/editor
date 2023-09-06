@@ -45,7 +45,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   public searchFormConfig: any;
   public leafFormConfig: any;
   public relationFormConfig: any;
-  public showLibraryPage = false;
   public questionlibraryInput: any = {};
   public editorMode;
   public collectionId;
@@ -71,26 +70,16 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     showReviewComment: false
   };
   public contentComment: string;
-  public showComment: boolean;
   public showReviewModal: boolean;
-  public csvDropDownOptions: any = {};
-  public showCsvUploadPopup = false;
   public objectType: string;
-  public isObjectTypeCollection: any;
-  public isCreateCsv = true;
   public isStatusReviewMode = false;
-  public isEnableCsvAction: any;
-  public isTreeInitialized: any;
   public ishierarchyConfigSet =  false;
   public publishchecklist: any;
-  public isComponenetInitialized = false;
   public unSubscribeshowQuestionLibraryPageEmitter: Subscription;
   public sourcingSettings: any;
   public setChildQuestion: any;
   public unsubscribe$ = new Subject<void>();
   public onComponentDestroy$ = new Subject<any>();
-  public outcomeDeclaration: any;
-  public levelsArray: any;
   constructor(private editorService: EditorService, public treeService: TreeService, private frameworkService: FrameworkService,
               private helperService: HelperService, public telemetryService: EditorTelemetryService, private router: Router,
               private toasterService: ToasterService,
@@ -122,7 +111,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.objectType = this.configService.categoryConfig[this.editorConfig.config.objectType];
     this.collectionId = _.get(this.editorConfig, 'context.identifier');
     this.toolbarConfig = this.editorService.getToolbarConfig();
-    this.isObjectTypeCollection = this.objectType === 'questionset' ? false : true;
     this.isStatusReviewMode = this.isReviewMode();
 
     if (this.objectType === 'question') {
@@ -204,63 +192,19 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getFrameworkDetails(categoryDefinitionData) {
-    let orgFWIdentifiers: any;
-    let targetFWIdentifiers: any;
-    let orgFWType: any;
-    let targetFWType: any;
-    orgFWIdentifiers = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.framework.enum') ||
-      _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.framework.default');
-    if (_.get(this.editorConfig, 'config.renderTaxonomy') === true) {
-      const orgId = _.get(this.editorConfig, 'context.identifier');
-      this.editorService.fetchOutComeDeclaration(orgId).toPromise()
-      .then(data => {
-        if (data?.result) {
-          this.outcomeDeclaration = _.get(data?.result, 'questionset.outcomeDeclaration');
-          this.levelsArray = Object.keys(this.outcomeDeclaration);
-        }
-      });
-    }
-    // tslint:disable-next-line:max-line-length
-    this.publishchecklist = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.forms.publishchecklist.properties') || _.get(categoryDefinitionData, 'result.objectCategoryDefinition.forms.review.properties') || [];
+    this.setPublishCheckList(categoryDefinitionData);
     if (_.isEmpty(this.targetFramework || _.get(this.editorConfig, 'context.targetFWIds'))) {
-      // tslint:disable-next-line:max-line-length
-      targetFWIdentifiers = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.targetFWIds.default');
-      if (_.isEmpty(targetFWIdentifiers)) {
-        // tslint:disable-next-line:max-line-length
-        targetFWType = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.config.frameworkMetadata.targetFWType');
-        const channelFrameworks = _.get(this.helperService.channelInfo, 'frameworks');
-        const channelFrameworksType = _.map(channelFrameworks, 'type');
-        const difference = _.difference(targetFWType, _.uniq(channelFrameworksType));
-
-        if (targetFWType && channelFrameworksType && _.isEmpty(difference)) {
-          this.targetFramework = _.get(_.first(_.filter(channelFrameworks, framework => {
-            return framework.type === _.first(targetFWType);
-          })), 'identifier');
-          this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
-          this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
-        } else if ((targetFWType && channelFrameworksType && !_.isEmpty(difference)) || _.isEmpty(channelFrameworksType)) {
-          this.frameworkService.getFrameworkData(undefined, difference, undefined, 'Yes').subscribe(
-            (targetResponse) => {
-              this.targetFramework = _.get(_.first(_.get(targetResponse, 'result.Framework')), 'identifier');
-              if (!_.isEmpty(this.targetFramework)) {
-                this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
-                this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
-              }
-            }
-          );
-        }
-      } else {
-        this.frameworkService.getFrameworkData(undefined, undefined, targetFWIdentifiers).subscribe(
-          (targetResponse) => {
-            this.targetFramework = _.get(_.first(_.get(targetResponse, 'result.Framework')), 'identifier');
-            if (!_.isEmpty(this.targetFramework)) {
-              this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
-              this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
-            }
-          }
-        );
-      }
+      this.setTargetFrameworkData(categoryDefinitionData);
     }
+    this.setOrgFrameworkData(categoryDefinitionData)
+
+  }
+
+  setOrgFrameworkData(categoryDefinitionData) {
+    let orgFWIdentifiers: any;
+    let orgFWType: any;
+    orgFWIdentifiers = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.framework.enum') ||
+    _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.framework.default');
 
     if (_.isEmpty(orgFWIdentifiers)) {
       let orgFrameworkList = [];
@@ -304,6 +248,50 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  setTargetFrameworkData(categoryDefinitionData) {
+    let targetFWIdentifiers;
+    let targetFWType;
+    targetFWIdentifiers = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.schema.properties.targetFWIds.default');
+    if (_.isEmpty(targetFWIdentifiers)) {
+      targetFWType = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.objectMetadata.config.frameworkMetadata.targetFWType');
+      const channelFrameworks = _.get(this.helperService.channelInfo, 'frameworks');
+      const channelFrameworksType = _.map(channelFrameworks, 'type');
+      const difference = _.difference(targetFWType, _.uniq(channelFrameworksType));
+
+      if (targetFWType && channelFrameworksType && _.isEmpty(difference)) {
+        this.targetFramework = _.get(_.first(_.filter(channelFrameworks, framework => {
+          return framework.type === _.first(targetFWType);
+        })), 'identifier');
+        this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
+        this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
+      } else if ((targetFWType && channelFrameworksType && !_.isEmpty(difference)) || _.isEmpty(channelFrameworksType)) {
+        this.frameworkService.getFrameworkData(undefined, difference, undefined, 'Yes').subscribe(
+          (targetResponse) => {
+            this.targetFramework = _.get(_.first(_.get(targetResponse, 'result.Framework')), 'identifier');
+            if (!_.isEmpty(this.targetFramework)) {
+              this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
+              this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
+            }
+          }
+        );
+      }
+    } else {
+      this.frameworkService.getFrameworkData(undefined, undefined, targetFWIdentifiers).subscribe(
+        (targetResponse) => {
+          this.targetFramework = _.get(_.first(_.get(targetResponse, 'result.Framework')), 'identifier');
+          if (!_.isEmpty(this.targetFramework)) {
+            this.treeService.updateMetaDataProperty('targetFWIds', _.castArray(this.targetFramework));
+            this.frameworkService.getTargetFrameworkCategories(_.castArray(this.targetFramework));
+          }
+        }
+      );
+    }
+  }
+
+  setPublishCheckList(categoryDefinitionData) {
+    this.publishchecklist = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.forms.publishchecklist.properties') || _.get(categoryDefinitionData, 'result.objectCategoryDefinition.forms.review.properties') || [];
+  }
+
   setEditorForms(categoryDefinitionData) {
     const formsConfigObj = _.get(categoryDefinitionData, 'result.objectCategoryDefinition.forms');
     this.unitFormConfig = _.get(formsConfigObj, 'unitMetadata.properties');
@@ -338,13 +326,11 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       type: 'edit', pageid: this.telemetryService.telemetryPageId, uri: this.router.url,
       duration: (Date.now() - this.pageStartTime) / 1000
     });
-    this.isComponenetInitialized = true;
   }
 
   mergeCollectionExternalProperties(): Observable<any> {
     const requests = [];
     this.collectionTreeNodes = null;
-    this.isTreeInitialized = true;
     requests.push(this.editorService.fetchCollectionHierarchy(this.collectionId));
     if (this.objectType === 'questionset') {
       requests.push(this.editorService.readQuestionSet(this.collectionId));
@@ -438,7 +424,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.saveContent().then((message: string) => {
           this.buttonLoaders.saveAsDraftButtonLoader = false;
           this.toasterService.success(message);
-          this.isEnableCsvAction = true;
           if (_.get(this.editorConfig, 'config.enableQuestionCreation') === false) {
             this.mergeCollectionExternalProperties().subscribe(response => {
               this.redirectToChapterListTab({
@@ -449,7 +434,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         }).catch(((error: string) => {
           this.buttonLoaders.saveAsDraftButtonLoader = false;
-          this.isEnableCsvAction = false;
           this.toasterService.error(error);
         }));
         break;
@@ -477,9 +461,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         break;
       case 'onFormStatusChange':
         this.onFormStatusChange(event.event);
-        if (this.isObjectTypeCollection) {
-          this.handleCsvDropdownOptionsOnCollection();
-        }
         break;
       case 'onFormValueChange':
         this.updateToolbarTitle(event);
@@ -576,8 +557,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.mergeCollectionExternalProperties().subscribe((res: any) => {
       this.pageId = 'questionset_editor';
       this.telemetryService.telemetryPageId = this.pageId;
-      this.isEnableCsvAction = true;
-      this.isComponenetInitialized = true;
     });
   }
 
@@ -604,7 +583,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         }, err => {
           const errInfo = {
-            errorMsg: _.get(this.configService, 'labelConfig.messages.error.043')
+            errorMsg: _.get(this.configService, 'labelConfig.messages.error.041')
           };
           return throwError(this.editorService.apiErrorHandling(err, errInfo));
         });
@@ -798,16 +777,12 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   treeEventListener(event: any) {
     this.actionType = event.type;
     this.updateTreeNodeData();
-    if (this.isObjectTypeCollection) {
-      this.handleCsvDropdownOptionsOnCollection();
-    }
     switch (event.type) {
       case 'nodeSelect':
         this.updateSubmitBtnVisibility();
         this.selectedNodeData = _.cloneDeep(event.data);
         this.isCurrentNodeFolder = _.get(this.selectedNodeData, 'folder');
         this.isCurrentNodeRoot = _.get(this.selectedNodeData, 'data.root');
-        // TODO: rethink below line code
         this.isQumlPlayer = _.get(this.selectedNodeData, 'data.metadata.mimeType') === 'application/vnd.sunbird.question';
         this.setTemplateList();
         this.changeDetectionRef.detectChanges();
@@ -1041,7 +1016,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.mergeCollectionExternalProperties().subscribe((res: any) => {
         this.pageId = 'questionset_editor';
         this.telemetryService.telemetryPageId = this.pageId;
-        this.isEnableCsvAction = true;
       });
     }
   }
@@ -1065,77 +1039,10 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     return false;
   }
-  handleCsvDropdownOptionsOnCollection() {
-    if (this.isTreeInitialized) {
-      this.isEnableCsvAction = true;
-      this.isTreeInitialized = false;
-    } else {
-      this.isEnableCsvAction = false;
-    }
-    this.setCsvDropDownOptionsDisable(true);
-  }
-  onClickFolder() {
-    if (this.isComponenetInitialized) {
-      this.isComponenetInitialized = false;
-      this.setCsvDropDownOptionsDisable();
-    } else if (this.isEnableCsvAction) {
-     this.setCsvDropDownOptionsDisable();
-  }
-  }
-  setCsvDropDownOptionsDisable(disable?) {
-    const status = this.editorService.getHierarchyFolder().length ? true : false;
-    this.csvDropDownOptions.isDisableCreateCsv = disable ? disable : status;
-    this.csvDropDownOptions.isDisableUpdateCsv = disable ? disable : !status;
-    this.csvDropDownOptions.isDisableDownloadCsv = disable ? disable : !status;
-  }
-  downloadHierarchyCsv() {
-    this.editorService.downloadHierarchyCsv(this.collectionId).subscribe(res => {
-      const tocUrl = _.get(res, 'result.collection.tocUrl');
-      this.downloadCSVFile(tocUrl);
-    }, error => {
-      this.toasterService.error(_.get(error, 'error.params.errmsg'));
-    });
-  }
+
   isReviewMode() {
     return  _.includes([ 'review', 'read', 'sourcingreview', 'orgreview' ], this.editorService.editorMode);
    }
-  downloadCSVFile(tocUrl) {
-    const downloadConfig = {
-      blobUrl: tocUrl,
-      successMessage: false,
-      fileType: 'csv',
-      fileName: this.collectionId
-    };
-    window.open(downloadConfig.blobUrl, '_blank');
-    /*this.editorService.downloadBlobUrlFile(downloadConfig);*/
-  }
-  hanndleCsvEmitter(event) {
-    switch (event.type) {
-      case 'closeModal':
-        this.showCsvUploadPopup = false;
-        break;
-      case 'updateHierarchy':
-        this.mergeCollectionExternalProperties().subscribe((res: any) => {
-          this.pageId = 'questionset_editor';
-          this.telemetryService.telemetryPageId = this.pageId;
-          this.isEnableCsvAction = true;
-        });
-        break;
-      case 'createCsv':
-        this.showCsvUploadPopup = true;
-        this.isCreateCsv = true;
-        break;
-      case 'updateCsv':
-        this.showCsvUploadPopup = true;
-        this.isCreateCsv = false;
-        break;
-      case 'downloadCsv':
-        this.downloadHierarchyCsv();
-        break;
-      default:
-        break;
-    }
-  }
 
   onFormStatusChange(form) {
     const selectedNode = this.treeService.getActiveNode();

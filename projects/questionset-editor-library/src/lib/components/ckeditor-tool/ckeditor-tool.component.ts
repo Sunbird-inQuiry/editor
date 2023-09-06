@@ -791,7 +791,8 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   uploadToBlob(signedURL, file, config): Observable<any> {
-    return this.questionService.http.put(signedURL, file, config).pipe(catchError(err => {
+    const csp = _.get(this.editorService.editorConfig, 'context.cloudStorage.provider', 'azure');
+    return this.questionService.uploadToBlob(signedURL, file, csp).pipe(catchError(err => {
       const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.018') };
       this.isClosable = true;
       this.loading = false;

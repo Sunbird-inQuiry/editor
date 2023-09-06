@@ -38,7 +38,7 @@ export class PublishChecklistComponent implements OnInit {
           publishData[field.code] = this.fieldsAvailable[field.code]; // asign value to field other than checkbox's example publishComment = 'some comment'
         }
       });
-      if (checkBoxData && checkBoxData.length) {
+      if (checkBoxData?.length) {
         publishData['publishChecklist'] = checkBoxData;
       }
       this.publishEmitter.emit({ button: this.actionType, publishData: publishData});

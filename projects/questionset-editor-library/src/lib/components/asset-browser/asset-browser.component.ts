@@ -27,15 +27,11 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
   showErrorMsg: boolean;
   errorMsg: string;
   query: string;
-  uploader;
   isClosable = true;
   loading = false;
-  public mediaobj;
-  public editorInstance: any;
   public assetsCount: any;
   public searchMyInput = '';
   public searchAllInput: any;
-  showAddButton: boolean;
   appIcon;
   public formData: any;
   public assestData = {};
@@ -62,14 +58,6 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
       result.push(`${type}/${content}`);
     });
     return result.toString();
-  }
-
-  initializeImagePicker() {
-    this.showImagePicker = true;
-  }
-
-  outputEventHandler(event) {
-    console.log(JSON.stringify(event));
   }
 
   getMyImages(offset, query?, search?) {
@@ -273,14 +261,14 @@ export class AssetBrowserComponent implements OnInit, OnDestroy {
   }
 
   uploadToBlob(signedURL, file, config): Observable<any> {
-    return this.questionService.http.put(signedURL, file, config).pipe(catchError(err => {
+    const csp = _.get(this.editorService.editorConfig, 'context.cloudStorage.provider', 'azure');
+    return this.questionService.uploadToBlob(signedURL, file, csp).pipe(catchError(err => {
       const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.018') };
       this.isClosable = true;
       this.loading = false;
       return throwError(this.editorService.apiErrorHandling(err, errInfo));
     }), map(data => data));
   }
-
 
   dismissImageUploadModal() {
     if (this.isClosable) {

@@ -4,7 +4,6 @@
     "showOriginPreviewUrl": false,
     "showSourcingStatus": false,
     "showCorrectionComments": false,
-    "publicStorageAccount": "",
     "assetConfig": {
         "image": {
             "size": "1",
@@ -27,10 +26,7 @@
     "readQuestionFields": "body,primaryCategory,mimeType,qType,answer,templateId,responseDeclaration,interactionTypes,interactions,name,solutions,editorState,media,remarks,evidence,hints,instructions,outcomeDeclaration,",
     "omitFalseyProperties":["topic", "topicsIds", "targetTopicIds", "keywords"],
     "questionSet": {
-      "maxQuestionsLimit": "500"
-    },
-    "collection": {
-      "maxContentsLimit": "1200"
+      "maxQuestionsLimit": 500
     },
     "defaultStates": {
         "nonInteractiveQuestions": {

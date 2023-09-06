@@ -38,7 +38,7 @@ export class McqForm {
     this.maxScore = maxScore;
     this.numberOfOptions = numberOfOptions || 2;
     this.maximumOptions = maximumOptions || 4
-    if (!this.options || !this.options.length) {
+    if (!this.options || !this.options?.length) {
       _.times(this.numberOfOptions, index => this.options.push(new McqOptions('')));
     }
   }
