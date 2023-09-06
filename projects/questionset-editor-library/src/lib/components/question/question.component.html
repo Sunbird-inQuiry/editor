@@ -69,6 +69,13 @@
                 (editorDataOutput)="editorDataHandler($event)"
                 [sourcingSettings]="sourcingSettings" [mapping]="scoreMapping" [maxScore]="maxScore"
                 [isReadOnlyMode]="isReadOnlyMode"></lib-options>
+              
+              <lib-match *ngIf="questionInteractionType === 'match'"
+                [questionPrimaryCategory]="questionPrimaryCategory"
+                [editorState]="editorState" [showFormError]="showFormError"
+                (editorDataOutput)="editorDataHandler($event)"
+                [mapping]="scoreMapping" [maxScore]="maxScore"
+                [isReadOnlyMode]="isReadOnlyMode"></lib-match>
 
               <lib-slider *ngIf="questionInteractionType === 'slider'" [editorDataInput]="sliderOptions"
                 (onChange)="sliderData($event)"></lib-slider>

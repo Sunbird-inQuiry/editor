@@ -44,7 +44,8 @@
        "remove_btn_label":"Remove",
        "done_btn_label":"Done",
        "add_translation_label":"Add Translation",
-       "add_page_numbers_to_questions_btn_label": "Pagination"
+       "add_page_numbers_to_questions_btn_label": "Pagination",
+       "delete_pair_btn_label":"Delete Pair"
     },
     "lbl":{
        "Questiondetails":"Question details",
@@ -154,7 +155,10 @@
        "editingConsentNote": "I confirm that I am allowing my reviewer to make edits to the content and metadata of the content. I consent my reviewer make changes, if any and publish the contain thereafter.",
        "acceptBothConsentNote": "Agree to both conditions",
        "totalScore": "Total Score",
-       "qualityReview": "If the score is less than or equal to 15 please re-evaluate the question and send back for corrections."
+       "qualityReview": "If the score is less than or equal to 15 please re-evaluate the question and send back for corrections.",
+       "addPair": "Add pair",
+       "setAnswers": "Set your answers",
+       "addQuestionAnswerPairText": "Add question-answer pairs to your question. Answers will be shuffled automatically"
       },
     "err":{
        "somethingWentWrong":"Something went wrong",
