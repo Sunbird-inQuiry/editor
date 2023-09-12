@@ -33,12 +33,12 @@
               },
               {
                 "glob": "**/*",
-                "input": "node_modules/compass-quml-player-web-component/assets/",
+                "input": "node_modules/@project-sunbird/sunbird-quml-player-web-component/assets/",
                 "output": "/assets/"
               }
             ],
             "styles": [
-              "node_modules/compass-quml-player-web-component/styles.css",
+              "node_modules/@project-sunbird/sunbird-quml-player-web-component/styles.css",
               "node_modules/@project-sunbird/sb-styles/assets/_styles.scss",
               "src/styles.scss",
               "src/assets/lib/semantic/semantic.min.css",
@@ -46,7 +46,7 @@
               "node_modules/font-awesome/css/font-awesome.css"
             ],
             "scripts": [
-              "node_modules/compass-quml-player-web-component/sunbird-quml-player.js",
+              "node_modules/@project-sunbird/sunbird-quml-player-web-component/sunbird-quml-player.js",
               "src/assets/libs/iziToast/iziToast.min.js",
               "node_modules/jquery.fancytree/dist/jquery.fancytree-all-deps.min.js",
               "node_modules/@project-sunbird/sunbird-file-upload-library/sunbird-file-upload-library.js",
@@ -224,12 +224,12 @@
               },
               {
                 "glob": "**/*",
-                "input": "node_modules/compass-quml-player-web-component/assets/",
+                "input": "node_modules/@project-sunbird/sunbird-quml-player-web-component/assets/",
                 "output": "/assets/"
               }
             ],
             "styles": [
-              "node_modules/compass-quml-player-web-component/styles.css",
+              "node_modules/@project-sunbird/sunbird-quml-player-web-component/styles.css",
               "projects/questionset-editor-library-wc/src/styles.scss",
               "node_modules/@project-sunbird/sb-styles/assets/_styles.scss",
               "src/assets/lib/semantic/semantic.min.css",
@@ -237,7 +237,7 @@
               "node_modules/font-awesome/css/font-awesome.css"
             ],
             "scripts": [
-              "node_modules/compass-quml-player-web-component/sunbird-quml-player.js",
+              "node_modules/@project-sunbird/sunbird-quml-player-web-component/sunbird-quml-player.js",
               "src/assets/libs/iziToast/iziToast.min.js",
               "node_modules/jquery.fancytree/dist/jquery.fancytree-all-deps.min.js",
               "node_modules/@project-sunbird/sunbird-file-upload-library/sunbird-file-upload-library.js",
