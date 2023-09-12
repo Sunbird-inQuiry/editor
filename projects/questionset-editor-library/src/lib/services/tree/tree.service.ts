@@ -272,6 +272,11 @@ export class TreeService {
     $(this.treeNativeElement).fancytree('getRootNode').getFirstChild().data.eval = evalMode;
   }
 
+  getEval() {
+    return $(this.treeNativeElement).fancytree('getRootNode').getFirstChild().data?.eval == this.configService.editorConfig.server || 
+    $(this.treeNativeElement).fancytree('getRootNode').getFirstChild().data.metadata?.eval.mode == this.configService.editorConfig.server.mode ? this.configService.editorConfig.serverSearch : this.configService.editorConfig.clientSearch
+  }
+
   overrideEvaluable(nodeId){
    const firstNode = this.getFirstChild()
    if(this.getFirstChild().data.metadata.mode) {
