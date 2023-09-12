@@ -67,12 +67,12 @@ app.use(['/action/questionset/v2/*',
     proxyReqOptDecorator: decoratePublicRequestHeaders()
 }));
 
-app.use(['*/action/composite/v3/search'
+app.use(['/action/composite/v3/search'
 ], proxy(BASE_URL, {
     https: true,
     limit: '30mb',
     proxyReqPathResolver: function (req) {
-        let originalUrl = req.originalUrl.replace('/action/action/composite/v3/', '/api/composite/v1/')
+        let originalUrl = req.originalUrl.replace('/action/composite/v3/', '/api/composite/v1/')
         console.log('proxyReqPathResolver questionset', originalUrl, require('url').parse(originalUrl).path);
         return require('url').parse(originalUrl).path;
     },
