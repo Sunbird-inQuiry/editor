@@ -480,9 +480,7 @@ describe('EditorService', () => {
   it('#getUpdatedNodeMetaData should return root nodesModified data', () => {
     treeService.treeCache.nodesModified = treeData.treeNode;
     treeService.treeNativeElement = nativeElement;
-    // $(nativeElement).fancytree('getRootNode');
-    // spyOn($(nativeElement), 'fancytree').withArgs('getRootNode').and.callFake(() => {});
-    spyOn(treeService, 'getFirstChild').and.callFake(()=> treeData.treeNode.data.metadata);
+    spyOn(treeService, 'getFirstChild').and.callFake(()=> treeData.treeNode.data);
     spyOn(editorService, 'getUpdatedNodeMetaData').and.callThrough();
     editorService.getUpdatedNodeMetaData();
     expect(editorService.getUpdatedNodeMetaData).toHaveBeenCalled();
