@@ -406,26 +406,11 @@ export class EditorService {
     const parentNodeId = _.findKey(this.treeService.treeCache.nodesModified,(node)=>{
       return node.root;
     });
-    const parentNode = $(this.treeService.treeNativeElement).fancytree('getRootNode').getFirstChild().data;
-    if(parentNode?.objectType === 'QuestionSet' && parentNode?.metadata?.primaryCategory === 'Blueprint Question Set'){
-      _.forEach(this.treeService.treeCache.nodesModified, (node, nodeId)=>{
-        if(!node.root){
-          const {board, medium, gradeLevel, subject, difficultyLevel, selectedQuestionType, requiredQuestionCount} = this.treeService.treeCache.nodesModified[nodeId]?.metadata;
-          this.treeService.treeCache.nodesModified[nodeId].metadata.criterias = [{
-          board:board,
-          medium:medium,
-          gradeLevel:gradeLevel,
-          subject:subject,
-          difficultyLevel:difficultyLevel,
-          selectedQuestionType:selectedQuestionType,
-          requiredQuestionCount:requiredQuestionCount,
-          }]
-        }
-      })    
-    } 
+    const parentNode = this.treeService.getFirstChild().data;
+
     _.forEach(this.treeService.treeCache.nodesModified, (node, nodeId)=>{
-      if(!node.root && parentNode?.eval || parentNode?.metadata.eval){
-        this.treeService.treeCache.nodesModified[nodeId].metadata.eval = parentNode.eval || parentNode?.metadata.eval;
+      if(!node.root && parentNode?.eval || parentNode?.metadata?.eval){
+        this.treeService.treeCache.nodesModified[nodeId].metadata.eval = parentNode.eval || parentNode?.metadata?.eval;
       }
 
     })
