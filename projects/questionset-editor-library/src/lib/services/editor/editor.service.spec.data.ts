@@ -36,7 +36,7 @@ export const rootNode = {
                     identifier: 'do_1135097615298723841131',
                     lastStatusChangedOn: '2022-04-05T06:40:11.752+0000',
                     audience: [
-                        'Student'
+                        'Audience1'
                     ],
                     visibility: 'Parent',
                     showTimer: false,
@@ -99,7 +99,7 @@ export const rootNode = {
                     identifier: 'do_1135097709808189441133',
                     lastStatusChangedOn: '2022-04-05T06:59:25.432+0000',
                     audience: [
-                        'Student'
+                        'Audience1'
                     ],
                     visibility: 'Parent',
                     showTimer: false,
@@ -231,7 +231,7 @@ export const questionsData = [
         identifier: 'do_1135097709808189441133',
         lastStatusChangedOn: '2022-04-05T06:59:25.432+0000',
         audience: [
-            'Student'
+            'Audience1'
         ],
         visibility: 'Parent',
         showTimer: false,
@@ -347,7 +347,7 @@ export const questionsData = [
         identifier: 'do_1135097615298723841131',
         lastStatusChangedOn: '2022-04-05T06:40:11.752+0000',
         audience: [
-            'Student'
+            'Audience1'
         ],
         visibility: 'Parent',
         showTimer: false,
