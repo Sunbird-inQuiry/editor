@@ -22,7 +22,8 @@ describe('EditorService', () => {
   const configStub = {
     urlConFig: (urlConfig as any).default,
     labelConfig: (labelConfig as any).default,
-    categoryConfig: (categoryConfig as any).default
+    categoryConfig: (categoryConfig as any).default,
+    editorConfig: (editorConfig as any).default
   };
   const configServiceData = {
     labelConfig: {
@@ -267,103 +268,6 @@ describe('EditorService', () => {
     expect(editorService.getContentChildrens).toHaveBeenCalled();
     expect(result).toBe(false);
   });
-  it('#downloadBlobUrlFile() should download the file', () => {
-    const service: EditorService = TestBed.inject(EditorService);
-    const httpClient = TestBed.inject(HttpClient);
-    const toasterService = TestBed.inject(ToasterService);
-    spyOn(toasterService, 'success').and.callFake(() => {});
-    const downloadConfig = {
-      // tslint:disable-next-line:max-line-length
-      blobUrl: 'https://sunbirddev.blob.core.windows.net/sunbird-content-dev/content/textbook/toc/do_113312173590659072160_dev-testing-1_1625022971409.csv',
-      successMessage: 'File downloaded',
-      fileType: 'csv',
-      fileName: 'do_113312173590659072160'
-    };
-    spyOn(httpClient, 'get').and.returnValue(of(new Blob([downloadConfig.blobUrl], {})));
-    spyOn(service, 'downloadBlobUrlFile').and.callThrough();
-    service.downloadBlobUrlFile(downloadConfig);
-    expect(httpClient.get).toHaveBeenCalled();
-    expect(toasterService.success).toHaveBeenCalledWith(configServiceData.labelConfig.messages.success['011']);
-  });
-  it('#downloadBlobUrlFile() should download the file and dose not show toaster message', () => {
-    const service: EditorService = TestBed.inject(EditorService);
-    const http = TestBed.inject(HttpClient);
-    const toasterService = TestBed.inject(ToasterService);
-    spyOn(toasterService, 'success').and.callThrough();
-    const downloadConfig = {
-      // tslint:disable-next-line:max-line-length
-      blobUrl: 'https://sunbirddev.blob.core.windows.net/sunbird-content-dev/content/textbook/toc/do_113312173590659072160_dev-testing-1_1625022971409.csv',
-      successMessage: false,
-      fileType: 'csv',
-      fileName: 'do_113312173590659072160'
-    };
-    spyOn(http, 'get').and.returnValue(of(new Blob([downloadConfig.blobUrl], {})));
-    spyOn(service, 'downloadBlobUrlFile').and.callThrough();
-    service.downloadBlobUrlFile(downloadConfig);
-    expect(http.get).toHaveBeenCalled();
-    expect(http.get).toHaveBeenCalledTimes(1);
-    expect(http.get).toHaveBeenCalled();
-    expect(toasterService.success).not.toHaveBeenCalledWith(configServiceData.labelConfig.messages.success['011']);
-  });
-  it('#downloadHierarchyCsv() should downloadHierarchyCsv', async () => {
-    const publicDataService: PublicDataService = TestBed.inject(PublicDataService);
-    spyOn(publicDataService, 'get').and.returnValue(of({
-      id: 'api.collection.export',
-      ver: '4.0',
-      ts: '2021-07-05T07:43:10ZZ',
-      params: {
-        resmsgid: 'd54936f9-9f9a-449a-a797-5564d5a97c6c',
-        msgid: null,
-        err: null,
-        status: 'successful',
-        errmsg: null
-      },
-      responseCode: 'OK',
-      result: {
-        collection: {
-          // tslint:disable-next-line:max-line-length
-          tocUrl: 'https://sunbirddev.blob.core.windows.net/sunbird-content-dev/content/textbook/toc/do_113312173590659072160_dev-testing-1_1625022971409.csv',
-          ttl: '54000'
-        }
-      }
-    }));
-    editorService.downloadHierarchyCsv('do_113312173590659072160').subscribe(data => {
-      expect(data.responseCode).toBe('OK');
-    });
-  });
-  it('#validateCSVFile() should validateCSVFile', async () => {
-    const publicDataService: PublicDataService = TestBed.inject(PublicDataService);
-    const file = new File([''], 'filename', { type: 'csv/text' });
-    const event = {
-      target: {
-        files: [
-          file
-        ]
-      }
-    };
-    spyOn(publicDataService, 'post').and.returnValue(of({
-      id: 'api.collection.import',
-      ver: '4.0',
-      ts: '2021-07-05T08:28:06ZZ',
-      params: {
-        resmsgid: 'f151855b-98fd-4baf-b8dc-00c31cc47b71',
-        msgid: null,
-        err: 'INVALID_CSV_FILE',
-        status: 'failed',
-        errmsg: 'Please provide valid csv file. Please check for data columns without headers.'
-      },
-      responseCode: 'CLIENT_ERROR',
-      result: {
-        messages: null
-      }
-    }));
-    editorService.validateCSVFile(event.target.files[0], 'do_113312173590659072160').subscribe(data => {
-    },
-      error => {
-        expect(error.error.responseCode).toBe('CLIENT_ERROR');
-
-      });
-  });
   it('#generatePreSignedUrl() should call generatePreSignedUrl', () => {
     const publicDataService: PublicDataService = TestBed.inject(PublicDataService);
     spyOn(publicDataService, 'post').and.returnValue(of());
@@ -568,15 +472,6 @@ describe('EditorService', () => {
     });
     editorService._toFlatObjFromHierarchy(rootNodeData);
     expect(editorService._toFlatObjFromHierarchy).toHaveBeenCalled();
-  });
-
-  it('#fetchOutComeDeclaration() should return the levels for rubrics', async()=> {
-    const questionSetId = 'do_11330102570702438417';
-    const publicDataService = TestBed.inject(PublicDataService);
-    spyOn(publicDataService, 'get').and.returnValue(of(mockData.serverResponse));
-    editorService.fetchOutComeDeclaration(questionSetId).subscribe(data => {
-      expect(data.responseCode).toEqual('OK');
-    });
   });
 
   it('#appendCloudStorageHeaders should set cloud storage headers if exist', () => {

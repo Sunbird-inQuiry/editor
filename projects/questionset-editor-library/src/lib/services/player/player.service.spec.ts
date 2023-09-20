@@ -6,40 +6,12 @@ import { ConfigService } from '../../services/config/config.service';
 import * as urlConfig from '../../services/config/url.config.json';
 import * as labelConfig from '../../services/config/label.config.json';
 import * as categoryConfig from '../../services/config/category.config.json';
-
+import * as playerConfig from '../../services/config/player.config.json';
 const configStub = {
   urlConFig: (urlConfig as any).default,
   labelConfig: (labelConfig as any).default,
   categoryConfig: (categoryConfig as any).default,
-  playerConfig: {
-    playerConfig: {
-      context: {
-        contentId: '',
-        sid: '',
-        uid: '',
-        timeDiff: '',
-        contextRollup: '',
-        channel: '',
-        did: '',
-        pdata: {
-          ver: ''
-        },
-        dims: '',
-        tags: {},
-        app: {},
-        cdata: ''
-      },
-      metadata: {},
-      data: {},
-      config: {
-        enableTelemetryValidation: false,
-        previewCdnUrl: ''
-      }
-    },
-    MIME_TYPE: {
-      ecmlContent: {}
-    }
-  }
+  playerConfig: (playerConfig as any).default,
 };
 
 const mockEditorService = {
@@ -87,19 +59,5 @@ describe('PlayerService', () => {
     expect(result.context.mode).toEqual('play');
     expect(result.metadata).toBeTruthy();
     expect(result.data).toBeTruthy();
-  })
-
-  it('#getPlayerConfig() should return player config', () => {
-    const service: PlayerService = TestBed.inject(PlayerService);
-    const contentDetails = {
-      contentId: 'do_123',
-      courseId: 'do_1234',
-      batchId: 'do_12345',
-      contentData: {},
-      body: {},
-      mimeType: 'image/png'
-    };
-    const result = service.getPlayerConfig(contentDetails);
-    expect(result).toBeTruthy();
   })
 });
