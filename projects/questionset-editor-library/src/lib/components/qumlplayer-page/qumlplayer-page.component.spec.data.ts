@@ -342,7 +342,7 @@ export const mockData = {
         "identifier": "do_113264162822283264127",
         "lastStatusChangedOn": "2021-04-23T06:48:20.767+0000",
         "audience": [
-          "Audience1nce1nce1"
+          "Audience1"
         ],
         "visibility": "Parent",
         "showTimer": false,
