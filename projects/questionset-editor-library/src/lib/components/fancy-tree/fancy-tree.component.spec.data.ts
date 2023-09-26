@@ -207,7 +207,7 @@ export const treeData = {
         autoBatch: "No",
       },
       identifier: "do_113289107070615552146",
-      audience: ["Student"],
+      audience: ["Audience1"],
       visibility: "Default",
       discussionForum: {
         enabled: "Yes",
@@ -280,7 +280,7 @@ export const treeData = {
   },
   identifier: "do_113277071092588544112",
   lastStatusChangedOn: "2021-05-11T12:30:17.357+0000",
-  audience: ["Student"],
+  audience: ["Audience1"],
   os: ["All"],
   visibility: "Parent",
   discussionForum: {
@@ -356,7 +356,7 @@ export const tree = [
         autoBatch: "No",
       },
       identifier: "do_113276371461185536128",
-      audience: ["Student"],
+      audience: ["Audience1"],
       visibility: "Default",
       consumerId: "dab07952-5d6c-459e-86ce-0bc31d90277f",
       discussionForum: {
@@ -469,7 +469,7 @@ export const tree = [
         autoBatch: "No",
       },
       identifier: "do_113276369323016192113",
-      audience: ["Student"],
+      audience: ["Audience1"],
       visibility: "Default",
       author: "may7thindividual@yopmail.com",
       consumerId: "33fb55ad-344e-4849-ab9b-e8e5e59e39ad",
