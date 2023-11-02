@@ -505,13 +505,13 @@ export const categoryDefinition = {
                   required: false,
                   visible: true,
                   range: [
-                    'Education Official',
-                    'School leaders (HMs)',
-                    'Teachers',
-                    'Students',
-                    'Parents',
-                    'Parent',
-                    'Others',
+                    'Audience1',
+                    'Audience2',
+                    'Audience3',
+                    'Audience4',
+                    'Audience5',
+                    'Audience6',
+                    'Audience7',
                   ],
                 },
                 {
@@ -586,14 +586,11 @@ export const categoryDefinition = {
                     class: 'sb-g-col-lg-1',
                   },
                   options: [
-                    'Student interview',
-                    'Teacher interview',
-                    'HM/HT interview',
-                    'Parent interview',
-                    'Official interview',
-                    'School walkthrough',
-                    'Class observation',
-                    'Document Review',
+                    'Audience1 interview',
+                    'Audience2 interview',
+                    'Audience3 interview',
+                    'Audience4 interview',
+                    'Audience5 interview'
                   ],
                 },
               ],
@@ -669,7 +666,7 @@ export const hierarchyResponse = [
           },
           "identifier": "do_2138622515299368961170",
           "audience": [
-              "Student"
+              "Audience1"
           ],
           "visibility": "Default",
           "showTimer": true,
@@ -1078,9 +1075,9 @@ export const categoryDefinitionData = {
                                   "required": true,
                                   "visible": true,
                                   "range": [
-                                      "Student",
-                                      "Teacher",
-                                      "Administrator"
+                                      "Audience1",
+                                      "Audience2",
+                                      "Audience3"
                                   ],
                                   "renderingHints": {
                                       "class": "sb-g-col-lg-1 required"
@@ -3516,7 +3513,7 @@ export const nodesModifiedData = {
               'Mathematics'
           ],
           audience: [
-              'Student'
+              'Audience1'
           ],
           shuffle: true,
           showFeedback: false,

@@ -481,9 +481,9 @@
                               "required": true,
                               "visible": true,
                               "range": [
-                                  "Student",
-                                  "Teacher",
-                                  "Administrator"
+                                  "Audience1",
+                                  "Audience2",
+                                  "Audience3"
                               ],
                               "renderingHints": {
                                   "class": "sb-g-col-lg-1 required"
