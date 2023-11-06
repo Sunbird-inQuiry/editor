@@ -68,7 +68,7 @@ app.use(['/action/questionset/v2/*',
 }));
 
 app.use(['/action/composite/v3/search'
-], proxy(BASE_URL, {
+    ], proxy(BASE_URL, {
     https: true,
     limit: '30mb',
     proxyReqPathResolver: function (req) {
