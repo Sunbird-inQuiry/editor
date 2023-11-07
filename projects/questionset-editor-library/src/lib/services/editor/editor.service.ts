@@ -410,8 +410,7 @@ export class EditorService {
       }
 
     })
-    this.treeService.treeCache.nodesModified[parentNodeId]?.metadata.hasOwnProperty('mode')? 
-    delete this.treeService.treeCache.nodesModified[parentNodeId]?.metadata?.mode:''
+    this.treeService.treeCache.nodesModified[parentNodeId]?.metadata.hasOwnProperty('mode')? delete this.treeService.treeCache.nodesModified[parentNodeId]?.metadata?.mode:''
     return this.treeService.treeCache.nodesModified;
   }
 
