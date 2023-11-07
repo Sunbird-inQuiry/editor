@@ -50,7 +50,6 @@ app.all(['/api/framework/v1/read/*',
     },
     proxyReqOptDecorator: decoratePublicRequestHeaders()
 }));
-
 app.use(['/action/questionset/v2/*',
     '/action/question/v2/*',
     '/action/collection/v1/*',
