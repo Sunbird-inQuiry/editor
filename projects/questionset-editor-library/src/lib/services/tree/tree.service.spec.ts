@@ -90,6 +90,12 @@ describe('TreeService', () => {
     expect(treeService.getFirstChild).toHaveBeenCalled();
   });
 
+  it('should call getEval method', () => {
+    spyOn(treeService, 'getFirstChild').and.callFake(()=> treeNode);
+    treeService.getEval();
+    expect(treeService.getFirstChild).toHaveBeenCalled();
+  });
+
   // it("#updateTreeNodeMetadata() should call #setTreeCache() with primaryCategory", ()=> {
   //   spyOn(treeService, 'updateTreeNodeMetadata').and.callThrough();
   //   spyOn(treeService, 'getActiveNode').and.callFake(()=> treeNode);

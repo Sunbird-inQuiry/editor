@@ -97,7 +97,8 @@ export const treeNode = {
         "maxTime": "00:06:00",
         "warningTime": "00:00:10",
         "summaryType": null
-      }
+      },
+      root: true
     },
     getLevel: ()=> {
         return 2;
