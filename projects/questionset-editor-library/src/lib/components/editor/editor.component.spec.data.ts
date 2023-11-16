@@ -257,6 +257,7 @@ editorConfig_question = {
     questionSet: {
       maxQuestionsLimit: 500,
     },
+    createdByField: 'board',
     editableFields: {
       orgreview: ['name', 'learningOutcome'],
       sourcingreview: ['name', 'learningOutcome'],
