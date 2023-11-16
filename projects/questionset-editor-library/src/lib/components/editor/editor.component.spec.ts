@@ -762,6 +762,7 @@ describe('EditorComponent', () => {
     spyOn(treeService, 'getActiveNode').and.returnValue({data: {metadata: {}}});
     spyOn(editorService, 'getContentChildrens').and.returnValue([{}, {}]);
     spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(true);
+    spyOn(treeService, 'getEval').and.returnValue({mode: "server"});
     spyOn(component, 'saveContent').and.callFake(() => {
       return Promise.resolve('success');
     });
@@ -771,6 +772,7 @@ describe('EditorComponent', () => {
       expect(treeService.getActiveNode).toHaveBeenCalled();
       expect(component.buttonLoaders.addQuestionFromLibraryButtonLoader).toBeFalsy();
       expect(component.questionlibraryInput).toBeDefined();
+      expect(treeService.getEval).toHaveBeenCalled();
       expect(component.pageId).toEqual('question_library');
     });
   }));

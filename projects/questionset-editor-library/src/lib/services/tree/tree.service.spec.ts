@@ -2,7 +2,7 @@ import { editorConfig, nativeElement } from './../../components/editor/editor.co
 import { TestBed, inject } from '@angular/core/testing';
 import { TreeService } from './tree.service';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
-import { treeNode } from './tree.service.spec.data';
+import { treeNode, treeCache } from './tree.service.spec.data';
 
 describe('TreeService', () => {
   let treeService: TreeService;
@@ -69,6 +69,32 @@ describe('TreeService', () => {
     spyOn(treeService, 'getActiveNode').and.callFake(()=> treeNode);
     treeService.updateTreeNodeMetadata(treeNode,undefined,'Observation', 'QuestionSet');
   })
+
+
+  it('should call updateEvaluable for root element', ()=> {
+    treeService.treeCache = treeCache;
+    treeService.treeNativeElement = nativeElement;
+    spyOn(treeService, 'getFirstChild').and.callFake(()=> treeNode);
+    spyOn(treeService, 'updateFirstChild').and.callFake(() => {});
+
+    treeService.updateEvaluable('do_113263678834016256111');
+    expect(treeService.getFirstChild).toHaveBeenCalled();
+    expect(treeService.updateFirstChild).toHaveBeenCalled();
+  });
+
+  it('should call updateEvaluable for non root element', ()=> {
+    treeService.treeCache = treeCache;
+
+    spyOn(treeService, 'getFirstChild').and.callFake(()=> treeNode);
+    treeService.updateEvaluable('da0ac2f0-1ea3-464a-bc03-f62b71415837');
+    expect(treeService.getFirstChild).toHaveBeenCalled();
+  });
+
+  it('should call getEval method', () => {
+    spyOn(treeService, 'getFirstChild').and.callFake(()=> treeNode);
+    treeService.getEval();
+    expect(treeService.getFirstChild).toHaveBeenCalled();
+  });
 
   // it("#updateTreeNodeMetadata() should call #setTreeCache() with primaryCategory", ()=> {
   //   spyOn(treeService, 'updateTreeNodeMetadata').and.callThrough();
