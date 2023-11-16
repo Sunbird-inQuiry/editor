@@ -544,6 +544,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           editorConfig: this.editorConfig,
           searchFormConfig:  this.questionlibraryInput.searchFormConfig
         };
+        this.questionlibraryInput.collection.eval = this.treeService.getEval();
         this.pageId = 'question_library';
         console.log(this.questionlibraryInput);
       }).catch(((error: string) => {

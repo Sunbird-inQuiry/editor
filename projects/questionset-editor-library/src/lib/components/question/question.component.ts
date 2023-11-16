@@ -1007,6 +1007,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     this.editorService.data = {};
     this.editorService.selectedSection = selectedUnitId;
     let metaData = this.getQuestionMetadata();
+    metaData.eval = activeNode?.data.metadata?.eval || data?.data?.eval;
     this.setQuestionTypeValues(metaData);
     return {
       nodesModified: {
