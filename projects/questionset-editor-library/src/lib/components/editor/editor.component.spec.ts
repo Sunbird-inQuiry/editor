@@ -751,7 +751,7 @@ describe('EditorComponent', () => {
   });
 
   it('#showQuestionLibraryComponentPage() should set #addQuestionFromLibraryButtonLoader to false and call #saveContent()',
-  fakeAsync(() => {
+  () => {
     const editorService = TestBed.inject(EditorService);
     const treeService = TestBed.inject(TreeService);
     editorService.templateList = ['Subjective Question'];
@@ -759,6 +759,7 @@ describe('EditorComponent', () => {
     component.organisationFramework = 'nit_k12';
     component.editorConfig = editorConfig_question;
     component.questionlibraryInput.searchFormConfig = categoryDefinition.result.objectCategoryDefinition.forms.searchConfig;
+    component.questionComponentInput.metadataFormConfig = categoryDefinition.result.objectCategoryDefinition.forms.childMetadata;
     spyOn(treeService, 'getActiveNode').and.returnValue({data: {metadata: {}}});
     spyOn(editorService, 'getContentChildrens').and.returnValue([{}, {}]);
     spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(true);
@@ -775,7 +776,7 @@ describe('EditorComponent', () => {
       expect(treeService.getEval).toHaveBeenCalled();
       expect(component.pageId).toEqual('question_library');
     });
-  }));
+  });
 
   it('#showQuestionLibraryComponentPage should not call saveContent', () => {
     const editorService = TestBed.inject(EditorService);
