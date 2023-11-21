@@ -20,12 +20,6 @@
     "contentPrimaryCategories": ["Course Assessment", "eTextbook", "Explanation Content", "Learning Resource", "Practice Question Set"],
     "readQuestionFields": "body,primaryCategory,mimeType,qType,answer,templateId,responseDeclaration,interactionTypes,interactions,name,solutions,editorState,media,remarks,evidence,hints,instructions,outcomeDeclaration,",
     "omitFalseyProperties":["topic", "topicsIds", "targetTopicIds", "keywords"],
-    "evaluableQuestionSet": "PIAA Question Set",
-    "server":{"mode":"server"},
-    "client":{"mode":"client"},
-    "editorModeCheck":"server",
-    "serverSearch": "{\"mode\":\"server\"}",
-    "clientSearch": "{\"mode\":\"client\"}",
     "questionSet": {
       "maxQuestionsLimit": 500
     },
