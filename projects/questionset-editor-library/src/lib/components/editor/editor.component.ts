@@ -314,8 +314,10 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     if ( this.objectType === 'questionset' && _.has(formsConfigObj, 'searchConfig')) {
         this.questionlibraryInput.searchFormConfig = _.get(formsConfigObj, 'searchConfig.properties');
+        this.questionlibraryInput.metadataFormConfig = _.get(formsConfigObj, 'childMetadata')
     } else {
       this.questionlibraryInput.searchFormConfig = _.get(formsConfigObj, 'search.properties');
+      this.questionlibraryInput.metadataFormConfig = _.get(formsConfigObj, 'childMetadata')
     }
     this.leafFormConfig = _.get(formsConfigObj, 'childMetadata.properties');
     this.relationFormConfig = _.get(formsConfigObj, 'relationalMetadata.properties');
@@ -519,6 +521,10 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.toasterService.error(_.get(this.configService, 'labelConfig.err.searchConfigNotFound'));
       return;
     }
+    if (_.isUndefined(this.questionlibraryInput.metadataFormConfig) || _.isEmpty(this.questionlibraryInput.metadataFormConfig)) {
+      this.toasterService.error(_.get(this.configService, 'labelConfig.err.metadataFormConfigNotFound'));
+      return;
+    }
     if (this.editorService.checkIfContentsCanbeAdded('add')) {
       const questionCategory = [];
       this.buttonLoaders.addQuestionFromLibraryButtonLoader = true;
@@ -534,7 +540,8 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.questionlibraryInput = {
           libraryLabels: {
             itemType: _.get(this.configService, 'labelConfig.lbl.questionsetAddFromLibraryItemLabel'),
-            collectionType: _.get(this.configService, 'labelConfig.lbl.questionsetAddFromLibraryCollectionLabel')
+            collectionType: _.get(this.configService, 'labelConfig.lbl.questionsetAddFromLibraryCollectionLabel'),
+            createdByField: _.get(this.editorConfig, 'config.createdByField')
           },
           targetPrimaryCategories: questionCategory,
           collectionId: this.collectionId,
@@ -542,9 +549,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           collection: activeNode?.data?.metadata,
           framework: this.organisationFramework,
           editorConfig: this.editorConfig,
-          searchFormConfig:  this.questionlibraryInput.searchFormConfig
+          searchFormConfig:  this.questionlibraryInput.searchFormConfig,
+          metadataFormConfig: this.questionlibraryInput.metadataFormConfig
         };
-        this.questionlibraryInput.collection.eval = this.treeService.getEval();
         this.pageId = 'question_library';
         console.log(this.questionlibraryInput);
       }).catch(((error: string) => {
@@ -871,7 +878,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     // this will activate the save and cancel button
     this.editorConfig.config.showSourcingStatus = false;
     // tslint:disable-next-line:max-line-length
-    this.editorService.getCategoryDefinition(selectedQuestionType, null, 'Question')
+    this.editorService.getCategoryDefinition(selectedQuestionType, this.editorConfig.context.channel, 'Question')
     .subscribe((res) => {
       const selectedtemplateDetails = res.result.objectCategoryDefinition;
       this.editorService.selectedChildren['label']=selectedtemplateDetails.label;

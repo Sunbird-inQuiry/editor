@@ -333,9 +333,6 @@ export const mockData = {
         },
         {
             code: 'showTimer',
-        },
-        {
-            code: 'mode'
         }
         ]
     }
@@ -418,9 +415,6 @@ export const mockData = {
                 createdBy: '5a587cc1-e018-4859-a0a8-e842650b9d64',
                 compatibilityLevel: 5,
                 navigationMode: 'non-linear',
-                eval: {
-                    mode: 'server'
-                },
                 timeLimits: {
                     questionSet: {
                       min: 0,

@@ -213,9 +213,7 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
         if (field.code === 'allowECM') {
           field.default = _.get(metaDataFields, 'recordedBy') !== 'Self' ? 'Yes' : 'No' ;
         }
-        if (field.code === 'mode') {
-          field.default = _.get(metaDataFields, 'eval.mode')
-        }
+
         if (field.code === 'instances') {
           field.default =  !_.isEmpty(metaDataFields, 'instances') ? _.get(metaDataFields, 'instances.label') : '' ;
         }
@@ -337,7 +335,6 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
       data.appIcon = this.appIcon;
     }
     this.toolbarEmitter.emit({ button: 'onFormValueChange', data });
-    delete data.selectedQuestionType;
     this.treeService.updateNode(data);
   }
 
