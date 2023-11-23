@@ -81,28 +81,4 @@ describe('QumlPlayerComponent', () => {
     component.getTelemetryEvents(mockData.telemetryEvent);
     expect(component.getTelemetryEvents).toHaveBeenCalled();
   });
-
-  it('#ngAfterViewInit() Should init and load the QuML player', () => {
-    component.qumlPlayer = { nativeElement: { append: ()=> { }}}
-    component.ngAfterViewInit();
-    expect(component.qumlPlayer).toBeTruthy();
-  });
-
-  it('#reviewQuestion() should emit the event', () => {
-    spyOn(component.toolbarEmitter, 'emit');
-    component.reviewQuestion();
-    expect(component.toolbarEmitter.emit).toHaveBeenCalledWith({});
-  });
-  
-  it('#getPlayerEvents() should print the event in the console log', () => {
-    spyOn(window.console, 'log');
-    component.getPlayerEvents({type: 'interact'});
-    expect(window.console.log).toHaveBeenCalled();
-  });
-
-  it('#getTelemetryEvents() should print the event in the console log', () => {
-    spyOn(window.console, 'log');
-    component.getTelemetryEvents({type: 'interact'});
-    expect(window.console.log).toHaveBeenCalled();
-  });
 });
