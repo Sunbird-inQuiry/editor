@@ -14,6 +14,7 @@
       "DEFAULT_PARAMS_FIELDS": "instructions,outcomeDeclaration"
     },
     "Question": {
+      "HIERARCHY_READ": "questionset/v2/hierarchy",
       "LIST":"question/v2/list",
       "READ":"question/v2/read/",
       "CREATE": "question/v2/create",

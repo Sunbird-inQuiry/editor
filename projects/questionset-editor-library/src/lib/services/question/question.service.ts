@@ -39,6 +39,9 @@ export class QuestionService {
       url: `${this.configService.urlConFig.URLS[this.editorService.editorConfig.config.objectType][mode]}${mode === 'UPDATE' ? questionId : ''}`,
       data: {
         request: questionBody
+      },
+      header: {
+        ['X-Channel-Id']: this.editorService.editorConfig.context.channel
       }
     }
     return mode === 'UPDATE' ? this.publicDataService.patch(req)
@@ -64,6 +67,9 @@ export class QuestionService {
       url: this.configService.urlConFig.URLS[this.editorService.editorConfig.config.objectType].HIERARCHY_UPDATE,
       data: {
         request: requestObj
+      },
+      header: {
+        ['X-Channel-Id']: this.editorService.editorConfig.context.channel
       }
     };
     return this.publicDataService.patch(req);
