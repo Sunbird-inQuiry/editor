@@ -246,10 +246,10 @@ export class EditorService {
       data: {
         request: {
           [objType]: {}
-        },
-        header: {
-          ['X-Channel-Id']: this.editorConfig.context.channel
         }
+      },
+      header: {
+        ['X-Channel-Id']: this.editorConfig.context.channel
       }
     };
     return this.publicDataService.post(option);
