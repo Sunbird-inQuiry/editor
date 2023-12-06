@@ -171,6 +171,9 @@ export class EditorService {
           data: {
             ...this.getCollectionHierarchy(),
             ...{lastUpdatedBy: _.get(this.editorConfig, 'context.user.id')}
+          },
+          header: {
+            ['X-Channel-Id']: this.editorConfig.context.channel
           }
         }
       }
@@ -226,7 +229,10 @@ export class EditorService {
     }
     const option = {
       url: `${url.SYSYTEM_UPDATE}${collectionId}`,
-      data: requestBody
+      data: requestBody,
+      header: {
+        ['X-Channel-Id']: this.editorConfig.context.channel
+      }
     };
     return this.publicDataService.patch(option);
   }
@@ -240,6 +246,9 @@ export class EditorService {
       data: {
         request: {
           [objType]: {}
+        },
+        header: {
+          ['X-Channel-Id']: this.editorConfig.context.channel
         }
       }
     };
@@ -259,7 +268,10 @@ export class EditorService {
     };
     const option = {
       url: `${url.REJECT}${contentId}`,
-      data: requestBody
+      data: requestBody,
+      header: {
+        ['X-Channel-Id']: this.editorConfig.context.channel
+      }
     };
     return this.publicDataService.post(option);
   }
@@ -281,7 +293,10 @@ export class EditorService {
    }
     const option = {
       url: `${url.PUBLISH}${contentId}`,
-      data: requestBody
+      data: requestBody,
+      header: {
+        ['X-Channel-Id']: this.editorConfig.context.channel
+      }
     };
     return this.publicDataService.post(option);
   }
@@ -295,6 +310,9 @@ export class EditorService {
           unitId: unitIdentifier,
           children: [contentId]
         }
+      },
+      header: {
+        ['X-Channel-Id']: this.editorConfig.context.channel
       }
     };
     return this.publicDataService.patch(req);
@@ -312,6 +330,9 @@ export class EditorService {
             children
           }
         }
+      },
+      header: {
+        ['X-Channel-Id']: this.editorConfig.context.channel
       }
     };
     if (collection === unitIdentifier) {

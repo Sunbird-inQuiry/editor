@@ -9,7 +9,7 @@
       "PUBLISH" : "questionset/v2/publish/",
       "DELETENODE" : "questionset/v2/remove",
       "HIERARCHY_READ": "questionset/v2/hierarchy",
-      "SYSYTEM_UPDATE": "questionset/v2/system/update/",
+      "SYSYTEM_UPDATE": "questionset/v5/system/update/",
       "HIERARCHY_UPDATE": "questionset/v2/hierarchy/update",
       "DEFAULT_PARAMS_FIELDS": "instructions,outcomeDeclaration"
     },
@@ -22,7 +22,7 @@
       "REVIEW" : "question/v2/review/",
       "REJECT": "question/v2/reject/",
       "PUBLISH": "question/v2/publish/",
-      "SYSYTEM_UPDATE": "question/v2/system/update/"
+      "SYSYTEM_UPDATE": "question/v5/system/update/"
     },
     "Collection": {
       "HIERARCHY_READ": "content/v3/hierarchy",

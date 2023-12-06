@@ -54,6 +54,9 @@ export class QuestionService {
       url: `${this.configService.urlConFig.URLS[objectType].SYSYTEM_UPDATE}${questionId}`,
       data: {
         request: requestObj
+      },
+      header: {
+        ['X-Channel-Id']: this.editorService.editorConfig.context.channel
       }
     };
     return this.publicDataService.patch(req);
