@@ -171,10 +171,10 @@ export class EditorService {
           data: {
             ...this.getCollectionHierarchy(),
             ...{lastUpdatedBy: _.get(this.editorConfig, 'context.user.id')}
-          },
-          header: this.getChannelHeader()
+          }
         }
-      }
+      },
+      header: this.getChannelHeader()
     };
     return this.publicDataService.patch(req);
   }
