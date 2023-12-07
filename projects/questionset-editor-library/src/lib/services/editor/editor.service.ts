@@ -402,10 +402,9 @@ export class EditorService {
       return node.root;
     });
     const parentNode = this.treeService.getFirstChild().data;
-
     _.forEach(this.treeService.treeCache.nodesModified, (node, nodeId)=>{
-      if(!node.root && parentNode?.eval || parentNode?.metadata?.eval){
-        this.treeService.treeCache.nodesModified[nodeId].metadata.eval = parentNode.eval || parentNode?.metadata?.eval;
+      if(!node.root && parentNode?.evalMode || parentNode?.metadata?.evalMode){
+        this.treeService.treeCache.nodesModified[nodeId].metadata.evalMode = parentNode?.evalMode || parentNode?.metadata?.evalMode;
       }
 
     })

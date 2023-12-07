@@ -21,11 +21,10 @@
     "readQuestionFields": "body,primaryCategory,mimeType,qType,answer,templateId,responseDeclaration,interactionTypes,interactions,name,solutions,editorState,media,remarks,evidence,hints,instructions,outcomeDeclaration,",
     "omitFalseyProperties":["topic", "topicsIds", "targetTopicIds", "keywords"],
     "evaluableQuestionSet": "PIAA Question Set",
-    "server":{"mode":"server"},
-    "client":{"mode":"client"},
-    "editorModeCheck":"server",
-    "serverSearch": "{\"mode\":\"server\"}",
-    "clientSearch": "{\"mode\":\"client\"}",
+    "evalMode": "server",
+    "client": "client",
+    "serverMode": "yes",
+    "notServerMode": "no",
     "questionSet": {
       "maxQuestionsLimit": 500
     },

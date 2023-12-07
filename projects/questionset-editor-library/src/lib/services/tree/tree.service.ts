@@ -253,35 +253,38 @@ export class TreeService {
   }
 
   updateEvaluable(nodeId){
-    this.treeCache.nodesModified[nodeId].metadata.eval = this.treeCache.nodesModified[nodeId].metadata.primaryCategory === this.configService.editorConfig.evaluableQuestionSet ? 
-    this.configService.editorConfig.server:this.configService.editorConfig.client;
+    if(this.treeCache.nodesModified[nodeId].metadata.primaryCategory === this.configService.editorConfig.evaluableQuestionSet) {
+      this.treeCache.nodesModified[nodeId].metadata.evalMode = this.configService.editorConfig.evalMode
+    }
       if(!this.treeCache.nodesModified[nodeId].root){
-          this.treeCache.nodesModified[nodeId].metadata.eval = this.getFirstChild().data.primaryCategory === this.configService.editorConfig.evaluableQuestionSet? 
-          this.configService.editorConfig.server:this.configService.editorConfig.client;
+          if(this.getFirstChild().data.primaryCategory === this.configService.editorConfig.evaluableQuestionSet) {
+            this.treeCache.nodesModified[nodeId].metadata.evalMode = this.configService.editorConfig.evalMode;
+          }
           this.overrideEvaluable(nodeId);
         } else {
-          if(this.getFirstChild().data?.metadata.mode) {
-            this.treeCache.nodesModified[nodeId].metadata.eval = this.getFirstChild().data.metadata.mode === this.configService.editorConfig.editorModeCheck ? 
-            this.configService.editorConfig.server:this.configService.editorConfig.client;
+          if(this.getFirstChild().data?.metadata?.mode?.toLowerCase() === this.configService.editorConfig.serverMode) {
+            this.treeCache.nodesModified[nodeId].metadata.evalMode = this.configService.editorConfig.evalMode;
+            this.updateFirstChild(this.treeCache.nodesModified[nodeId].metadata.evalMode)
           }
-          this.updateFirstChild(this.treeCache.nodesModified[nodeId].metadata.eval)
       }
   }
 
   updateFirstChild(evalMode:any) {
-    $(this.treeNativeElement).fancytree('getRootNode').getFirstChild().data.eval = evalMode;
+    $(this.treeNativeElement).fancytree('getRootNode').getFirstChild().data.evalMode = evalMode;
   }
 
   getEval() {
-    return this.getFirstChild().data?.eval?.mode === this.configService.editorConfig.server.mode || 
-    this.getFirstChild().data.metadata?.eval?.mode === this.configService.editorConfig.server.mode ? this.configService.editorConfig.serverSearch : this.configService.editorConfig.clientSearch
+    if(this.getFirstChild().data?.mode?.toLowerCase() === this.configService.editorConfig.serverMode || 
+    this.getFirstChild().data.metadata?.mode?.toLowerCase() === this.configService.editorConfig.serverMode) {
+      return true
+    }
+    return false
   }
 
   overrideEvaluable(nodeId){
    const firstNode = this.getFirstChild()
-   if(this.getFirstChild().data.metadata.mode) {
-      this.treeCache.nodesModified[nodeId].metadata.eval = firstNode.data.metadata.mode === this.configService.editorConfig.editorModeCheck ? 
-      this.configService.editorConfig.server:this.configService.editorConfig.client;
+   if(this.getFirstChild().data.metadata.mode && firstNode.data.metadata.mode.toLowerCase() == this.configService.editorConfig.serverMode) {
+      this.treeCache.nodesModified[nodeId].metadata.evalMode = this.configService.editorConfig.evalMode
    }
   }
 
