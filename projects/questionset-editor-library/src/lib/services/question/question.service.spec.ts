@@ -26,7 +26,14 @@ describe('QuestionService', () => {
             }
         }
     };
-    const editorConfigStub = { 'editorConfig': editorConfig };
+    const editorConfigStub = {
+      'editorConfig': editorConfig,
+      getChannelHeader() {
+        return {
+          ['X-Channel-Id']: '01309282781705830427'
+        }
+      }
+    };
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientModule],
