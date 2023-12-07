@@ -172,9 +172,7 @@ export class EditorService {
             ...this.getCollectionHierarchy(),
             ...{lastUpdatedBy: _.get(this.editorConfig, 'context.user.id')}
           },
-          header: {
-            ['X-Channel-Id']: this.editorConfig.context.channel
-          }
+          header: this.getChannelHeader()
         }
       }
     };
@@ -230,9 +228,7 @@ export class EditorService {
     const option = {
       url: `${url.SYSYTEM_UPDATE}${collectionId}`,
       data: requestBody,
-      header: {
-        ['X-Channel-Id']: this.editorConfig.context.channel
-      }
+      header: this.getChannelHeader()
     };
     return this.publicDataService.patch(option);
   }
@@ -248,9 +244,7 @@ export class EditorService {
           [objType]: {}
         }
       },
-      header: {
-        ['X-Channel-Id']: this.editorConfig.context.channel
-      }
+      header: this.getChannelHeader()
     };
     return this.publicDataService.post(option);
   }
@@ -269,9 +263,7 @@ export class EditorService {
     const option = {
       url: `${url.REJECT}${contentId}`,
       data: requestBody,
-      header: {
-        ['X-Channel-Id']: this.editorConfig.context.channel
-      }
+      header: this.getChannelHeader()
     };
     return this.publicDataService.post(option);
   }
@@ -294,9 +286,7 @@ export class EditorService {
     const option = {
       url: `${url.PUBLISH}${contentId}`,
       data: requestBody,
-      header: {
-        ['X-Channel-Id']: this.editorConfig.context.channel
-      }
+      header: this.getChannelHeader()
     };
     return this.publicDataService.post(option);
   }
@@ -311,9 +301,7 @@ export class EditorService {
           children: [contentId]
         }
       },
-      header: {
-        ['X-Channel-Id']: this.editorConfig.context.channel
-      }
+      header: this.getChannelHeader()
     };
     return this.publicDataService.patch(req);
   }
@@ -331,9 +319,7 @@ export class EditorService {
           }
         }
       },
-      header: {
-        ['X-Channel-Id']: this.editorConfig.context.channel
-      }
+      header: this.getChannelHeader()
     };
     if (collection === unitIdentifier) {
       req = _.omit(req, 'data.request.questionset.collectionId');
@@ -695,5 +681,11 @@ getDependentNodes(identifier) {
       config.headers = {...config.headers, ...headers};
     }
     return config;
+  }
+
+  getChannelHeader() {
+    return {
+      ['X-Channel-Id']: this.editorConfig.context.channel
+    }
   }
 }

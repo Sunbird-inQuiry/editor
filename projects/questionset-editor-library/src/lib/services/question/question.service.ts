@@ -40,9 +40,7 @@ export class QuestionService {
       data: {
         request: questionBody
       },
-      header: {
-        ['X-Channel-Id']: this.editorService.editorConfig.context.channel
-      }
+      header: this.editorService.getChannelHeader()
     }
     return mode === 'UPDATE' ? this.publicDataService.patch(req)
       : this.publicDataService.post(req);
@@ -55,9 +53,7 @@ export class QuestionService {
       data: {
         request: requestObj
       },
-      header: {
-        ['X-Channel-Id']: this.editorService.editorConfig.context.channel
-      }
+      header: this.editorService.getChannelHeader()
     };
     return this.publicDataService.patch(req);
   }
@@ -71,9 +67,7 @@ export class QuestionService {
       data: {
         request: requestObj
       },
-      header: {
-        ['X-Channel-Id']: this.editorService.editorConfig.context.channel
-      }
+      header: this.editorService.getChannelHeader()
     };
     return this.publicDataService.patch(req);
   }
