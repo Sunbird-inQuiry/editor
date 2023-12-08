@@ -73,9 +73,9 @@ describe('TreeService', () => {
 
   it('should call updateEvaluable for root element', ()=> {
     treeService.treeCache = treeCache;
-    treeService.treeNativeElement = nativeElement;
-    spyOn(treeService, 'getFirstChild').and.callFake(()=> treeNode);
+    const serverMode = {data: {metadata: {mode: true}}};
     spyOn(treeService, 'updateFirstChild').and.callFake(() => {});
+    spyOn(treeService,'getFirstChild').and.callFake(() => serverMode);
 
     treeService.updateEvaluable('do_113263678834016256111');
     expect(treeService.getFirstChild).toHaveBeenCalled();

@@ -267,7 +267,7 @@ export class TreeService {
             this.updateFirstChild(this.treeCache.nodesModified[nodeId].metadata.evalMode)
           } else if(!this.getFirstChild().data?.metadata?.mode) {
             delete this.treeCache.nodesModified[nodeId].metadata.evalMode;
-            delete $(this.treeNativeElement).fancytree('getRootNode').getFirstChild().data.evalMode
+            delete $(this.treeNativeElement).fancytree('getRootNode').getFirstChild()?.data?.evalMode
           }
       }
   }

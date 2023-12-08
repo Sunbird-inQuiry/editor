@@ -6,6 +6,7 @@ export const treeNode = {
         "keywords": [
             "test"
         ],
+        "mode": true,
         "subject": [
             "History"
         ],
@@ -63,7 +64,7 @@ export const treeNode = {
         "medium": [
             "English"
         ],
-        "mode": "server",
+        "evalMode": "server",
         "createdOn": "2021-04-22T14:23:40.169+0000",
         "contentDisposition": "inline",
         "additionalCategories": [
@@ -124,9 +125,6 @@ export const treeCache = {
                         "min": 0
                     }
                 },
-                "eval": {
-                    "mode": "server"
-                },
                 "description": "desc",
                 "board": "General Nursing Midwifery",
                 "medium": [
@@ -161,9 +159,6 @@ export const treeCache = {
                         "max": 0,
                         "min": 0
                     }
-                },
-                "eval": {
-                    "mode": "client"
                 }
             },
             "isNew": true
