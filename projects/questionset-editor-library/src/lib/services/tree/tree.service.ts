@@ -265,6 +265,9 @@ export class TreeService {
           if(this.getFirstChild().data?.metadata?.mode?.toLowerCase() === this.configService.editorConfig.serverMode) {
             this.treeCache.nodesModified[nodeId].metadata.evalMode = this.configService.editorConfig.evalMode;
             this.updateFirstChild(this.treeCache.nodesModified[nodeId].metadata.evalMode)
+          } else if(this.getFirstChild().data?.metadata?.mode?.toLowerCase() === this.configService.editorConfig.notServerMode) {
+            delete this.treeCache.nodesModified[nodeId].metadata.evalMode;
+            delete $(this.treeNativeElement).fancytree('getRootNode').getFirstChild().data.evalMode
           }
       }
   }
