@@ -786,10 +786,6 @@ describe('EditorComponent', () => {
     expect(component.saveContent).not.toHaveBeenCalled();
   });
 
-  it("#getEval() should be called", () => {
-
-  })
-
   it('#libraryEventListener() should set pageId to questionset_editor', async () => {
     const res = {};
     spyOn(component, 'mergeCollectionExternalProperties').and.returnValue(of(res));
