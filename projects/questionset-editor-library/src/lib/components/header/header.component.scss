@@ -47,3 +47,20 @@
 .sb-modal-fullscreen .modals.dimmer .ui.scrolling.modal{
   margin: 0 auto !important;
 }
+
+.sb-modal-header {
+  display: flex !important;
+  justify-content:space-between !important;
+}
+
+// .sui-modal {
+//   position: fixed !important;
+//   bottom: 0 !important;
+//   right: 0 !important;
+// }
+
+// .comment-modal {
+//   position: fixed !important;
+//   bottom: 0 !important;
+//   right: 0 !important;
+// }

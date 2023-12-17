@@ -1,14 +1,16 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, tick,fakeAsync, waitForAsync } from '@angular/core/testing';
 import { HeaderComponent } from './header.component';
 import { CUSTOM_ELEMENTS_SCHEMA, EventEmitter } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TelemetryInteractDirective } from '../../directives/telemetry-interact/telemetry-interact.directive';
 import { EditorService } from '../../services/editor/editor.service';
+import { of } from 'rxjs/internal/observable/of';
 
-describe('HeaderComponent', () => {
+fdescribe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
+  let editorService: EditorService;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -23,6 +25,7 @@ describe('HeaderComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
+    editorService = TestBed.inject(EditorService);
     // fixture.detectChanges();
   });
 
@@ -57,11 +60,24 @@ describe('HeaderComponent', () => {
     component.handleActionButtons();
     expect(component.visibility).toBeDefined();
   });
-  it('#openRequestChangePopup() should actionType defined', () => {
+  it('#openRequestChangePopup() should actionType defined', fakeAsync(() => {
+    component.questionSetId = '1234';
+    const fakeComment = 'sample comment';
+    const fakeApiResponse = {
+      result: {
+        comments: [
+          { identifier: component.questionSetId, comment: fakeComment },
+        ],
+      },
+    };
+    spyOn(editorService, 'readComment').and.returnValue(of(fakeApiResponse));
     component.openRequestChangePopup('sendForCorrections');
-    expect(component.showRequestChangesPopup).toBeTruthy();
+    tick();
     expect(component.actionType).toBe('sendForCorrections');
-  });
+    expect(component.showRequestChangesPopup).toBe(true);
+    expect(component.rejectComment).toBe(fakeComment);
+    expect(editorService.readComment).toHaveBeenCalledWith(component.questionSetId);
+  }));
   it('#buttonEmitter() should call buttonEmitter', () => {
     const data = { type: 'previewContent' };
     spyOn(component.toolbarEmitter, 'emit');

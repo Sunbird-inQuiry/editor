@@ -39,6 +39,7 @@
        "create_new_btn_label":"Create New",
        "add_from_library_btn_label":" Add from library",
        "submit_review_btn_label":"Submit Review",
+       "save_draft_btn_label":"Save as draft",
        "delete_btn_label":"Delete",
        "next_btn_label":"Next",
        "remove_btn_label":"Remove",

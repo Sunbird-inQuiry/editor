@@ -13,6 +13,7 @@ import { NgForm } from '@angular/forms';
 })
 export class HeaderComponent implements OnDestroy, OnInit {
   @Input() pageId: any;
+  @Input() questionSetId: string;
   @Input() labelConfigData: any;
   @Input() buttonLoaders: any;
   @Input() publishchecklist: any;
@@ -77,6 +78,9 @@ export class HeaderComponent implements OnDestroy, OnInit {
   openRequestChangePopup(action: string) {
     this.actionType = action;
     this.showRequestChangesPopup = true;
+    this.editorService.readComment(this.questionSetId).subscribe((res) => {
+      this.rejectComment = res.result.comments.find((item)=> item.identifier == this.questionSetId).comment;
+    })
   }
 
   buttonEmitter(action) {
@@ -101,6 +105,11 @@ export class HeaderComponent implements OnDestroy, OnInit {
     if (event.button === 'publishContent' || event.button === 'publishQuestion' || event.button === 'sourcingApprove' || event.button === 'sourcingApproveQuestion') {
       this.toolbarEmitter.emit(event);
     }
+  }
+
+  saveDraftComments() {
+    this.editorService.updateComment(this.questionSetId,this.rejectComment)
+    .subscribe((res) => {})
   }
 
   ngOnDestroy() {

@@ -246,7 +246,34 @@ export class EditorService {
     return this.publicDataService.post(option);
   }
 
-  submitRequestChanges(contentId, comment) {
+  updateComment(contentId,comment): Observable<any> {
+    const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
+    const option = {
+      url: url.UPDATE_COMMENT,
+      data: {
+        request: {
+          comments : [
+            {
+              identifier : contentId,
+              comment : comment
+            }
+          ]
+        }
+      }
+    };
+    return this.publicDataService.patch(option);
+  }
+
+  readComment(contentId:string): Observable<any> {
+    const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
+    const hierarchyUrl = `${url.READ_COMMENT}/${contentId}`;
+    const req = {
+      url: hierarchyUrl,
+    };
+    return this.publicDataService.get(req);
+  }
+
+  submitRequestChanges(contentId:string, comment:string) {
     let objType = this.configService.categoryConfig[this.editorConfig.config.objectType];
     objType = objType.toLowerCase();
     const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
