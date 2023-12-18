@@ -7,7 +7,7 @@ import { TelemetryInteractDirective } from '../../directives/telemetry-interact/
 import { EditorService } from '../../services/editor/editor.service';
 import { of } from 'rxjs/internal/observable/of';
 
-fdescribe('HeaderComponent', () => {
+describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
   let editorService: EditorService;
