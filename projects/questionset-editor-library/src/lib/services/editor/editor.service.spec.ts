@@ -489,7 +489,7 @@ describe('EditorService', () => {
   it('#readComment() should read comments of questionset', async () => {
     const publicDataService = TestBed.inject(PublicDataService);
     spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse));
-    editorService.readComment('do_1234').subscribe(data => {
+    editorService.readComment('do_113941643543011328112').subscribe(data => {
       expect(data.responseCode).toEqual('OK');
     });
   });
@@ -497,7 +497,7 @@ describe('EditorService', () => {
   it('#updateComment() should update comments of questionset', async () => {
     const publicDataService = TestBed.inject(PublicDataService);
     spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse));
-    editorService.updateComment('do_1234','sample comment').subscribe(data => {
+    editorService.updateComment('do_113941643543011328112','sample comment').subscribe(data => {
       expect(data.responseCode).toEqual('OK');
     });
   });
