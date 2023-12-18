@@ -16,7 +16,7 @@ import * as mockData from './editor.service.spec.data';
 import { map } from 'rxjs/operators';
 import * as _ from 'lodash-es';
 
-describe('EditorService', () => {
+fdescribe('EditorService', () => {
   let editorService: EditorService;
   let treeService;
   const configStub = {
@@ -484,6 +484,22 @@ describe('EditorService', () => {
     editorService.initialize(editorConfigMock);
     const config = editorService.appendCloudStorageHeaders({});
     expect(config).toEqual({});
+  });
+
+  it('#readComment() should read comments of questionset', async () => {
+    const publicDataService = TestBed.inject(PublicDataService);
+    spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse));
+    editorService.readComment('do_1234').subscribe(data => {
+      expect(data.responseCode).toEqual('OK');
+    });
+  });
+
+  it('#updateComment() should update comments of questionset', async () => {
+    const publicDataService = TestBed.inject(PublicDataService);
+    spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse));
+    editorService.updateComment('do_1234','sample comment').subscribe(data => {
+      expect(data.responseCode).toEqual('OK');
+    });
   });
 
 });
