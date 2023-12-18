@@ -16,7 +16,7 @@ import * as mockData from './editor.service.spec.data';
 import { map } from 'rxjs/operators';
 import * as _ from 'lodash-es';
 
-fdescribe('EditorService', () => {
+describe('EditorService', () => {
   let editorService: EditorService;
   let treeService;
   const configStub = {
