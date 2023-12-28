@@ -408,8 +408,8 @@ export class EditorService {
       }
 
     })
-    if(this.treeService.treeCache.nodesModified[parentNodeId]?.metadata.hasOwnProperty('mode')) {
-      delete this.treeService.treeCache.nodesModified[parentNodeId]?.metadata?.mode
+    if(this.treeService.treeCache.nodesModified[parentNodeId]?.metadata.hasOwnProperty('serverMode')) {
+      delete this.treeService.treeCache.nodesModified[parentNodeId]?.metadata?.serverMode
     }
     return this.treeService.treeCache.nodesModified;
   }

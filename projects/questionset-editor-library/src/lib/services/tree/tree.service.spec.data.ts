@@ -6,7 +6,7 @@ export const treeNode = {
         "keywords": [
             "test"
         ],
-        "mode": true,
+        "serverMode": true,
         "subject": [
             "History"
         ],

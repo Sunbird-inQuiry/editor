@@ -335,7 +335,7 @@ export const mockData = {
             code: 'showTimer',
         },
         {
-            code: 'mode'
+            code: 'serverMode'
         }
         ]
     }

@@ -73,7 +73,7 @@ describe('TreeService', () => {
 
   it('should call updateEvaluable for root element', ()=> {
     treeService.treeCache = treeCache;
-    const serverMode = {data: {metadata: {mode: true}}};
+    const serverMode = {data: {metadata: {serverMode: true}}};
     spyOn(treeService, 'updateFirstChild').and.callFake(() => {});
     spyOn(treeService,'getFirstChild').and.callFake(() => serverMode);
 

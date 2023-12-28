@@ -22,9 +22,6 @@
     "omitFalseyProperties":["topic", "topicsIds", "targetTopicIds", "keywords"],
     "evaluableQuestionSet": "PIAA Question Set",
     "evalMode": "server",
-    "client": "client",
-    "serverMode": "yes",
-    "notServerMode": "no",
     "questionSet": {
       "maxQuestionsLimit": 500
     },
