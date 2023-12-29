@@ -39,7 +39,8 @@ export class QuestionService {
       url: `${this.configService.urlConFig.URLS[this.editorService.editorConfig.config.objectType][mode]}${mode === 'UPDATE' ? questionId : ''}`,
       data: {
         request: questionBody
-      }
+      },
+      header: this.editorService.getChannelHeader()
     }
     return mode === 'UPDATE' ? this.publicDataService.patch(req)
       : this.publicDataService.post(req);
@@ -51,7 +52,8 @@ export class QuestionService {
       url: `${this.configService.urlConFig.URLS[objectType].SYSYTEM_UPDATE}${questionId}`,
       data: {
         request: requestObj
-      }
+      },
+      header: this.editorService.getChannelHeader()
     };
     return this.publicDataService.patch(req);
   }
@@ -64,7 +66,8 @@ export class QuestionService {
       url: this.configService.urlConFig.URLS[this.editorService.editorConfig.config.objectType].HIERARCHY_UPDATE,
       data: {
         request: requestObj
-      }
+      },
+      header: this.editorService.getChannelHeader()
     };
     return this.publicDataService.patch(req);
   }

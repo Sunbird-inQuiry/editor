@@ -173,7 +173,8 @@ export class EditorService {
             ...{lastUpdatedBy: _.get(this.editorConfig, 'context.user.id')}
           }
         }
-      }
+      },
+      header: this.getChannelHeader()
     };
     return this.publicDataService.patch(req);
   }
@@ -226,7 +227,8 @@ export class EditorService {
     }
     const option = {
       url: `${url.SYSYTEM_UPDATE}${collectionId}`,
-      data: requestBody
+      data: requestBody,
+      header: this.getChannelHeader()
     };
     return this.publicDataService.patch(option);
   }
@@ -241,7 +243,8 @@ export class EditorService {
         request: {
           [objType]: {}
         }
-      }
+      },
+      header: this.getChannelHeader()
     };
     return this.publicDataService.post(option);
   }
@@ -286,7 +289,8 @@ export class EditorService {
     };
     const option = {
       url: `${url.REJECT}${contentId}`,
-      data: requestBody
+      data: requestBody,
+      header: this.getChannelHeader()
     };
     return this.publicDataService.post(option);
   }
@@ -308,7 +312,8 @@ export class EditorService {
    }
     const option = {
       url: `${url.PUBLISH}${contentId}`,
-      data: requestBody
+      data: requestBody,
+      header: this.getChannelHeader()
     };
     return this.publicDataService.post(option);
   }
@@ -322,7 +327,8 @@ export class EditorService {
           unitId: unitIdentifier,
           children: [contentId]
         }
-      }
+      },
+      header: this.getChannelHeader()
     };
     return this.publicDataService.patch(req);
   }
@@ -339,7 +345,8 @@ export class EditorService {
             children
           }
         }
-      }
+      },
+      header: this.getChannelHeader()
     };
     if (collection === unitIdentifier) {
       req = _.omit(req, 'data.request.questionset.collectionId');
@@ -701,5 +708,11 @@ getDependentNodes(identifier) {
       config.headers = {...config.headers, ...headers};
     }
     return config;
+  }
+
+  getChannelHeader() {
+    return {
+      ['X-Channel-Id']: this.editorConfig.context.channel
+    }
   }
 }
