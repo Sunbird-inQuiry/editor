@@ -262,10 +262,11 @@ export class TreeService {
           }
           this.overrideEvaluable(nodeId);
         } else {
-          if(this.getFirstChild().data?.metadata?.serverMode) {
+          const firstChild = this.getFirstChild().data?.metadata;
+          if(firstChild?.serverMode) {
             this.treeCache.nodesModified[nodeId].metadata.evalMode = this.configService.editorConfig.evalMode;
             this.updateFirstChild(this.treeCache.nodesModified[nodeId].metadata.evalMode)
-          } else if(!this.getFirstChild().data?.metadata?.serverMode) {
+          } else if(!firstChild?.serverMode) {
             delete this.treeCache.nodesModified[nodeId].metadata.evalMode;
             delete $(this.treeNativeElement).fancytree('getRootNode').getFirstChild()?.data?.evalMode
           }

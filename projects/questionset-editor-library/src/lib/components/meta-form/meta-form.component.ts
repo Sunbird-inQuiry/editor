@@ -214,7 +214,8 @@ export class MetaFormComponent implements OnChanges, OnDestroy {
           field.default = _.get(metaDataFields, 'recordedBy') !== 'Self' ? 'Yes' : 'No' ;
         }
         if (field.code === 'serverMode') {
-          field.default = _.get(metaDataFields, 'evalMode') == this.configService.editorConfig.evalMode || _.get(metaDataFields, 'serverMode') === true ? true : false;
+          field.default = _.get(metaDataFields, 'evalMode') == this.configService.editorConfig.evalMode || _.get(metaDataFields, 'serverMode') === true;
+
         }
         if (field.code === 'instances') {
           field.default =  !_.isEmpty(metaDataFields, 'instances') ? _.get(metaDataFields, 'instances.label') : '' ;
