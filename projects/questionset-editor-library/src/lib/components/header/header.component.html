@@ -181,7 +181,7 @@
 </div>
 
 <sui-modal *ngIf="showRequestChangesPopup" [mustScroll]="true" [isClosable]="false" [transitionDuration]="0"
-  [size]="'normal'" class="sb-modal bx-none overflow-modal comment-modal" appBodyScroll #modal (dismissed)="showRequestChangesPopup = false;">
+  [size]="'normal'" class="sb-modal bx-none overflow-modal" appBodyScroll #modal (dismissed)="showRequestChangesPopup = false;">
   <div class="sb-modal-header">
       <h5>{{configService.labelConfig?.lbl?.addReviewComments}}</h5>
       <i class="close icon" (click)="modal.deny('denied')"></i>

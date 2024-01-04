@@ -60,24 +60,11 @@ describe('HeaderComponent', () => {
     component.handleActionButtons();
     expect(component.visibility).toBeDefined();
   });
-  it('#openRequestChangePopup() should actionType defined', fakeAsync(() => {
-    component.questionSetId = '1234';
-    const fakeComment = 'sample comment';
-    const fakeApiResponse = {
-      result: {
-        comments: [
-          { identifier: component.questionSetId, comment: fakeComment },
-        ],
-      },
-    };
-    spyOn(editorService, 'readComment').and.returnValue(of(fakeApiResponse));
+  it('#openRequestChangePopup() should actionType defined',() => {
     component.openRequestChangePopup('sendForCorrections');
-    tick();
     expect(component.actionType).toBe('sendForCorrections');
     expect(component.showRequestChangesPopup).toBe(true);
-    expect(component.rejectComment).toBe(fakeComment);
-    expect(editorService.readComment).toHaveBeenCalledWith(component.questionSetId);
-  }));
+  });
   it('#buttonEmitter() should call buttonEmitter', () => {
     const data = { type: 'previewContent' };
     spyOn(component.toolbarEmitter, 'emit');

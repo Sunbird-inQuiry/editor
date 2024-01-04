@@ -57,7 +57,7 @@ export class TreeService {
     const node = this.getFirstChild();
     const nodeId = node.data.id;
     node.data.metadata = {...node.data.metadata, [key] : value};
-    this.setTreeCache(nodeId, _.merge({}, {[key] : value}, _.pick(node.data.metadata, ['objectType'])));
+    this.setTreeCache(nodeId, _.merge({}, {[key] : value}, _.pick(node.data.metadata, ['objectType','entityType'])));
   }
 
   updateTreeNodeMetadata(newData: any, nodeToBeUpdated?: any, primaryCategory?: any, objectType?: any) {
@@ -239,12 +239,12 @@ export class TreeService {
   setTreeCache(nodeId, metadata, activeNode?) {
     if (this.treeCache.nodesModified[nodeId]) {
       // tslint:disable-next-line:max-line-length
-      this.treeCache.nodesModified[nodeId].metadata = _.assign(this.treeCache.nodesModified[nodeId].metadata, _.omit(metadata, 'objectType'));
+      this.treeCache.nodesModified[nodeId].metadata = _.assign(this.treeCache.nodesModified[nodeId].metadata, _.omit(metadata, 'objectType','entityType'));
     } else {
       this.treeCache.nodesModified[nodeId] = {
         root: activeNode?.root ? true : false,
         objectType: metadata.objectType,
-        metadata: { ..._.omit(metadata, ['objectType']) },
+        metadata: { ..._.omit(metadata, ['objectType','entityType']) },
         ...(nodeId.includes('do_') ? { isNew: false } : { isNew: true })
       };
       this.treeCache.nodes.push(nodeId); // To track sequence of modifiation

@@ -13,6 +13,7 @@ import { NgForm } from '@angular/forms';
 })
 export class HeaderComponent implements OnDestroy, OnInit {
   @Input() pageId: any;
+  @Input() rejectComment: string;
   @Input() questionSetId: string;
   @Input() labelConfigData: any;
   @Input() buttonLoaders: any;
@@ -23,13 +24,13 @@ export class HeaderComponent implements OnDestroy, OnInit {
     }
   }
   @Output() toolbarEmitter = new EventEmitter<any>();
+  @Output() reviewerComment = new EventEmitter<any>();
   @ViewChild('FormControl') FormControl: NgForm;
   @ViewChild('modal') public modal;
   @Output() qualityParamEmitter = new EventEmitter<any>();
   public visibility: any;
   public showPublishCollectionPopup: boolean;
   public showRequestChangesPopup: boolean;
-  public rejectComment: string;
   public actionType: string;
   public objectType: string;
   public sourcingStatusText: string;
@@ -78,9 +79,6 @@ export class HeaderComponent implements OnDestroy, OnInit {
   openRequestChangePopup(action: string) {
     this.actionType = action;
     this.showRequestChangesPopup = true;
-    this.editorService.readComment(this.questionSetId).subscribe((res) => {
-      this.rejectComment = res.result.comments.find((item)=> item.identifier == this.questionSetId).comment;
-    })
   }
 
   buttonEmitter(action) {
@@ -108,8 +106,7 @@ export class HeaderComponent implements OnDestroy, OnInit {
   }
 
   saveDraftComments() {
-    this.editorService.updateComment(this.questionSetId,this.rejectComment)
-    .subscribe((res) => {})
+    this.reviewerComment.emit(this.rejectComment);
   }
 
   ngOnDestroy() {
