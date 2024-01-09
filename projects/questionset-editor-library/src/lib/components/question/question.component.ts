@@ -808,35 +808,29 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   checkMediaExists(questionMetadata, mediaId) {
-    let mediaExists = false;
-    if (_.includes(questionMetadata.body, mediaId) && !mediaExists) {
-      mediaExists = true;
+    if (_.includes(questionMetadata.body, mediaId) || _.includes(questionMetadata.answer, mediaId)) {
+      return true;
     }
 
-    if (_.includes(questionMetadata.answer, mediaId) && !mediaExists) {
-      mediaExists = true;
-    }
-
-    if (questionMetadata?.solutions && !mediaExists) {
+    if (questionMetadata?.solutions) {
       const solutionValues = _.values(questionMetadata.solutions);
-      for(let i = 0; i < solutionValues.length; i++) {
-        if (_.includes(solutionValues[i], mediaId)) {
-          mediaExists = true;
-          break;
+      for (const solution of solutionValues) {
+        if (_.includes(solution, mediaId)) {
+          return true;
         }
       }
     }
 
-    if (questionMetadata?.qType != 'SA' && !mediaExists) {
+    if (questionMetadata?.qType !== 'SA' && questionMetadata?.interactions?.response1?.options) {
       const interactionsOptions = questionMetadata.interactions.response1.options;
-      for(let i = 0; i < interactionsOptions.length; i++) {
-        if (_.includes(interactionsOptions[i].label, mediaId)) {
-          mediaExists = true;
-          break;
+      for (const option of interactionsOptions) {
+        if (_.includes(option?.label, mediaId)) {
+          return true;
         }
       }
     }
-    return mediaExists;
+
+    return false;
   }
 
   getQuestionMetadata() {
