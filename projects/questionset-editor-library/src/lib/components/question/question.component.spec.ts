@@ -1096,6 +1096,23 @@ describe("QuestionComponent", () => {
     component.saveQuestion();
   });
 
+  it('#checkMediaExists() should check media exists in question data', () => {
+    const questionMetadata = {
+      body: `
+      <div class='question-body' tabindex='-1'>
+        <div class='mcq-title' tabindex='0'>
+          <p>2+2 = ?&nbsp;</p><figure class=\"image resize-25\">
+          <img src=\"/assets/public/content/do_113867310987550720172/artifact/do_113867310987550720172_1692786985884_540px-npm-logo.svg.png\"
+          alt=\"540px-Npm-logo svg\" data-asset-variable=\"do_113867310987550720172\">
+        </figure></div><div data-choice-interaction='response1' class='mcq-vertical'>
+        </div>
+      </div>`
+    }
+    spyOn(component, 'checkMediaExists').and.callThrough();
+    const mediaExists = component.checkMediaExists(questionMetadata, 'do_113867310987550720172');
+    expect(mediaExists).toBeTruthy();
+  });
+
   it('#getQuestionMetadata shpuld call when queston body is prepared',()=>{
     spyOn(component,'getQuestionMetadata').and.callThrough();
     component.editorState=mockData.sliderQuestionMetaData.result.question;

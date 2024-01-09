@@ -797,6 +797,48 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return metadata;
   }
 
+  removeUnusedMedia(questionMetadata: any) {
+    const media = _.get(questionMetadata, 'media');
+    for (let i = media.length - 1; i >= 0; i--) {
+      if (!this.checkMediaExists(questionMetadata, media[i].id)) {
+        media.splice(i, 1);
+      }
+    }
+    return media;
+  }
+
+  checkMediaExists(questionMetadata, mediaId) {
+    let mediaExists = false;
+    if (_.includes(questionMetadata.body, mediaId) && !mediaExists) {
+      mediaExists = true;
+    }
+
+    if (_.includes(questionMetadata.answer, mediaId) && !mediaExists) {
+      mediaExists = true;
+    }
+
+    if (questionMetadata?.solutions && !mediaExists) {
+      const solutionValues = _.values(questionMetadata.solutions);
+      for(let i = 0; i < solutionValues.length; i++) {
+        if (_.includes(solutionValues[i], mediaId)) {
+          mediaExists = true;
+          break;
+        }
+      }
+    }
+
+    if (questionMetadata?.qType != 'SA' && !mediaExists) {
+      const interactionsOptions = questionMetadata.interactions.response1.options;
+      for(let i = 0; i < interactionsOptions.length; i++) {
+        if (_.includes(interactionsOptions[i].label, mediaId)) {
+          mediaExists = true;
+          break;
+        }
+      }
+    }
+    return mediaExists;
+  }
+
   getQuestionMetadata() {
     let metadata: any = {
       mimeType: 'application/vnd.sunbird.question',
@@ -834,6 +876,11 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     if (_.get(this.creationContext, 'objectType') === 'question') {
       metadata.isReviewModificationAllowed = !!_.get(this.questionMetaData, 'isReviewModificationAllowed');
     }
+
+    if (!_.isEmpty(metadata.media)) {
+      metadata.media = this.removeUnusedMedia(metadata);
+    }
+
     // tslint:disable-next-line:max-line-length
     return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions']);
   }
