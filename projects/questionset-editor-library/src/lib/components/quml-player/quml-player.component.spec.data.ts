@@ -198,7 +198,7 @@ export const mockData = {
                     "identifier": "do_11326368076523929611",
                     "lastStatusChangedOn": "2021-04-22T14:27:35.932+0000",
                     "audience": [
-                        "Student"
+                        "Audience1"
                     ],
                     "visibility": "Parent",
                     "showTimer": false,
@@ -256,7 +256,7 @@ export const mockData = {
                     "identifier": "do_113264100861919232115",
                     "lastStatusChangedOn": "2021-04-23T04:42:17.246+0000",
                     "audience": [
-                        "Student"
+                        "Audience1"
                     ],
                     "visibility": "Parent",
                     "showTimer": false,
@@ -314,7 +314,7 @@ export const mockData = {
                     "identifier": "do_113264103767826432118",
                     "lastStatusChangedOn": "2021-04-23T04:48:11.971+0000",
                     "audience": [
-                        "Student"
+                        "Audience1"
                     ],
                     "visibility": "Parent",
                     "showTimer": false,
@@ -373,7 +373,7 @@ export const mockData = {
                     "identifier": "do_113264105505570816124",
                     "lastStatusChangedOn": "2021-04-23T04:51:44.098+0000",
                     "audience": [
-                        "Student"
+                        "Audience1"
                     ],
                     "visibility": "Parent",
                     "showTimer": false,
@@ -434,7 +434,7 @@ export const mockData = {
                     "identifier": "do_113264162822283264127",
                     "lastStatusChangedOn": "2021-04-23T06:48:20.767+0000",
                     "audience": [
-                        "Student"
+                        "Audience1"
                     ],
                     "visibility": "Parent",
                     "showTimer": false,
@@ -492,7 +492,7 @@ export const mockData = {
                     "identifier": "do_113264164671733760129",
                     "lastStatusChangedOn": "2021-04-23T06:52:06.530+0000",
                     "audience": [
-                        "Student"
+                        "Audience1"
                     ],
                     "visibility": "Parent",
                     "showTimer": false,
@@ -526,7 +526,7 @@ export const mockData = {
             "showSolutions": false,
             "identifier": "do_113263678834016256111",
             "audience": [
-                "Student"
+                "Audience1"
             ],
             "visibility": "Default",
             "showTimer": true,

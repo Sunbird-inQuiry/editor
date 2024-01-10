@@ -19,6 +19,8 @@ import { OptionsComponent } from './components/options/options.component';
 import { AnswerComponent } from './components/answer/answer.component';
 import { CkeditorToolComponent } from './components/ckeditor-tool/ckeditor-tool.component';
 import { QuestionComponent } from './components/question/question.component';
+import { QumlLibraryModule } from '@project-sunbird/sunbird-quml-player';
+import { CarouselModule } from 'ngx-bootstrap/carousel';
 import { TelemetryInteractDirective } from './directives/telemetry-interact/telemetry-interact.directive';
 import { AssetBrowserComponent } from './components/asset-browser/asset-browser.component';
 import { CollectionIconComponent } from './components/collection-icon/collection-icon.component';
@@ -71,7 +73,7 @@ import { AssetsBrowserComponent } from './components/assets-browser/assets-brows
     AssetsBrowserComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule.withConfig({callSetDisabledState: 'whenDisabledForLegacyCode'}), RouterModule.forChild([]), SuiModule,
-  CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule],
+  CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule, QumlLibraryModule, CarouselModule,],
   providers: [
   ],
   exports: [EditorComponent],

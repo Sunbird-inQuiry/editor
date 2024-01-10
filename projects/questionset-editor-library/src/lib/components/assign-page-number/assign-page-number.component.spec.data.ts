@@ -49,7 +49,7 @@ export const mockTreeData = [
             "visibility": "Parent",
             "showTimer": false,
             "groups": {
-                "Student interview": [
+                "Audience1 interview": [
                     "do_113449672558780416163"
                 ]
             },
@@ -234,18 +234,18 @@ export const mockTreeData = [
                     "visibility": "Parent",
                     "showTimer": false,
                     "groups": {
-                        "Student interview": [
+                        "Audience1 interview": [
                             "do_113449672558780416163",
                             "do_11364358223115059211484"
                         ],
-                        "Teacher interview": [
+                        "Audience2 interview": [
                             "do_11358056771369369615004",
                             "do_1136011660822200321804"
                         ],
-                        "Official interview": [
+                        "Audience3 interview": [
                             "do_1136011666813255681808"
                         ],
-                        "Parent interview": [
+                        "Audience4 interview": [
                             "do_11364297206960128011480"
                         ]
                     },
@@ -1068,7 +1068,7 @@ export const mockTreeData = [
                     "visibility": "Parent",
                     "showTimer": false,
                     "groups": {
-                        "Teacher interview": [
+                        "Audience2 interview": [
                             "do_11357919243396710414900"
                         ]
                     },
@@ -1321,7 +1321,7 @@ export const mockTreeData = [
                     "visibility": "Parent",
                     "showTimer": false,
                     "groups": {
-                        "Parent interview": [
+                        "Audience4 interview": [
                             "do_113583348668153856123"
                         ]
                     },

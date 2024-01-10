@@ -143,13 +143,13 @@ export const mockData = {
             required: false,
             visible: true,
             range: [
-                'Education Official',
-                'School leaders (HMs)',
-                'Teachers',
-                'Students',
-                'Parents',
-                'Parent',
-                'Others'
+                'Audience1',
+                'Audience2',
+                'Audience3',
+                'Audience4',
+                'Audience5',
+                'Audience6',
+                'Audience7'
             ]
         },
         {
@@ -363,7 +363,7 @@ export const mockData = {
                 showSolutions: false,
                 identifier: 'do_113263678834016256111',
                 audience: [
-                    'Student'
+                    'Audience1'
                 ],
                 visibility: 'Default',
                 showTimer: true,
