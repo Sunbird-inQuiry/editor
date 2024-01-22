@@ -465,22 +465,36 @@ describe('EditorService', () => {
 
   it('#getCollectionHierarchy should call when no section id and parent', () => {
     treeService.treeCache.nodesModified = treeData.treeNode;
-    treeService.treeNativeElement = nativeElement;
+    // treeService.treeNativeElement = nativeElement;
+    // treeService.setTreeElement(nativeElement);
+    spyOn(treeService, 'setTreeElement').and.returnValue(nativeElement)
     spyOn(editorService, 'getCollectionHierarchy').and.callThrough();
+    spyOn(editorService.treeService, 'getFirstChild').and.callFake(() => treeData.treeNode.data);
     spyOn(editorService, 'getUpdatedNodeMetaData').and.callFake(() => { return treeService.treeCache.nodesModified });
-    spyOn(treeService, 'getFirstChild').and.callFake(() => {
-      return { data: { metadata: { identifier: '0123' } } };
-    });
     hierarchyRootNodeData.folder = false;
     editorService.getHierarchyObj(hierarchyRootNodeData);
     editorService.getCollectionHierarchy();
+    // expect(treeService.treeNativeElement).toEqual(nativeElement);
     expect(editorService.getCollectionHierarchy).toHaveBeenCalled();
   });
 
   it('#getUpdatedNodeMetaData should return root nodesModified data', () => {
-    treeService.treeCache.nodesModified = treeData.treeNode;
+    treeService.treeCache.nodesModified = {"da0ac2f0-1ea3-464a-bc03-f62b71415837": {root: false, metadata: {}}};
     treeService.treeNativeElement = nativeElement;
-    spyOn(treeService, 'getFirstChild').and.callFake(()=> treeData.treeNode.data);
+    spyOn(treeService, 'getFirstChild').and.callFake(() => {
+      return { data: { metadata: { identifier: '0123', evalMode: 'server' } } };
+    });
+    spyOn(editorService, 'getUpdatedNodeMetaData').and.callThrough();
+    editorService.getUpdatedNodeMetaData();
+    expect(editorService.getUpdatedNodeMetaData).toHaveBeenCalled();
+  });
+
+  it('#getUpdatedNodeMetaData should delete serverMode property', () => {
+    treeService.treeCache.nodesModified = {"da0ac2f0-1ea3-464a-bc03-f62b71415837": {root: true, metadata: {serverMode: true}}};
+    treeService.treeNativeElement = nativeElement;
+    spyOn(treeService, 'getFirstChild').and.callFake(() => {
+      return { data: { metadata: { identifier: '0123', evalMode: 'server' } } };
+    });
     spyOn(editorService, 'getUpdatedNodeMetaData').and.callThrough();
     editorService.getUpdatedNodeMetaData();
     expect(editorService.getUpdatedNodeMetaData).toHaveBeenCalled();
