@@ -69,7 +69,7 @@ describe('TreeService', () => {
     spyOn(treeService, 'getActiveNode').and.callFake(()=> treeNode);
     treeService.updateTreeNodeMetadata(treeNode,undefined,'Observation', 'QuestionSet');
   })
-
+  
 
   it('should call updateEvaluable for root element', ()=> {
     treeService.treeCache = treeCache;
@@ -89,10 +89,23 @@ describe('TreeService', () => {
     treeService.updateEvaluable('da0ac2f0-1ea3-464a-bc03-f62b71415837');
     expect(treeService.getFirstChild).toHaveBeenCalled();
   });
+  
 
   it('should call getEval method', () => {
-    spyOn(treeService, 'getFirstChild').and.callFake(()=> treeNode);
-    treeService.getEval();
+    const serverMode = {data: {metadata: {serverMode: true}}};
+    spyOn(treeService, 'getFirstChild').and.callFake(()=> serverMode);
+    let result = treeService.getEval();
+    expect(treeService.getFirstChild).toHaveBeenCalled();
+    expect(result).toBe(true)
+  });
+
+  it('should call overrideEvaluable method', () => {
+    // const serverMode = {data: {metadata: {serverMode: true}}};
+    treeService.treeCache = treeCache;
+    const serverMode = {data: {metadata: {serverMode: true}}};
+    spyOn(treeService, 'getFirstChild').and.callFake(()=> serverMode);
+    treeService.overrideEvaluable('da0ac2f0-1ea3-464a-bc03-f62b71415837')
+    spyOn(treeService, 'overrideEvaluable');
     expect(treeService.getFirstChild).toHaveBeenCalled();
   });
 
