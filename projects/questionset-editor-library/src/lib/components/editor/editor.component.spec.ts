@@ -36,12 +36,14 @@ describe('EditorComponent', () => {
   let component: EditorComponent;
   let fixture: ComponentFixture<EditorComponent>;
   let toasterService;
+  let editorService: EditorService;
+  let treeService: TreeService;
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule, FormsModule, ReactiveFormsModule, RouterTestingModule],
       declarations: [EditorComponent, TelemetryInteractDirective],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      providers: [EditorTelemetryService, EditorService, ToasterService,
+      providers: [EditorTelemetryService, EditorService, ToasterService, TreeService,
         { provide: ConfigService, useValue: configStub }
       ]
     })
@@ -52,6 +54,8 @@ describe('EditorComponent', () => {
     fixture = TestBed.createComponent(EditorComponent);
     component = fixture.componentInstance;
     toasterService = TestBed.inject(ToasterService);
+    editorService = TestBed.inject(EditorService);
+    treeService = TestBed.inject(TreeService);
     // tslint:disable-next-line:no-string-literal
     editorConfig.context['targetFWIds'] = ['nit_k12'];
     // tslint:disable-next-line:no-string-literal
@@ -752,17 +756,20 @@ describe('EditorComponent', () => {
 
   it('#showQuestionLibraryComponentPage() should set #addQuestionFromLibraryButtonLoader to false and call #saveContent()',
   () => {
-    const editorService = TestBed.inject(EditorService);
-    const treeService = TestBed.inject(TreeService);
     editorService.templateList = ['Subjective Question'];
     component.collectionId = 'do_12345';
     component.organisationFramework = 'nit_k12';
     component.editorConfig = editorConfig_question;
     component.questionlibraryInput.searchFormConfig = categoryDefinition.result.objectCategoryDefinition.forms.searchConfig;
-    component.questionComponentInput.metadataFormConfig = categoryDefinition.result.objectCategoryDefinition.forms.childMetadata;
-    spyOn(treeService, 'getActiveNode').and.returnValue({data: {metadata: {}}});
-    spyOn(editorService, 'getContentChildrens').and.returnValue([{}, {}]);
+    component.questionlibraryInput.metadataFormConfig = categoryDefinition.result.objectCategoryDefinition.forms.childMetadata;
+    treeService.treeNativeElement = nativeElement;
+    spyOn(treeService, 'getActiveNode').and.returnValue({data: {metadata: {}}});  
+    editorService.contentsCount = 0;
+    spyOn(editorService, 'getContentChildrens').and.returnValue([]);
     spyOn(editorService, 'checkIfContentsCanbeAdded').and.returnValue(true);
+    const serverMode = {data: {metadata: {serverMode: true}}};
+    spyOn(treeService, 'getFirstChild').and.callFake(()=> serverMode);
+    let result = treeService.getEval();
     spyOn(component, 'saveContent').and.callFake(() => {
       return Promise.resolve('success');
     });
@@ -772,6 +779,9 @@ describe('EditorComponent', () => {
       expect(treeService.getActiveNode).toHaveBeenCalled();
       expect(component.buttonLoaders.addQuestionFromLibraryButtonLoader).toBeFalsy();
       expect(component.questionlibraryInput).toBeDefined();
+      expect(editorService.getContentChildrens).toHaveBeenCalled();
+      expect(treeService.getFirstChild).toHaveBeenCalled();
+      expect(result).toBe(true)
       expect(component.pageId).toEqual('question_library');
     });
   });

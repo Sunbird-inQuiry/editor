@@ -2991,6 +2991,9 @@ export const mockTreeService = {
     return {
       data: {
         id: "do_11330103476396851218",
+        metadata: {
+          evalMode: 'server'
+        }
       },
       getParent: () => {
         return {

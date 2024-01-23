@@ -1,5 +1,5 @@
 import { DataService } from './../data/data.service';
-import { editorConfig, BranchingLogicData, treeNodeData, rootNodeData, hierarchyRootNodeData } from './../../components/editor/editor.component.spec.data';
+import { editorConfig, BranchingLogicData, treeNodeData, rootNodeData, hierarchyRootNodeData, nativeElement } from './../../components/editor/editor.component.spec.data';
 import { TestBed } from '@angular/core/testing';
 import { EditorService } from './editor.service';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
@@ -12,9 +12,12 @@ import { of } from 'rxjs';
 import { PublicDataService } from '../public-data/public-data.service';
 import { ToasterService } from '../../services/toaster/toaster.service';
 import { TreeService } from '../tree/tree.service';
+import * as treeData from '../../services/tree/tree.service.spec.data';
 import * as mockData from './editor.service.spec.data';
 import { map } from 'rxjs/operators';
 import * as _ from 'lodash-es';
+import 'jquery.fancytree';
+declare var $: any;
 
 describe('EditorService', () => {
   let editorService: EditorService;
@@ -431,7 +434,10 @@ describe('EditorService', () => {
   });
 
   it('#getCollectionHierarchy should call', () => {
+    treeService.treeCache.nodesModified = treeData.treeNode;
+    treeService.treeNativeElement = nativeElement;
     spyOn(editorService, 'getCollectionHierarchy').and.callThrough();
+    spyOn(editorService, 'getUpdatedNodeMetaData').and.callFake(() => { return treeService.treeCache.nodesModified });
     spyOn(treeService, 'getFirstChild').and.callFake(() => {
       return { data: { metadata: { identifier: '0123' } } };
     });
@@ -443,7 +449,10 @@ describe('EditorService', () => {
   });
 
   it('#getCollectionHierarchy should call when folder false', () => {
+    treeService.treeCache.nodesModified = treeData.treeNode;
+    treeService.treeNativeElement = nativeElement;
     spyOn(editorService, 'getCollectionHierarchy').and.callThrough();
+    spyOn(editorService, 'getUpdatedNodeMetaData').and.callFake(() => { return treeService.treeCache.nodesModified });
     spyOn(treeService, 'getFirstChild').and.callFake(() => {
       return { data: { metadata: { identifier: '0123' } } };
     });
@@ -455,14 +464,37 @@ describe('EditorService', () => {
   });
 
   it('#getCollectionHierarchy should call when no section id and parent', () => {
+    treeService.treeCache.nodesModified = treeData.treeNode;
+    spyOn(treeService, 'setTreeElement').and.returnValue(nativeElement)
     spyOn(editorService, 'getCollectionHierarchy').and.callThrough();
-    spyOn(treeService, 'getFirstChild').and.callFake(() => {
-      return { data: { metadata: { identifier: '0123' } } };
-    });
+    spyOn(editorService.treeService, 'getFirstChild').and.callFake(() => treeData.treeNode.data);
+    spyOn(editorService, 'getUpdatedNodeMetaData').and.callFake(() => { return treeService.treeCache.nodesModified });
     hierarchyRootNodeData.folder = false;
     editorService.getHierarchyObj(hierarchyRootNodeData);
     editorService.getCollectionHierarchy();
     expect(editorService.getCollectionHierarchy).toHaveBeenCalled();
+  });
+
+  it('#getUpdatedNodeMetaData should return root nodesModified data', () => {
+    treeService.treeCache.nodesModified = {"da0ac2f0-1ea3-464a-bc03-f62b71415837": {root: false, metadata: {}}};
+    treeService.treeNativeElement = nativeElement;
+    spyOn(treeService, 'getFirstChild').and.callFake(() => {
+      return { data: { metadata: { identifier: '0123', evalMode: 'server' } } };
+    });
+    spyOn(editorService, 'getUpdatedNodeMetaData').and.callThrough();
+    editorService.getUpdatedNodeMetaData();
+    expect(editorService.getUpdatedNodeMetaData).toHaveBeenCalled();
+  });
+
+  it('#getUpdatedNodeMetaData should delete serverMode property', () => {
+    treeService.treeCache.nodesModified = {"da0ac2f0-1ea3-464a-bc03-f62b71415837": {root: true, metadata: {serverMode: true}}};
+    treeService.treeNativeElement = nativeElement;
+    spyOn(treeService, 'getFirstChild').and.callFake(() => {
+      return { data: { metadata: { identifier: '0123', evalMode: 'server' } } };
+    });
+    spyOn(editorService, 'getUpdatedNodeMetaData').and.callThrough();
+    editorService.getUpdatedNodeMetaData();
+    expect(editorService.getUpdatedNodeMetaData).toHaveBeenCalled();
   });
 
   it('#_toFlatObjFromHierarchy should call', () => {
