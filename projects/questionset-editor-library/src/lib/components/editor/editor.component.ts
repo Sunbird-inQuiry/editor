@@ -545,7 +545,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           },
           targetPrimaryCategories: questionCategory,
           collectionId: this.collectionId,
-          existingcontentCounts: this.editorService.getContentChildrens().length,
           collection: activeNode?.data?.metadata,
           framework: this.organisationFramework,
           editorConfig: this.editorConfig,
