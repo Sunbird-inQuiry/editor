@@ -244,7 +244,7 @@ export class TreeService {
       this.treeCache.nodesModified[nodeId] = {
         root: activeNode?.root ? true : false,
         objectType: metadata.objectType,
-        metadata: { ..._.omit(metadata, ['objectType','entityType']) },
+        metadata: { ..._.omit(metadata, ['objectType','entityType','category']) },
         ...(nodeId.includes('do_') ? { isNew: false } : { isNew: true })
       };
       this.treeCache.nodes.push(nodeId); // To track sequence of modifiation

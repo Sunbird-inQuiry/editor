@@ -78,7 +78,7 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
     const data = this.nodes.data;
     this.nodeParentDependentMap = this.editorService.getParentDependentMap(this.nodes.data);
     let treeData;
-    if (_.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true && _.isEmpty(_.get(this.nodes, 'data.children'))) {
+    if (_.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true && _.isEmpty(_.get(this.nodes, 'data.children')) || _.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true && !_.isEmpty(_.get(this.nodes, 'data.children')) && this.nodes.data.children[0]?.category) {
       this.helperService.addDepthToHierarchy(this.nodes.data.children);
       this.nodes.data.children =   this.removeIntermediateLevelsFromFramework(this.nodes.data.children);
       treeData = this.buildTreeFromFramework(this.nodes.data);
@@ -119,24 +119,28 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
     return data;
   }
 
-  buildTreeFromFramework(data, tree?, level?) {
+  buildTreeFromFramework(data, tree?, primaryCategory?,objectType?) {
     tree = tree || [];
     if (data.children) { data.children = _.sortBy(data.children, ['index']); }
     _.forEach(data.children, (child) => {
       const childTree = [];
-      tree.push({
-        id: uuidv4(),
-        title: child.name,
-        tooltip: child.name,
-        primaryCategory: child.primaryCategory,
-        metadata: _.omit(child, ['children', 'collections']),
-        folder: true,
-        children: childTree,
-        root: false,
-        icon: 'fa fa-folder-o'
-      });
-      if (child.children) {
-        this.buildTreeFromFramework(child, childTree);
+      if(child) {
+        child.mimeType = data.mimeType;
+        tree.push({
+          id: uuidv4(),
+          title: child.name,
+          tooltip: child.name,
+          primaryCategory: primaryCategory ? primaryCategory :data.primaryCategory,
+          objectType: objectType ? objectType : data.objectType,
+          metadata: _.omit(child, ['children', 'collections']),
+          folder: true,
+          children: childTree,
+          root: false,
+          icon: 'fa fa-folder-o'
+        });
+        if (child.children) {
+          this.buildTreeFromFramework(child, childTree,data.primaryCategory,data.objectType);
+        }
       }
     });
     return tree;
@@ -246,7 +250,7 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.treeService.nextTreeStatus('loaded');
       this.showTree = true;
     });
-    if (_.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true && _.isEmpty(_.get(this.nodes, 'data.children'))) {
+    if (_.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true && _.isEmpty(_.get(this.nodes, 'data.children')) || _.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true && !_.isEmpty(_.get(this.nodes, 'data.children')) && this.nodes.data.children[0]?.category ) {
       _.forEach(this.rootNode[0]?.children, (child) => {
           this.treeService.updateTreeNodeMetadata(child.metadata, child.id, child.primaryCategory, child.objectType);
           _.forEach(child.children, (el) => {
