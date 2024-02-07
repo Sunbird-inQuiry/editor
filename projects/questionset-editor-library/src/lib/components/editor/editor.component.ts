@@ -113,7 +113,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.toolbarConfig = this.editorService.getToolbarConfig();
     this.isStatusReviewMode = this.isReviewMode();
 
-    if (this.objectType === 'question') {
+    if (this.objectType.toLowerCase() === 'question') {
       this.handleQuestionObjectType();
     } else {
       this.pageId = 'questionset_editor';
@@ -312,7 +312,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         field.options = this.setEcm;
       }
     });
-    if ( this.objectType === 'questionset' && _.has(formsConfigObj, 'searchConfig')) {
+    if ( this.objectType.toLowerCase() === 'questionset' && _.has(formsConfigObj, 'searchConfig')) {
         this.questionlibraryInput.searchFormConfig = _.get(formsConfigObj, 'searchConfig.properties');
         this.questionlibraryInput.metadataFormConfig = _.get(formsConfigObj, 'childMetadata')
     } else {
@@ -334,7 +334,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     const requests = [];
     this.collectionTreeNodes = null;
     requests.push(this.editorService.fetchCollectionHierarchy(this.collectionId));
-    if (this.objectType === 'questionset') {
+    if (this.objectType.toLowerCase() === 'questionset') {
       requests.push(this.editorService.readQuestionSet(this.collectionId));
     }
     return forkJoin(requests).pipe(tap(responseList => {
@@ -349,7 +349,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.toolbarConfig.hasChildren = true;
       }
 
-      if (this.objectType === 'questionset') {
+      if (this.objectType.toLowerCase() === 'questionset') {
         const questionSetResponse = _.last(responseList);
         const data = _.get(questionSetResponse, _.toLower(`result.${this.objectType}`));
         this.collectionTreeNodes.data.instructions = data.instructions ? data.instructions : '';
@@ -1129,5 +1129,4 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     );
     return response;
   }
-
 }
