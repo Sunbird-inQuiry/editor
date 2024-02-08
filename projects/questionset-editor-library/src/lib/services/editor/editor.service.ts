@@ -252,12 +252,11 @@ export class EditorService {
   updateComment(contentId,comment): Observable<any> {
     const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
     const option = {
-      url: url.UPDATE_COMMENT,
+      url: url.UPDATE_COMMENT+contentId,
       data: {
         request: {
           comments : [
             {
-              identifier : contentId,
               comment : comment
             }
           ]

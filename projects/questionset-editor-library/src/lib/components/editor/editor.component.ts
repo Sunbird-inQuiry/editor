@@ -114,7 +114,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.toolbarConfig = this.editorService.getToolbarConfig();
     this.isStatusReviewMode = this.isReviewMode();
 
-    if (this.objectType.toLowerCase() === 'question') {
+    if (this.objectType === 'question') {
       this.handleQuestionObjectType();
     } else {
       this.pageId = 'questionset_editor';
@@ -155,7 +155,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
     this.editorService.readComment(this.collectionId).subscribe((res) => {
-      this.draftComment = res.result.comments.find((item)=> item.identifier == this.collectionId).comment;
+      this.draftComment = res.result.comments[0].comment;
       console.log(this.draftComment)
     })
   }
@@ -317,7 +317,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         field.options = this.setEcm;
       }
     });
-    if ( this.objectType.toLowerCase() === 'questionset' && _.has(formsConfigObj, 'searchConfig')) {
+    if ( this.objectType === 'questionset' && _.has(formsConfigObj, 'searchConfig')) {
         this.questionlibraryInput.searchFormConfig = _.get(formsConfigObj, 'searchConfig.properties');
         this.questionlibraryInput.metadataFormConfig = _.get(formsConfigObj, 'childMetadata')
     } else {
@@ -339,7 +339,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     const requests = [];
     this.collectionTreeNodes = null;
     requests.push(this.editorService.fetchCollectionHierarchy(this.collectionId));
-    if (this.objectType.toLowerCase() === 'questionset') {
+    if (this.objectType === 'questionset') {
       requests.push(this.editorService.readQuestionSet(this.collectionId));
     }
     return forkJoin(requests).pipe(tap(responseList => {
@@ -354,7 +354,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.toolbarConfig.hasChildren = true;
       }
 
-      if (this.objectType.toLowerCase() === 'questionset') {
+      if (this.objectType === 'questionset') {
         const questionSetResponse = _.last(responseList);
         const data = _.get(questionSetResponse, _.toLower(`result.${this.objectType}`));
         this.collectionTreeNodes.data.instructions = data.instructions ? data.instructions : '';

@@ -239,12 +239,12 @@ export class TreeService {
   setTreeCache(nodeId, metadata, activeNode?) {
     if (this.treeCache.nodesModified[nodeId]) {
       // tslint:disable-next-line:max-line-length
-      this.treeCache.nodesModified[nodeId].metadata = _.assign(this.treeCache.nodesModified[nodeId].metadata, _.omit(metadata, 'objectType','entityType'));
+      this.treeCache.nodesModified[nodeId].metadata = _.assign(this.treeCache.nodesModified[nodeId].metadata, _.omit(metadata, 'objectType'));
     } else {
       this.treeCache.nodesModified[nodeId] = {
         root: activeNode?.root ? true : false,
         objectType: metadata.objectType,
-        metadata: { ..._.omit(metadata, ['objectType','entityType','category']) },
+        metadata: { ..._.omit(metadata, ['objectType']) },
         ...(nodeId.includes('do_') ? { isNew: false } : { isNew: true })
       };
       this.treeCache.nodes.push(nodeId); // To track sequence of modifiation
