@@ -57,7 +57,7 @@ export class TreeService {
     const node = this.getFirstChild();
     const nodeId = node.data.id;
     node.data.metadata = {...node.data.metadata, [key] : value};
-    this.setTreeCache(nodeId, _.merge({}, {[key] : value}, _.pick(node.data.metadata, ['objectType','entityType'])));
+    this.setTreeCache(nodeId, _.merge({}, {[key] : value}, _.pick(node.data.metadata, ['objectType'])));
   }
 
   updateTreeNodeMetadata(newData: any, nodeToBeUpdated?: any, primaryCategory?: any, objectType?: any) {

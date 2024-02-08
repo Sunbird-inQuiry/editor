@@ -78,8 +78,7 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
     const data = this.nodes.data;
     this.nodeParentDependentMap = this.editorService.getParentDependentMap(this.nodes.data);
     let treeData;
-    if (_.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true && _.isEmpty(_.get(this.nodes, 'data.children')) || _.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true && !_.isEmpty(_.get(this.nodes, 'data.children')) && this.nodes.data.children[0]?.category) {
-      debugger;
+    if (_.get(this.editorService, 'editorConfig.config.renderTaxonomy') === true && _.isEmpty(_.get(this.nodes, 'data.children'))) {
       this.helperService.addDepthToHierarchy(this.nodes.data.children);
       this.nodes.data.children =   this.removeIntermediateLevelsFromFramework(this.nodes.data.children);
       treeData = this.buildTreeFromFramework(this.nodes.data);
@@ -125,21 +124,19 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (data.children) { data.children = _.sortBy(data.children, ['index']); }
     _.forEach(data.children, (child) => {
       const childTree = [];
-      if(child) {
-        tree.push({
-          id: uuidv4(),
-          title: child.name,
-          tooltip: child.name,
-          primaryCategory: child.primaryCategory,
-          metadata: _.omit(child, ['children', 'collections']),
-          folder: true,
-          children: childTree,
-          root: false,
-          icon: 'fa fa-folder-o'
-        });
-        if (child.children) {
-          this.buildTreeFromFramework(child, childTree);
-        }
+      tree.push({
+        id: uuidv4(),
+        title: child.name,
+        tooltip: child.name,
+        primaryCategory: child.primaryCategory,
+        metadata: _.omit(child, ['children', 'collections']),
+        folder: true,
+        children: childTree,
+        root: false,
+        icon: 'fa fa-folder-o'
+      });
+      if (child.children) {
+        this.buildTreeFromFramework(child, childTree);
       }
     });
     return tree;
