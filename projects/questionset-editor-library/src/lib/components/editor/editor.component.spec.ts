@@ -26,7 +26,7 @@ import { FrameworkService } from '../../services/framework/framework.service';
 import { HelperService } from '../../services/helper/helper.service';
 import { ToasterService } from '../../services/toaster/toaster.service';
 
-fdescribe('EditorComponent', () => {
+describe('EditorComponent', () => {
   const configStub = {
     urlConFig: (urlConfig as any).default,
     labelConfig: (labelConfig as any).default,
@@ -1546,6 +1546,13 @@ fdescribe('EditorComponent', () => {
     expect(returnChildrenData).toBeDefined();
   });
 
-
+  it('should save draft comments successfully', () => {
+    const comment = { id: 1, text: 'Valid comment' };
+    const editorService = TestBed.inject(EditorService);
+    spyOn(editorService, 'updateComment').and.returnValue(of({}))
+    component.saveDraftComments(comment);
+    expect(editorService.updateComment).toBeDefined()
+    expect(toasterService.success).toBeDefined();
+  });
 });
 

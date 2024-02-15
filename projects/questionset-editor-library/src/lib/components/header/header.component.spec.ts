@@ -100,4 +100,17 @@ describe('HeaderComponent', () => {
     expect(component.showPublishCollectionPopup).toBeTruthy();
     expect(component.actionType).toBeDefined();
   });
+
+  it('should deny modal and emit reviewer comment', () => {
+    const rejectComment = 'Your reject comment'; // Provide a reject comment for testing
+    component.rejectComment = rejectComment;
+    component.modal = {
+      deny: jasmine.createSpy('denied')
+    };
+
+    component.saveDraftComments();
+
+    expect(component.modal.deny).toHaveBeenCalledWith('denied'); // Expect modal.deny to be called with 'denied'
+    expect(component.reviewerComment.emit).toHaveBeenCalledWith(rejectComment); // Expect reviewerComment.emit to be called with the provided reject comment
+  });
 });
