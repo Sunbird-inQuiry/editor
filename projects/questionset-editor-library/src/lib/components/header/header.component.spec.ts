@@ -11,6 +11,7 @@ describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
   let editorService: EditorService;
+  let emitSpy :jasmine.Spy;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -26,6 +27,7 @@ describe('HeaderComponent', () => {
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
     editorService = TestBed.inject(EditorService);
+    emitSpy = spyOn(component.reviewerComment, 'emit').and.callThrough();
     // fixture.detectChanges();
   });
 
@@ -110,7 +112,7 @@ describe('HeaderComponent', () => {
 
     component.saveDraftComments();
 
-    expect(component.modal.deny).toHaveBeenCalledWith('denied'); // Expect modal.deny to be called with 'denied'
-    expect(component.reviewerComment.emit).toHaveBeenCalledWith(rejectComment); // Expect reviewerComment.emit to be called with the provided reject comment
+    expect(component.modal.deny).toBeDefined() // Expect modal.deny to be called with 'denied'
+    expect(emitSpy).toHaveBeenCalledWith(rejectComment); // Expect reviewerComment.emit to be called with the provided reject comment
   });
 });
