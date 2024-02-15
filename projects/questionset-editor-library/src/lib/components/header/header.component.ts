@@ -105,6 +105,7 @@ export class HeaderComponent implements OnDestroy, OnInit {
   }
 
   saveDraftComments() {
+    this.modal.deny('denied')
     this.reviewerComment.emit(this.rejectComment);
   }
 
