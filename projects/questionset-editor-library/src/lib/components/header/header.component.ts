@@ -14,7 +14,6 @@ import { NgForm } from '@angular/forms';
 export class HeaderComponent implements OnDestroy, OnInit {
   @Input() pageId: any;
   @Input() rejectComment: string;
-  @Input() questionSetId: string;
   @Input() labelConfigData: any;
   @Input() buttonLoaders: any;
   @Input() publishchecklist: any;

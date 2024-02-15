@@ -1137,7 +1137,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
   saveDraftComments(comment) {
     this.editorService.updateComment(this.collectionId,comment)
-    .subscribe((res) => {},(error) => {
+    .subscribe((res) => {
+      this.toasterService.success(_.get(this.configService, 'labelConfig.messages.success.043'));
+    },(error) => {
       const errInfo = {
         errorMsg: _.get(this.configService, 'labelConfig.messages.error.006'),
       };

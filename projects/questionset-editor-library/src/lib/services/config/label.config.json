@@ -190,7 +190,8 @@
          "037": "Question accepted successfully",
          "038": "Content is successfully approved",
          "039": "Content is successfully rejected",
-         "040": "Content sent back for corrections"
+         "040": "Content sent back for corrections",
+         "043": "Comment saved successfully"
       }
     },
     "categoryLabels": {
