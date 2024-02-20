@@ -39,6 +39,7 @@ import { ProgressStatusComponent } from './components/progress-status/progress-s
 import {TermAndConditionComponent} from './components/term-and-condition/term-and-condition.component';
 
 import { QualityParamsModalComponent } from './components/quality-params-modal/quality-params-modal.component';
+import { AssetsBrowserComponent } from './components/assets-browser/assets-browser.component';
 @NgModule({
   declarations: [
     QuestionsetEditorLibraryComponent,
@@ -68,7 +69,8 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     PlainTreeComponent,
     ProgressStatusComponent,
     TermAndConditionComponent,
-    QualityParamsModalComponent
+    QualityParamsModalComponent,
+    AssetsBrowserComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule.withConfig({callSetDisabledState: 'whenDisabledForLegacyCode'}), RouterModule.forChild([]), SuiModule,
   CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule, QumlLibraryModule, CarouselModule,],
