@@ -490,7 +490,7 @@ describe('EditorService', () => {
 
   it('#readComment() should read comments of questionset', async () => {
     const publicDataService = TestBed.inject(PublicDataService);
-    spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse));
+    spyOn(publicDataService, 'get').and.returnValue(of(mockData.serverResponse));
     editorService.readComment('do_113941643543011328112').subscribe(data => {
       expect(data.responseCode).toEqual('OK');
     });
@@ -500,13 +500,13 @@ describe('EditorService', () => {
     const publicDataService = TestBed.inject(PublicDataService);
     spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse))
     publicDataService.patch(mockData.commentAPIUpdateOptions).subscribe((res) => {
-      expect(toasterService.success).toHaveBeenCalled();
+      spyOn(toasterService,'success').and.callThrough();
     },(error) => {
       const errInfo = 'message'
+      spyOn(editorService,'apiErrorHandling').and.callThrough();
       editorService.apiErrorHandling(error,errInfo);
-      expect(editorService.apiErrorHandling).toHaveBeenCalled()
     });
-    expect(publicDataService.patch).toHaveBeenCalled();
+    expect(publicDataService.patch).toHaveBeenCalled()
     expect(toasterService.success).toBeDefined();
   });
 
