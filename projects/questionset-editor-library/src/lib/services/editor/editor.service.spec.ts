@@ -41,7 +41,8 @@ describe('EditorService', () => {
       URLS: {
         questionSet: {
           SYSYTEM_UPDATE: ''
-        }
+        },
+
       }
     }
   };
@@ -499,6 +500,8 @@ describe('EditorService', () => {
   it('#updateComment() should update comments of questionset', async () => {
     const publicDataService = TestBed.inject(PublicDataService);
     spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse))
+    publicDataService.patch(mockData.commentAPIUpdateOptions);
+    expect(publicDataService.patch).toHaveBeenCalled();
     expect(toasterService.success).toBeDefined();
   });
 
