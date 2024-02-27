@@ -41,8 +41,7 @@ describe('EditorService', () => {
       URLS: {
         questionSet: {
           SYSYTEM_UPDATE: ''
-        },
-
+        }
       }
     }
   };
