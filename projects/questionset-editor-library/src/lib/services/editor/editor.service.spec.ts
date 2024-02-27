@@ -40,7 +40,9 @@ describe('EditorService', () => {
     urlConFig: {
       URLS: {
         questionSet: {
-          SYSYTEM_UPDATE: ''
+          SYSYTEM_UPDATE: '',
+          UPDATE_COMMENT:"questionset/v2/comment/update/",
+          READ_COMMENT:"questionset/v2/comment/read"
         }
       }
     }
@@ -498,8 +500,23 @@ describe('EditorService', () => {
 
   it('#updateComment() should update comments of questionset', async () => {
     const publicDataService = TestBed.inject(PublicDataService);
+    const options = {
+      url: configServiceData.urlConFig.URLS.questionSet.UPDATE_COMMENT+'do_113941643543011328112',
+      data: {
+        request: {
+          comments : [
+            {
+              comment : ''
+            }
+          ]
+        }
+      }
+    };
+    expect(options).toBeDefined();
+    expect(options.data.request.comments.length).toBeGreaterThan(0);
+    expect(options.data.request.comments[0].comment).toBe('');
     spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse))
-    publicDataService.patch(mockData.commentAPIUpdateOptions).subscribe((res) => {
+    publicDataService.patch(options).subscribe((res) => {
       spyOn(toasterService,'success').and.callThrough();
     },(error) => {
       const errInfo = 'message'

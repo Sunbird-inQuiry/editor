@@ -400,16 +400,3 @@ export const serverResponse = {
       ver: '',
       headers: {}
 };
-
-export const commentAPIUpdateOptions = {
-    url: ''+'do_113941643543011328112',
-    data: {
-      request: {
-        comments : [
-          {
-            comment : ''
-          }
-        ]
-      }
-    }
-  };
