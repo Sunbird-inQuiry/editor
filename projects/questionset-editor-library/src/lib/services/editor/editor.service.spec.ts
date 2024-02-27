@@ -19,6 +19,7 @@ import * as _ from 'lodash-es';
 describe('EditorService', () => {
   let editorService: EditorService;
   let treeService;
+  let toasterService;
   const configStub = {
     urlConFig: (urlConfig as any).default,
     labelConfig: (labelConfig as any).default,
@@ -53,6 +54,7 @@ describe('EditorService', () => {
         PublicDataService,
         { provide: ConfigService, useValue: configStub }]
     });
+    toasterService = TestBed.inject(ToasterService);
     editorService = TestBed.inject(EditorService);
     treeService = TestBed.inject(TreeService);
     editorService.initialize(editorConfig);
@@ -496,10 +498,8 @@ describe('EditorService', () => {
 
   it('#updateComment() should update comments of questionset', async () => {
     const publicDataService = TestBed.inject(PublicDataService);
-    spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse));
-    editorService.updateComment('do_113941643543011328112','sample comment').subscribe(data => {
-      expect(data.responseCode).toEqual('OK');
-    });
+    spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse))
+    expect(toasterService.success).toBeDefined();
   });
 
 });

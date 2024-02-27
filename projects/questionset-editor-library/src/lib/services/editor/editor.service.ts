@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, throwError } from 'rxjs';
 import * as _ from 'lodash-es';
 import { TreeService } from '../tree/tree.service';
 import { PublicDataService } from '../public-data/public-data.service';
@@ -249,7 +249,7 @@ export class EditorService {
     return this.publicDataService.post(option);
   }
 
-  updateComment(contentId,comment): Observable<any> {
+  updateComment(contentId,comment) {
     const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
     const option = {
       url: url.UPDATE_COMMENT+contentId,
@@ -263,7 +263,14 @@ export class EditorService {
         }
       }
     };
-    return this.publicDataService.patch(option);
+    this.publicDataService.patch(option).subscribe((res) => {
+      this.toasterService.success(_.get(this.configService, 'labelConfig.messages.success.043'));
+    },(error) => {
+      const errInfo = {
+        errorMsg: _.get(this.configService, 'labelConfig.messages.error.006'),
+      };
+      return throwError(this.apiErrorHandling(error, errInfo))
+    });
   }
 
   readComment(contentId:string): Observable<any> {
