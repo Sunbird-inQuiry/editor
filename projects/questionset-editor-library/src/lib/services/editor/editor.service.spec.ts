@@ -263,13 +263,13 @@ describe('EditorService', () => {
     expect(editorService.treeService.getTreeObject).toHaveBeenCalled();
     expect(content.length).toEqual(0);
   });
-  // it('#checkIfContentsCanbeAdded() should return false', () => {
-  //   editorService.contentsCount = 0;
-  //   spyOn(editorService, 'getContentChildrens').and.callFake(() => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-  //   let result = editorService.checkIfContentsCanbeAdded('add');
-  //   expect(editorService.getContentChildrens).toHaveBeenCalled();
-  //   expect(result).toBe(false);
-  // });
+  it('#checkIfContentsCanbeAdded() should return false', () => {
+    editorService.contentsCount = 0;
+    spyOn(editorService, 'getContentChildrens').and.callFake(() => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    let result = editorService.checkIfContentsCanbeAdded('add');
+    expect(editorService.getContentChildrens).toHaveBeenCalled();
+    expect(result).toBe(false);
+  });
   it('#generatePreSignedUrl() should call generatePreSignedUrl', () => {
     const publicDataService: PublicDataService = TestBed.inject(PublicDataService);
     spyOn(publicDataService, 'post').and.returnValue(of());
