@@ -253,15 +253,7 @@ export class EditorService {
     const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
     const option = {
       url: url.UPDATE_COMMENT+contentId,
-      data: {
-        request: {
-          comments : [
-            {
-              comment : comment
-            }
-          ]
-        }
-      }
+      data: { request: { comments : [{ comment : comment }] }}
     };
     this.publicDataService.patch(option).subscribe((res) => {
       this.toasterService.success(_.get(this.configService, 'labelConfig.messages.success.043'));
