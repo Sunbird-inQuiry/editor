@@ -8,7 +8,7 @@ import { ConfigService } from '../config/config.service';
 import * as urlConfig from '../../services/config/url.config.json';
 import * as labelConfig from '../../services/config/label.config.json';
 import * as categoryConfig from '../../services/config/category.config.json';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { PublicDataService } from '../public-data/public-data.service';
 import { ToasterService } from '../../services/toaster/toaster.service';
 import { TreeService } from '../tree/tree.service';
@@ -500,7 +500,13 @@ describe('EditorService', () => {
   it('#updateComment() should update comments of questionset', async () => {
     const publicDataService = TestBed.inject(PublicDataService);
     spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse))
-    publicDataService.patch(mockData.commentAPIUpdateOptions);
+    publicDataService.patch(mockData.commentAPIUpdateOptions).subscribe((res) => {
+      expect(toasterService.success).toHaveBeenCalled();
+    },(error) => {
+      const errInfo = 'message'
+      editorService.apiErrorHandling(error,errInfo);
+      expect(editorService.apiErrorHandling).toHaveBeenCalled()
+    });
     expect(publicDataService.patch).toHaveBeenCalled();
     expect(toasterService.success).toBeDefined();
   });
