@@ -156,7 +156,6 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     this.editorService.readComment(this.collectionId).subscribe((res) => {
       this.draftComment = res.result.comments[0].comment;
-      console.log(this.draftComment)
     })
   }
 
@@ -1136,15 +1135,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   saveDraftComments(comment) {
-    this.editorService.updateComment(this.collectionId,comment)
-    .subscribe((res) => {
-      this.toasterService.success(_.get(this.configService, 'labelConfig.messages.success.043'));
-    },(error) => {
-      const errInfo = {
-        errorMsg: _.get(this.configService, 'labelConfig.messages.error.006'),
-      };
-      return throwError(this.editorService.apiErrorHandling(error, errInfo))
-    });
+    this.editorService.updateComment(this.collectionId,comment);
   }
 
 

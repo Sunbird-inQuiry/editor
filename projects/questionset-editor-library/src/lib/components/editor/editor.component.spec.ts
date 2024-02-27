@@ -1549,10 +1549,9 @@ describe('EditorComponent', () => {
   it('should save draft comments successfully', () => {
     const comment = { id: 1, text: 'Valid comment' };
     const editorService = TestBed.inject(EditorService);
-    spyOn(editorService, 'updateComment').and.returnValue(of({}))
+    spyOn(editorService, 'updateComment')
     component.saveDraftComments(comment);
-    expect(editorService.updateComment).toBeDefined()
-    expect(toasterService.success).toBeDefined();
+    expect(editorService.updateComment).toHaveBeenCalled();
   });
 });
 
