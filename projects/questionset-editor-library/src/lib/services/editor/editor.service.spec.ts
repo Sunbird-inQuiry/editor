@@ -498,33 +498,25 @@ describe('EditorService', () => {
     });
   });
 
-  it('#updateComment() should update comments of questionset', async () => {
+  it('should handle successful comment update', () => {
     const publicDataService = TestBed.inject(PublicDataService);
-    const options = {
-      url: configServiceData.urlConFig.URLS.questionSet.UPDATE_COMMENT+'do_113941643543011328112',
-      data: {
-        request: {
-          comments : [
-            {
-              comment : ''
-            }
-          ]
-        }
-      }
-    };
-    expect(options).toBeDefined();
-    expect(options.data.request.comments.length).toBeGreaterThan(0);
-    expect(options.data.request.comments[0].comment).toBe('');
-    spyOn(publicDataService, 'patch').and.returnValue(of(mockData.serverResponse))
-    publicDataService.patch(options).subscribe((res) => {
-      spyOn(toasterService,'success').and.callThrough();
-    },(error) => {
-      const errInfo = 'message'
-      spyOn(editorService,'apiErrorHandling').and.callThrough();
-      editorService.apiErrorHandling(error,errInfo);
-    });
-    expect(publicDataService.patch).toHaveBeenCalled()
-    expect(toasterService.success).toBeDefined();
+    spyOn(publicDataService,'patch').and.returnValue(of(mockData.serverResponse));
+    spyOn(toasterService, 'success');
+
+    editorService.updateComment('contentId', 'comment');
+
+    expect(publicDataService.patch).toHaveBeenCalled();
   });
+
+  it('should handle error during comment update', () => {
+    const publicDataService = TestBed.inject(PublicDataService);
+    const error = new Error('Failed to update comment');
+    spyOn(publicDataService,'patch').and.returnValue(throwError(error));
+
+    editorService.updateComment('contentId', 'comment');
+
+    expect(publicDataService.patch).toHaveBeenCalled();
+  });
+
 
 });
