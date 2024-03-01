@@ -371,4 +371,22 @@
   input:focus-visible{
     border: none !important;
   }
-  
+
+  .audio-player {
+    cursor: pointer;
+  }
+
+  audio {
+    width: 150px;
+    height: 50px;
+    margin: 5px;
+    padding: 5px;
+  }
+
+  .audio-tag {
+    margin: 5px;
+    padding: 5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }

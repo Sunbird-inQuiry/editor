@@ -709,14 +709,16 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       this.assetSolutionData = event;
       this.assetSolutionName = event.name;
       this.editorState.solutions = event.identifier;
-      this.assetThumbnail = event.thumbnail;
+      this.assetThumbnail = event?.thumbnail;
       const assetMedia: any = {};
       assetMedia.id = event.identifier;
       assetMedia.src = event.src;
       assetMedia.type = this.assetType;
       assetMedia.assetId = event.identifier;
       assetMedia.name = event.name;
-      assetMedia.thumbnail = this.assetThumbnail;
+      if (event?.thumbnail) {
+        assetMedia.thumbnail = this.assetThumbnail;
+      }
       assetMedia.baseUrl = _.get(this.editorService.editorConfig, 'context.host') || document.location.origin;
       if (assetMedia.thumbnail) {
         const thumbnailMedia: any = {};
