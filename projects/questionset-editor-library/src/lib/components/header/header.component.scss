@@ -47,3 +47,7 @@
 .sb-modal-fullscreen .modals.dimmer .ui.scrolling.modal{
   margin: 0 auto !important;
 }
+.sb-modal-header {
+  display: flex;
+  justify-content: space-between;
+}
