@@ -78,6 +78,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   public unSubscribeshowQuestionLibraryPageEmitter: Subscription;
   public sourcingSettings: any;
   public setChildQuestion: any;
+  draftComment:string = '';
   public unsubscribe$ = new Subject<void>();
   public onComponentDestroy$ = new Subject<any>();
   constructor(private editorService: EditorService, public treeService: TreeService, private frameworkService: FrameworkService,
@@ -153,6 +154,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         this.getFrameworkDetails(this.primaryCategoryDef);
       }
     });
+    this.editorService.readComment(this.collectionId).subscribe((res) => {
+      this.draftComment = res.result.comments[0].comment;
+    })
   }
 
   handleQuestionObjectType() {
@@ -1129,5 +1133,11 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     );
     return response;
   }
+
+  saveDraftComments(comment) {
+    this.editorService.updateComment(this.collectionId,comment);
+  }
+
+
 
 }

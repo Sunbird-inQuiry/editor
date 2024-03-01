@@ -13,6 +13,7 @@ import { NgForm } from '@angular/forms';
 })
 export class HeaderComponent implements OnDestroy, OnInit {
   @Input() pageId: any;
+  @Input() rejectComment: string;
   @Input() labelConfigData: any;
   @Input() buttonLoaders: any;
   @Input() publishchecklist: any;
@@ -22,13 +23,13 @@ export class HeaderComponent implements OnDestroy, OnInit {
     }
   }
   @Output() toolbarEmitter = new EventEmitter<any>();
+  @Output() reviewerComment = new EventEmitter<any>();
   @ViewChild('FormControl') FormControl: NgForm;
   @ViewChild('modal') public modal;
   @Output() qualityParamEmitter = new EventEmitter<any>();
   public visibility: any;
   public showPublishCollectionPopup: boolean;
   public showRequestChangesPopup: boolean;
-  public rejectComment: string;
   public actionType: string;
   public objectType: string;
   public sourcingStatusText: string;
@@ -101,6 +102,11 @@ export class HeaderComponent implements OnDestroy, OnInit {
     if (event.button === 'publishContent' || event.button === 'publishQuestion' || event.button === 'sourcingApprove' || event.button === 'sourcingApproveQuestion') {
       this.toolbarEmitter.emit(event);
     }
+  }
+
+  saveDraftComments() {
+    this.modal.deny('denied')
+    this.reviewerComment.emit(this.rejectComment);
   }
 
   ngOnDestroy() {

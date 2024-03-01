@@ -4012,3 +4012,11 @@ export  const categoryDefinitionPublishCheckList = {
       }
   }
 };
+export const fakeComment = 'sample comment';
+export const fakeApiResponse = {
+  result: {
+    comments: [
+      { identifier: 'do_113431883451195392169', comment: fakeComment },
+    ],
+  },
+};
