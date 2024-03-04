@@ -22,7 +22,6 @@ import { QuestionComponent } from './components/question/question.component';
 import { QumlLibraryModule } from '@project-sunbird/sunbird-quml-player';
 import { CarouselModule } from 'ngx-bootstrap/carousel';
 import { TelemetryInteractDirective } from './directives/telemetry-interact/telemetry-interact.directive';
-import { AssetBrowserComponent } from './components/asset-browser/asset-browser.component';
 import { CollectionIconComponent } from './components/collection-icon/collection-icon.component';
 import { QumlPlayerComponent } from './components/quml-player/quml-player.component';
 import { QuestionOptionSubMenuComponent } from './components/question-option-sub-menu/question-option-sub-menu.component';
@@ -56,7 +55,6 @@ import { AssetsBrowserComponent } from './components/assets-browser/assets-brows
     CkeditorToolComponent,
     TemplateComponent,
     TelemetryInteractDirective,
-    AssetBrowserComponent,
     CollectionIconComponent,
     QumlPlayerComponent,
     PublishChecklistComponent,
