@@ -5,7 +5,7 @@ import { throwError, Observable } from 'rxjs';
 import { EditorService } from '../../services/editor/editor.service';
 import { ConfigService } from '../../services/config/config.service';
 import { QuestionService } from '../../services/question/question.service';
-import { config } from '../asset-browser/asset-browser.data';
+import { config } from './assets-browser.data';
 import { ToasterService } from '../../services/toaster/toaster.service';
 @Component({
   selector: 'lib-assets-browser',
@@ -108,8 +108,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   
   dismissAssetPicker() {
     this.showAssetPicker = false;
-    this.assetShow=false;
-    this.showAssetPicker = false;
+    this.assetShow = false;
     this.assetDataOutput.emit(false);
   }
   
