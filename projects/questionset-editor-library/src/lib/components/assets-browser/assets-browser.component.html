@@ -22,31 +22,13 @@
           <p class="fs-0-986 ml-auto sb-color-grey" >{{assetsCount}}</p>
         </div>
         <div *ngIf="!myAssets?.length && searchMyInput" class="fs-0785"> {{emptySearchMessage}} </div>
-      <div class="sb-grid-layout image" *ngIf="assetType === 'image'">
-        <div class="sb-video-content" *ngFor="let data of myAssets">
-          <div class="sb-image-section relative position" *ngIf="data.mediaType === 'image'">
-            <img (click)="addAssetInEditor(undefined, data)" alt="{{ data?.name }}" [src]="data.downloadUrl">
-          </div>
-         </div>
-        </div>
-
-      <div class="sb-grid-layout video" *ngIf="assetType === 'video'">
-        <div class="sb-video-content" *ngFor="let data of myAssets">
-            <div class="sb-image-section relative position" *ngIf="data.mediaType === 'video'"
-            (click)="addAssetInEditor(undefined, data);">
-              <div class="overlay-image"><i class="play circle icon" aria-hidden="true"></i></div>
-              <i class="check circle icon selected-video" aria-hidden="true"></i>
-              <img [src]="data.thumbnail" alt="{{data.name}}">
-            </div>
-          </div>
-        </div>
-
-    <div class="sb-grid-layout video" *ngIf="assetType === 'audio'">
-      <div class="sb-video-content" *ngFor="let data of audioData">
-          <div class="sb-image-section relative position" *ngIf="data.mediaType === 'audio'"
-            (click)="addAssetInEditor(undefined, data);">
-            <i class="check circle icon selected-video" aria-hidden="true"></i>
-            <div class="audio-player">
+        <div class="sb-grid-layout video">
+          <div class="sb-video-content" *ngFor="let data of myAssets">
+            <div class="sb-image-section relative position" (click)="addAssetInEditor(undefined, data);">
+              <div *ngIf="assetType === 'video'" class="overlay-image"><i class="play circle icon" aria-hidden="true"></i></div>
+              <i *ngIf="assetType !== 'audio'" class="check circle icon selected-video" aria-hidden="true"></i>
+              <img *ngIf="assetType === 'image' || assetType === 'video'" [src]="assetType === 'image' ? data.downloadUrl : data.thumbnail" alt="{{data.name}}">
+              <div *ngIf="assetType === 'audio'" class="audio-player">
                 <audio controls controlsList="nodownload noplaybackrate">
                   <source [src]="data.downloadUrl" type="audio/ogg">
                   <source [src]="data.downloadUrl" type="audio/mpeg">
@@ -75,31 +57,13 @@
           <p class="fs-0-986 ml-auto sb-color-grey">{{assetsCount}}</p>
         </div>
         <div *ngIf="!allAssets?.length && searchAllInput" class="fs-0785"> {{emptySearchMessage}} </div>
-        <div class="sb-grid-layout image" *ngIf="assetType === 'image'">
+        <div class="sb-grid-layout video">
           <div class="sb-video-content" *ngFor="let data of allAssets">
-            <div class="sb-image-section relative position" *ngIf="data.mediaType === 'image'">
-              <img (click)="addAssetInEditor(undefined, data)" alt="{{ data?.name }}" [src]="data.downloadUrl">
-            </div>
-          </div>
-        </div>
-
-        <div class="sb-grid-layout video" *ngIf="assetType === 'video'">
-          <div class="sb-video-content" *ngFor="let data of allAssets">
-            <div class="sb-image-section relative position" *ngIf="data.mediaType === 'video'"
-            (click)="addAssetInEditor(undefined, data);">
-              <div class="overlay-image"><i class="play circle icon" aria-hidden="true"></i></div>
-              <i class="check circle icon selected-video" aria-hidden="true"></i>
-              <img [src]="data.thumbnail" alt="{{data.name}}">
-            </div>
-          </div>
-        </div>
-
-        <div class="sb-grid-layout video" *ngIf="assetType === 'audio'">
-          <div class="sb-video-content" *ngFor="let data of audioData">
-            <div class="sb-image-section relative position" *ngIf="data.mediaType === 'audio'"
-            (click)="addAssetInEditor(undefined, data);">
-              <i class="check circle icon selected-video" aria-hidden="true"></i>
-              <div class="audio-player">
+            <div class="sb-image-section relative position" (click)="addAssetInEditor(undefined, data);">
+              <div *ngIf="assetType === 'video'" class="overlay-image"><i class="play circle icon" aria-hidden="true"></i></div>
+              <i *ngIf="assetType !== 'audio'" class="check circle icon selected-video" aria-hidden="true"></i>
+              <img *ngIf="assetType === 'image' || assetType === 'video'" [src]="assetType === 'image' ? data.downloadUrl : data.thumbnail" alt="{{data.name}}">
+              <div *ngIf="assetType === 'audio'" class="audio-player">
                 <audio controls controlsList="nodownload noplaybackrate">
                   <source [src]="data.downloadUrl" type="audio/ogg">
                   <source [src]="data.downloadUrl" type="audio/mpeg">
@@ -111,7 +75,6 @@
             </div>
           </div>
         </div>
-
       </div>
   </sui-tabset>
 </div>
