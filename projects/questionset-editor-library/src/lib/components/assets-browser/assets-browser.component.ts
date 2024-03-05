@@ -61,7 +61,6 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   public searchMyInput = '';
   public searchAllInput: any;
   public assetUploadLoader = false;
-  public audioData = [];
   constructor(private editorService: EditorService, public configService: ConfigService,
                 private questionService: QuestionService, public toasterService: ToasterService) { }
   
@@ -435,7 +434,6 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
       this.assetFormValid = true;
       return throwError(this.editorService.apiErrorHandling(err, errInfo));
     })).subscribe(res => {
-      // this.toasterService.success(_.get(this.configService, 'labelConfig.messages.success.006'));
       this.selectedAsset = res;
       this.showAddButton = true;
       this.loading = false;
@@ -446,7 +444,8 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   }
   
   uploadToBlob(signedURL, file, config): Observable<any> {
-    return this.questionService.http.put(signedURL, file, config).pipe(catchError(err => {
+    const csp = _.get(this.editorService.editorConfig, 'context.cloudStorage.provider', 'azure');
+    return this.questionService.uploadToBlob(signedURL, file, csp).pipe(catchError(err => {
       const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.018') };
       this.isClosable = true;
       this.loading = false;
