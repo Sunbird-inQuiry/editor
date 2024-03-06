@@ -11,7 +11,7 @@ jobs:
   test-cases:
     working_directory: ~/sunbird-questionset-editor
     machine:
-      image: ubuntu-2204:edge
+      image: default
     steps:
       - checkout:
           path: ~/sunbird-questionset-editor
