@@ -9,8 +9,5 @@
         </div>
         <img *ngIf="appIcon" class="ui image sb-appicon" src="{{appIcon}}" alt="app icon"/>
     </div>
-    <lib-assets-browser *ngIf="showImagePicker" [showAssetPicker]="showImagePicker"
-    (assetDataOutput)="collectionIconHandler($event)" [assetType]="'image'"
-    [isAppIcon]="true">
-    </lib-assets-browser>
+    <lib-assets-browser *ngIf="showImagePicker" [showAssetPicker]="showImagePicker" (assetDataOutput)="collectionIconHandler($event)" [assetType]="'image'" [isAppIcon]="true"></lib-assets-browser>
 </ng-container>
