@@ -39,6 +39,7 @@ import {TermAndConditionComponent} from './components/term-and-condition/term-an
 
 import { QualityParamsModalComponent } from './components/quality-params-modal/quality-params-modal.component';
 import { AssetsBrowserComponent } from './components/assets-browser/assets-browser.component';
+import { AssetSegmentComponent } from './components/asset-segment/asset-segment.component';
 @NgModule({
   declarations: [
     QuestionsetEditorLibraryComponent,
@@ -69,6 +70,7 @@ import { AssetsBrowserComponent } from './components/assets-browser/assets-brows
     TermAndConditionComponent,
     QualityParamsModalComponent,
     AssetsBrowserComponent,
+    AssetSegmentComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule.withConfig({callSetDisabledState: 'whenDisabledForLegacyCode'}), RouterModule.forChild([]), SuiModule,
   CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule, QumlLibraryModule, CarouselModule,],

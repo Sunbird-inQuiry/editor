@@ -22,24 +22,7 @@
           <p class="fs-0-986 ml-auto sb-color-grey" >{{assetsCount}}</p>
         </div>
         <div *ngIf="!myAssets?.length && searchMyInput" class="fs-0785"> {{emptySearchMessage}} </div>
-        <div class="sb-grid-layout video">
-          <div class="sb-video-content" *ngFor="let data of myAssets">
-            <div class="sb-image-section relative position" (click)="addAssetInEditor(undefined, data);">
-              <div *ngIf="assetType === 'video'" class="overlay-image"><i class="play circle icon" aria-hidden="true"></i></div>
-              <i *ngIf="assetType !== 'audio'" class="check circle icon selected-video" aria-hidden="true"></i>
-              <img *ngIf="assetType === 'image' || assetType === 'video'" [src]="assetType === 'image' ? data.downloadUrl : data.thumbnail" alt="{{data.name}}">
-              <div *ngIf="assetType === 'audio'" class="audio-player">
-                <audio controls controlsList="nodownload noplaybackrate">
-                  <source [src]="data.downloadUrl" type="audio/ogg">
-                  <source [src]="data.downloadUrl" type="audio/mpeg">
-                </audio>
-                <div class="audio-tag" [title]="data.name">
-                  <span>{{data.name}}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <lib-asset-segment [assetType]="assetType" [assets]="myAssets" (assetSelectOutput)="addAssetInEditor(undefined, $event)"></lib-asset-segment>
       </div>
 
       <div class="ui segment sb-tabset-segment m-0 pt-15" infiniteScroll [infiniteScrollDistance]="2"
@@ -57,24 +40,7 @@
           <p class="fs-0-986 ml-auto sb-color-grey">{{assetsCount}}</p>
         </div>
         <div *ngIf="!allAssets?.length && searchAllInput" class="fs-0785"> {{emptySearchMessage}} </div>
-        <div class="sb-grid-layout video">
-          <div class="sb-video-content" *ngFor="let data of allAssets">
-            <div class="sb-image-section relative position" (click)="addAssetInEditor(undefined, data);">
-              <div *ngIf="assetType === 'video'" class="overlay-image"><i class="play circle icon" aria-hidden="true"></i></div>
-              <i *ngIf="assetType !== 'audio'" class="check circle icon selected-video" aria-hidden="true"></i>
-              <img *ngIf="assetType === 'image' || assetType === 'video'" [src]="assetType === 'image' ? data.downloadUrl : data.thumbnail" alt="{{data.name}}">
-              <div *ngIf="assetType === 'audio'" class="audio-player">
-                <audio controls controlsList="nodownload noplaybackrate">
-                  <source [src]="data.downloadUrl" type="audio/ogg">
-                  <source [src]="data.downloadUrl" type="audio/mpeg">
-                </audio>
-                <div class="audio-tag" [title]="data.name">
-                  <span>{{data.name}}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <lib-asset-segment [assetType]="assetType" [assets]="allAssets" (assetSelectOutput)="addAssetInEditor(undefined, $event)"></lib-asset-segment>
       </div>
   </sui-tabset>
 </div>
