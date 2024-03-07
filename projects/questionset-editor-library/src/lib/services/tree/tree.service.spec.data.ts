@@ -6,6 +6,7 @@ export const treeNode = {
         "keywords": [
             "test"
         ],
+        "serverMode": true,
         "subject": [
             "History"
         ],
@@ -63,6 +64,7 @@ export const treeNode = {
         "medium": [
             "English"
         ],
+        "evalMode": "server",
         "createdOn": "2021-04-22T14:23:40.169+0000",
         "contentDisposition": "inline",
         "additionalCategories": [
@@ -96,9 +98,74 @@ export const treeNode = {
         "maxTime": "00:06:00",
         "warningTime": "00:00:10",
         "summaryType": null
-      }
+      },
+      root: true
     },
     getLevel: ()=> {
         return 2;
     }
   };
+
+  export const treeCache = {
+    "nodesModified": {
+        "do_113263678834016256111": {
+            "root": true,
+            "objectType": "QuestionSet",
+            "metadata": {
+                "name": "Testing6",
+                "primaryCategory": "PIAA Question Set",
+                "showTimer": "No",
+                "requiresSubmit": "No",
+                "copyright": "UPHRH_TEST",
+                "license": "CC BY 4.0",
+                "attributions": [],
+                "timeLimits": {
+                    "questionSet": {
+                        "max": 0,
+                        "min": 0
+                    }
+                },
+                "description": "desc",
+                "board": "General Nursing Midwifery",
+                "medium": [
+                    "Sociology"
+                ],
+                "gradeLevel": [
+                    "Describes about social groups social change control stratification and social problems"
+                ],
+                "subject": [
+                    "Sociology"
+                ],
+                "difficultyLevel": [
+                    "Interprets society"
+                ]
+            },
+            "isNew": false
+        },
+        "da0ac2f0-1ea3-464a-bc03-f62b71415837": {
+            "root": false,
+            "objectType": "QuestionSet",
+            "metadata": {
+                "mimeType": "application/vnd.sunbird.questionset",
+                "code": "da0ac2f0-1ea3-464a-bc03-f62b71415837",
+                "name": "Section A",
+                "visibility": "Parent",
+                "primaryCategory": "Practice Question Set",
+                "shuffle": true,
+                "selectedQuestionType": "",
+                "attributions": [],
+                "timeLimits": {
+                    "questionSet": {
+                        "max": 0,
+                        "min": 0
+                    }
+                }
+            },
+            "isNew": true
+        }
+    },
+    "nodes": [
+        "do_113263678834016256111",
+        "da0ac2f0-1ea3-464a-bc03-f62b71415837"
+    ]
+}

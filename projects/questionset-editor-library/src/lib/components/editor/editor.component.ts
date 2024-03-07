@@ -545,13 +545,16 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
           },
           targetPrimaryCategories: questionCategory,
           collectionId: this.collectionId,
-          existingcontentCounts: this.editorService.getContentChildrens().length,
           collection: activeNode?.data?.metadata,
           framework: this.organisationFramework,
           editorConfig: this.editorConfig,
           searchFormConfig:  this.questionlibraryInput.searchFormConfig,
           metadataFormConfig: this.questionlibraryInput.metadataFormConfig
         };
+        if(this.treeService.getEval()) {
+          this.questionlibraryInput.collection.evalMode = "server"
+        }
+        this.questionlibraryInput.existingcontentCounts = this.editorService.getContentChildrens().length
         this.pageId = 'question_library';
         console.log(this.questionlibraryInput);
       }).catch(((error: string) => {

@@ -240,6 +240,7 @@ export class TreeService {
     if (this.treeCache.nodesModified[nodeId]) {
       // tslint:disable-next-line:max-line-length
       this.treeCache.nodesModified[nodeId].metadata = _.assign(this.treeCache.nodesModified[nodeId].metadata, _.omit(metadata, 'objectType'));
+      this.updateEvaluable(nodeId);
     } else {
       this.treeCache.nodesModified[nodeId] = {
         root: activeNode?.root ? true : false,
@@ -249,6 +250,46 @@ export class TreeService {
       };
       this.treeCache.nodes.push(nodeId); // To track sequence of modifiation
     }
+  }
+
+  updateEvaluable(nodeId){
+    if(this.treeCache.nodesModified[nodeId].metadata.primaryCategory === this.configService.editorConfig.evaluableQuestionSet) {
+      this.treeCache.nodesModified[nodeId].metadata.evalMode = this.configService.editorConfig.evalMode
+    }
+      if(!this.treeCache.nodesModified[nodeId].root){
+        if(this.getFirstChild().data.primaryCategory === this.configService.editorConfig.evaluableQuestionSet) {
+          this.treeCache.nodesModified[nodeId].metadata.evalMode = this.configService.editorConfig.evalMode;
+        }
+          this.overrideEvaluable(nodeId);
+        } else {
+          const firstChild = this.getFirstChild().data?.metadata;
+          if(firstChild?.serverMode) {
+            this.treeCache.nodesModified[nodeId].metadata.evalMode = this.configService.editorConfig.evalMode;
+            this.updateFirstChild(this.treeCache.nodesModified[nodeId].metadata.evalMode)
+          } else if(!firstChild?.serverMode) {
+            delete this.treeCache.nodesModified[nodeId].metadata?.evalMode;
+            delete $(this.treeNativeElement).fancytree('getRootNode').getFirstChild()?.data?.evalMode;
+            delete $(this.treeNativeElement).fancytree('getRootNode').getFirstChild()?.data?.metadata?.evalMode;
+          }
+      }
+  }
+
+  updateFirstChild(evalMode:any) {
+    $(this.treeNativeElement).fancytree('getRootNode').getFirstChild().data.evalMode = evalMode;
+  }
+
+  getEval() {
+    if(this.getFirstChild().data?.serverMode || this.getFirstChild().data?.metadata?.serverMode) {
+      return true
+    }
+    return false
+  }
+
+  overrideEvaluable(nodeId){
+   const firstNode = this.getFirstChild()
+   if(this.getFirstChild().data?.metadata?.serverMode && firstNode.data?.metadata?.serverMode) {
+    this.treeCache.nodesModified[nodeId].metadata.evalMode = this.configService.editorConfig.evalMode
+   }
   }
 
   clearTreeCache(node?) {

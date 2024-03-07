@@ -10,6 +10,8 @@ import { EditorTelemetryService } from '../../services/telemetry/telemetry.servi
 import { DataService } from '../data/data.service';
 import { map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import 'jquery.fancytree';
+declare let $: any;
 interface SelectedChildren {
   label?: string;
   primaryCategory?: string;
@@ -397,9 +399,27 @@ export class EditorService {
     this.data = {};
     const data = this.treeService.getFirstChild();
     return {
-      nodesModified: this.treeService.treeCache.nodesModified,
+      nodesModified: this.getUpdatedNodeMetaData(),
       hierarchy: instance.getHierarchyObj(data)
     };
+  }
+
+  getUpdatedNodeMetaData() {
+    const parentNodeId = _.findKey(this.treeService.treeCache.nodesModified,(node)=>{
+      return node.root;
+    });
+    const parentNode = this.treeService.getFirstChild().data;
+
+    _.forEach(this.treeService.treeCache.nodesModified, (node, nodeId)=>{
+      if(!node.root && parentNode?.evalMode || parentNode?.metadata?.evalMode){
+        this.treeService.treeCache.nodesModified[nodeId].metadata.evalMode = parentNode?.evalMode || parentNode?.metadata?.evalMode;
+      }
+
+    })
+    if(this.treeService.treeCache.nodesModified[parentNodeId]?.metadata.hasOwnProperty('serverMode')) {
+      delete this.treeService.treeCache.nodesModified[parentNodeId]?.metadata?.serverMode
+    }
+    return this.treeService.treeCache.nodesModified;
   }
 
   getHierarchyObj(data, questionId?, selectUnitId?, parentId?) {

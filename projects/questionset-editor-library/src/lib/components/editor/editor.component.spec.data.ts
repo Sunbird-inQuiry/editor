@@ -319,11 +319,7 @@ export const toolbarConfig_question = {
   done_btn_label: 'Done'
 };
 
-export const nativeElement = `<div><ul id="ft-id-1" class="ui-fancytree fancytree-container fancytree-plain fancytree-ext-glyph fancytree-ext-dnd5 fancytree-connectors" tabindex="0" role="tree" aria-multiselectable="true"><li role="treeitem" aria-expanded="false" aria-selected="false" class="fancytree-lastsib"><span class="fancytree-node fancytree-folder fancytree-has-children fancytree-lastsib fancytree-exp-cl fancytree-ico-cf" draggable="true"><span role="button" class="fancytree-expander fa fa-caret-right"></span><span role="presentation" class="fancytree-custom-icon fa fa-book"></span><span class="fancytree-title" title="SB23410q" style="width:15em;text-overflow:ellipsis;white-space:nowrap;overflow:hidden">SB23410q</span><span class="ui dropdown sb-dotted-dropdown" autoclose="itemClick" suidropdown="" tabindex="0" style="display: none;"> <span id="contextMenu" class="p-0 w-auto"><i class="icon ellipsis vertical sb-color-black"></i></span>
-  <span id="contextMenuDropDown" class="menu transition hidden" suidropdownmenu="" style="">
-    <div id="addchild" class="item">Add Child</div>
-  </span>
-  </span></span></li></ul></div>`;
+export const nativeElement = `<div><ul id="ft-id-1" class="ui-fancytree fancytree-container fancytree-plain fancytree-ext-glyph fancytree-ext-dnd5 fancytree-connectors" tabindex="0" role="tree" aria-multiselectable="true"><li role="treeitem" aria-selected="false" class="fancytree-lastsib"><span class="fancytree-node fancytree-folder fancytree-lastsib fancytree-exp-nl fancytree-ico-cf" draggable="true"><span class="fancytree-expander fa "></span><span role="presentation" class="fancytree-custom-icon fa fa-book"></span><span class="fancytree-title" title="Untitled QuestionSet" style="width:15em;text-overflow:ellipsis;white-space:nowrap;overflow:hidden">Untitled QuestionSet</span><span class="ui dropdown sb-dotted-dropdown" autoclose="itemClick" suidropdown="" tabindex="0" style="display: none;"><span id="contextMenu" class="p-0 w-auto"><i class="icon ellipsis vertical sb-color-black"></i></span><span id="contextMenuDropDown" class="menu transition hidden" suidropdownmenu="" style=""><div id="addchild" class="item">Add Child</div></span></span></span></li></ul></div>`;
 
 export const getCategoryDefinitionResponse = {
   id: 'api.object.category.definition.read',
@@ -1692,6 +1688,7 @@ export const treeNodeData = {
       board: 'CBSE',
       status: 'Draft',
       showEvidence: 'No',
+      serverMode: true
     },
     root: false,
   },
