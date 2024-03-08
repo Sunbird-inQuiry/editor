@@ -22,14 +22,7 @@
         <p class="fs-0-986 ml-auto sb-color-grey" >{{assetsCount}}</p>
       </div>
       <div *ngIf="!myAssets?.length && searchMyInput" class="fs-0785"> {{emptySearchMessage}} </div>
-      <div class="sb-grid-layout image">
-        <div class="sb-video-content" *ngFor="let data of myAssets">
-          <div class="sb-image-section relative position">
-            <img (click)="addAssetInEditor(data.downloadUrl, data.identifier, data.name)" alt="{{data?.name}}" [src]="data.downloadUrl">
-          </div>
-        </div>
-
-      </div>
+      <lib-asset-segment [assetType]="assetType" [assets]="myAssets" (assetSelectOutput)="addAssetInEditor(undefined, $event)"></lib-asset-segment>
     </div>
 
     <div class="ui segment sb-tabset-segment m-0 pt-15" infiniteScroll [infiniteScrollDistance]="2"
@@ -47,14 +40,7 @@
         <p class="fs-0-986 ml-auto sb-color-grey">{{assetsCount}}</p>
       </div>
       <div *ngIf="!allAssets?.length && searchAllInput" class="fs-0785"> {{emptySearchMessage}} </div>
-      <div class="sb-grid-layout image">
-        <div class="sb-video-content" *ngFor="let data of allAssets">
-          <div class="sb-image-section">
-            <img (click)="addAssetInEditor(data.downloadUrl, data.identifier, data.name)" alt="{{data?.name}}" [src]="data.downloadUrl">
-          </div>
-        </div>
-      </div>
-
+      <lib-asset-segment [assetType]="assetType" [assets]="allAssets" (assetSelectOutput)="addAssetInEditor(undefined, $event)"></lib-asset-segment>
     </div>
   </sui-tabset>
 </div>

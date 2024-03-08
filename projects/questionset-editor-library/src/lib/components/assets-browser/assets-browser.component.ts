@@ -5,7 +5,7 @@ import { throwError, Observable } from 'rxjs';
 import { EditorService } from '../../services/editor/editor.service';
 import { ConfigService } from '../../services/config/config.service';
 import { QuestionService } from '../../services/question/question.service';
-import { config } from '../asset-browser/asset-browser.data';
+import { config } from './assets-browser.data';
 import { ToasterService } from '../../services/toaster/toaster.service';
 @Component({
   selector: 'lib-assets-browser',
@@ -18,6 +18,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   @Input() assetShow;
   @Input() assetType;
   @Input() showAssetPicker;
+  @Input() isAppIcon: boolean;
   @ViewChild('modal') private modal;
   myAssets = [];
   allAssets = [];
@@ -106,8 +107,7 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
   
   dismissAssetPicker() {
     this.showAssetPicker = false;
-    this.assetShow=false;
-    this.showAssetPicker = false;
+    this.assetShow = false;
     this.assetDataOutput.emit(false);
   }
   
@@ -203,18 +203,29 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
   
-  addAssetInEditor(videoModal?, assetUrl?, assetId?, assetName?) {
-        const assetData: any = _.cloneDeep(this.selectedAsset);
-        if(this.url!=undefined){
-          assetData.downloadUrl = this.url;
-        }
-        assetData.src = this.getMediaOriginURL(assetData.downloadUrl);
-        assetData.thumbnail = (assetData.thumbnail) && this.getMediaOriginURL(assetData.thumbnail);
-        this.showAssetPicker = false;
-        this.assetDataOutput.emit(assetData);
-        if (videoModal) {
-          videoModal.deny();
+  addAssetInEditor(assetModal, selectedAssetData?) {
+    if(this.isAppIcon) {
+      this.assetDataOutput.emit({type: 'image', url: selectedAssetData.downloadUrl});
+      if (assetModal) {
+        assetModal.deny();
       }
+    } else {
+      let assetData: any;
+      if (!_.isEmpty(this.selectedAsset)) {
+        assetData = _.cloneDeep(this.selectedAsset);
+      } else if(!_.isEmpty(selectedAssetData)) {
+        assetData = selectedAssetData;
+      }
+      assetData.src = this.getMediaOriginURL(assetData.downloadUrl);
+      if (assetData?.thumbnail) {
+        assetData.thumbnail = (assetData.thumbnail) && this.getMediaOriginURL(assetData.thumbnail);
+      }
+      this.showAssetPicker = false;
+      this.assetDataOutput.emit(assetData);
+      if (assetModal) {
+        assetModal.deny();
+      }
+    }
   }
   
   getMediaOriginURL(src) {
@@ -423,18 +434,18 @@ export class AssetsBrowserComponent implements OnInit, OnChanges, OnDestroy {
       this.assetFormValid = true;
       return throwError(this.editorService.apiErrorHandling(err, errInfo));
     })).subscribe(res => {
-      this.toasterService.success(_.get(this.configService, 'labelConfig.messages.success.006'));
       this.selectedAsset = res;
       this.showAddButton = true;
       this.loading = false;
       this.isClosable = true;
       this.assetFormValid = true;
-      this.addAssetInEditor(modal);
+      this.addAssetInEditor(modal, res);
     });
   }
   
   uploadToBlob(signedURL, file, config): Observable<any> {
-    return this.questionService.http.put(signedURL, file, config).pipe(catchError(err => {
+    const csp = _.get(this.editorService.editorConfig, 'context.cloudStorage.provider', 'azure');
+    return this.questionService.uploadToBlob(signedURL, file, csp).pipe(catchError(err => {
       const errInfo = { errorMsg: _.get(this.configService.labelConfig, 'messages.error.018') };
       this.isClosable = true;
       this.loading = false;
