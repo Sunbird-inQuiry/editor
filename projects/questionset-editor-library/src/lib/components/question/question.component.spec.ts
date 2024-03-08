@@ -1320,6 +1320,30 @@ describe("QuestionComponent", () => {
     component.createQuestion();
   });
 
+  it('should set assetType and selectedSolutionType correctly for matching data', () => {
+    const data = 'video';
+    component.solutionTypes = [{ value: 'video', type: 'video' }];
+    component.selectSolutionType(data);
+    expect(component.assetType).toEqual(data);
+    expect(component.selectedSolutionType).toEqual('video');
+  });
+
+  it('should set assetShow to true for video or audio type', () => {
+    component.assetShow = false;
+    const data = 'video';
+    component.solutionTypes = [{ value: 'video', type: 'video' }];
+    component.selectSolutionType(data);
+    expect(component.assetShow).toBeTruthy();
+  });
+
+  it('should set assetShow to false for image type', () => {
+    component.assetShow = false;
+    const data = 'image';
+    component.solutionTypes = [{ value: 'image', type: 'image' }];
+    component.selectSolutionType(data);
+    expect(component.assetShow).toBeFalsy();
+  });
+
   it("#deleteSolution() should call deleteSolution and set showSolutionDropDown value", () => {
     component.editorState = mockData.editorState;
     component.deleteSolution();
