@@ -27,6 +27,7 @@ sui-select {
       right: 0;
       cursor: pointer;
       z-index: 1;
+      background-repeat: no-repeat !important;
     }
     .overlay-image .play.icon {
       position: absolute;
@@ -323,4 +324,27 @@ sui-select {
   margin-right:10px;
   display: flex;
   gap: 10px;
+}
+
+.selected-audio-container {
+  height: 100%;
+  border: 1px solid #9E9E9E;
+  border-radius: 6px;
+  float: left;
+  width: 20%;
+  margin-right: 15px;
+}
+
+.audio-container {
+  height: 100px;
+  float: left;
+  width: 200px;
+  padding: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cursor-pointer-txt {
+  cursor: pointer;
 }
