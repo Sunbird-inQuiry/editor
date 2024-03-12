@@ -7,7 +7,7 @@ import { QuestionService } from '../../services/question/question.service';
 import { EditorService } from '../../services/editor/editor.service';
 import { ToasterService } from '../../services/toaster/toaster.service';
 import { ConfigService } from '../../services/config/config.service';
-import { config } from '../asset-browser/asset-browser.data';
+import { config } from '../assets-browser/assets-browser.data';
 @Component({
   selector: 'lib-ckeditor-tool',
   templateUrl: './ckeditor-tool.component.html',

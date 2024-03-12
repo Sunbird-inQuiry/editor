@@ -1,0 +1,117 @@
+<sui-modal [isClosable]="true" class="sb-modal overflow-modal" [isInverted]="false" (dismissed)="dismissAssetPicker()"
+*ngIf="showAssetPicker" [size]="'normal'" [isFullScreen]="false" [mustScroll]="true" #modal>
+<div class="sb-modal-header">{{selectast}}</div>
+<div class="sb-modal-content p-0">
+  <sui-tabset>
+    <div class="sb-tabset-menu">
+      <a class="sb-item" (activate)="getMyAssets(0)" suiTabHeader="1">{{myast}}</a>
+      <a class="sb-item" (activate)="getAllAssets(0)" suiTabHeader="2">{{allast}}</a>
+    </div>
+    <div class="ui segment sb-tabset-segment m-0 pt-15" infiniteScroll [infiniteScrollDistance]="2"
+      [infiniteScrollThrottle]="500" [scrollWindow]="false" (scrolled)="lazyloadMyAssets()" suiTabContent="1">
+      <div class="ui  pb-16 d-flex pl-0">
+        <div class="sb-search-box small no-btn">
+          <div class="input-div relative">
+            <i class="search icon" aria-hidden="true"></i>
+            <input (change)="searchAsset($event, 'myAssets')" class="sb-search-input" [(ngModel)]="searchMyInput"
+              type="text" placeholder={{configService.labelConfig?.lbl?.searchPlaceholder}} />
+            <i class="close icon" (click)="searchAsset('clearInput', 'myAssets')" aria-hidden="true"></i>
+          </div>
+          <button class="sb-btn sb-btn-normal">{{configService.labelConfig?.button_labels?.search_btn_label}}</button>
+        </div>
+        <p class="fs-0-986 ml-auto sb-color-grey" >{{assetsCount}}</p>
+      </div>
+      <div *ngIf="!myAssets?.length && searchMyInput" class="fs-0785"> {{emptySearchMessage}} </div>
+      <lib-asset-segment [assetType]="assetType" [assets]="myAssets" (assetSelectOutput)="addAssetInEditor(undefined, $event)"></lib-asset-segment>
+    </div>
+
+    <div class="ui segment sb-tabset-segment m-0 pt-15" infiniteScroll [infiniteScrollDistance]="2"
+      [infiniteScrollThrottle]="500" [scrollWindow]="false" (scrolled)="lazyloadAllAssets()" suiTabContent="2">
+      <div class="ui  pb-16 d-flex pl-0">
+        <div class="sb-search-box small no-btn">
+          <div class="input-div relative">
+            <i class="search icon" aria-hidden="true"></i>
+            <input (change)="searchAsset($event, 'myAssets')" class="sb-search-input" [(ngModel)]="searchAllInput"
+              type="text" placeholder={{configService.labelConfig?.lbl?.searchPlaceholder}} />
+            <i class="close icon" (click)="searchAsset('clearInput', 'allAssets')" aria-hidden="true"></i>
+          </div>
+          <button class="sb-btn sb-btn-normal">{{configService.labelConfig?.button_labels?.search_btn_label}}</button>
+        </div>
+        <p class="fs-0-986 ml-auto sb-color-grey">{{assetsCount}}</p>
+      </div>
+      <div *ngIf="!allAssets?.length && searchAllInput" class="fs-0785"> {{emptySearchMessage}} </div>
+      <lib-asset-segment [assetType]="assetType" [assets]="allAssets" (assetSelectOutput)="addAssetInEditor(undefined, $event)"></lib-asset-segment>
+    </div>
+  </sui-tabset>
+</div>
+<div class="sb-modal-actions flex-jc-space-end">
+  <button (click)="openAssetUploadModal();" class="sb-btn sb-btn-primary sb-btn-normal">{{configService.labelConfig?.button_labels?.upload_use_btn_label}}</button>
+</div>
+</sui-modal>
+<!-- Upload image pop up code here  -->
+
+<sui-modal class="sb-modal overflow-modal" [isClosable]="isClosable" [isInverted]="false"
+(dismissed)="dismissAssetUploadModal()" *ngIf="showAssetUploadModal" [size]="'large'" [isFullScreen]="false"
+[mustScroll]="true" appBodyScroll #modal>
+<div class="sb-modal-header">{{configService.labelConfig?.lbl?.uploadAndUse}}</div>
+<div class="p-10 sb-bg-white">
+<div class="d-flex">
+<div class="w-50">
+  <div class="content">
+    <h6 class="mb-8 fs-normal">{{chooseOrDragAst}}<span class="red">*</span></h6>
+    <div class="upload-image-modal-section d-flex flex-ai-center flex-jc-center flex-dc">
+      <ng-container>
+        <button class="upload-input-button sb-btn sb-btn-success sb-btn-normal">
+           {{configService.labelConfig?.button_labels?.upload_from_computer_btn_label}}
+          <input (change)="uploadAsset($event)" type="file" [accept]="acceptAssetType" name="assetfile">
+        </button>
+        <div class="py-10 fs-0-785 sb-color-primary" *ngIf="assetUploadLoader"> {{assetName}} </div>
+        <span class="fsmall mt-8">{{configService.labelConfig?.lbl?.upload}} {{acceptedFileType}} ({{configService.labelConfig?.lbl?.maxFileSize}}
+          {{astSize}}{{astSizeType}})</span>
+        <div *ngIf="showErrorMsg" class="sb-color-error fsmall mt-8">
+          <p>{{errorMsg}}</p>
+        </div>
+      </ng-container>
+    </div>
+    <div class="ui info message sb-info-bx">
+      <ul class="list">
+        <li class="fs-0785">{{configService.labelConfig?.lbl?.allowedFileTypes}} {{acceptedFileType}}</li>
+        <li class="fs-0785">{{configService.labelConfig?.lbl?.maximumAllowedFileSize}} {{astSize}}{{astSizeType}}</li>
+      </ul>
+    </div>
+    <h6 class="fs-0785">{{configService.labelConfig?.lbl?.copyRightsAndLicense}}<span class="red">*</span></h6>
+    <p class="fsmall mt-8 terms-and-condition">{{termsAndCondition}}</p>
+  </div>
+</div>
+<div class="w-50 pl-10 ml-10 b-bl">
+  <div class="ui info message sb-info-bx mb-0">
+    <ul class="list">
+      <li class="fs-0785 font-weight-bold">
+        <i class="icon info circle" aria-hidden="true"></i>
+        {{configService.labelConfig?.lbl?.dropChooseFile}}</li>
+    </ul>
+  </div>
+  <div class="sb-form-fields">
+    <div class="form-container upload-form">
+      <sb-dynamic-form [config]="formConfig" (statusChanges)="onStatusChanges($event)"
+        (valueChanges)="valueChanges($event)"></sb-dynamic-form>
+    </div>
+  </div>
+</div>
+</div>
+<div class="sb-modal-actions flex-jc-space-between p-0">
+<div>
+  <button (click)="dismissPops(modal);" class="mr-10 sb-btn sb-btn-primary sb-btn-normal">{{configService.labelConfig?.button_labels?.cancel_btn_label}}</button>
+    <button type="button" class="sb-btn sb-btn-normal text-left sb-btn-loading-spinner sb-btn-primary"
+    [disabled]="!assetFormValid"  (click)="uploadAndUseAsset(modal);" 
+    [ngClass]="{'sb-btn-primary': assetFormValid, 'sb-btn-disabled': !assetFormValid}">
+      <div class="sb-loading-spinner"  *ngIf="loading" role="status" aria-hidden="true"></div>
+      {{configService.labelConfig?.button_labels?.upload_use_btn_label}}
+    </button>
+</div>
+<div>
+  <button (click)="dismissAssetUploadModal();" class=" sb-btn sb-btn-primary sb-btn-normal"> {{configService.labelConfig?.button_labels?.back_btn_label}}</button>
+</div>
+</div>
+</div>
+</sui-modal>
