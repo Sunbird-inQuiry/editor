@@ -23,6 +23,7 @@
     "questionSet": {
       "maxQuestionsLimit": 500
     },
+    "createdByField": "board",
     "defaultStates": {
         "nonInteractiveQuestions": {
             "MTF": {

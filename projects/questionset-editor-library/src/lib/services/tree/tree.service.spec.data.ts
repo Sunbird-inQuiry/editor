@@ -24,7 +24,7 @@ export const treeNode = {
         "showSolutions": false,
         "identifier": "do_113263678834016256111",
         "audience": [
-            "Student"
+            "Audience1"
         ],
         "visibility": "Default",
         "showTimer": true,
