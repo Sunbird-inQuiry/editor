@@ -834,8 +834,48 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     if (_.get(this.creationContext, 'objectType') === 'question') {
       metadata.isReviewModificationAllowed = !!_.get(this.questionMetaData, 'isReviewModificationAllowed');
     }
+
+    if (!_.isEmpty(metadata.media)) {
+      metadata.media = this.removeUnusedMedia(metadata);
+    }
     // tslint:disable-next-line:max-line-length
     return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions']);
+  }
+
+  removeUnusedMedia(questionMetadata: any) {
+    const media = _.get(questionMetadata, 'media');
+    for (let i = media.length - 1; i >= 0; i--) {
+      if (!this.checkMediaExists(questionMetadata, media[i].id)) {
+        media.splice(i, 1);
+      }
+    }
+    return media;
+  }
+
+  checkMediaExists(questionMetadata, mediaId) {
+    if (_.includes(questionMetadata.body, mediaId) || _.includes(questionMetadata.answer, mediaId)) {
+      return true;
+    }
+
+    if (questionMetadata?.solutions) {
+      const solutionValues = _.values(questionMetadata.solutions);
+      for (const solution of solutionValues) {
+        if (_.includes(solution, mediaId)) {
+          return true;
+        }
+      }
+    }
+
+    if (questionMetadata?.qType !== 'SA' && questionMetadata?.interactions?.response1?.options) {
+      const interactionsOptions = questionMetadata.interactions.response1.options;
+      for (const option of interactionsOptions) {
+        if (_.includes(option?.label, mediaId)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   getAnswerHtml(optionLabel) {
