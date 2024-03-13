@@ -18,7 +18,7 @@ jobs:
           command: 'npm install --no-progress'
       - run:
           name: Executing test cases
-          command: 'cd ~/sunbird-questionset-editor npm run test-coverage'
+          command: 'cd ~/sunbird-questionset-editor && npm run test-coverage'
       - run:
           name: Install sonar scanner
           command: npm install -g sonarqube-scanner
