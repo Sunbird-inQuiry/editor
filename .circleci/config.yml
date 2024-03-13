@@ -20,7 +20,7 @@ jobs:
       #     command: 'mkdir -p /tmp/logs && npm run build-lib:prod | tee /tmp/logs/build.log'
       - run:
           name: Executing test cases
-          command: 'npm run test-coverage | tee /tmp/logs/test_cases.log'
+          command: 'npm run test-coverage'
       - run:
           name: Install sonar scanner
           command: npm install -g sonarqube-scanner
