@@ -1,41 +1,20 @@
 version: 2.1
 jobs:
   build:
-    machine:
-      image: circleci/classic:latest
-    steps:
-      - checkout
-      - run:
-          name: run build file
-          command: /bin/bash -x build.sh ${CIRCLE_SHA1} test
-  test-cases:
-    working_directory: ~/sunbird-questionset-editor
-    machine:
-      image: ubuntu-2004:202010-01
+  docker:
+    - image: cimg/node:14.21.3-browsers
     steps:
       - checkout:
           path: ~/sunbird-questionset-editor
-      - run:
-          name: Install  Node.js v16 with build in nvm tool
-          command: |
-            export NVM_DIR="/opt/circleci/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-            nvm install v16 && nvm use 16 && nvm alias default 16
-            node -v
       - run:
           name: Node version
           command: 'node --version'
       - run:
           name: Installing angular cli
           command: 'npm install -g @angular/cli@15 --no-progress'
-      #~ - restore_cache:
-          #~ key: dependency-cache-{{ checksum "package.json" }}
       - run:
           name: Installing npm deps
           command: 'npm install --no-progress'
-      - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
-          paths: ./node_modules
       - run:
           name: ng lint and building
           command: 'mkdir -p /tmp/logs && npm run build-lib:prod | tee /tmp/logs/build.log'
