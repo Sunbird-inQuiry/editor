@@ -1,6 +1,7 @@
 version: 2.1
 jobs:
   build:
+    working_directory: ~/questionset-editor-library
     docker:
     - image: cimg/node:14.21.3-browsers
     steps:
