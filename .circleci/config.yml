@@ -16,12 +16,9 @@ jobs:
       - run:
           name: Installing npm deps
           command: 'npm install --no-progress'
-      # - run:
-      #     name: ng lint and building
-      #     command: 'mkdir -p /tmp/logs && npm run build-lib:prod | tee /tmp/logs/build.log'
       - run:
           name: Executing test cases
-          command: 'npm run test-coverage'
+          command: 'cd ~/sunbird-questionset-editor npm run test-coverage'
       - run:
           name: Install sonar scanner
           command: npm install -g sonarqube-scanner
