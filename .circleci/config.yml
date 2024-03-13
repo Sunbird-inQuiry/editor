@@ -1,7 +1,7 @@
 version: 2.1
 jobs:
   build:
-    working_directory: ~/questionset-editor-library
+    working_directory: ~/sunbird-questionset-editor
     docker:
     - image: cimg/node:14.21.3-browsers
     steps:
@@ -18,13 +18,13 @@ jobs:
           command: 'npm install --no-progress'
       - run:
           name: Executing test cases
-          command: 'cd ~/sunbird-questionset-editor && npm run test-coverage'
+          command: npm run test-coverage
       - run:
           name: Install sonar scanner
           command: npm install -g sonarqube-scanner
       - run:
           name: Run sonar scanner
-          command: 'cd ~/sunbird-questionset-editor && sonar-scanner'     
+          command: 'sonar-scanner'     
       - run:
           name: Publish to NPM
           command: |
