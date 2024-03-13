@@ -22,7 +22,6 @@ import { QuestionComponent } from './components/question/question.component';
 import { QumlLibraryModule } from '@project-sunbird/sunbird-quml-player';
 import { CarouselModule } from 'ngx-bootstrap/carousel';
 import { TelemetryInteractDirective } from './directives/telemetry-interact/telemetry-interact.directive';
-import { AssetBrowserComponent } from './components/asset-browser/asset-browser.component';
 import { CollectionIconComponent } from './components/collection-icon/collection-icon.component';
 import { QumlPlayerComponent } from './components/quml-player/quml-player.component';
 import { QuestionOptionSubMenuComponent } from './components/question-option-sub-menu/question-option-sub-menu.component';
@@ -39,6 +38,8 @@ import { ProgressStatusComponent } from './components/progress-status/progress-s
 import {TermAndConditionComponent} from './components/term-and-condition/term-and-condition.component';
 
 import { QualityParamsModalComponent } from './components/quality-params-modal/quality-params-modal.component';
+import { AssetsBrowserComponent } from './components/assets-browser/assets-browser.component';
+import { AssetSegmentComponent } from './components/asset-segment/asset-segment.component';
 @NgModule({
   declarations: [
     QuestionsetEditorLibraryComponent,
@@ -55,7 +56,6 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     CkeditorToolComponent,
     TemplateComponent,
     TelemetryInteractDirective,
-    AssetBrowserComponent,
     CollectionIconComponent,
     QumlPlayerComponent,
     PublishChecklistComponent,
@@ -68,7 +68,9 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     PlainTreeComponent,
     ProgressStatusComponent,
     TermAndConditionComponent,
-    QualityParamsModalComponent
+    QualityParamsModalComponent,
+    AssetsBrowserComponent,
+    AssetSegmentComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule.withConfig({callSetDisabledState: 'whenDisabledForLegacyCode'}), RouterModule.forChild([]), SuiModule,
   CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule, QumlLibraryModule, CarouselModule,],
