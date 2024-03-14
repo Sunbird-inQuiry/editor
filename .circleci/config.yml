@@ -1,10 +1,15 @@
 version: 2.1
+orbs:
+  browser-tools: circleci/browser-tools@1.4.8
 jobs:
   build:
     working_directory: ~/sunbird-questionset-editor
     docker:
     - image: cimg/node:14.21.3-browsers
     steps:
+      - browser-tools/install-chrome
+      - run:
+          command: google-chrome --version
       - checkout:
           path: ~/sunbird-questionset-editor
       - run:
@@ -15,7 +20,7 @@ jobs:
           command: 'npm install -g @angular/cli@15 --no-progress'
       - run:
           name: Installing npm deps
-          command: 'npm install --no-progress'
+          command: 'npm install'
       - run:
           name: Executing test cases
           command: npm run test-coverage
