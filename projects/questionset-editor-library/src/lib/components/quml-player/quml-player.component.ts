@@ -13,6 +13,7 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit {
   qumlPlayerConfig: any;
   @Input() questionSetHierarchy: any;
   @Input() isSingleQuestionPreview = false;
+  showPreview = false;
   showViewButton = false;
   @Output() public toolbarEmitter: EventEmitter<any> = new EventEmitter();
   @ViewChild('inQuiryQuMLPlayer') inQuiryQuMLPlayer: ElementRef;
@@ -27,13 +28,13 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    console.log('load player called...');
     this.loadPlayer();
   }
 
 
   initialize() {
     this.setQumlPlayerData();
+    this.showPreview = true;
   }
 
   setQumlPlayerData() {
@@ -60,7 +61,6 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit {
   }
 
   loadPlayer() {
-    console.log('loadQuMLPlayer with config:: ', this.qumlPlayerConfig);
     (window as any).questionListUrl = `/api/${_.get(this.configService, 'urlConFig.URLS.Question.LIST')}`;
     const qumlElement = document.createElement('sunbird-quml-player');
     qumlElement.setAttribute('player-config', JSON.stringify(this.qumlPlayerConfig));
@@ -69,7 +69,6 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit {
 
     qumlElement.addEventListener('telemetryEvent', this.getTelemetryEvents);
     this.inQuiryQuMLPlayer.nativeElement.append(qumlElement);
-    console.log('load player called ended');
   }
 
   getPlayerEvents(event) {

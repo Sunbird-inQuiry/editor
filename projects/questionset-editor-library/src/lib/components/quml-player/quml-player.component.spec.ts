@@ -36,10 +36,12 @@ describe('QumlPlayerComponent', () => {
     component.ngOnInit();
     expect(component.initialize).toHaveBeenCalled();
   });
-  it('#initialize() should set playerConfig', () => {
+  it('#initialize() should set showPreview', () => {
+    component.showPreview = false;
     component.qumlPlayerConfig = mockData.qumlPlayerConfig;
     spyOn(component, 'setQumlPlayerData');
     component.initialize();
+    expect(component.showPreview).toBeTruthy();
   });
   it('#setQumlPlayerData() should call setQumlPlayerData and isSingleQuestionPreview is false', () => {
     const playerService = TestBed.inject(PlayerService);
