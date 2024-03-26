@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit , Output, ViewEncapsulation} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit , Output, ViewChild, ViewEncapsulation} from '@angular/core';
 import * as _ from 'lodash-es';
 import { ConfigService } from '../../services/config/config.service';
 import { PlayerService } from '../../services/player/player.service';
@@ -9,13 +9,14 @@ import { EditorService } from '../../services/editor/editor.service';
   styleUrls: ['./quml-player.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class QumlPlayerComponent implements OnInit {
+export class QumlPlayerComponent implements OnInit, AfterViewInit {
   qumlPlayerConfig: any;
   @Input() questionSetHierarchy: any;
   @Input() isSingleQuestionPreview = false;
   showPreview = false;
   showViewButton = false;
   @Output() public toolbarEmitter: EventEmitter<any> = new EventEmitter();
+  @ViewChild('inQuiryQuMLPlayer') inQuiryQuMLPlayer: ElementRef;
   constructor(private configService: ConfigService, private playerService: PlayerService,
     public editorService: EditorService ) { }
 
@@ -25,6 +26,11 @@ export class QumlPlayerComponent implements OnInit {
       this.showViewButton = true
     }
   }
+
+  ngAfterViewInit() {
+    this.loadPlayer();
+  }
+
 
   initialize() {
     this.setQumlPlayerData();
@@ -52,6 +58,15 @@ export class QumlPlayerComponent implements OnInit {
       }
     }
     console.log('qumlPlayerConfig:: ', this.qumlPlayerConfig);
+  }
+
+  loadPlayer() {
+    (window as any).questionListUrl = `/api/${_.get(this.configService, 'urlConFig.URLS.Question.LIST')}`;
+    const qumlElement = document.createElement('sunbird-quml-player');
+    qumlElement.setAttribute('player-config', JSON.stringify(this.qumlPlayerConfig));
+    qumlElement.addEventListener('playerEvent', this.getPlayerEvents);
+    qumlElement.addEventListener('telemetryEvent', this.getTelemetryEvents);
+    this.inQuiryQuMLPlayer.nativeElement.append(qumlElement);
   }
 
   getPlayerEvents(event) {

@@ -36,6 +36,12 @@ describe('QumlPlayerComponent', () => {
     component.ngOnInit();
     expect(component.initialize).toHaveBeenCalled();
   });
+  it('#ngAfterViewInit should call loadPlayer', () => {
+    spyOn(component, 'loadPlayer').and.callFake(() => {});
+    spyOn(component, 'ngAfterViewInit').and.callThrough();
+    component.ngAfterViewInit();
+    expect(component.loadPlayer).toHaveBeenCalled();
+  });
   it('#initialize() should set showPreview', () => {
     component.showPreview = false;
     component.qumlPlayerConfig = mockData.qumlPlayerConfig;
@@ -70,6 +76,17 @@ describe('QumlPlayerComponent', () => {
     component.setQumlPlayerData();
     expect(component.isSingleQuestionPreview).toBeTruthy();
     expect(component.qumlPlayerConfig).toBeDefined();
+  });
+  it('should load player correctly', () => {
+    component.qumlPlayerConfig = mockData.qumlPlayerConfig;
+    component.inQuiryQuMLPlayer = {
+      nativeElement: document.createElement('div')
+    };
+    spyOn(document, 'createElement').and.callThrough();
+    spyOn(component.inQuiryQuMLPlayer.nativeElement, 'append');
+    component.loadPlayer();
+    expect(document.createElement).toHaveBeenCalledWith('sunbird-quml-player');
+    expect(component.inQuiryQuMLPlayer.nativeElement.append).toHaveBeenCalled();
   });
   it('#getPlayerEvents() should call getPlayerEvents', () => {
     spyOn(component, 'getPlayerEvents').and.callFake(() => {});
