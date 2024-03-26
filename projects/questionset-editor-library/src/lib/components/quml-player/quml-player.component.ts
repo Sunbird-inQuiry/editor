@@ -64,9 +64,7 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit {
     (window as any).questionListUrl = `/api/${_.get(this.configService, 'urlConFig.URLS.Question.LIST')}`;
     const qumlElement = document.createElement('sunbird-quml-player');
     qumlElement.setAttribute('player-config', JSON.stringify(this.qumlPlayerConfig));
-
     qumlElement.addEventListener('playerEvent', this.getPlayerEvents);
-
     qumlElement.addEventListener('telemetryEvent', this.getTelemetryEvents);
     this.inQuiryQuMLPlayer.nativeElement.append(qumlElement);
   }
