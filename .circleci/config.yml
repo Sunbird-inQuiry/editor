@@ -5,7 +5,7 @@ jobs:
   build:
     working_directory: ~/sunbird-questionset-editor
     docker:
-    - image: cimg/node:14.21.3-browsers
+    - image: cimg/node:18.19.1-browsers
     steps:
       - browser-tools/install-chrome
       - run:
@@ -17,7 +17,7 @@ jobs:
           command: 'node --version'
       - run:
           name: Installing angular cli
-          command: 'npm install -g @angular/cli@15 --no-progress'
+          command: 'npm install -g @angular/cli@16 --no-progress'
       #~ - restore_cache:
           #~ key: dependency-cache-{{ checksum "package.json" }}
       - run:
