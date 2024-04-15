@@ -187,7 +187,8 @@ export class DataService {
       ts: '2020-12-31T16:23:27+05:30', // moment().format(), //TODO::
       'X-msgid': uuidv4(),
       // tslint:disable-next-line:max-line-length
-      Authorization: ''
+      Authorization: '',
+      'X-Request-Id': uuidv4()
     };
 
     try {

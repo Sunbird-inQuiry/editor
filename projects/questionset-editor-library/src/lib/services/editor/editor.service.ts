@@ -10,6 +10,7 @@ import { EditorTelemetryService } from '../../services/telemetry/telemetry.servi
 import { DataService } from '../data/data.service';
 import { map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { v4 as uuidv4 } from 'uuid';
 interface SelectedChildren {
   label?: string;
   primaryCategory?: string;
@@ -710,7 +711,8 @@ getDependentNodes(identifier) {
 
   getChannelHeader() {
     return {
-      ['X-Channel-Id']: this.editorConfig.context.channel
+      ['X-Channel-Id']: this.editorConfig.context.channel,
+      ['X-Request-Id']: uuidv4()
     }
   }
 }
