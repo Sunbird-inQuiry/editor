@@ -31,6 +31,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() questionInput: any;
   @Input() leafFormConfig: any;
   @Input() sourcingSettings: any;
+  @Input() frameworkId: string;
   public initialLeafFormConfig: any;
   public childFormData: any;
   @Output() questionEmitter = new EventEmitter<any>();
@@ -87,6 +88,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   public framework;
   public frameworkDetails: any = {};
   public questionMetadataFormStatus = true;
+  public frameworkCategories: string[] = [];
   public buttonLoaders = {
     saveButtonLoader: false,
     'review': false
@@ -152,6 +154,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initialLeafFormConfig = _.cloneDeep(this.leafFormConfig);
     this.initialize();
     this.framework = _.get(this.editorService.editorConfig, 'context.framework');
+    this.initializeFrameworkCategories();
     this.qualityFormConfig = this.editorService.qualityFormConfig;
   }
 
@@ -165,6 +168,35 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         this.populateFrameworkData();
       }
     });
+  }
+
+  initializeFrameworkCategories() {
+    const frameworkId = this.frameworkId || this.framework;
+    if (frameworkId) {
+      this.frameworkService.getFrameworkCategories(frameworkId).subscribe(
+        (response: any) => {
+          try {
+            const categories = _.get(response, 'result.framework.categories', []);
+            this.frameworkCategories = categories
+              .filter(category => category.code && category.code.trim() !== '')
+              .map(category => category.code);
+            
+            if (this.frameworkCategories.length > 0) {
+              this.configService.sessionContext = [...(this.configService.sessionContext || []), ...this.frameworkCategories];
+            }
+          } catch (error) {
+            console.error('Error processing framework categories:', error);
+            this.frameworkCategories = [];
+          }
+        },
+        (error) => {
+          console.error('Error fetching framework categories:', error);
+          this.frameworkCategories = [];
+        }
+      );
+    } else {
+      this.frameworkCategories = [];
+    }
   }
 
   populateFrameworkData() {
@@ -958,11 +990,12 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getDefaultSessionContext() {
+    const editorConfigArray = ["topic", ...this.frameworkCategories];
     return _.omitBy(_.merge(
       {
         creator: _.get(this.editorService.editorConfig, 'context.user.fullName'),
         createdBy: _.get(this.editorService.editorConfig, 'context.user.id'),
-        ..._.pick(_.get(this.editorService.editorConfig, 'context'), ['board', 'medium', 'gradeLevel', 'subject', 'topic'])
+        ..._.pick(_.get(this.editorService.editorConfig, 'context'), editorConfigArray)
       },
       {
         ..._.pick(this.questionSetHierarchy, this.configService.sessionContext)

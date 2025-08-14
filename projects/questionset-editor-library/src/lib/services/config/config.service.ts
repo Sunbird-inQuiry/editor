@@ -14,6 +14,5 @@ export class ConfigService {
   labelConfig = (labelConfig as any);
   playerConfig = (playerConfig as any);
   editorConfig = (editorConfig as any);
-  public sessionContext: Array<string> =  ['board', 'medium', 'gradeLevel', 'subject',
-       'topic', 'author', 'channel', 'framework', 'copyright', 'attributions', 'audience',  'license' ];
+  public sessionContext: Array<string> =  ['topic', 'author', 'channel', 'framework', 'copyright', 'attributions', 'audience',  'license' ];
 }
