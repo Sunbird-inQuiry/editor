@@ -96,6 +96,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   subMenus: SubMenu[];
   showAddSecondaryQuestionCat: boolean;
   sliderDatas: any = {};
+  sessionContext = this.configService.sessionContext;
   sliderOptions: any = {};
   hints: any;
   categoryLabel: any = {};
@@ -170,7 +171,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   initializeFrameworkCategories() {
-    const frameworkId = this.framework || this.frameworkService.organisationFramework;;
+    const frameworkId = this.framework || this.frameworkService.organisationFramework;
     if (frameworkId) {
       this.frameworkService.getTargetFrameworkCategories([frameworkId]);
       this.frameworkService.frameworkData$.pipe(
@@ -180,7 +181,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
           const categories = frameworkData.frameworkdata[frameworkId].categories || [];
           if (categories.length) {
             this.categoryCodes = categories?.map(category => category.code)
-            this.configService.sessionContext = [...(this.configService.sessionContext || []), ...this.categoryCodes];
+            this.sessionContext = [...this.sessionContext, ...this.categoryCodes];
           }
         }
       }, err => {
@@ -989,7 +990,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         ..._.pick(_.get(this.editorService.editorConfig, 'context'), editorConfigArray)
       },
       {
-        ..._.pick(this.questionSetHierarchy, this.configService.sessionContext)
+        ..._.pick(this.questionSetHierarchy, this.sessionContext)
       }
     ), key => _.isEmpty(key));
   }
