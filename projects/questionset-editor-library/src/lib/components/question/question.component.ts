@@ -87,6 +87,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   public framework;
   public frameworkDetails: any = {};
   public questionMetadataFormStatus = true;
+  public categoryCodes: string[] = [];
   public buttonLoaders = {
     saveButtonLoader: false,
     'review': false
@@ -95,6 +96,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   subMenus: SubMenu[];
   showAddSecondaryQuestionCat: boolean;
   sliderDatas: any = {};
+  sessionContext = this.configService.sessionContext;
   sliderOptions: any = {};
   hints: any;
   categoryLabel: any = {};
@@ -152,6 +154,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initialLeafFormConfig = _.cloneDeep(this.leafFormConfig);
     this.initialize();
     this.framework = _.get(this.editorService.editorConfig, 'context.framework');
+    this.initializeFrameworkCategories();
     this.qualityFormConfig = this.editorService.qualityFormConfig;
   }
 
@@ -165,6 +168,27 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         this.populateFrameworkData();
       }
     });
+  }
+
+  initializeFrameworkCategories() {
+    const frameworkId = this.framework || this.frameworkService.organisationFramework;
+    if (frameworkId) {
+      this.frameworkService.getTargetFrameworkCategories([frameworkId]);
+      this.frameworkService.frameworkData$.pipe(
+        takeUntil(this.onComponentDestroy$)
+      ).subscribe(frameworkData => {
+        if (frameworkData?.frameworkdata[frameworkId]) {
+          const categories = frameworkData.frameworkdata[frameworkId].categories || [];
+          if (categories.length) {
+            this.categoryCodes = categories?.map(category => category.code)
+            this.sessionContext = [...this.sessionContext, ...this.categoryCodes];
+          }
+        }
+      }, err => {
+        this.categoryCodes = [];
+        console.error('Failed to get framework data:', err);
+      });
+    }
   }
 
   populateFrameworkData() {
@@ -958,14 +982,15 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getDefaultSessionContext() {
+    const editorConfigArray = ["topic", ...this.categoryCodes];
     return _.omitBy(_.merge(
       {
         creator: _.get(this.editorService.editorConfig, 'context.user.fullName'),
         createdBy: _.get(this.editorService.editorConfig, 'context.user.id'),
-        ..._.pick(_.get(this.editorService.editorConfig, 'context'), ['board', 'medium', 'gradeLevel', 'subject', 'topic'])
+        ..._.pick(_.get(this.editorService.editorConfig, 'context'), editorConfigArray)
       },
       {
-        ..._.pick(this.questionSetHierarchy, this.configService.sessionContext)
+        ..._.pick(this.questionSetHierarchy, this.sessionContext)
       }
     ), key => _.isEmpty(key));
   }
