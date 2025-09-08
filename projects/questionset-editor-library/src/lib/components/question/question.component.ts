@@ -179,7 +179,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         if (frameworkData?.frameworkdata[frameworkId]) {
           const categories = frameworkData.frameworkdata[frameworkId].categories || [];
           if (categories.length) {
-            this.categoryCodes = categories[0].code;
+            this.categoryCodes = categories?.map(category => category.code)
           }
         }
       }, err => {
