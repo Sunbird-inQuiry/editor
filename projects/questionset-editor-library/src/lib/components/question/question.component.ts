@@ -180,6 +180,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
           const categories = frameworkData.frameworkdata[frameworkId].categories || [];
           if (categories.length) {
             this.categoryCodes = categories?.map(category => category.code)
+            this.configService.sessionContext = [...(this.configService.sessionContext || []), ...this.categoryCodes];
           }
         }
       }, err => {
