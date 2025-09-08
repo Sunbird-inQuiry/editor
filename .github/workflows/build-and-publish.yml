@@ -31,22 +31,18 @@ jobs:
       - name: Build web component
         run: npm run build-web-component
 
-      - name: Pack library
-        run: npm pack ./dist/questionset-editor-library
-
-      - name: Pack web component
-        run: npm pack ./web-component
-
-      - name: Publish library to NPM
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm publish project-sunbird-sunbird-questionset-editor-*
+      - name: Build and publish library package
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish web component to NPM
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          npm pack ./dist/questionset-editor-library
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+          npm publish project-sunbird-sunbird-questionset-editor-* --access=public
+
+      - name: Build and publish web component package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm pack ./web-component
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
           npm publish project-sunbird-sunbird-questionset-editor-web-component-* --access=public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
