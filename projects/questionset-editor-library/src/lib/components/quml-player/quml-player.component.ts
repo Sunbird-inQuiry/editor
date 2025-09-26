@@ -138,8 +138,8 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit, OnChanges, Af
     const waitForCustomElement = async (tagName: string): Promise<void> => {
       // First try to ensure the script is loaded
       await ensurePlayerScriptLoaded();
-      
-      return new Promise((resolve) => {
+
+      return new Promise((resolve, reject) => {
         if (checkCustomElement(tagName)) {
           resolve();
         } else {
@@ -153,7 +153,7 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit, OnChanges, Af
               resolve();
             } else if (attempts >= maxAttempts) {
               clearInterval(interval);
-              resolve();
+              reject();
             }
           }, QumlPlayerComponent.CUSTOM_ELEMENT_CHECK_INTERVAL);
         }
@@ -194,6 +194,8 @@ export class QumlPlayerComponent implements OnInit, AfterViewInit, OnChanges, Af
       } else {
         console.error('QuML player web component not available or ViewChild not ready.');
       }
+    }).catch(() => {
+      console.error('QuML player web component failed to load within the expected time.');
     });
   }
 
