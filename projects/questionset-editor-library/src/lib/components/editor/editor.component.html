@@ -1,8 +1,8 @@
 <ng-container [ngSwitch]="pageId">
   <ng-container *ngSwitchCase="'questionset_editor'">
     <div class="add-to-library mb-10">
-      <lib-header [pageId]="pageId" [publishchecklist]="publishchecklist"
-      [labelConfigData]="toolbarConfig" [buttonLoaders]="buttonLoaders" (toolbarEmitter)="toolbarEventListener($event)"> </lib-header>
+      <lib-header [pageId]="pageId" [publishchecklist]="publishchecklist" [rejectComment]="draftComment"
+      [labelConfigData]="toolbarConfig" [buttonLoaders]="buttonLoaders" (toolbarEmitter)="toolbarEventListener($event)" (reviewerComment)="saveDraftComments($event)"> </lib-header>
       <div class="h-100vh sb-bg-white">
         <div class="ui">
           <div class="ui twelve column grid m-0 ">
@@ -103,7 +103,7 @@
     <lib-library [libraryInput]="questionlibraryInput" (libraryEmitter)="onQuestionLibraryChange($event)"></lib-library>
   </ng-container>
   <ng-container *ngSwitchCase="'question'">
-    <lib-question *ngIf="leafFormConfig" [questionInput]="questionComponentInput" [leafFormConfig]="leafFormConfig" [sourcingSettings]="sourcingSettings"  (questionEmitter)="questionEventListener($event)" >
+    <lib-question *ngIf="leafFormConfig" [questionInput]="questionComponentInput" [leafFormConfig]="leafFormConfig" [sourcingSettings]="sourcingSettings" (questionEmitter)="questionEventListener($event)" >
     </lib-question>
   </ng-container>
   <ng-container *ngSwitchCase="'pagination'">

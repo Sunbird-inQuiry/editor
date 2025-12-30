@@ -1,33 +1,23 @@
 version: 2.1
+orbs:
+  browser-tools: circleci/browser-tools@1.4.8
 jobs:
   build:
-    machine:
-      image: circleci/classic:latest
-    steps:
-      - checkout
-      - run:
-          name: run build file
-          command: /bin/bash -x build.sh ${CIRCLE_SHA1} test
-  test-cases:
     working_directory: ~/sunbird-questionset-editor
-    machine:
-      image: ubuntu-2004:202010-01
+    docker:
+    - image: cimg/node:18.19.1-browsers
     steps:
+      - browser-tools/install-chrome
+      - run:
+          command: google-chrome --version
       - checkout:
           path: ~/sunbird-questionset-editor
-      - run:
-          name: Install  Node.js v16 with build in nvm tool
-          command: |
-            export NVM_DIR="/opt/circleci/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-            nvm install v16 && nvm use 16 && nvm alias default 16
-            node -v
       - run:
           name: Node version
           command: 'node --version'
       - run:
           name: Installing angular cli
-          command: 'npm install -g @angular/cli@15 --no-progress'
+          command: 'npm install -g @angular/cli@16 --no-progress'
       #~ - restore_cache:
           #~ key: dependency-cache-{{ checksum "package.json" }}
       - run:
@@ -47,7 +37,7 @@ jobs:
           command: npm install -g sonarqube-scanner
       - run:
           name: Run sonar scanner
-          command: 'cd ~/sunbird-questionset-editor && sonar-scanner'     
+          command: 'cd ~/sunbird-questionset-editor && sonar-scanner'
       - run:
           name: Publish to NPM
           command: |
@@ -67,9 +57,9 @@ jobs:
               npm publish project-sunbird-sunbird-questionset-editor-web-component-* --access=public
             else
               npm run build-web-component && npm pack ./web-component
-            fi   
+            fi
 workflows:
   version: 2.1
   build_and_test:
     jobs:
-      - test-cases
+      - build

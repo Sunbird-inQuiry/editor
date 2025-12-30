@@ -1,5 +1,5 @@
 import { EditorService } from './../../services/editor/editor.service';
-import { ComponentFixture, fakeAsync, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { EditorComponent } from './editor.component';
 import { CUSTOM_ELEMENTS_SCHEMA, EventEmitter } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -15,7 +15,7 @@ import {
   SelectedNodeMockData, observationAndRubericsField,
   questionsetRead, questionsetHierarchyRead, nodesModifiedData, treeNodeData,
   questionSetEditorConfig, categoryDefinitionPublishCheckList,
-  frameworkData, serverResponse } from './editor.component.spec.data';
+  frameworkData, serverResponse, fakeApiResponse } from './editor.component.spec.data';
 import { ConfigService } from '../../services/config/config.service';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { treeData } from './../fancy-tree/fancy-tree.component.spec.data';
@@ -124,6 +124,7 @@ describe('EditorComponent', () => {
     spyOn(editorService, 'getshowQuestionLibraryPageEmitter').and.callFake(() => {return questionLibraryPage});
     spyOn(component, 'showQuestionLibraryComponentPage').and.callFake(() => {});
     spyOn(component, 'getFrameworkDetails').and.callFake(() => {})
+    spyOn(editorService, 'readComment').and.returnValue(of(fakeApiResponse));
     component.ngOnInit();
     expect(component.editorConfig).toBeDefined();
     expect(editorService.initialize).toHaveBeenCalledWith(editorConfig);
@@ -141,6 +142,7 @@ describe('EditorComponent', () => {
     expect(telemetryService.initializeTelemetry).toHaveBeenCalled();
     expect(telemetryService.telemetryPageId).toEqual('questionset_editor');
     expect(telemetryService.start).toHaveBeenCalled();
+    expect(editorService.readComment).toHaveBeenCalled();
   });
 
   it('#ngOnInit() should call all methods inside it (for objectType Question)', () => {
@@ -1544,6 +1546,12 @@ describe('EditorComponent', () => {
     expect(returnChildrenData).toBeDefined();
   });
 
-
+  it('should save draft comments successfully', () => {
+    const comment = { id: 1, text: 'Valid comment' };
+    const editorService = TestBed.inject(EditorService);
+    spyOn(editorService, 'updateComment')
+    component.saveDraftComments(comment);
+    expect(editorService.updateComment).toHaveBeenCalled();
+  });
 });
 

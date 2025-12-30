@@ -1,6 +1,6 @@
 {
     "name": "@project-sunbird/sunbird-questionset-editor-web-component",
-    "version": "3.0.4",
+    "version": "4.0.3",
     "description": "The web component package for the sunbird questionset editor",
     "main": "sunbird-questionset-editor.js",
     "scripts": {

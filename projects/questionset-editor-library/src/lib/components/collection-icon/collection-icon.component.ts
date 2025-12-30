@@ -11,7 +11,6 @@ export class CollectionIconComponent {
   @Input() appIconConfig;
   @Output() iconEmitter = new EventEmitter<any>();
   public showImagePicker = false;
-
   constructor(public configService: ConfigService) { }
 
   initializeImagePicker() {

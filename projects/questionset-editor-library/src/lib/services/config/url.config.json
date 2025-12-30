@@ -11,7 +11,9 @@
       "HIERARCHY_READ": "questionset/v2/hierarchy",
       "SYSYTEM_UPDATE": "questionset/v5/system/update/",
       "HIERARCHY_UPDATE": "questionset/v2/hierarchy/update",
-      "DEFAULT_PARAMS_FIELDS": "instructions,outcomeDeclaration"
+      "DEFAULT_PARAMS_FIELDS": "instructions,outcomeDeclaration",
+      "UPDATE_COMMENT":"questionset/v2/comment/update/",
+      "READ_COMMENT":"questionset/v2/comment/read"
     },
     "Question": {
       "HIERARCHY_READ": "questionset/v2/hierarchy",

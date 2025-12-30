@@ -34,10 +34,15 @@
               <div class="sb-field">
                 <div [ngClass]="{'ckeditor-tool__question': !isReadOnlyMode, 'ckeditor-tool__question-readonly': isReadOnlyMode, 'mb-5': true}">
                   <lib-ckeditor-tool
-                    *ngIf="!isReadOnlyMode"
-                    (editorDataOutput)="editorDataHandler($event, 'question')"
-                    [editorDataInput]="editorState.question"
-                    (videoDataOutput)="videoDataOutput($event)" [videoShow]="videoShow"></lib-ckeditor-tool>
+                  *ngIf="!isReadOnlyMode"
+                  (editorDataOutput)="editorDataHandler($event, 'question')"
+                  [editorDataInput]="editorState.question"
+                  ></lib-ckeditor-tool>
+                    <lib-assets-browser
+                    *ngIf="(assetType==='video' || assetType==='audio') && !isReadOnlyMode" [showAssetPicker]="showAssetPicker" 
+                    (assetDataOutput)="assetDataOutput($event)" [assetShow]="assetShow"
+                    [assetType]="assetType" [isAppIcon]="false"
+                    ></lib-assets-browser>
                   <ng-container *ngIf="isReadOnlyMode">
                     <label class="px-16 py-8 fs-0-92 mb-0 ckeditor-tool__label width-100">{{configService.labelConfig?.lbl?.question}}</label>
                     <div class="ckeditor-tool__solution__body">
@@ -89,6 +94,10 @@
                         [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('solution_type','select','single_select', telemetryService.telemetryPageId, {solution_type:'video'})">
                         {{configService.labelConfig?.lbl?.video}}
                       </div>
+                      <div class="item" (click)="selectSolutionType('audio')" (keydown.enter)="selectSolutionType('audio')" tabindex="0" libTelemetryInteract
+                      [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('solution_type','select','single_select', telemetryService.telemetryPageId, {solution_type:'audio'})">
+                      {{configService.labelConfig?.lbl?.audio}}
+                    </div>
                     </div>
                   </div>
                 </div>
@@ -106,31 +115,34 @@
                     </div>
                   </div>
                 </div>
-                <div class="solution_video" *ngIf="selectedSolutionType == 'video' && showSolution">
+                <div class="solution_video" *ngIf="(selectedSolutionType == 'audio' || selectedSolutionType == 'video') && showSolution">
                   <div class="ckeditor-tool__solution sb-bg-color-white sb-ckeditor relative">
                     <div class="solution-media p-16 d-flex flex-ai-center ckeditor-tool__option p-16">
-                      <div class="mcq-checkbox-answer">
+                      <div>
                         <button class="sb-btn sb-ckeditor-close absolute" (click)="deleteSolution()"
-                          libTelemetryInteract
-                          [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('delete_solution','click','cancel', this.telemetryService.telemetryPageId, {solution_type:'video'})">
-                          <i class="icon close"></i>
-                        </button>
+                        libTelemetryInteract
+                        [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('delete_solution','click','cancel', this.telemetryService.telemetryPageId, {solution_type: selectedSolutionType})">
+                        <i class="icon close"></i>
+                      </button>
                       </div>
-                      <div class="solution-media__video relative position">
-                        <div class="overlay-image" [ngStyle]="
-                            videoThumbnail
-                              ? { background: 'url(' + videoThumbnail + ')' }
-                              : { background: 'rgba(0,0,0,0.3)' }
-                          ">
+                      <div class="solution-media__video relative position" *ngIf="(selectedSolutionType == 'video')">
+                        <div class="overlay-image" [ngStyle]="assetThumbnail ?
+                        { background: 'url(' + assetThumbnail + ')' } :
+                        { background: 'rgba(0,0,0,0.3)' }">
                           <i class="play circle icon"></i>
                         </div>
-                      </div>
-                      <div class="solution-media__desc ml-16 sb-color-primary">
-                        {{ videoSolutionName
-                        }}
+                    </div>
+                    <div *ngIf="(selectedSolutionType == 'audio')" class="selected-audio-container">
+                      <div class="audio-container">
+                        <i class="music icon"></i>
+                        <span class="cursor-pointer-txt" [title]="assetSolutionName">{{ assetSolutionName }}</span>
                       </div>
                     </div>
+                    <div  *ngIf="(selectedSolutionType != 'audio')" class="solution-media__desc ml-16 sb-color-primary">
+                      {{ assetSolutionName }}
+                    </div>
                   </div>
+                 </div>
                 </div>
               </ng-container>
               <ng-template #readOnlySolutionsContainer>
@@ -142,13 +154,13 @@
                               <div class="ckeditor-tool__solution__body" *ngIf="selectedSolutionType == 'html'">
                                   <p class="fs-0-785 p-16" [innerHTML]="editorState.solutions | sanitizeHtml"></p>
                               </div>
-                              <div class="ckeditor-tool__solution__body" *ngIf="selectedSolutionType == 'video' && showSolution">
+                              <div class="ckeditor-tool__solution__body" *ngIf="(selectedSolutionType == 'video' && showSolution) || (selectedSolutionType == 'audio' && showSolution)">
                                   <div class="solution-media p-16 d-flex flex-ai-center">
                                       <div class="solution-media__video relative position">
-                                      <div class="overlay-image" [ngStyle]="videoThumbnail ?  {'background' : 'url(' + videoThumbnail + ')' }  : {'background': 'rgba(0,0,0,0.3)'}"><i class="play circle icon"></i></div>
+                                      <div class="overlay-image" [ngStyle]="assetThumbnail ?  {'background' : 'url(' + assetThumbnail + ')' }  : {'background': 'rgba(0,0,0,0.3)'}"><i class="play circle icon"></i></div>
                                       </div>
                                       <div class="solution-media__desc ml-16">
-                                      {{videoSolutionName}}
+                                      {{assetSolutionName}}
                                       </div>
                                   </div>
                               </div>

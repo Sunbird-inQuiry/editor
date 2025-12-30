@@ -1,0 +1,19 @@
+<div class="sb-grid-layout" [ngClass]="assetType === 'image' ? 'image' : 'video'">
+  <div class="sb-video-content" *ngFor="let data of assets">
+    <div class="sb-image-section relative position" (click)="addAsset(data);">
+      <div *ngIf="assetType === 'video'" class="overlay-image"><i class="play circle icon" aria-hidden="true"></i></div>
+      <i *ngIf="assetType !== 'audio'" class="check circle icon selected-video" aria-hidden="true"></i>
+      <img *ngIf="assetType === 'image' || assetType === 'video'"
+        [src]="assetType === 'image' ? data.downloadUrl : data.thumbnail" alt="{{data.name}}">
+      <div *ngIf="assetType === 'audio'" class="audio-player">
+        <audio controls controlsList="nodownload noplaybackrate">
+          <source [src]="data.downloadUrl" type="audio/ogg">
+          <source [src]="data.downloadUrl" type="audio/mpeg">
+        </audio>
+        <div class="audio-tag" [title]="data.name">
+          <span>{{data.name}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

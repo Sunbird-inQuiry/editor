@@ -1,0 +1,48 @@
+name: Build and Publish to NPM
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.19.1'
+          cache: 'npm'
+
+      - name: Install Angular CLI
+        run: npm install -g @angular/cli@16 --no-progress
+
+      - name: Install dependencies
+        run: npm install --no-progress
+
+      - name: Build library
+        run: npm run build-lib:prod
+
+      - name: Build web component
+        run: npm run build-web-component
+
+      - name: Build and publish library package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm pack ./dist/questionset-editor-library
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+          npm publish project-sunbird-sunbird-questionset-editor-* --access=public
+
+      - name: Build and publish web component package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm pack ./web-component
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+          npm publish project-sunbird-sunbird-questionset-editor-web-component-* --access=public

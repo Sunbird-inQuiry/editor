@@ -7,7 +7,7 @@ const latexService = require('./latexService.js')
 const dotenv = require('dotenv');
 dotenv.config();
 
-const BASE_URL = process.env.BASE_URL || "dev.inquiry.sunbird.org";
+const BASE_URL = process.env.BASE_URL || "dev.sunbirded.org";
 const API_AUTH_TOKEN = process.env.AUTH_API_TOKEN;
 const USER_TOKEN = process.env.USER_API_TOKEN;
 const PORTAL_COOKIES= ""
@@ -22,7 +22,7 @@ app.use(express.static(__dirname + '/web-component-examples/vanilla-js'));
 const decoratePublicRequestHeaders = function () {
     return function (proxyReqOpts, srcReq) {
         proxyReqOpts.headers['authorization'] = `Bearer ${API_AUTH_TOKEN}`;
-        proxyReqOpts.headers['x-authenticated-user-token'] = USER_TOKEN;
+        // proxyReqOpts.headers['x-authenticated-user-token'] = USER_TOKEN;
         return proxyReqOpts;     
     }
 };
@@ -39,10 +39,9 @@ app.post(["/action/asset/v1/upload/*"], proxy(BASE_URL, {
   })
 );
 
-app.all(['/api/framework/v1/read/*',
+app.get(['/api/framework/v1/read/*',
      '/learner/framework/v1/read/*', 
-     '/api/channel/v1/read/*',
-     '/api/question/v2/list'], proxy(BASE_URL, {
+     '/api/channel/v1/read/*'], proxy(BASE_URL, {
     https: true,
     proxyReqPathResolver: function(req) {
         console.log('proxyReqPathResolver ',  urlHelper.parse(req.url).path);
@@ -50,11 +49,12 @@ app.all(['/api/framework/v1/read/*',
     },
     proxyReqOptDecorator: decoratePublicRequestHeaders()
 }));
+
+
 app.use(['/action/questionset/v2/*',
     '/action/question/v2/*',
-    '/action/collection/v1/*',
     '/action/object/category/definition/v1/*',
-    '/action/collection/v1/*'
+    '/api/question/v2/*'
     ], proxy(BASE_URL, {
     https: true,
     limit: '30mb',

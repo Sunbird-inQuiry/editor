@@ -3,7 +3,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { CommonFormElementsModule } from '@project-sunbird/common-form-elements-full';
-import { SuiModule } from 'ng2-semantic-ui-v9';
+import { SuiModule } from '@project-sunbird/ng2-semantic-ui';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { HttpClientModule } from '@angular/common/http';
 import { SanitizeHtmlPipe } from './pipes/sanitize-html.pipe';
@@ -19,10 +19,7 @@ import { OptionsComponent } from './components/options/options.component';
 import { AnswerComponent } from './components/answer/answer.component';
 import { CkeditorToolComponent } from './components/ckeditor-tool/ckeditor-tool.component';
 import { QuestionComponent } from './components/question/question.component';
-import { QumlLibraryModule } from '@project-sunbird/sunbird-quml-player';
-import { CarouselModule } from 'ngx-bootstrap/carousel';
 import { TelemetryInteractDirective } from './directives/telemetry-interact/telemetry-interact.directive';
-import { AssetBrowserComponent } from './components/asset-browser/asset-browser.component';
 import { CollectionIconComponent } from './components/collection-icon/collection-icon.component';
 import { QumlPlayerComponent } from './components/quml-player/quml-player.component';
 import { QuestionOptionSubMenuComponent } from './components/question-option-sub-menu/question-option-sub-menu.component';
@@ -39,6 +36,8 @@ import { ProgressStatusComponent } from './components/progress-status/progress-s
 import {TermAndConditionComponent} from './components/term-and-condition/term-and-condition.component';
 
 import { QualityParamsModalComponent } from './components/quality-params-modal/quality-params-modal.component';
+import { AssetsBrowserComponent } from './components/assets-browser/assets-browser.component';
+import { AssetSegmentComponent } from './components/asset-segment/asset-segment.component';
 @NgModule({
   declarations: [
     QuestionsetEditorLibraryComponent,
@@ -55,7 +54,6 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     CkeditorToolComponent,
     TemplateComponent,
     TelemetryInteractDirective,
-    AssetBrowserComponent,
     CollectionIconComponent,
     QumlPlayerComponent,
     PublishChecklistComponent,
@@ -68,10 +66,12 @@ import { QualityParamsModalComponent } from './components/quality-params-modal/q
     PlainTreeComponent,
     ProgressStatusComponent,
     TermAndConditionComponent,
-    QualityParamsModalComponent
+    QualityParamsModalComponent,
+    AssetsBrowserComponent,
+    AssetSegmentComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule.withConfig({callSetDisabledState: 'whenDisabledForLegacyCode'}), RouterModule.forChild([]), SuiModule,
-  CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule, QumlLibraryModule, CarouselModule,],
+  CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule],
   providers: [
   ],
   exports: [EditorComponent],

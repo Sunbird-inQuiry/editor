@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, throwError } from 'rxjs';
 import * as _ from 'lodash-es';
 import { TreeService } from '../tree/tree.service';
 import { PublicDataService } from '../public-data/public-data.service';
@@ -10,6 +10,7 @@ import { EditorTelemetryService } from '../../services/telemetry/telemetry.servi
 import { DataService } from '../data/data.service';
 import { map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { v4 as uuidv4 } from 'uuid';
 interface SelectedChildren {
   label?: string;
   primaryCategory?: string;
@@ -249,7 +250,32 @@ export class EditorService {
     return this.publicDataService.post(option);
   }
 
-  submitRequestChanges(contentId, comment) {
+  updateComment(contentId,comment) {
+    const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
+    const option = {
+      url: url.UPDATE_COMMENT+contentId,
+      data: { request: { comments : [{ comment : comment }] }}
+    };
+    this.publicDataService.patch(option).subscribe((res) => {
+      this.toasterService.success(_.get(this.configService, 'labelConfig.messages.success.043'));
+    },(error) => {
+      const errInfo = {
+        errorMsg: _.get(this.configService, 'labelConfig.messages.error.006'),
+      };
+      return throwError(this.apiErrorHandling(error, errInfo))
+    });
+  }
+
+  readComment(contentId:string): Observable<any> {
+    const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
+    const hierarchyUrl = `${url.READ_COMMENT}/${contentId}`;
+    const req = {
+      url: hierarchyUrl,
+    };
+    return this.publicDataService.get(req);
+  }
+
+  submitRequestChanges(contentId:string, comment:string) {
     let objType = this.configService.categoryConfig[this.editorConfig.config.objectType];
     objType = objType.toLowerCase();
     const url = this.configService.urlConFig.URLS[this.editorConfig.config.objectType];
@@ -685,7 +711,8 @@ getDependentNodes(identifier) {
 
   getChannelHeader() {
     return {
-      ['X-Channel-Id']: this.editorConfig.context.channel
+      ['X-Channel-Id']: this.editorConfig.context.channel,
+      ['X-Request-Id']: uuidv4()
     }
   }
 }
