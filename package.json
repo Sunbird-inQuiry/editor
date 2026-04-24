@@ -42,7 +42,8 @@
     "phin": "^3.7.1",
     "tmp": "^0.2.3",
     "xml2js": "^0.6.2",
-    "request": "npm:@cypress/request@^3.0.0"
+    "request": "npm:@cypress/request@^3.0.0",
+    "uuid": "^14.0.0"
   },
   "dependencies": {
     "@angular-devkit/core": "^19.2.18",
@@ -90,7 +91,7 @@
     "rxjs": "^7.8.1",
     "svg2img": "1.0.0-beta.2",
     "tslib": "^2.7.0",
-    "uuid": "^9.0.0",
+    "uuid": "^14.0.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

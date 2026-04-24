@@ -64,8 +64,9 @@
     justify-content: center;
     flex-direction: column;
     margin: 0 auto;
-    background-color: #F5F9FC;
-    border: 1px dashed #80a7ce;
+    background-color: var(--color-brand-tint);
+    border: 1px dashed var(--color-brand-divider);
+    border-radius: 0.5rem;
   }
   
   .upload-file-description p {
@@ -220,11 +221,11 @@
   }
   
   .upload-image-modal-section {
-    border-radius: 4px;
+    border-radius: 0.5rem;
     width: 100%;
     min-height: 130px;
-    background: #F5F9FC;
-    border: 1px dashed #024f9d;
+    background: var(--color-brand-tint);
+    border: 1px dashed var(--color-brand-outline);
   }
   
   .upload-input-button {
@@ -284,9 +285,9 @@
       position: relative;
       margin-bottom: 0.5rem;
       .sb-form-control{
-        border: 1px solid rgba(34,36,38,.15);
+        border: 1px solid var(--spark-border-card);
         width: 100%;
-        border-radius: .28571429rem;
+        border-radius: 0.5rem;
         box-shadow: 0 0 0 0 transparent inset;
         padding: .25rem .5rem!important;
       }

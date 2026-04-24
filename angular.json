@@ -38,12 +38,12 @@
               }
             ],
             "styles": [
-              "node_modules/@project-sunbird/sunbird-quml-player-web-component/assets/quml-player/styles.css",
               "node_modules/@project-sunbird/sb-styles/assets/styles.scss",
               "src/styles.scss",
               "src/assets/lib/semantic/semantic.min.css",
-              "src/assets/styles/styles.scss",
-              "node_modules/font-awesome/css/font-awesome.css"
+              "node_modules/font-awesome/css/font-awesome.css",
+              "node_modules/@project-sunbird/sunbird-quml-player-web-component/assets/quml-player/styles.css",
+              "src/assets/styles/styles.scss"
             ],
             "scripts": [
               "src/assets/libs/iziToast/iziToast.min.js",
@@ -225,9 +225,9 @@
               "src/assets/quml-styles/quml-carousel.css",
               "node_modules/@project-sunbird/sb-styles/assets/styles.scss",
               "src/assets/lib/semantic/semantic.min.css",
-              "src/assets/styles/styles.scss",
               "node_modules/font-awesome/css/font-awesome.css",
-              "node_modules/@project-sunbird/sunbird-quml-player-web-component/assets/quml-player/styles.css"
+              "node_modules/@project-sunbird/sunbird-quml-player-web-component/assets/quml-player/styles.css",
+              "src/assets/styles/styles.scss"
             ],
             "scripts": [
               "node_modules/@project-sunbird/sunbird-file-upload-library/sunbird-file-upload-library.js",
