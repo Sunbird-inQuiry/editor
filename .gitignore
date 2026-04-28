@@ -52,3 +52,6 @@ Thumbs.db
 project-sunbird-sunbird-questionset-editor-web-component-*
 
 .env
+
+# Dependency submission SBOM artifacts
+*.spdx.json
