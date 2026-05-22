@@ -71,7 +71,7 @@
     "async": "^3.2.4",
     "concat": "^1.0.3",
     "export-to-csv": "^0.2.1",
-    "express": "^4.19.2",
+    "express": "^4.22.2",
     "express-http-proxy": "^2.0.0",
     "font-awesome": "^4.7.0",
     "fs-extra": "^11.2.0",
