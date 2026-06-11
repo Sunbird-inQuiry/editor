@@ -54,8 +54,9 @@ app.get(['/api/framework/v1/read/*',
 app.use(['/action/questionset/v2/*',
     '/action/question/v2/*',
     '/action/object/category/definition/v1/*',
-    '/api/question/v2/*'
-    ], proxy(BASE_URL, {
+    '/api/object/category/definition/v1/*',
+    '/api/question/v2/*',
+    '/api/questionset/v2/*'    ], proxy(BASE_URL, {
     https: true,
     limit: '30mb',
     proxyReqPathResolver: function (req) {

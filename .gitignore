@@ -52,3 +52,5 @@ Thumbs.db
 project-sunbird-sunbird-questionset-editor-web-component-*
 
 .env
+
+/web-component
