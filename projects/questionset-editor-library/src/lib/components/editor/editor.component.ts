@@ -108,6 +108,8 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {
     this.setEditorConfig();
     this.editorService.initialize(this.editorConfig);
+    const appLang = localStorage.getItem('app-language') || 'en';
+    this.configService.setLanguage(appLang);
     this.editorMode = this.editorService.editorMode;
     this.treeService.initialize(this.editorConfig);
     this.objectType = this.configService.categoryConfig[this.editorConfig.config.objectType];

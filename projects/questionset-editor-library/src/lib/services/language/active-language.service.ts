@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class ActiveLanguageService {
@@ -18,10 +17,7 @@ export class ActiveLanguageService {
   get isRTL(): boolean  { return this.current === 'ar'; }
   get dir(): string     { return this.isRTL ? 'rtl' : 'ltr'; }
 
-  constructor(private configService: ConfigService) {}
-
   set(code: string): void {
     this._lang$.next(code);
-    this.configService.setLanguage(code);
   }
 }
