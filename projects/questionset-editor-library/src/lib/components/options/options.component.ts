@@ -1,5 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output, OnChanges, SimpleChanges } from '@angular/core';
 import * as _ from 'lodash-es';
+import { ActiveLanguageService } from '../../services/language/active-language.service';
+import { readI18n, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { ConfigService } from '../../services/config/config.service';
 import { SubMenu } from '../question-option-sub-menu/question-option-sub-menu.component';
@@ -20,7 +22,14 @@ export class OptionsComponent implements OnInit, OnChanges {
   @Input() mapping = [];
   @Input() isReadOnlyMode;
   @Input() maxScore;
+  @Input() activeLang: ActiveLanguageService;
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
+
+  get lang(): string { return this.activeLang?.current ?? 'en'; }
+  optionBody(option: any): string { return readI18n(option.body as I18nValue, this.lang); }
+  setOptionBody(option: any, value: string): void {
+    option.body = writeI18n(option.body as I18nValue, this.lang, value);
+  }
   public setCharacterLimit = 160;
   public setImageLimit = 1;
   public templateType = 'mcq-vertical';
@@ -177,7 +186,7 @@ export class OptionsComponent implements OnInit, OnChanges {
     let index;
     const interactOptions = _.map(options, (opt, key) => {
       index = Number(key);
-      return { label: opt.body, value: index,  hint: this.hints[this.editorState?.interactions?.response1?.options[index]?.hint] ? Object.keys(this.hints).find(element => element == this.editorState?.interactions?.response1?.options[index]?.hint) : '' };
+      return { label: normalizeI18n(typeof opt.body === 'object' ? opt.body : (opt.body ? { en: opt.body } : {})), value: index,  hint: this.hints[this.editorState?.interactions?.response1?.options[index]?.hint] ? Object.keys(this.hints).find(element => element == this.editorState?.interactions?.response1?.options[index]?.hint) : '' };
     });
     const interactions = {
       response1: {

@@ -23,6 +23,12 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() videoShow;
   @Input() setCharacterLimit: number;
   @Input() setImageLimit: any;
+  @Input() set lang(value: string) {
+    this._lang = value ?? 'en';
+    if (this.editorInstance) { this._applyDirection(); }
+  }
+  private _lang = 'en';
+  @Input() compact = false;
   public editorConfig: any;
   public imageUploadLoader = false;
   public editorInstance: any;
@@ -143,10 +149,18 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
     this.acceptVideoType = this.getAcceptType(this.assetConfig.video.accepted, 'video');
     this.acceptImageType = this.getAcceptType(this.assetConfig.image.accepted, 'image');
   }
-  ngOnChanges() {
+  ngOnChanges(changes: any) {
     if (this.videoShow) {
       this.showVideoPicker = true;
       this.selectVideo(undefined);
+    }
+    // Sync editor content when editorDataInput changes due to language switch.
+    // Guard: only when content actually differs (avoids fighting user keystrokes).
+    if (changes.editorDataInput && this.editorInstance && this.initialized) {
+      const incoming = this.editorDataInput || '';
+      if (this.editorInstance.getData() !== incoming) {
+        this.editorInstance.setData(incoming);
+      }
     }
   }
 
@@ -272,7 +286,7 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
         ]
       },
       extraPlugins: ['Table', 'Heading'],
-      toolbar: this.editorConfig.toolbar,
+      toolbar: this.compact ? ['imageUpload'] : this.editorConfig.toolbar,
       fontSize: this.editorConfig.fontSize,
       image: this.editorConfig.image,
       isReadOnly: this.editorConfig.isReadOnly,
@@ -290,6 +304,7 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
           this.editorInstance.setData('');
         }
         console.log('Editor was initialized');
+        this._applyDirection();
         this.changeTracker(this.editorInstance);
         this.attachEvent(this.editorInstance);
         // this.pasteTracker(this.editorInstance);
@@ -882,6 +897,16 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
       this.selectedVideo = {};
     }
 
+  }
+
+  private _applyDirection(): void {
+    try {
+      const dir = this._lang === 'ar' ? 'rtl' : 'ltr';
+      this.editorInstance.editing.view.change((writer: any) => {
+        writer.setAttribute('dir', dir,
+          this.editorInstance.editing.view.document.getRoot());
+      });
+    } catch (_) {}
   }
 
   countCharacters(document) {

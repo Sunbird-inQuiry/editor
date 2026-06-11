@@ -19,13 +19,12 @@
           [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('delete_option','click','submit',telemetryService.telemetryPageId)">
           <i class="icon close"></i>
         </button>
-        <lib-ckeditor-tool [setCharacterLimit]="setCharacterLimit" (editorDataOutput)="option.body = $event.body; option.length = $event.length; editorDataHandler($event)"
-          [editorDataInput]="option.body" class="ckeditor-tool__option mb-10"
-          [class.mb-5]="showFormError && ([undefined, ''].includes(option.body) || option.length > setCharacterLimit)">
+        <lib-ckeditor-tool [setCharacterLimit]="setCharacterLimit"
+          (editorDataOutput)="setOptionBody(option, $event.body); option.length = $event.length; editorDataHandler($event)"
+          [editorDataInput]="optionBody(option)" [lang]="lang" class="ckeditor-tool__option mb-10"
+          [class.mb-5]="showFormError && ([undefined, ''].includes(optionBody(option)) || option.length > setCharacterLimit)">
         </lib-ckeditor-tool>
-        <label *ngIf="
-            showFormError && (option.body === undefined || option.body === '')
-          " class="sb-color-error fs-0-785">{{configService.labelConfig?.lbl?.fillThisOption}}</label>
+        <label *ngIf="showFormError && !optionBody(option)" class="sb-color-error fs-0-785">{{configService.labelConfig?.lbl?.fillThisOption}}</label>
         <label *ngIf="option.length > setCharacterLimit" class="ui basic red error label pt-1">
           {{configService.labelConfig?.lbl?.reduceSize}}</label>
       </div>
