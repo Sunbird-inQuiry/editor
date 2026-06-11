@@ -348,3 +348,47 @@ sui-select {
 .cursor-pointer-txt {
   cursor: pointer;
 }
+
+// ── RTL overrides scoped to the question content area only ──────────
+.br-4.b-1-100[dir="rtl"],
+[dir="rtl"].py-20.px-32 {
+  // Question body area labels and hint text
+  .sb-field-group > label,
+  .sb-field-group > p,
+  .ftb-hint,
+  .ftb-hint li,
+  .sb-color-error,
+  .order-item-counter,
+  .reorder-counter {
+    text-align: right;
+    direction: rtl;
+  }
+
+  // Reverse ul indent for RTL
+  .ftb-hint ul {
+    padding-right: 1.2rem;
+    padding-left: 0;
+  }
+
+  // Question details heading
+  .font-weight-bold.fs-0-92 {
+    text-align: right;
+  }
+
+  // Dynamic form labels — right-align within their columns
+  .dynamic-form label,
+  .two-column-grid label {
+    text-align: right;
+    direction: rtl;
+  }
+
+  // Solution row: label on far right, button on far left
+  .ckeditor-tool__solution {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    .ml-auto {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+  }
+}

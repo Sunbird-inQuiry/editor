@@ -28,7 +28,8 @@
               </sui-multi-select>
             </div>
           </div>
-          <div class="py-20 px-32 br-4 b-1-100" *ngIf="!showPreview" [ngClass]="{'sb-bg-color-primary-0': !isReadOnlyMode}">
+          <div class="py-20 px-32 br-4 b-1-100" *ngIf="!showPreview" [ngClass]="{'sb-bg-color-primary-0': !isReadOnlyMode}" [attr.dir]="activeLang.dir">
+            <lib-language-selector *ngIf="!isReadOnlyMode"></lib-language-selector>
             <div class="sb-field-group">
               <label *ngIf="!isReadOnlyMode" class="fs-0-92 font-weight-bold">{{configService.labelConfig?.lbl?.question}}<span class="sb-required">*</span></label>
               <div class="sb-field">
@@ -36,7 +37,8 @@
                   <lib-ckeditor-tool
                   *ngIf="!isReadOnlyMode"
                   (editorDataOutput)="editorDataHandler($event, 'question')"
-                  [editorDataInput]="editorState.question"
+                  [editorDataInput]="questionBody"
+                  [lang]="currentLang"
                   ></lib-ckeditor-tool>
                     <lib-assets-browser
                     *ngIf="(assetType==='video' || assetType==='audio') && !isReadOnlyMode" [showAssetPicker]="showAssetPicker" 
@@ -58,17 +60,7 @@
               <lib-question-option-sub-menu *ngIf="subMenus?.length" [subMenus]="subMenus"
                 (onChange)="subMenuChange($event)"></lib-question-option-sub-menu>
 
-              <lib-answer *ngIf="questionInteractionType === 'default'"
-                [questionPrimaryCategory]="questionPrimaryCategory"
-                [editorState]="editorState" [showFormError]="showFormError"
-                (editorDataOutput)="editorDataHandler($event)" [isReadOnlyMode]="isReadOnlyMode"></lib-answer>
-
-              <lib-options *ngIf="questionInteractionType === 'choice'"
-                [questionPrimaryCategory]="questionPrimaryCategory"
-                [editorState]="editorState" [showFormError]="showFormError"
-                (editorDataOutput)="editorDataHandler($event)"
-                [sourcingSettings]="sourcingSettings" [mapping]="scoreMapping" [maxScore]="maxScore"
-                [isReadOnlyMode]="isReadOnlyMode"></lib-options>
+              <ng-container #editorOutlet></ng-container>
 
               <lib-slider *ngIf="questionInteractionType === 'slider'" [editorDataInput]="sliderOptions"
                 (onChange)="sliderData($event)"></lib-slider>

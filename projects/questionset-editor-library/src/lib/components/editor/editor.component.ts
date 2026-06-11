@@ -122,7 +122,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.mergeCollectionExternalProperties().subscribe(
         (response) => {
           const hierarchyResponse = _.first(response);
-          const collection = _.get(hierarchyResponse, `result.${this.objectType}`);
+          const collection = _.get(hierarchyResponse, `result.${this.objectType}`) ||
+            _.get(hierarchyResponse, 'result.questionSet') ||
+            _.get(hierarchyResponse, 'result.QuestionSet');
           this.toolbarConfig.title = collection.name;
           this.initializeFrameworkAndChannel(collection);
         });
@@ -305,6 +307,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.rootFormConfig?.length) {
       formData = this.rootFormConfig[0].fields || [];
     }
+    if (!formData) { return; }
     formData.forEach((field) => {
       if (field.code === 'evidenceMimeType') {
         evidenceMimeType = field.range;
@@ -324,7 +327,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.questionlibraryInput.searchFormConfig = _.get(formsConfigObj, 'search.properties');
       this.questionlibraryInput.metadataFormConfig = _.get(formsConfigObj, 'childMetadata')
     }
-    this.leafFormConfig = _.get(formsConfigObj, 'childMetadata.properties');
+    this.leafFormConfig = _.get(formsConfigObj, 'childMetadata.properties') || [];
     this.relationFormConfig = _.get(formsConfigObj, 'relationalMetadata.properties');
   }
 
@@ -345,7 +348,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     return forkJoin(requests).pipe(tap(responseList => {
       const hierarchyResponse = _.first(responseList);
       this.collectionTreeNodes = {
-        data: _.get(hierarchyResponse, `result.${this.objectType}`)
+        data: _.get(hierarchyResponse, `result.${this.objectType}`) ||
+              _.get(hierarchyResponse, 'result.questionSet') ||
+              _.get(hierarchyResponse, 'result.QuestionSet')
       };
       this.buttonLoaders.showReviewComment = this.showCommentAddedAgainstContent();
       if (_.isEmpty(this.collectionTreeNodes.data.children)) {
@@ -356,7 +361,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
       if (this.objectType === 'questionset') {
         const questionSetResponse = _.last(responseList);
-        const data = _.get(questionSetResponse, _.toLower(`result.${this.objectType}`));
+        const data = _.get(questionSetResponse, _.toLower(`result.${this.objectType}`)) ||
+                     _.get(questionSetResponse, 'result.questionSet') ||
+                     _.get(questionSetResponse, 'result.QuestionSet') || {};
         this.collectionTreeNodes.data.instructions = data.instructions ? data.instructions : '';
         this.collectionTreeNodes.data.outcomeDeclaration = data?.outcomeDeclaration;
       }
@@ -367,10 +374,10 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     let hierarchyConfig;
     if (_.get(primaryCatConfig, 'result.objectCategoryDefinition.objectMetadata.config')) {
       hierarchyConfig = _.get(primaryCatConfig, 'result.objectCategoryDefinition.objectMetadata.config.sourcingSettings.collection');
-      if (!_.isEmpty(hierarchyConfig.children)) {
+      if (hierarchyConfig && !_.isEmpty(hierarchyConfig.children)) {
         hierarchyConfig.children = this.getHierarchyChildrenConfig(hierarchyConfig.children);
       }
-      if (!_.isEmpty(hierarchyConfig.hierarchy)) {
+      if (hierarchyConfig && !_.isEmpty(hierarchyConfig.hierarchy)) {
         _.forEach(hierarchyConfig.hierarchy, (hierarchyValue) => {
           if (_.get(hierarchyValue, 'children')) {
             hierarchyValue.children = this.getHierarchyChildrenConfig(_.get(hierarchyValue, 'children'));
@@ -835,6 +842,13 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         _.get(this.editorService.editorConfig.config, `hierarchy.level${this.selectedNodeData.getLevel() - 1}.children`)
       );
     }
+    // When the host app declares questionPrimaryCategories and this node allows
+    // questions, use that list as the authoritative set (overrides server-side
+    // category definition which may only know about a subset of types).
+    const hostCategories = _.get(this.editorConfig, 'config.questionPrimaryCategories');
+    if (!_.isEmpty(hostCategories) && !_.isEmpty(this.templateList)) {
+      this.templateList = hostCategories;
+    }
     this.editorService.templateList = this.templateList;
   }
 
@@ -890,6 +904,8 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       const selectedTemplateFormFields = _.get(selectedtemplateDetails, 'forms.create.properties');
       if (!_.isEmpty(selectedTemplateFormFields)) {
         this.setLeafFormConfig(selectedTemplateFormFields);
+      } else if (!this.leafFormConfig) {
+        this.leafFormConfig = [];
       }
 
       const catMetaData = _.get(selectedtemplateDetails, 'objectMetadata');
