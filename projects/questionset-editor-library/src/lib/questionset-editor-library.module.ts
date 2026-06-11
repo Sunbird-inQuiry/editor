@@ -38,6 +38,14 @@ import {TermAndConditionComponent} from './components/term-and-condition/term-an
 import { QualityParamsModalComponent } from './components/quality-params-modal/quality-params-modal.component';
 import { AssetsBrowserComponent } from './components/assets-browser/assets-browser.component';
 import { AssetSegmentComponent } from './components/asset-segment/asset-segment.component';
+import { EditorQuestionTypeRegistryService, EDITOR_QUESTION_TYPE_REGISTRY } from './registry';
+import { FtbComponent } from './components/ftb/ftb.component';
+import { MtfComponent } from './components/mtf/mtf.component';
+import { OrderComponent } from './components/order/order.component';
+import { LanguageSelectorComponent } from './components/language-selector/language-selector.component';
+import { ReorderComponent } from './components/reorder/reorder.component';
+import { ActiveLanguageService } from './services/language/active-language.service';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 @NgModule({
   declarations: [
     QuestionsetEditorLibraryComponent,
@@ -69,10 +77,23 @@ import { AssetSegmentComponent } from './components/asset-segment/asset-segment.
     QualityParamsModalComponent,
     AssetsBrowserComponent,
     AssetSegmentComponent,
+    FtbComponent,
+    MtfComponent,
+    OrderComponent,
+    LanguageSelectorComponent,
+    ReorderComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule.withConfig({callSetDisabledState: 'whenDisabledForLegacyCode'}), RouterModule.forChild([]), SuiModule,
-  CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule],
+  CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule, DragDropModule],
   providers: [
+    EditorQuestionTypeRegistryService,
+    ActiveLanguageService,
+    { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'multiple choice question', interactionType: 'choice', qType: 'MCQ', component: OptionsComponent }, multi: true },
+    { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'subjective question', interactionType: 'default', qType: 'SA', component: AnswerComponent }, multi: true },
+    { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'ftb question', interactionType: 'text', qType: 'FTB', component: FtbComponent }, multi: true },
+    { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'match the following question', interactionType: 'match', qType: 'MTF', component: MtfComponent }, multi: true },
+    { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'sequence question', interactionType: 'order', qType: 'SEQ', component: OrderComponent }, multi: true },
+    { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'reorder question', interactionType: 'order', qType: 'REO', component: ReorderComponent }, multi: true },
   ],
   exports: [EditorComponent],
 })
