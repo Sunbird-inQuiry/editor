@@ -1,0 +1,35 @@
+.reorder-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.reorder-textarea {
+  flex: 1;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 70px;
+
+  &:focus {
+    outline: none;
+    border-color: #006dc6;
+  }
+}
+
+.reorder-counter {
+  white-space: nowrap;
+  padding-top: 10px;
+}
+
+.reorder-chip {
+  border: 1px solid #aaa;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: default;
+  user-select: none;
+}

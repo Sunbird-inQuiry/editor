@@ -1,0 +1,24 @@
+<div *ngIf="!isReadOnlyMode">
+  <div class="ftb-hint mt-10 fs-0-785 sb-color-gray-200">
+    <ul class="mb-0 pl-20">
+      <li>{{ configService.labelConfig?.lbl?.ftbHint1 }}</li>
+      <li>{{ configService.labelConfig?.lbl?.ftbHint2 }}</li>
+    </ul>
+  </div>
+
+  <div *ngIf="parsedBlanks.length > 0" class="mt-10">
+    <label class="fs-0-785 font-weight-bold d-block mb-5">
+      {{ configService.labelConfig?.lbl?.ftbBlanksLabel }} ({{ lang | uppercase }})
+    </label>
+    <div class="d-flex flex-w-wrap">
+      <span *ngFor="let blank of parsedBlanks; let i = index"
+            class="sb-tag sb-tag-primary mr-10 mb-5 px-10 py-5 fs-0-785">
+        Blank {{ i + 1 }}: <strong>{{ blank.answer || '(empty)' }}</strong>
+      </span>
+    </div>
+  </div>
+
+  <label *ngIf="showFormError && parsedBlanks.length === 0" class="sb-color-error fs-0-785 d-block mt-5">
+    {{ configService.labelConfig?.lbl?.ftbBlankRequired }}
+  </label>
+</div>

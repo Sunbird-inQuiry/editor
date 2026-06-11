@@ -1,0 +1,52 @@
+<div *ngIf="!isReadOnlyMode; else readOnlyMtf">
+  <div class="mt-15">
+    <label class="fs-0-92 font-weight-bold d-block">{{ configService.labelConfig?.lbl?.mtfSetAnswers }}</label>
+    <p class="fs-0-785 mb-15">{{ configService.labelConfig?.lbl?.mtfAnswersDesc }}</p>
+
+    <div *ngFor="let pair of pairs; let i = index" class="mtf-pair-row mb-20">
+      <div class="d-flex">
+        <div class="mtf-cell mr-10" [attr.dir]="lang === 'ar' ? 'rtl' : 'ltr'">
+          <lib-ckeditor-tool [editorDataInput]="cellValue(pair.left)" [lang]="lang" [compact]="true"
+            [setCharacterLimit]="160" (editorDataOutput)="onCellChange($event, i, 'left')">
+          </lib-ckeditor-tool>
+          <label *ngIf="showFormError && !cellValue(pair.left)" class="sb-color-error fs-0-785">
+            {{ configService.labelConfig?.lbl?.mtfRequired }}
+          </label>
+        </div>
+        <div class="mtf-cell" [attr.dir]="lang === 'ar' ? 'rtl' : 'ltr'">
+          <lib-ckeditor-tool [editorDataInput]="cellValue(pair.right)" [lang]="lang" [compact]="true"
+            [setCharacterLimit]="160" (editorDataOutput)="onCellChange($event, i, 'right')">
+          </lib-ckeditor-tool>
+          <label *ngIf="showFormError && !cellValue(pair.right)" class="sb-color-error fs-0-785">
+            {{ configService.labelConfig?.lbl?.mtfRequired }}
+          </label>
+        </div>
+      </div>
+      <div class="mt-8">
+        <button class="sb-btn sb-btn-xs sb-btn-outline-error" [disabled]="pairs.length <= 2" (click)="deletePair(i)">
+          <i class="trash alternate outline icon mr-5"></i>{{ configService.labelConfig?.lbl?.mtfDeletePair }}
+        </button>
+      </div>
+    </div>
+
+    <button *ngIf="pairs.length < 5" class="sb-btn sb-btn-primary sb-btn-normal w-100 mt-5" (click)="addPair()">
+      {{ configService.labelConfig?.lbl?.mtfAddPair }}
+    </button>
+    <label *ngIf="showFormError && pairs.length < 2" class="sb-color-error fs-0-785 d-block mt-5">
+      {{ configService.labelConfig?.lbl?.mtfMinPairs }}
+    </label>
+  </div>
+</div>
+
+<ng-template #readOnlyMtf>
+  <div class="mt-15">
+    <div class="d-flex mb-5">
+      <div class="sb-w-45 fs-0-785 font-weight-bold">Column 1</div>
+      <div class="sb-w-45 fs-0-785 font-weight-bold">Column 2</div>
+    </div>
+    <div *ngFor="let pair of pairs; let i = index" class="d-flex mb-8">
+      <div class="sb-w-45 pr-10"><p class="fs-0-785 m-0" [innerHTML]="cellValue(pair.left) | sanitizeHtml"></p></div>
+      <div class="sb-w-45"><p class="fs-0-785 m-0" [innerHTML]="cellValue(pair.right) | sanitizeHtml"></p></div>
+    </div>
+  </div>
+</ng-template>
