@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import * as _ from 'lodash-es';
 import { ConfigService } from '../../services/config/config.service';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
-import { readI18n, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
+import { readI18nForEditor, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
 
 interface MtfPair {
   left: I18nValue;
@@ -20,16 +20,22 @@ export class MtfComponent implements OnInit {
   @Input() questionPrimaryCategory: any;
   @Input() showFormError: any;
   @Input() isReadOnlyMode: any;
-  @Input() activeLang: ActiveLanguageService;
+  private _activeLang: ActiveLanguageService;
+  @Input() set activeLang(val: ActiveLanguageService) {
+    this._activeLang = val;
+    if (val) { val.lang$.subscribe(l => { this.currentLang = l; }); }
+  }
+  get activeLang(): ActiveLanguageService { return this._activeLang; }
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
 
   readonly MIN_PAIRS = 2;
   readonly MAX_PAIRS = 5;
 
-  get lang(): string    { return this.activeLang?.current ?? 'en'; }
+  currentLang = 'en';
+  get lang(): string    { return this.currentLang; }
   get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
   get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
-  cellValue(field: I18nValue): string { return readI18n(field, this.lang); }
+  cellValue(field: I18nValue): string { return readI18nForEditor(field, this.lang); }
 
   constructor(public configService: ConfigService) {}
 

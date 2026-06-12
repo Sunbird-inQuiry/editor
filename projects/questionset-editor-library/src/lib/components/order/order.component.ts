@@ -3,7 +3,7 @@ import * as _ from 'lodash-es';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ConfigService } from '../../services/config/config.service';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
-import { readI18n, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
+import { readI18nForEditor, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
 
 interface OrderOption {
   value: string;
@@ -21,7 +21,12 @@ export class OrderComponent implements OnInit {
   @Input() questionPrimaryCategory: any;
   @Input() showFormError: any;
   @Input() isReadOnlyMode: any;
-  @Input() activeLang: ActiveLanguageService;
+  private _activeLang: ActiveLanguageService;
+  @Input() set activeLang(val: ActiveLanguageService) {
+    this._activeLang = val;
+    if (val) { val.lang$.subscribe(l => { this.currentLang = l; }); }
+  }
+  get activeLang(): ActiveLanguageService { return this._activeLang; }
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
 
   readonly MIN_OPTIONS = 2;
@@ -32,10 +37,11 @@ export class OrderComponent implements OnInit {
     { id: 'seq-horizontal', label: 'Horizontal' },
   ];
 
-  get lang(): string    { return this.activeLang?.current ?? 'en'; }
+  currentLang = 'en';
+  get lang(): string    { return this.currentLang; }
   get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
   get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
-  optionLabel(opt: OrderOption): string { return readI18n(opt.label, this.lang); }
+  optionLabel(opt: OrderOption): string { return readI18nForEditor(opt.label, this.lang); }
 
   setLayout(layoutId: string) {
     this.editorState.templateId = layoutId;

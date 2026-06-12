@@ -12,6 +12,13 @@ export function readI18n(field: I18nValue | undefined, lang: string): string {
        : first ? field[first] : '';
 }
 
+// For editor inputs: no fallback — return '' if lang slot doesn't exist yet
+export function readI18nForEditor(field: I18nValue | undefined, lang: string): string {
+  if (!field) return '';
+  if (typeof field === 'string') return lang === DEFAULT ? field : '';
+  return field[lang] ?? '';
+}
+
 export function writeI18n(current: I18nValue | undefined, lang: string, value: string): I18nValue {
   if (lang === DEFAULT && !current) return value;
   const map: I18nMap = typeof current === 'object'

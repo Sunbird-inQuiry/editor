@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output, OnChanges, SimpleChanges } from '@angular/core';
 import * as _ from 'lodash-es';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
-import { readI18n, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
+import { readI18n, readI18nForEditor, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { ConfigService } from '../../services/config/config.service';
 import { SubMenu } from '../question-option-sub-menu/question-option-sub-menu.component';
@@ -22,13 +22,21 @@ export class OptionsComponent implements OnInit, OnChanges {
   @Input() mapping = [];
   @Input() isReadOnlyMode;
   @Input() maxScore;
-  @Input() activeLang: ActiveLanguageService;
+  private _activeLang: ActiveLanguageService;
+  @Input() set activeLang(val: ActiveLanguageService) {
+    this._activeLang = val;
+    if (val) { val.lang$.subscribe(l => { this.currentLang = l; }); }
+  }
+  get activeLang(): ActiveLanguageService { return this._activeLang; }
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
 
-  get lang(): string    { return this.activeLang?.current ?? 'en'; }
+  currentLang = 'en';
+  get lang(): string    { return this.currentLang; }
   get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
   get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
-  optionBody(option: any): string { return readI18n(option.body as I18nValue, this.lang); }
+  langs = ActiveLanguageService.LANGS;
+  onLangChange(code: string): void { this._activeLang?.set(code); }
+  optionBody(option: any): string { return readI18nForEditor(option.body as I18nValue, this.lang); }
   setOptionBody(option: any, value: string): void {
     option.body = writeI18n(option.body as I18nValue, this.lang, value);
   }

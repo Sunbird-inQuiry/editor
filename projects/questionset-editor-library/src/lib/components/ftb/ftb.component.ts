@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ConfigService } from '../../services/config/config.service';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
-import { readI18n, I18nValue } from '../../utils/i18nField';
+import { readI18nForEditor, I18nValue } from '../../utils/i18nField';
 
 interface FtbBlank { key: string; answer: string; }
 
@@ -16,13 +16,19 @@ export class FtbComponent implements OnInit {
   @Input() questionPrimaryCategory: any;
   @Input() showFormError: any;
   @Input() isReadOnlyMode: any;
-  @Input() activeLang: ActiveLanguageService;
+  private _activeLang: ActiveLanguageService;
+  @Input() set activeLang(val: ActiveLanguageService) {
+    this._activeLang = val;
+    if (val) { val.lang$.subscribe(l => { this.currentLang = l; }); }
+  }
+  get activeLang(): ActiveLanguageService { return this._activeLang; }
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
 
-  get lang(): string { return this.activeLang?.current ?? 'en'; }
+  currentLang = 'en';
+  get lang(): string { return this.currentLang; }
 
   get questionBody(): string {
-    return readI18n(this.editorState?.question as I18nValue, this.lang);
+    return readI18nForEditor(this.editorState?.question as I18nValue, this.lang);
   }
 
   get parsedBlanks(): FtbBlank[] {

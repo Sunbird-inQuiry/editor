@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { ConfigService } from '../../services/config/config.service';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
-import { readI18n, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
+import { readI18nForEditor, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
 
 @Component({
   selector: 'lib-answer',
@@ -13,12 +13,20 @@ export class AnswerComponent implements OnInit {
   @Input() questionPrimaryCategory;
   @Input() showFormError;
   @Input() isReadOnlyMode;
-  @Input() activeLang: ActiveLanguageService;
+  private _activeLang: ActiveLanguageService;
+  @Input() set activeLang(val: ActiveLanguageService) {
+    this._activeLang = val;
+    if (val) { val.lang$.subscribe(l => { this.currentLang = l; }); }
+  }
+  get activeLang(): ActiveLanguageService { return this._activeLang; }
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
 
-  get lang(): string       { return this.activeLang?.current ?? 'en'; }
+  currentLang = 'en';
+  get lang(): string       { return this.currentLang; }
   get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
-  get answerBody(): string { return readI18n(this.editorState.answer as I18nValue, this.lang); }
+  langs = ActiveLanguageService.LANGS;
+  onLangChange(code: string): void { this._activeLang?.set(code); }
+  get answerBody(): string { return readI18nForEditor(this.editorState.answer as I18nValue, this.lang); }
 
   constructor(public configService: ConfigService) {}
 
