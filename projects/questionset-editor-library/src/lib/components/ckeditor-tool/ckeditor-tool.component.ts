@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, Output, Input, EventEmitter, OnChanges, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Output, Input, EventEmitter, OnChanges, ViewChild, ElementRef, NgZone } from '@angular/core';
 import ClassicEditor from '@project-sunbird/ckeditor-build-classic';
 import * as _ from 'lodash-es';
 import { catchError, map } from 'rxjs/operators';
@@ -29,6 +29,11 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
   }
   private _lang = 'en';
   @Input() compact = false;
+  @Input() showLangSelector = false;
+  @Input() langs: Array<{code: string; label: string}> = [];
+  @Input() activeLangCode = 'en';
+  @Output() langChange = new EventEmitter<string>();
+  private _langSelectEl: HTMLSelectElement | null = null;
   public editorConfig: any;
   public imageUploadLoader = false;
   public editorInstance: any;
@@ -42,7 +47,8 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
   public assetProxyUrl: any;
   public lastImgResizeWidth;
   constructor(private questionService: QuestionService, private editorService: EditorService,
-              private toasterService: ToasterService, public configService: ConfigService) { }
+              private toasterService: ToasterService, public configService: ConfigService,
+              private ngZone: NgZone) { }
   assetConfig: any = {};
   myAssets = [];
   allImages = [];
@@ -154,13 +160,14 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
       this.showVideoPicker = true;
       this.selectVideo(undefined);
     }
-    // Sync editor content when editorDataInput changes due to language switch.
-    // Guard: only when content actually differs (avoids fighting user keystrokes).
     if (changes.editorDataInput && this.editorInstance && this.initialized) {
       const incoming = this.editorDataInput || '';
       if (this.editorInstance.getData() !== incoming) {
         this.editorInstance.setData(incoming);
       }
+    }
+    if (changes.activeLangCode && this._langSelectEl) {
+      this._langSelectEl.value = this.activeLangCode;
     }
   }
 
@@ -305,6 +312,8 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
         }
         console.log('Editor was initialized');
         this._applyDirection();
+        this._injectLangDropdown();
+        this._injectImageButton();
         this.changeTracker(this.editorInstance);
         this.attachEvent(this.editorInstance);
         // this.pasteTracker(this.editorInstance);
@@ -897,6 +906,90 @@ export class CkeditorToolComponent implements OnInit, AfterViewInit, OnChanges {
       this.selectedVideo = {};
     }
 
+  }
+
+  private _injectImageButton(): void {
+    if (this.compact) return;
+    const toolbar = this.editorInstance?.ui?.view?.toolbar?.element as HTMLElement;
+    if (!toolbar) return;
+
+    const itemsContainer = (toolbar.querySelector('.ck-toolbar__items') || toolbar) as HTMLElement;
+
+    const sep = document.createElement('span');
+    sep.className = 'ck ck-toolbar__separator';
+    itemsContainer.appendChild(sep);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.title = 'Add image';
+    btn.className = 'ck ck-button';
+    Object.assign(btn.style, {
+      cursor: 'pointer', background: 'transparent', border: 'none',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      width: '28px', height: '28px', borderRadius: '2px', padding: '0'
+    });
+    btn.innerHTML = `<svg class="ck ck-icon ck-button__icon" viewBox="0 0 20 20" width="16" height="16">
+      <path d="M6.91 10.54c.26-.23.64-.21.88.03l3.36 3.14 2.23-2.06a.64.64 0 0 1 .87 0l2.52 2.97V4.5H3.2v10.12l3.71-4.08zm10.27-7.51c.55 0 1 .45 1 1v11.9c0 .55-.45 1-1 1H2.82c-.55 0-1-.45-1-1V4.03c0-.55.45-1 1-1zm-3.51 4.42a1.32 1.32 0 1 1 2.64 0 1.32 1.32 0 0 1-2.64 0z"/>
+    </svg>`;
+    btn.addEventListener('mouseenter', () => { btn.style.background = '#f0f0f0'; });
+    btn.addEventListener('mouseleave', () => { btn.style.background = 'transparent'; });
+    btn.addEventListener('click', () => {
+      this.ngZone.run(() => this.initializeImagePicker('question'));
+    });
+
+    itemsContainer.appendChild(btn);
+  }
+
+  private _injectLangDropdown(): void {
+    if (!this.showLangSelector || !this.langs?.length) return;
+    const toolbar = this.editorInstance?.ui?.view?.toolbar?.element as HTMLElement;
+    if (!toolbar) return;
+
+    if (!document.getElementById('ck-lang-selector-styles')) {
+      const style = document.createElement('style');
+      style.id = 'ck-lang-selector-styles';
+      style.textContent = `
+        .ck-lang-selector-wrapper { display: flex !important; align-items: center !important; gap: 6px !important; padding: 0 6px !important; }
+        .ck-lang-selector-label { font-size: 12px !important; color: #333 !important; white-space: nowrap !important; user-select: none !important; }
+        .ck-lang-selector { font-size: 13px !important; font-weight: 600 !important; color: #333 !important; background: #fff !important; border: 1px solid #c4c4c4 !important; border-radius: 2px !important; padding: 2px 4px !important; height: 26px !important; min-width: 60px !important; width: auto !important; cursor: pointer !important; outline: none !important; }
+        .ck-lang-selector:hover { background: #f0f0f0 !important; }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ck-lang-selector-wrapper';
+
+    const label = document.createElement('span');
+    label.className = 'ck-lang-selector-label';
+    label.textContent = 'Language:';
+    wrapper.appendChild(label);
+
+    const select = document.createElement('select');
+    select.className = 'ck-lang-selector';
+    select.title = 'Select language for question';
+
+    this.langs.forEach(l => {
+      const opt = document.createElement('option');
+      opt.value = l.code;
+      opt.textContent = l.label;
+      select.appendChild(opt);
+    });
+    select.value = this.activeLangCode || this.langs[0]?.code;
+    select.addEventListener('change', (e: Event) => {
+      const code = (e.target as HTMLSelectElement).value;
+      this.ngZone.run(() => this.langChange.emit(code));
+    });
+    wrapper.appendChild(select);
+
+    const itemsContainer = (toolbar.querySelector('.ck-toolbar__items') || toolbar) as HTMLElement;
+    itemsContainer.insertBefore(wrapper, itemsContainer.firstChild);
+
+    const sep = document.createElement('span');
+    sep.className = 'ck ck-toolbar__separator';
+    itemsContainer.insertBefore(sep, wrapper.nextSibling);
+
+    this._langSelectEl = select;
   }
 
   private _applyDirection(): void {

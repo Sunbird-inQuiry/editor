@@ -142,6 +142,12 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   currentLang = 'en';
+  langs = ActiveLanguageService.LANGS;
+
+  get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
+  get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
+
+  onLangChange(code: string): void { this.activeLang.set(code); }
 
   get questionBody(): string {
     const q = this.editorState.question as I18nValue;
@@ -964,6 +970,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     metadata['outcomeDeclaration'] = this.getOutcomeDeclaration(metadata);
     metadata = _.merge(metadata, _.pickBy(this.childFormData, _.identity));
+    if (!metadata.name) {
+      metadata.name = this.questionPrimaryCategory || 'Untitled Question';
+    }
     if (_.get(this.creationContext, 'objectType') === 'question') {
       metadata.isReviewModificationAllowed = !!_.get(this.questionMetaData, 'isReviewModificationAllowed');
     }

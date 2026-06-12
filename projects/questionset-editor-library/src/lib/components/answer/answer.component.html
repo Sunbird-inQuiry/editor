@@ -5,7 +5,7 @@
       <lib-ckeditor-tool *ngIf="!isReadOnlyMode"
         (editorDataOutput)="onAnswerChange($event)"
         [editorDataInput]="answerBody"
-        [lang]="lang"></lib-ckeditor-tool>
+        [lang]="globalLang"></lib-ckeditor-tool>
       <ng-container *ngIf="isReadOnlyMode">
         <label class="px-16 py-8 mb-0 ckeditor-tool__label width-100">{{configService.labelConfig?.lbl?.answers}}</label>
         <div class="ckeditor-tool__solution__body">

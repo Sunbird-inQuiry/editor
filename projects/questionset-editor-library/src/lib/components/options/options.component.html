@@ -21,7 +21,7 @@
         </button>
         <lib-ckeditor-tool [setCharacterLimit]="setCharacterLimit"
           (editorDataOutput)="setOptionBody(option, $event.body); option.length = $event.length; editorDataHandler($event)"
-          [editorDataInput]="optionBody(option)" [lang]="lang" class="ckeditor-tool__option mb-10"
+          [editorDataInput]="optionBody(option)" [lang]="globalLang" class="ckeditor-tool__option mb-10"
           [class.mb-5]="showFormError && ([undefined, ''].includes(optionBody(option)) || option.length > setCharacterLimit)">
         </lib-ckeditor-tool>
         <label *ngIf="showFormError && !optionBody(option)" class="sb-color-error fs-0-785">{{configService.labelConfig?.lbl?.fillThisOption}}</label>

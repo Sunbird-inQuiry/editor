@@ -19,7 +19,7 @@
         <div class="order-drag-handle d-flex flex-ai-center pr-5 sb-color-gray-200" cdkDragHandle>
           <i class="icon bars"></i>
         </div>
-        <div class="flex-1 pr-5" [attr.dir]="lang === 'ar' ? 'rtl' : 'ltr'">
+        <div class="flex-1 pr-5" [attr.dir]="globalDir">
           <textarea class="order-item-textarea" rows="2" [attr.maxlength]="120"
             [placeholder]="'Item ' + (i + 1)" [value]="optionLabel(option)"
             (input)="onLabelInput($event.target['value'], i)"></textarea>

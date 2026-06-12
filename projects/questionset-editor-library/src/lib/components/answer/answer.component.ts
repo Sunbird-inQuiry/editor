@@ -16,7 +16,8 @@ export class AnswerComponent implements OnInit {
   @Input() activeLang: ActiveLanguageService;
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
 
-  get lang(): string { return this.activeLang?.current ?? 'en'; }
+  get lang(): string       { return this.activeLang?.current ?? 'en'; }
+  get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
   get answerBody(): string { return readI18n(this.editorState.answer as I18nValue, this.lang); }
 
   constructor(public configService: ConfigService) {}

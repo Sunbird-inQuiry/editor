@@ -11,5 +11,7 @@ import { ConfigService } from '../../services/config/config.service';
 export class LanguageSelectorComponent {
   languages = ActiveLanguageService.LANGS;
 
+  get globalIsRTL(): boolean { return localStorage.getItem('app-language') === 'ar'; }
+
   constructor(public activeLang: ActiveLanguageService, public configService: ConfigService) {}
 }

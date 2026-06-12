@@ -26,7 +26,9 @@ export class MtfComponent implements OnInit {
   readonly MIN_PAIRS = 2;
   readonly MAX_PAIRS = 5;
 
-  get lang(): string { return this.activeLang?.current ?? 'en'; }
+  get lang(): string    { return this.activeLang?.current ?? 'en'; }
+  get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
+  get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
   cellValue(field: I18nValue): string { return readI18n(field, this.lang); }
 
   constructor(public configService: ConfigService) {}

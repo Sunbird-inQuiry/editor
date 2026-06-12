@@ -5,16 +5,16 @@
 
     <div *ngFor="let pair of pairs; let i = index" class="mtf-pair-row mb-20">
       <div class="d-flex">
-        <div class="mtf-cell mr-10" [attr.dir]="lang === 'ar' ? 'rtl' : 'ltr'">
-          <lib-ckeditor-tool [editorDataInput]="cellValue(pair.left)" [lang]="lang" [compact]="true"
+        <div class="mtf-cell mr-10" [attr.dir]="globalDir">
+          <lib-ckeditor-tool [editorDataInput]="cellValue(pair.left)" [lang]="globalLang" [compact]="true"
             [setCharacterLimit]="160" (editorDataOutput)="onCellChange($event, i, 'left')">
           </lib-ckeditor-tool>
           <label *ngIf="showFormError && !cellValue(pair.left)" class="sb-color-error fs-0-785">
             {{ configService.labelConfig?.lbl?.mtfRequired }}
           </label>
         </div>
-        <div class="mtf-cell" [attr.dir]="lang === 'ar' ? 'rtl' : 'ltr'">
-          <lib-ckeditor-tool [editorDataInput]="cellValue(pair.right)" [lang]="lang" [compact]="true"
+        <div class="mtf-cell" [attr.dir]="globalDir">
+          <lib-ckeditor-tool [editorDataInput]="cellValue(pair.right)" [lang]="globalLang" [compact]="true"
             [setCharacterLimit]="160" (editorDataOutput)="onCellChange($event, i, 'right')">
           </lib-ckeditor-tool>
           <label *ngIf="showFormError && !cellValue(pair.right)" class="sb-color-error fs-0-785">

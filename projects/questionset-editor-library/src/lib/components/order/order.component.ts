@@ -32,7 +32,9 @@ export class OrderComponent implements OnInit {
     { id: 'seq-horizontal', label: 'Horizontal' },
   ];
 
-  get lang(): string { return this.activeLang?.current ?? 'en'; }
+  get lang(): string    { return this.activeLang?.current ?? 'en'; }
+  get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
+  get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
   optionLabel(opt: OrderOption): string { return readI18n(opt.label, this.lang); }
 
   setLayout(layoutId: string) {

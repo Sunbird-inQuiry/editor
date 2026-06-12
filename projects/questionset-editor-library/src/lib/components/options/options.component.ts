@@ -25,7 +25,9 @@ export class OptionsComponent implements OnInit, OnChanges {
   @Input() activeLang: ActiveLanguageService;
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
 
-  get lang(): string { return this.activeLang?.current ?? 'en'; }
+  get lang(): string    { return this.activeLang?.current ?? 'en'; }
+  get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
+  get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
   optionBody(option: any): string { return readI18n(option.body as I18nValue, this.lang); }
   setOptionBody(option: any, value: string): void {
     option.body = writeI18n(option.body as I18nValue, this.lang, value);

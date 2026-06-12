@@ -28,8 +28,7 @@
               </sui-multi-select>
             </div>
           </div>
-          <div class="py-20 px-32 br-4 b-1-100" *ngIf="!showPreview" [ngClass]="{'sb-bg-color-primary-0': !isReadOnlyMode}" [attr.dir]="activeLang.dir">
-            <lib-language-selector *ngIf="!isReadOnlyMode"></lib-language-selector>
+          <div class="py-20 px-32 br-4 b-1-100" *ngIf="!showPreview" [ngClass]="{'sb-bg-color-primary-0': !isReadOnlyMode}" [attr.dir]="globalDir">
             <div class="sb-field-group">
               <label *ngIf="!isReadOnlyMode" class="fs-0-92 font-weight-bold">{{configService.labelConfig?.lbl?.question}}<span class="sb-required">*</span></label>
               <div class="sb-field">
@@ -38,7 +37,11 @@
                   *ngIf="!isReadOnlyMode"
                   (editorDataOutput)="editorDataHandler($event, 'question')"
                   [editorDataInput]="questionBody"
-                  [lang]="currentLang"
+                  [lang]="globalLang"
+                  [showLangSelector]="true"
+                  [langs]="langs"
+                  [activeLangCode]="currentLang"
+                  (langChange)="onLangChange($event)"
                   ></lib-ckeditor-tool>
                     <lib-assets-browser
                     *ngIf="(assetType==='video' || assetType==='audio') && !isReadOnlyMode" [showAssetPicker]="showAssetPicker" 
