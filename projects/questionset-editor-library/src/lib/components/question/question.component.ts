@@ -270,6 +270,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 if (this.questionMetaData.editorState) {
                   this.editorState = this.questionMetaData.editorState;
                 }
+                if (this.questionInteractionType === 'order' && this.questionMetaData.templateId) {
+                  this.editorState.templateId = this.questionMetaData.templateId;
+                }
               }
 
               if (this.questionInteractionType === 'slider') {
