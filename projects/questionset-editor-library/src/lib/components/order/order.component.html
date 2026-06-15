@@ -6,7 +6,7 @@
     <i class="icon info circle ml-8" suiPopup popupDelay="500" popupText="Select how items are displayed to the learner."></i>
     <span class="divider mr-8"></span>
     <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-single" [ngClass]="{active: 'seq-vertical' === editorState.templateId}" (click)="setLayout('seq-vertical')"><i class="mr-10 h-7"></i> {{configService.labelConfig?.lbl?.vertical}}</button></span>
-    <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-two" [ngClass]="{active: 'seq-grid' === editorState.templateId}" (click)="setLayout('seq-grid')"><i class="mr-10 h-7 w-20"></i>{{configService.labelConfig?.lbl?.grid}}</button></span>
+    <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-two" [ngClass]="{active: 'seq-vertical-split' === editorState.templateId}" (click)="setLayout('seq-vertical-split')"><i class="mr-10 h-7 w-20"></i>{{configService.labelConfig?.lbl?.grid}}</button></span>
     <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray q-sb-layout-three" [ngClass]="{active: 'seq-horizontal' === editorState.templateId}" (click)="setLayout('seq-horizontal')"><i class="mr-10 h-7"></i> {{configService.labelConfig?.lbl?.horizontal}}</button></span>
   </div>
 

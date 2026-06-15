@@ -1033,7 +1033,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       metadata.media = this.removeUnusedMedia(metadata);
     }
     // tslint:disable-next-line:max-line-length
-    return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions']);
+    return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions', 'i18n']);
   }
 
   removeUnusedMedia(questionMetadata: any) {

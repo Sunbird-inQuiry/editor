@@ -33,7 +33,7 @@ export class OrderComponent implements OnInit {
   readonly MAX_OPTIONS = 5;
   readonly LAYOUTS = [
     { id: 'seq-vertical',   label: 'Vertical' },
-    { id: 'seq-grid',       label: 'Grid' },
+    { id: 'seq-vertical-split', label: 'Grid' },
     { id: 'seq-horizontal', label: 'Horizontal' },
   ];
 

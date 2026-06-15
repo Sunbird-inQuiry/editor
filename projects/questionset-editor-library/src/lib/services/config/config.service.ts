@@ -3,7 +3,6 @@ import * as urlConfig from './url.config.json';
 import * as categoryConfig from './category.config.json';
 import * as labelConfigEn from './label.config.json';
 import * as labelConfigAr from './label.config.ar.json';
-import * as labelConfigHi from './label.config.hi.json';
 import * as labelConfigFr from './label.config.fr.json';
 import * as labelConfigPt from './label.config.pt.json';
 import * as playerConfig from './player.config.json';
@@ -24,9 +23,8 @@ export class ConfigService {
   private readonly labelMap: Record<string, any> = {
     en: labelConfigEn,
     ar: labelConfigAr,
-    hi: labelConfigHi,
-    pt: labelConfigPt,
     fr: labelConfigFr,
+    pt: labelConfigPt,
   };
 
   setLanguage(lang: string): void {

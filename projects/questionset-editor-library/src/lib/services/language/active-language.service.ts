@@ -6,7 +6,7 @@ export class ActiveLanguageService {
   static readonly LANGS = [
     { code: 'en', label: 'EN', dir: 'ltr' as const },
     { code: 'ar', label: 'AR', dir: 'rtl' as const },
-    { code: 'hi', label: 'HI', dir: 'ltr' as const },
+    { code: 'fr', label: 'FR', dir: 'ltr' as const },
     { code: 'pt', label: 'PT', dir: 'ltr' as const },
   ];
 
