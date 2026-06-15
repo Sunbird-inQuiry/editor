@@ -43,7 +43,10 @@ export class OrderComponent implements OnInit {
   get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
   optionLabel(opt: OrderOption): string { return readI18nForEditor(opt.label, this.lang); }
 
+  templateId = 'seq-vertical';
+
   setLayout(layoutId: string) {
+    this.templateId = layoutId;
     this.editorState.templateId = layoutId;
     this.editorDataHandler();
   }
@@ -71,6 +74,7 @@ export class OrderComponent implements OnInit {
     if (!this.editorState.templateId) {
       this.editorState.templateId = 'seq-vertical';
     }
+    this.templateId = this.editorState.templateId;
     if (this.isReorder) {
       this.syncCorrectOrderOptions();
     }
