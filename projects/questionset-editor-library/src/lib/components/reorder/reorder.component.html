@@ -4,7 +4,7 @@
 
   <div class="reorder-input-wrap">
     <textarea class="reorder-textarea" [attr.maxlength]="MAX_CHARS" [value]="sentence"
-      [attr.dir]="lang === 'ar' ? 'rtl' : 'ltr'"
+      [attr.dir]="globalDir"
       (input)="onSentenceChange($event.target['value'])" rows="3"
       [placeholder]="configService.labelConfig?.lbl?.reoPlaceholder"></textarea>
     <span class="reorder-counter fs-0-785 sb-color-gray-200">{{ charCount }} / {{ MAX_CHARS }}</span>

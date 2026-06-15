@@ -919,9 +919,12 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         maxScore: { cardinality: 'single', type: 'integer', defaultValue: Object.keys(rd).length }
       };
     } else if (this.questionInteractionType === 'match') {
-      metadata.body = this.getMtfQuestionHtmlBody(this.editorState.question);
+      metadata.body = this.getMtfQuestionHtmlBody(readI18n(this.editorState.question as I18nValue, 'en'));
     } else if (this.questionInteractionType === 'order') {
-      metadata.body = this.getOrderQuestionHtmlBody(this.editorState.question);
+      metadata.body = this.getOrderQuestionHtmlBody(readI18n(this.editorState.question as I18nValue, 'en'));
+      if (metadata.sentence && typeof metadata.sentence === 'object') {
+        metadata.sentence = readI18n(metadata.sentence as I18nValue, 'en');
+      }
     } else if (this.questionInteractionType != 'default') {
       metadata.responseDeclaration = this.getResponseDeclaration(this.questionInteractionType);
     }
