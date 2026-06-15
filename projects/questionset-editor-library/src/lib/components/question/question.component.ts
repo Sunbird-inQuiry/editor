@@ -863,9 +863,20 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   setQuestionProperties(metadata) {
     if (this.questionInteractionType != 'choice') {
       if (!_.isUndefined(metadata.answer)) {
-        const answerHtml = this.getAnswerHtml(metadata.answer);
-        const finalAnswer = this.getAnswerWrapperHtml(answerHtml);
-        metadata.answer = finalAnswer;
+        if (typeof metadata.answer === 'object') {
+          const answerI18n: Record<string, string> = {};
+          Object.entries(metadata.answer as Record<string, string>).forEach(([lang, text]) => {
+            if (text) {
+              answerI18n[lang] = this.getAnswerWrapperHtml(this.getAnswerHtml(text));
+            }
+          });
+          const keys = Object.keys(answerI18n);
+          metadata.answer = (keys.length === 1 && keys[0] === 'en')
+            ? answerI18n['en']
+            : JSON.stringify(answerI18n);
+        } else {
+          metadata.answer = this.getAnswerWrapperHtml(this.getAnswerHtml(metadata.answer));
+        }
       } else {
         metadata.answer = '';
       }
