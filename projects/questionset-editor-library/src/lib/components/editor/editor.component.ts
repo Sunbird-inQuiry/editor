@@ -105,11 +105,23 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  private _onStorageChange = (e: StorageEvent) => {
+    if (e.key === 'app-language' && e.newValue) {
+      this.configService.setLanguage(e.newValue);
+    }
+  };
+  private _onAppLangChange = (e: Event) => {
+    const lang = (e as CustomEvent).detail?.lang;
+    if (lang) { this.configService.setLanguage(lang); }
+  };
+
   ngOnInit() {
     this.setEditorConfig();
     this.editorService.initialize(this.editorConfig);
     const appLang = localStorage.getItem('app-language') || 'en';
     this.configService.setLanguage(appLang);
+    window.addEventListener('storage', this._onStorageChange);
+    window.addEventListener('app-language-change', this._onAppLangChange);
     this.editorMode = this.editorService.editorMode;
     this.treeService.initialize(this.editorConfig);
     this.objectType = this.configService.categoryConfig[this.editorConfig.config.objectType];
@@ -1102,6 +1114,8 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    window.removeEventListener('storage', this._onStorageChange);
+    window.removeEventListener('app-language-change', this._onAppLangChange);
   }
 
 
