@@ -55,9 +55,21 @@
     "copyRightsAndLicense": "Droits d'auteur et licence",
     "dropChooseFile": "Déposez ou choisissez un fichier à télécharger",
     "charactersLeft": "Caractères restants :",
-    "myAssets": { "image": "Mes images", "video": "Mes vidéos", "audio": "Mes fichiers audio" },
-    "allAssets": { "image": "Toutes les images", "video": "Toutes les vidéos", "audio": "Tous les fichiers audio" },
-    "selectAsset": { "image": "Sélectionner une image", "video": "Sélectionner une vidéo", "audio": "Sélectionner un fichier audio" },
+    "myAssets": {
+      "image": "Mes images",
+      "video": "Mes vidéos",
+      "audio": "Mes fichiers audio"
+    },
+    "allAssets": {
+      "image": "Toutes les images",
+      "video": "Toutes les vidéos",
+      "audio": "Tous les fichiers audio"
+    },
+    "selectAsset": {
+      "image": "Sélectionner une image",
+      "video": "Sélectionner une vidéo",
+      "audio": "Sélectionner un fichier audio"
+    },
     "chooseOrDragAsset": {
       "image": "Choisissez ou glissez-déposez votre image ici",
       "video": "Choisissez ou glissez-déposez votre vidéo ici",
@@ -208,6 +220,12 @@
     }
   },
   "categoryLabels": {
-    "Multiselect Multiple Choice Question": "Question à choix multiple"
+    "Multiselect Multiple Choice Question": "Question à choix multiple",
+    "Multiple Choice Question": "Question à Choix Multiple",
+    "Subjective Question": "Question Subjective",
+    "FTB Question": "Question à Trous",
+    "Match The Following Question": "Question d'Appariement",
+    "Sequence Question": "Question de Séquence",
+    "Reorder Question": "Question de Réorganisation"
   }
 }

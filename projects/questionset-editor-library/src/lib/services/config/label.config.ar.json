@@ -55,9 +55,21 @@
     "copyRightsAndLicense": "حقوق النشر والترخيص",
     "dropChooseFile": "أفلت أو اختر ملفاً للرفع",
     "charactersLeft": "الأحرف المتبقية:",
-    "myAssets": { "image": "صوري", "video": "مقاطعي المرئية", "audio": "تسجيلاتي الصوتية" },
-    "allAssets": { "image": "جميع الصور", "video": "جميع المقاطع المرئية", "audio": "جميع الملفات الصوتية" },
-    "selectAsset": { "image": "اختر صورة", "video": "اختر فيديو", "audio": "اختر صوتاً" },
+    "myAssets": {
+      "image": "صوري",
+      "video": "مقاطعي المرئية",
+      "audio": "تسجيلاتي الصوتية"
+    },
+    "allAssets": {
+      "image": "جميع الصور",
+      "video": "جميع المقاطع المرئية",
+      "audio": "جميع الملفات الصوتية"
+    },
+    "selectAsset": {
+      "image": "اختر صورة",
+      "video": "اختر فيديو",
+      "audio": "اختر صوتاً"
+    },
     "chooseOrDragAsset": {
       "image": "اختر أو اسحب وأفلت صورتك هنا",
       "video": "اختر أو اسحب وأفلت الفيديو هنا",
@@ -208,6 +220,12 @@
     }
   },
   "categoryLabels": {
-    "Multiselect Multiple Choice Question": "سؤال اختيار متعدد"
+    "Multiselect Multiple Choice Question": "سؤال اختيار متعدد",
+    "Multiple Choice Question": "سؤال الاختيار من متعدد",
+    "Subjective Question": "سؤال إنشائي",
+    "FTB Question": "سؤال ملء الفراغات",
+    "Match The Following Question": "سؤال المطابقة",
+    "Sequence Question": "سؤال الترتيب",
+    "Reorder Question": "سؤال إعادة الترتيب"
   }
 }

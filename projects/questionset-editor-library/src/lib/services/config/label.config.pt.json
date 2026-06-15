@@ -55,9 +55,21 @@
     "copyRightsAndLicense": "Direitos Autorais e Licença",
     "dropChooseFile": "Solte ou escolha um arquivo para carregar",
     "charactersLeft": "Caracteres restantes:",
-    "myAssets": { "image": "Minhas Imagens", "video": "Meus Vídeos", "audio": "Meu Áudio" },
-    "allAssets": { "image": "Todas as Imagens", "video": "Todos os Vídeos", "audio": "Todos os Áudios" },
-    "selectAsset": { "image": "Selecionar Imagem", "video": "Selecionar Vídeo", "audio": "Selecionar Áudio" },
+    "myAssets": {
+      "image": "Minhas Imagens",
+      "video": "Meus Vídeos",
+      "audio": "Meu Áudio"
+    },
+    "allAssets": {
+      "image": "Todas as Imagens",
+      "video": "Todos os Vídeos",
+      "audio": "Todos os Áudios"
+    },
+    "selectAsset": {
+      "image": "Selecionar Imagem",
+      "video": "Selecionar Vídeo",
+      "audio": "Selecionar Áudio"
+    },
     "chooseOrDragAsset": {
       "image": "Escolha ou arraste e solte sua imagem aqui",
       "video": "Escolha ou arraste e solte seu vídeo aqui",
@@ -208,6 +220,12 @@
     }
   },
   "categoryLabels": {
-    "Multiselect Multiple Choice Question": "Pergunta de Múltipla Escolha"
+    "Multiselect Multiple Choice Question": "Pergunta de Múltipla Escolha",
+    "Multiple Choice Question": "Questão de Múltipla Escolha",
+    "Subjective Question": "Questão Subjetiva",
+    "FTB Question": "Questão de Preenchimento",
+    "Match The Following Question": "Questão de Correspondência",
+    "Sequence Question": "Questão de Sequência",
+    "Reorder Question": "Questão de Reordenação"
   }
 }
