@@ -266,7 +266,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
               this.questionInteractionType = _.get(this.questionMetaData,'interactionTypes') ? _.get(this.questionMetaData,'interactionTypes[0]') : 'default';
               this.editorService.setIsReviewModificationAllowed(_.get(this.questionMetaData, 'isReviewModificationAllowed', false));
               this.populateFormData();
-              if (_.includes(['default', 'text', 'date', 'slider'], this.questionInteractionType)) {
+              if (_.includes(['default', 'text', 'date', 'slider', 'match', 'order'], this.questionInteractionType)) {
                 if (this.questionMetaData.editorState) {
                   this.editorState = this.questionMetaData.editorState;
                 }
