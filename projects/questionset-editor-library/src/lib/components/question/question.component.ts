@@ -930,9 +930,15 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         maxScore: { cardinality: 'single', type: 'integer', defaultValue: Object.keys(rd).length }
       };
     } else if (this.questionInteractionType === 'match') {
-      metadata.body = this.getMtfQuestionHtmlBody(readI18n(this.editorState.question as I18nValue, 'en'));
+      metadata.body = this.buildI18nBody(
+        this.editorState.question as I18nValue,
+        (text) => this.getMtfQuestionHtmlBody(text)
+      );
     } else if (this.questionInteractionType === 'order') {
-      metadata.body = this.getOrderQuestionHtmlBody(readI18n(this.editorState.question as I18nValue, 'en'));
+      metadata.body = this.buildI18nBody(
+        this.editorState.question as I18nValue,
+        (text) => this.getOrderQuestionHtmlBody(text)
+      );
       if (metadata.sentence && typeof metadata.sentence === 'object') {
         metadata.sentence = readI18n(metadata.sentence as I18nValue, 'en');
       }
@@ -940,6 +946,19 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       metadata.responseDeclaration = this.getResponseDeclaration(this.questionInteractionType);
     }
     return metadata;
+  }
+
+  buildI18nBody(question: I18nValue, buildFn: (text: string) => string): string {
+    if (!question) return buildFn('');
+    if (typeof question === 'string') return buildFn(question);
+    const bodyI18n: Record<string, string> = {};
+    Object.entries(question as Record<string, string>).forEach(([lang, text]) => {
+      if (text) { bodyI18n[lang] = buildFn(text); }
+    });
+    const keys = Object.keys(bodyI18n);
+    if (keys.length === 0) return buildFn('');
+    if (keys.length === 1 && keys[0] === 'en') return bodyI18n['en'];
+    return JSON.stringify(bodyI18n);
   }
 
   getMtfQuestionHtmlBody(question: string): string {
