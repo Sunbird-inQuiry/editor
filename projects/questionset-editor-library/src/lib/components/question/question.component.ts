@@ -883,18 +883,37 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.questionInteractionType === 'choice') {
-      metadata.body = this.getMcqQuestionHtmlBody(this.editorState.question, this.editorState.templateId);
+      metadata.body = this.buildI18nBody(
+        this.editorState.question as I18nValue,
+        (text) => this.getMcqQuestionHtmlBody(text, this.editorState.templateId)
+      );
       if(_.isNumber(metadata.answer)) {
         metadata.answer = [metadata.answer];
       }
       const correctAnswersData = this.getInteractionValues(metadata.answer, metadata.interactions);
-      let concatenatedAnswers = '';
+      const answerI18n: Record<string, string> = {};
       _.forEach(correctAnswersData, (answer) => {
-        const optionAnswer = this.getAnswerHtml(answer.label);
-        concatenatedAnswers = concatenatedAnswers.concat(optionAnswer);
-      })
-      const finalAnswer = this.getAnswerWrapperHtml(concatenatedAnswers);
-      metadata.answer = finalAnswer;
+        const label = answer.label;
+        if (label && typeof label === 'object') {
+          Object.entries(label as Record<string, string>).forEach(([lang, text]) => {
+            if (text) { answerI18n[lang] = (answerI18n[lang] || '') + this.getAnswerHtml(text); }
+          });
+        } else {
+          answerI18n['en'] = (answerI18n['en'] || '') + this.getAnswerHtml(label || '');
+        }
+      });
+      const answerKeys = Object.keys(answerI18n);
+      if (answerKeys.length === 0) {
+        metadata.answer = this.getAnswerWrapperHtml('');
+      } else if (answerKeys.length === 1 && answerKeys[0] === 'en') {
+        metadata.answer = this.getAnswerWrapperHtml(answerI18n['en']);
+      } else {
+        metadata.answer = JSON.stringify(
+          Object.fromEntries(
+            Object.entries(answerI18n).map(([lang, html]) => [lang, this.getAnswerWrapperHtml(html)])
+          )
+        );
+      }
     } else if (this.questionInteractionType === 'text') {
       // FTB: transform [[answer]] → [[responseN]] in stored body (language-agnostic keys).
       // The editorState keeps [[answer]] for authoring; body uses [[responseN]] for the player.
