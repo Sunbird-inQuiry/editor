@@ -48,7 +48,7 @@
     "@angular-devkit/core": "^19.2.18",
     "@angular/animations": "^19.2.18",
     "@angular/cdk": "^19.2.18",
-    "@angular/common": "^19.2.18",
+    "@angular/common": "^20.3.25",
     "@angular/compiler": "^19.2.18",
     "@angular/core": "^19.2.18",
     "@angular/elements": "^19.2.18",
