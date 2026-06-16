@@ -30,7 +30,7 @@
           </div>
           <div class="py-20 px-32 br-4 b-1-100" *ngIf="!showPreview" [ngClass]="{'sb-bg-color-primary-0': !isReadOnlyMode}" [attr.dir]="globalDir">
             <div class="sb-field-group">
-              <label *ngIf="!isReadOnlyMode" class="fs-0-92 font-weight-bold">{{configService.labelConfig?.lbl?.question}}<span class="sb-required">*</span></label>
+              <label *ngIf="!isReadOnlyMode" class="fs-0-92 font-weight-bold">{{ questionInteractionType === 'match' ? 'Enter the question' : configService.labelConfig?.lbl?.question }}<span class="sb-required">*</span></label>
               <div class="sb-field">
                 <div [ngClass]="{'ckeditor-tool__question': !isReadOnlyMode, 'ckeditor-tool__question-readonly': isReadOnlyMode, 'mb-5': true}">
                   <lib-ckeditor-tool
@@ -42,6 +42,7 @@
                   [langs]="langs"
                   [activeLangCode]="currentLang"
                   (langChange)="onLangChange($event)"
+                  [setCharacterLimit]="questionInteractionType === 'match' ? 1000 : 0"
                   ></lib-ckeditor-tool>
                     <lib-assets-browser
                     *ngIf="(assetType==='video' || assetType==='audio') && !isReadOnlyMode" [showAssetPicker]="showAssetPicker" 

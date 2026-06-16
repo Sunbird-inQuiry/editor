@@ -36,6 +36,8 @@ export class MtfComponent implements OnInit {
   get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
   get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
   cellValue(field: I18nValue): string { return readI18nForEditor(field, this.lang); }
+  langs = ActiveLanguageService.LANGS;
+  onLangChange(code: string): void { this._activeLang?.set(code); }
   isPartialScore = false;
 
   constructor(public configService: ConfigService) {}
