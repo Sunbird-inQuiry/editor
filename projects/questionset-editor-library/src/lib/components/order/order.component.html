@@ -6,7 +6,6 @@
     <i class="icon info circle ml-8" suiPopup popupDelay="500" popupText="Select how items are displayed to the learner."></i>
     <span class="divider mr-8"></span>
     <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-single" [ngClass]="{active: 'seq-vertical' === templateId}" (click)="setLayout('seq-vertical')"><i class="mr-10 h-7"></i> {{configService.labelConfig?.lbl?.vertical}}</button></span>
-    <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-two" [ngClass]="{active: 'seq-vertical-split' === templateId}" (click)="setLayout('seq-vertical-split')"><i class="mr-10 h-7 w-20"></i>{{configService.labelConfig?.lbl?.grid}}</button></span>
     <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray q-sb-layout-three" [ngClass]="{active: 'seq-horizontal' === templateId}" (click)="setLayout('seq-horizontal')"><i class="mr-10 h-7"></i> {{configService.labelConfig?.lbl?.horizontal}}</button></span>
   </div>
 
@@ -15,24 +14,23 @@
     <p class="fs-0-785 sb-color-gray-200 mb-10">{{ configService.labelConfig?.lbl?.seqItemsDesc }}</p>
 
     <div cdkDropList (cdkDropListDropped)="dropOption($event)" class="order-list">
-      <div *ngFor="let option of options; let i = index" cdkDrag class="order-item d-flex mb-10">
-        <div class="order-drag-handle d-flex flex-ai-center pr-5 sb-color-gray-200" cdkDragHandle>
-          <i class="icon bars"></i>
-        </div>
-        <div class="flex-1 pr-5" [attr.dir]="globalDir">
-          <textarea class="order-item-textarea" rows="2" [attr.maxlength]="120"
-            [placeholder]="'Item ' + (i + 1)" [value]="optionLabel(option)"
-            (input)="onLabelInput($event.target['value'], i)"></textarea>
-          <span class="fs-0-785 sb-color-gray-200 d-block mt-2">
-            {{ 120 - optionLabel(option).length }} {{ configService.labelConfig?.lbl?.charactersLeft }}
+      <div *ngFor="let option of options; let i = index" cdkDrag class="order-item-card mb-10">
+        <div class="order-item-card__body" [attr.dir]="globalDir">
+          <input class="order-item-card__input" type="text" [attr.maxlength]="120"
+            [placeholder]="'Enter Sequence ' + (i + 1)"
+            [value]="optionLabel(option)"
+            (input)="onLabelInput($event.target['value'], i)">
+          <span class="order-item-card__count fs-0-785 sb-color-gray-200">
+            {{ optionLabel(option).length }} / 120
           </span>
-          <label *ngIf="showFormError && !optionLabel(option)" class="sb-color-error fs-0-785">
+          <label *ngIf="showFormError && !optionLabel(option)" class="sb-color-error fs-0-785 d-block mt-4">
             {{ configService.labelConfig?.lbl?.mtfRequired }}
           </label>
         </div>
-        <div class="d-flex flex-ai-center">
-          <button class="sb-btn sb-ckeditor-close" [disabled]="options.length <= 2" (click)="deleteOption(i)">
-            <i class="icon close"></i>
+        <div class="order-item-card__footer">
+          <button class="order-item-card__delete sb-btn" [disabled]="options.length <= 2" (click)="deleteOption(i)"
+            cdkDragHandle>
+            <i class="trash alternate outline icon"></i>
           </button>
         </div>
       </div>
