@@ -165,7 +165,9 @@
     "reoAnswersDesc": "أضف كلماتك بالترتيب الصحيح. ستُخلط الكلمات تلقائياً.",
     "reoPlaceholder": "اكتب جملتك هنا...",
     "reoTokensRequired": "أدخل جملة لإنشاء رموز الكلمات.",
-    "reoWordsLabel": "الكلمات"
+    "reoWordsLabel": "الكلمات",
+    "partialScoring": "تسجيل جزئي",
+    "evalUnordered": "السماح بالإجابات بأي ترتيب"
   },
   "err": {
     "somethingWentWrong": "حدث خطأ ما",

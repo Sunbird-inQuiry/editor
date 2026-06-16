@@ -36,6 +36,7 @@ export class MtfComponent implements OnInit {
   get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
   get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
   cellValue(field: I18nValue): string { return readI18nForEditor(field, this.lang); }
+  isPartialScore = false;
 
   constructor(public configService: ConfigService) {}
 
@@ -48,6 +49,7 @@ export class MtfComponent implements OnInit {
         { left: '', right: '' },
       ];
     }
+    this.isPartialScore = !!this.editorState.isPartialScore;
     this.editorDataHandler();
   }
 
@@ -91,27 +93,33 @@ export class MtfComponent implements OnInit {
       return acc;
     }, {} as Record<string, string>);
 
+    const pairMapping = this.isPartialScore
+      ? pairs.map((_, i) => ({ key: String(i), value: String.fromCharCode(97 + i), score: 1 }))
+      : undefined;
+
+    const rd: any = {
+      cardinality: 'single',
+      type: 'map',
+      correctResponse: { value: correctValue },
+    };
+    if (pairMapping) { rd.mapping = pairMapping; }
+
     return {
       interactionTypes: ['match'],
       qType: 'MTF',
       primaryCategory: this.questionPrimaryCategory || 'Match The Following Question',
+      isPartialScore: this.isPartialScore,
       interactions: {
         response1: {
           type: 'match',
           options: { left: leftOptions, right: rightOptions },
         },
       },
-      responseDeclaration: {
-        response1: {
-          cardinality: 'single',
-          type: 'map',
-          correctResponse: { value: correctValue },
-        },
-      },
+      responseDeclaration: { response1: rd },
       scoringMode: 'responseProcessing',
       responseProcessing: { template: 'MAP_RESPONSE' },
       outcomeDeclaration: {
-        maxScore: { cardinality: 'single', type: 'integer', defaultValue: pairs.length },
+        maxScore: { cardinality: 'single', type: 'integer', defaultValue: this.isPartialScore ? pairs.length : 1 },
       },
       editorState: { pairs: this.editorState.pairs },
     };

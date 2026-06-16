@@ -942,14 +942,26 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
           return `[[${key}]]`;
         });
       });
+      // evalUnordered: every blank accepts any correct answer (set intersection logic for player)
+      const allAnswers = Object.values(rd).map((r: any) => r.correctResponse?.value).filter(Boolean);
+      if (this.editorState.evalUnordered && allAnswers.length > 1) {
+        Object.keys(rd).forEach(key => {
+          rd[key].mapping = allAnswers.map((ans: string) => ({ value: ans, score: 1, caseSensitive: false }));
+        });
+      }
+
+      const numBlanks = Object.keys(rd).length;
+      const isPartialScore = !!this.editorState.isPartialScore;
       metadata.body = normalizeI18n(transformedBody);
       metadata.responseDeclaration = rd;
       metadata.interactions = { ...(metadata.interactions || {}), ...interactions };
       metadata.interactionTypes = ['text'];
       metadata.qType = 'FTB';
       metadata.primaryCategory = this.questionPrimaryCategory;
+      metadata.scoringMode = 'responseProcessing';
+      metadata.responseProcessing = { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' };
       metadata.outcomeDeclaration = {
-        maxScore: { cardinality: 'single', type: 'integer', defaultValue: Object.keys(rd).length }
+        maxScore: { cardinality: 'single', type: 'integer', defaultValue: isPartialScore ? numBlanks : 1 }
       };
     } else if (this.questionInteractionType === 'match') {
       metadata.body = this.buildI18nBody(

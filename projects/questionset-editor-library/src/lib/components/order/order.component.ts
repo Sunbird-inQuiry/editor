@@ -42,6 +42,7 @@ export class OrderComponent implements OnInit {
   get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
   get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
   optionLabel(opt: OrderOption): string { return readI18nForEditor(opt.label, this.lang); }
+  isPartialScore = false;
 
   templateId = 'seq-vertical';
 
@@ -75,6 +76,7 @@ export class OrderComponent implements OnInit {
       this.editorState.templateId = 'seq-vertical';
     }
     this.templateId = this.editorState.templateId;
+    this.isPartialScore = !!this.editorState.isPartialScore;
     if (this.isReorder) {
       this.syncCorrectOrderOptions();
     }
@@ -145,12 +147,23 @@ export class OrderComponent implements OnInit {
     const options: OrderOption[] = this.editorState.options || [];
     const correctOrder: string[] = this.editorState.correctOrder || options.map(o => o.value);
     const qType = this.isReorder ? 'REO' : 'SEQ';
+    const isPartialScore = !this.isReorder && this.isPartialScore;
+
+    const rd: any = {
+      cardinality: 'ordered',
+      type: 'string',
+      correctResponse: { value: correctOrder },
+    };
+    if (isPartialScore) {
+      rd.mapping = correctOrder.map(v => ({ value: v, score: 1 }));
+    }
 
     return {
       interactionTypes: ['order'],
       qType,
       templateId: this.editorState.templateId || 'seq-vertical',
       primaryCategory: this.questionPrimaryCategory,
+      isPartialScore: isPartialScore || undefined,
       interactions: {
         response1: {
           type: 'order',
@@ -160,17 +173,11 @@ export class OrderComponent implements OnInit {
           })),
         },
       },
-      responseDeclaration: {
-        response1: {
-          cardinality: 'ordered',
-          type: 'string',
-          correctResponse: { value: correctOrder },
-        },
-      },
+      responseDeclaration: { response1: rd },
       scoringMode: 'responseProcessing',
-      responseProcessing: { template: 'MATCH_CORRECT' },
+      responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
       outcomeDeclaration: {
-        maxScore: { cardinality: 'single', type: 'integer', defaultValue: 1 },
+        maxScore: { cardinality: 'single', type: 'integer', defaultValue: isPartialScore ? options.length : 1 },
       },
       editorState: { options, correctOrder },
     };

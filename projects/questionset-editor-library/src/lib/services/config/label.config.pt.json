@@ -165,7 +165,9 @@
     "reoAnswersDesc": "Adicione suas palavras na sequência correta. As palavras serão embaralhadas automaticamente.",
     "reoPlaceholder": "Digite sua frase aqui...",
     "reoTokensRequired": "Digite uma frase para criar tokens de palavras.",
-    "reoWordsLabel": "Palavras"
+    "reoWordsLabel": "Palavras",
+    "partialScoring": "Pontuação Parcial",
+    "evalUnordered": "Permitir respostas em qualquer ordem"
   },
   "err": {
     "somethingWentWrong": "Algo deu errado",

@@ -47,6 +47,14 @@
     <label *ngIf="showFormError && options.length < 2" class="sb-color-error fs-0-785 d-block">
       {{ configService.labelConfig?.lbl?.seqMinItems }}
     </label>
+
+    <div *ngIf="!isReorder" class="mt-15 br-4 b-1-100 px-16 py-12 sb-bg-color-white">
+      <label class="fs-0-92 font-weight-bold d-block mb-10">Configuration</label>
+      <label class="d-flex flex-ai-center cursor-pointer pl-16">
+        <input type="checkbox" [(ngModel)]="isPartialScore" (change)="editorDataHandler()" class="mr-8">
+        <span class="fs-0-785">{{ configService.labelConfig?.lbl?.isPartialScore }}</span>
+      </label>
+    </div>
   </div>
 
   <!-- Reorder: correct-order panel -->

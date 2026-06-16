@@ -21,4 +21,16 @@
   <label *ngIf="showFormError && parsedBlanks.length === 0" class="sb-color-error fs-0-785 d-block mt-5">
     {{ configService.labelConfig?.lbl?.ftbBlankRequired }}
   </label>
+
+  <div class="mt-15 br-4 b-1-100 px-16 py-12 sb-bg-color-white">
+    <label class="fs-0-92 font-weight-bold d-block mb-10">Configuration</label>
+    <label class="d-flex flex-ai-center mb-8 cursor-pointer pl-16">
+      <input type="checkbox" [(ngModel)]="isPartialScore" (change)="onToggle()" class="mr-8">
+      <span class="fs-0-785">{{ configService.labelConfig?.lbl?.isPartialScore }}</span>
+    </label>
+    <label class="d-flex flex-ai-center cursor-pointer pl-16">
+      <input type="checkbox" [(ngModel)]="evalUnordered" (change)="onToggle()" class="mr-8">
+      <span class="fs-0-785">{{ configService.labelConfig?.lbl?.evalUnordered }}</span>
+    </label>
+  </div>
 </div>

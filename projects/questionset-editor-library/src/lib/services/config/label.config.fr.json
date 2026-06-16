@@ -165,7 +165,9 @@
     "reoAnswersDesc": "Ajoutez vos mots dans la séquence correcte. Les mots seront mélangés automatiquement.",
     "reoPlaceholder": "Tapez votre phrase ici...",
     "reoTokensRequired": "Saisissez une phrase pour créer des jetons de mots.",
-    "reoWordsLabel": "Mots"
+    "reoWordsLabel": "Mots",
+    "partialScoring": "Score Partiel",
+    "evalUnordered": "Autoriser les réponses dans n'importe quel ordre"
   },
   "err": {
     "somethingWentWrong": "Quelque chose a mal tourné",

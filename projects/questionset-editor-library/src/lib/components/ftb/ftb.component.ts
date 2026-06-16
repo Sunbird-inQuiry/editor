@@ -27,6 +27,9 @@ export class FtbComponent implements OnInit {
   currentLang = 'en';
   get lang(): string { return this.currentLang; }
 
+  isPartialScore = false;
+  evalUnordered  = false;
+
   get questionBody(): string {
     return readI18nForEditor(this.editorState?.question as I18nValue, this.lang);
   }
@@ -45,13 +48,23 @@ export class FtbComponent implements OnInit {
 
   ngOnInit() {
     if (!this.editorState) { this.editorState = {}; }
-    // Emit static metadata so editorState carries qType/interactionTypes.
-    // responseDeclaration is built at save time in setQuestionProperties().
+    this.isPartialScore = !!this.editorState.isPartialScore;
+    this.evalUnordered  = !!this.editorState.evalUnordered;
+    this.emitMetadata();
+  }
+
+  onToggle() {
+    this.emitMetadata();
+  }
+
+  private emitMetadata() {
     this.editorDataOutput.emit({
       body: {
         interactionTypes: ['text'],
         qType: 'FTB',
         primaryCategory: this.questionPrimaryCategory || 'FTB Question',
+        isPartialScore: this.isPartialScore,
+        evalUnordered: this.evalUnordered,
         scoringMode: 'responseProcessing',
         responseProcessing: { template: 'MAP_RESPONSE' },
       }

@@ -161,6 +161,8 @@
        "ftbHint2": "Example: 'The tree is [[tall]] and [[strong]].' The text inside the brackets is the correct answer for that language.",
        "ftbBlanksLabel": "Detected blanks",
        "ftbBlankRequired": "Add at least one blank using [[ ]] syntax.",
+       "partialScoring": "Partial Scoring",
+       "evalUnordered": "Allow answers in any order",
        "mtfSetAnswers": "Set your answers",
        "mtfAnswersDesc": "Add question-answer pairs to your question. Answers will be shuffled automatically.",
        "mtfDeletePair": "Delete Pair",
