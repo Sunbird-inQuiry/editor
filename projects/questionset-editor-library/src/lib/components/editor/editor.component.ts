@@ -1,5 +1,5 @@
 import {
-  Component, HostListener, Input, OnDestroy, OnInit, ChangeDetectorRef,
+  Component, HostBinding, HostListener, Input, OnDestroy, OnInit, ChangeDetectorRef,
   EventEmitter, Output, ViewEncapsulation, AfterViewInit, ViewChild
 } from '@angular/core';
 import { EditorService } from '../../services/editor/editor.service';
@@ -105,21 +105,30 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  currentLang = 'en';
+  @HostBinding('attr.dir') get dir() { return this.currentLang === 'ar' ? 'rtl' : 'ltr'; }
+
+  private _applyLang(lang: string) {
+    this.currentLang = lang;
+    this.configService.setLanguage(lang);
+    document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', lang);
+  }
+
   private _onStorageChange = (e: StorageEvent) => {
     if (e.key === 'app-language' && e.newValue) {
-      this.configService.setLanguage(e.newValue);
+      this._applyLang(e.newValue);
     }
   };
   private _onAppLangChange = (e: Event) => {
     const lang = (e as CustomEvent).detail?.lang;
-    if (lang) { this.configService.setLanguage(lang); }
+    if (lang) { this._applyLang(lang); }
   };
 
   ngOnInit() {
     this.setEditorConfig();
     this.editorService.initialize(this.editorConfig);
-    const appLang = localStorage.getItem('app-language') || 'en';
-    this.configService.setLanguage(appLang);
+    this._applyLang(localStorage.getItem('app-language') || 'en');
     window.addEventListener('storage', this._onStorageChange);
     window.addEventListener('app-language-change', this._onAppLangChange);
     this.editorMode = this.editorService.editorMode;
@@ -1116,6 +1125,8 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.unsubscribe$.complete();
     window.removeEventListener('storage', this._onStorageChange);
     window.removeEventListener('app-language-change', this._onAppLangChange);
+    document.documentElement.removeAttribute('dir');
+    document.documentElement.removeAttribute('lang');
   }
 
 
