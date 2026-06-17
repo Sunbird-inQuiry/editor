@@ -585,11 +585,6 @@ lib-questionset-editor {
       display: flex !important;
       direction: rtl !important;
     }
-    // Restore ltr direction inside columns so content isn't affected
-    .three.wide.column.p-0,
-    .eight.wide.column.bg-white {
-      direction: ltr;
-    }
     // Fix padding on the form panel
     .eight.wide.column.bg-white {
       padding-left: 0 !important;
@@ -656,5 +651,11 @@ lib-questionset-editor {
       margin-right: 0;
     }
   }
+
+  // Footer bar: reverse button groups for RTL
+  .sb-fixed-with-whitebg {
+    flex-direction: row-reverse !important;
+  }
+
   }
 }
