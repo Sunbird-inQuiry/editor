@@ -40,6 +40,10 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
   public nodeParentDependentMap = {};
   public treeData: any = [];
   public branchingObject = {};
+  get isRTL(): boolean {
+    void this.configService.labelConfig; // creates CD dependency so this re-runs on language change
+    return document.documentElement.dir === 'rtl';
+  }
   get rootMenuTemplate(): string {
     const lbl = this.configService.labelConfig?.button_labels;
     const addChild = lbl?.add_child_btn_label || 'Add Child';

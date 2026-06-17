@@ -566,6 +566,11 @@ lib-questionset-editor {
   }
 }
 
+// Hide CKEditor accessibility voice label across all editor instances
+.ck.ck-label.ck-voice-label {
+  display: none !important;
+}
+
 [dir="rtl"] {
   // Portaled Semantic UI modals
   .ui.modal,
@@ -574,6 +579,13 @@ lib-questionset-editor {
   .ui.modal .sb-modal-actions {
     direction: rtl;
     text-align: right;
+  }
+
+  // Form field labels — right-align in RTL
+  lib-questionset-editor .input-label,
+  lib-questionset-editor label:not(.cursor-pointer):not(.d-flex):not(.sb-checkbox) {
+    text-align: right !important;
+    display: block;
   }
 
   lib-questionset-editor {
@@ -652,10 +664,6 @@ lib-questionset-editor {
     }
   }
 
-  // Footer bar: reverse button groups for RTL
-  .sb-fixed-with-whitebg {
-    flex-direction: row-reverse !important;
-  }
 
   }
 }

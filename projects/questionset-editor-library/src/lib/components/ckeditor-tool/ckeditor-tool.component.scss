@@ -2,6 +2,10 @@
   border: 0px solid white;
 }
 
+:host ::ng-deep .ck.ck-label.ck-voice-label {
+  display: none !important;
+}
+
 :host ::ng-deep .ck-lang-selector-wrapper {
   display: flex;
   align-items: center;
