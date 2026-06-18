@@ -33,7 +33,8 @@
     "remove_btn_label": "إزالة",
     "done_btn_label": "تم",
     "add_translation_label": "إضافة ترجمة",
-    "add_page_numbers_to_questions_btn_label": "ترقيم الصفحات"
+    "add_page_numbers_to_questions_btn_label": "ترقيم الصفحات",
+    "reset_btn_label": "إعادة تعيين"
   },
   "lbl": {
     "Questiondetails": "تفاصيل السؤال",

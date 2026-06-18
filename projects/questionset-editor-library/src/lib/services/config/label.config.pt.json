@@ -33,7 +33,8 @@
     "remove_btn_label": "Remover",
     "done_btn_label": "Concluído",
     "add_translation_label": "Adicionar Tradução",
-    "add_page_numbers_to_questions_btn_label": "Paginação"
+    "add_page_numbers_to_questions_btn_label": "Paginação",
+    "reset_btn_label": "Redefinir"
   },
   "lbl": {
     "Questiondetails": "Detalhes da pergunta",
