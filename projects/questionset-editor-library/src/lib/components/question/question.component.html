@@ -180,7 +180,7 @@
           </div>
           <hr>
           <div *ngIf="questionFormConfig">
-            <div class="pl-5 py-10 font-weight-bold fs-0-92">
+            <div class="pl-5 py-10 font-weight-bold fs-0-92" [style.text-align]="globalDir === 'rtl' ? 'right' : 'left'">
               {{configService.labelConfig?.lbl?.Questiondetails}}
             </div>
             <div class="form-container px-30">
