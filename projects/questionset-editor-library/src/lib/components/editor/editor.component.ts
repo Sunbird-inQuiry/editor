@@ -109,7 +109,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   currentLang = 'en';
   @HostBinding('attr.dir') get dir() { return this.currentLang === 'ar' ? 'rtl' : 'ltr'; }
 
-  /** Resolve i18n map fields (label/placeholder/description as {en,ar,fr,pt} objects) to strings */
+  /** Resolve i18n map fields (label/placeholder/description/message as {en,ar,fr,pt} objects) to strings */
   private applyI18nToFields(fields: any[], lang: string): void {
     if (!fields?.length) { return; }
     fields.forEach(field => {
@@ -118,6 +118,12 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       if (typeof field.placeholder === 'object') { field.placeholder = readI18n(field.placeholder, lang); }
       if (typeof field.description === 'object') { field.description = readI18n(field.description, lang); }
       if (typeof field.name        === 'object') { field.name        = readI18n(field.name, lang); }
+      if (typeof field.tooltip     === 'object') { field.tooltip     = readI18n(field.tooltip, lang); }
+      if (Array.isArray(field.validations)) {
+        field.validations.forEach((v: any) => {
+          if (typeof v.message === 'object') { v.message = readI18n(v.message, lang); }
+        });
+      }
     });
   }
 
