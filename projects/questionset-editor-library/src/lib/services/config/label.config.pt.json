@@ -167,7 +167,8 @@
     "reoTokensRequired": "Digite uma frase para criar tokens de palavras.",
     "reoWordsLabel": "Palavras",
     "partialScoring": "Pontuação Parcial",
-    "evalUnordered": "Permitir respostas em qualquer ordem"
+    "evalUnordered": "Permitir respostas em qualquer ordem",
+    "configuration": "Configuração"
   },
   "err": {
     "somethingWentWrong": "Algo deu errado",

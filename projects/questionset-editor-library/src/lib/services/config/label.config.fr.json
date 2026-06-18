@@ -167,7 +167,8 @@
     "reoTokensRequired": "Saisissez une phrase pour créer des jetons de mots.",
     "reoWordsLabel": "Mots",
     "partialScoring": "Score Partiel",
-    "evalUnordered": "Autoriser les réponses dans n'importe quel ordre"
+    "evalUnordered": "Autoriser les réponses dans n'importe quel ordre",
+    "configuration": "Configuration"
   },
   "err": {
     "somethingWentWrong": "Quelque chose a mal tourné",

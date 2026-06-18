@@ -1125,8 +1125,8 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.unsubscribe$.complete();
     window.removeEventListener('storage', this._onStorageChange);
     window.removeEventListener('app-language-change', this._onAppLangChange);
-    document.documentElement.removeAttribute('dir');
-    document.documentElement.removeAttribute('lang');
+    // Do NOT remove dir/lang from document.documentElement — the host page owns
+    // those attributes and other tabs or micro-frontends depend on them.
   }
 
 

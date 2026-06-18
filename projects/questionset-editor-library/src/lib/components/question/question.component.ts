@@ -1,4 +1,4 @@
-import { Component, ComponentRef, EventEmitter, Input, NgModuleRef, OnInit, Output, AfterViewInit, ViewChild, ViewContainerRef, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, ComponentRef, EventEmitter, Input, NgModuleRef, OnInit, Output, AfterViewInit, ViewChild, ViewContainerRef, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { EditorQuestionTypeRegistryService } from '../../registry';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
 import { readI18n, writeI18n, normalizeI18n, I18nValue, I18nMap } from '../../utils/i18nField';
@@ -130,7 +130,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     public playerService: PlayerService, private toasterService: ToasterService, private treeService: TreeService,
     private frameworkService: FrameworkService, private router: Router, public configService: ConfigService,
     private editorCursor: EditorCursor, private editorRegistry: EditorQuestionTypeRegistryService,
-    private ngModuleRef: NgModuleRef<any>, public activeLang: ActiveLanguageService) {
+    private ngModuleRef: NgModuleRef<any>, public activeLang: ActiveLanguageService,
+    private changeDetectionRef: ChangeDetectorRef) {
     const { primaryCategory, label } = this.editorService.selectedChildren;
     this.questionPrimaryCategory = primaryCategory;
     this.pageStartTime = Date.now();
@@ -346,7 +347,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.previewContent();
               }
               this.showLoader = false;
-              setTimeout(() => this.renderEditorComponent(), 0);
+              this.changeDetectionRef.detectChanges();
+              this.renderEditorComponent();
             }
           }, (err: ServerResponse) => {
             const errInfo = {
@@ -394,13 +396,11 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         }
         this.showLoader = false;
-        // Defer until Angular re-evaluates *ngIf="!showLoader" and resolves #editorOutlet
-        setTimeout(() => {
-          this.renderEditorComponent();
-          if(!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)){
-            this.subMenuConfig();
-          }
-        }, 0);
+        this.changeDetectionRef.detectChanges();
+        this.renderEditorComponent();
+        if(!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)){
+          this.subMenuConfig();
+        }
       }
     }, (err: ServerResponse) => {
       const errInfo = {
@@ -452,8 +452,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         this.showPreview = false;
         this.toolbarConfig.showPreview = false;
         this.previewFormData(!this.toolbarConfig.showPreview);
-        // Re-render the editor component after *ngIf restores #editorOutlet
-        setTimeout(() => this.renderEditorComponent(), 0);
+        this.changeDetectionRef.detectChanges();
+        this.renderEditorComponent();
         break;
       case 'showReviewcomments':
         this.showReviewModal = !this.showReviewModal;
@@ -942,7 +942,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
           return `[[${key}]]`;
         });
       });
-      // evalUnordered: every blank accepts any correct answer (set intersection logic for player)
+      // evalUnordered: encode the author's intent into the QuML payload by placing all correct
+      // answers in every blank's mapping. The player uses MAP_RESPONSE + set-intersection to
+      // award credit regardless of which blank the student fills. This is a serialization
+      // concern — the player is responsible for the runtime scoring algorithm.
       const allAnswers = Object.values(rd).map((r: any) => r.correctResponse?.value).filter(Boolean);
       if (this.editorState.evalUnordered && allAnswers.length > 1) {
         Object.keys(rd).forEach(key => {

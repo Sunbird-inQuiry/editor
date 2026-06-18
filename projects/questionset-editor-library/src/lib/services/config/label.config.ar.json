@@ -167,7 +167,8 @@
     "reoTokensRequired": "أدخل جملة لإنشاء رموز الكلمات.",
     "reoWordsLabel": "الكلمات",
     "partialScoring": "تسجيل جزئي",
-    "evalUnordered": "السماح بالإجابات بأي ترتيب"
+    "evalUnordered": "السماح بالإجابات بأي ترتيب",
+    "configuration": "التكوين"
   },
   "err": {
     "somethingWentWrong": "حدث خطأ ما",
