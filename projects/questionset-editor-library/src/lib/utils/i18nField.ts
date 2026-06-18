@@ -24,7 +24,9 @@ export function writeI18n(current: I18nValue | undefined, lang: string, value: s
   const map: I18nMap = typeof current === 'object'
     ? { ...current }
     : (current ? { [DEFAULT]: current } : {});
-  if (value) { map[lang] = value; } else { delete map[lang]; }
+  // Store empty string rather than deleting — prevents accidental data loss when author clears a field.
+  // normalizeI18n will exclude empty entries from the serialized map.
+  map[lang] = value;
   return normalizeI18n(map);
 }
 

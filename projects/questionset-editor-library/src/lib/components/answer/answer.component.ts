@@ -14,9 +14,10 @@ export class AnswerComponent implements OnInit {
   @Input() showFormError;
   @Input() isReadOnlyMode;
   private _activeLang: ActiveLanguageService;
+  private _langSub: any;
   @Input() set activeLang(val: ActiveLanguageService) {
     this._activeLang = val;
-    if (val) { val.lang$.subscribe(l => { this.currentLang = l; }); }
+    if (val) { if (this._langSub) { this._langSub.unsubscribe(); } this._langSub = val.lang$.subscribe(l => { this.currentLang = l; }); }
   }
   get activeLang(): ActiveLanguageService { return this._activeLang; }
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
