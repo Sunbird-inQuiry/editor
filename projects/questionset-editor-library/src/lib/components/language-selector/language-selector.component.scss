@@ -1,0 +1,13 @@
+.lang-btn {
+  min-width: 36px;
+  font-weight: 600;
+  border: 1px solid #c0c0c0;
+  background: #fff;
+  color: #555;
+
+  &--active {
+    background: #006dc6;
+    border-color: #006dc6;
+    color: #fff;
+  }
+}

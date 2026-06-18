@@ -1,5 +1,5 @@
 import {
-  Component, HostListener, Input, OnDestroy, OnInit, ChangeDetectorRef,
+  Component, HostBinding, HostListener, Input, OnDestroy, OnInit, ChangeDetectorRef,
   EventEmitter, Output, ViewEncapsulation, AfterViewInit, ViewChild
 } from '@angular/core';
 import { EditorService } from '../../services/editor/editor.service';
@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { Observable, throwError, forkJoin, Subscription, Subject, merge, of } from 'rxjs';
 import * as _ from 'lodash-es';
+import { readI18n } from '../../utils/i18nField';
 import { ConfigService } from '../../services/config/config.service';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
@@ -105,9 +106,48 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  currentLang = 'en';
+  @HostBinding('attr.dir') get dir() { return this.currentLang === 'ar' ? 'rtl' : 'ltr'; }
+
+  /** Resolve i18n map fields (label/placeholder/description as {en,ar,fr,pt} objects) to strings */
+  private applyI18nToFields(fields: any[], lang: string): void {
+    if (!fields?.length) { return; }
+    fields.forEach(field => {
+      if (field.fields) { this.applyI18nToFields(field.fields, lang); return; }
+      if (typeof field.label       === 'object') { field.label       = readI18n(field.label, lang); }
+      if (typeof field.placeholder === 'object') { field.placeholder = readI18n(field.placeholder, lang); }
+      if (typeof field.description === 'object') { field.description = readI18n(field.description, lang); }
+      if (typeof field.name        === 'object') { field.name        = readI18n(field.name, lang); }
+    });
+  }
+
+  private _applyLang(lang: string) {
+    this.currentLang = lang;
+    this.configService.setLanguage(lang);
+    document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', lang);
+    // Re-apply i18n to already-loaded form configs when language changes at runtime
+    if (this.rootFormConfig) { this.applyI18nToFields(this.rootFormConfig, lang); }
+    if (this.unitFormConfig) { this.applyI18nToFields(this.unitFormConfig, lang); }
+    if (this.leafFormConfig) { this.applyI18nToFields(this.leafFormConfig, lang); }
+  }
+
+  private _onStorageChange = (e: StorageEvent) => {
+    if (e.key === 'app-language' && e.newValue) {
+      this._applyLang(e.newValue);
+    }
+  };
+  private _onAppLangChange = (e: Event) => {
+    const lang = (e as CustomEvent).detail?.lang;
+    if (lang) { this._applyLang(lang); }
+  };
+
   ngOnInit() {
     this.setEditorConfig();
     this.editorService.initialize(this.editorConfig);
+    this._applyLang(localStorage.getItem('app-language') || 'en');
+    window.addEventListener('storage', this._onStorageChange);
+    window.addEventListener('app-language-change', this._onAppLangChange);
     this.editorMode = this.editorService.editorMode;
     this.treeService.initialize(this.editorConfig);
     this.objectType = this.configService.categoryConfig[this.editorConfig.config.objectType];
@@ -122,7 +162,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.mergeCollectionExternalProperties().subscribe(
         (response) => {
           const hierarchyResponse = _.first(response);
-          const collection = _.get(hierarchyResponse, `result.${this.objectType}`);
+          const collection = _.get(hierarchyResponse, `result.${this.objectType}`) ||
+            _.get(hierarchyResponse, 'result.questionSet') ||
+            _.get(hierarchyResponse, 'result.QuestionSet');
           this.toolbarConfig.title = collection.name;
           this.initializeFrameworkAndChannel(collection);
         });
@@ -305,6 +347,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.rootFormConfig?.length) {
       formData = this.rootFormConfig[0].fields || [];
     }
+    if (!formData) { return; }
     formData.forEach((field) => {
       if (field.code === 'evidenceMimeType') {
         evidenceMimeType = field.range;
@@ -324,8 +367,12 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.questionlibraryInput.searchFormConfig = _.get(formsConfigObj, 'search.properties');
       this.questionlibraryInput.metadataFormConfig = _.get(formsConfigObj, 'childMetadata')
     }
-    this.leafFormConfig = _.get(formsConfigObj, 'childMetadata.properties');
+    this.leafFormConfig = _.get(formsConfigObj, 'childMetadata.properties') || [];
     this.relationFormConfig = _.get(formsConfigObj, 'relationalMetadata.properties');
+    // Apply i18n to all form configs on initial load
+    this.applyI18nToFields(this.rootFormConfig || [], this.currentLang);
+    this.applyI18nToFields(this.unitFormConfig || [], this.currentLang);
+    this.applyI18nToFields(this.leafFormConfig || [], this.currentLang);
   }
 
   ngAfterViewInit() {
@@ -345,7 +392,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     return forkJoin(requests).pipe(tap(responseList => {
       const hierarchyResponse = _.first(responseList);
       this.collectionTreeNodes = {
-        data: _.get(hierarchyResponse, `result.${this.objectType}`)
+        data: _.get(hierarchyResponse, `result.${this.objectType}`) ||
+              _.get(hierarchyResponse, 'result.questionSet') ||
+              _.get(hierarchyResponse, 'result.QuestionSet')
       };
       this.buttonLoaders.showReviewComment = this.showCommentAddedAgainstContent();
       if (_.isEmpty(this.collectionTreeNodes.data.children)) {
@@ -356,7 +405,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
       if (this.objectType === 'questionset') {
         const questionSetResponse = _.last(responseList);
-        const data = _.get(questionSetResponse, _.toLower(`result.${this.objectType}`));
+        const data = _.get(questionSetResponse, _.toLower(`result.${this.objectType}`)) ||
+                     _.get(questionSetResponse, 'result.questionSet') ||
+                     _.get(questionSetResponse, 'result.QuestionSet') || {};
         this.collectionTreeNodes.data.instructions = data.instructions ? data.instructions : '';
         this.collectionTreeNodes.data.outcomeDeclaration = data?.outcomeDeclaration;
       }
@@ -367,10 +418,10 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     let hierarchyConfig;
     if (_.get(primaryCatConfig, 'result.objectCategoryDefinition.objectMetadata.config')) {
       hierarchyConfig = _.get(primaryCatConfig, 'result.objectCategoryDefinition.objectMetadata.config.sourcingSettings.collection');
-      if (!_.isEmpty(hierarchyConfig.children)) {
+      if (hierarchyConfig && !_.isEmpty(hierarchyConfig.children)) {
         hierarchyConfig.children = this.getHierarchyChildrenConfig(hierarchyConfig.children);
       }
-      if (!_.isEmpty(hierarchyConfig.hierarchy)) {
+      if (hierarchyConfig && !_.isEmpty(hierarchyConfig.hierarchy)) {
         _.forEach(hierarchyConfig.hierarchy, (hierarchyValue) => {
           if (_.get(hierarchyValue, 'children')) {
             hierarchyValue.children = this.getHierarchyChildrenConfig(_.get(hierarchyValue, 'children'));
@@ -835,6 +886,13 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
         _.get(this.editorService.editorConfig.config, `hierarchy.level${this.selectedNodeData.getLevel() - 1}.children`)
       );
     }
+    // When the host app declares questionPrimaryCategories and this node allows
+    // questions, use that list as the authoritative set (overrides server-side
+    // category definition which may only know about a subset of types).
+    const hostCategories = _.get(this.editorConfig, 'config.questionPrimaryCategories');
+    if (!_.isEmpty(hostCategories) && !_.isEmpty(this.templateList)) {
+      this.templateList = hostCategories;
+    }
     this.editorService.templateList = this.templateList;
   }
 
@@ -890,6 +948,8 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
       const selectedTemplateFormFields = _.get(selectedtemplateDetails, 'forms.create.properties');
       if (!_.isEmpty(selectedTemplateFormFields)) {
         this.setLeafFormConfig(selectedTemplateFormFields);
+      } else if (!this.leafFormConfig) {
+        this.leafFormConfig = [];
       }
 
       const catMetaData = _.get(selectedtemplateDetails, 'objectMetadata');
@@ -1084,6 +1144,10 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    window.removeEventListener('storage', this._onStorageChange);
+    window.removeEventListener('app-language-change', this._onAppLangChange);
+    // Do NOT remove dir/lang from document.documentElement — the host page owns
+    // those attributes and other tabs or micro-frontends depend on them.
   }
 
 

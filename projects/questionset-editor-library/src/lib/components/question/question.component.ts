@@ -1,4 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output, AfterViewInit, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, ComponentRef, EventEmitter, Input, NgModuleRef, OnInit, Output, AfterViewInit, ViewChild, ViewContainerRef, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { EditorQuestionTypeRegistryService } from '../../registry';
+import { ActiveLanguageService } from '../../services/language/active-language.service';
+import { readI18n, writeI18n, normalizeI18n, I18nValue, I18nMap } from '../../utils/i18nField';
 import * as _ from 'lodash-es';
 import { v4 as uuidv4 } from 'uuid';
 import { McqForm } from '../../interfaces/McqForm';
@@ -102,6 +105,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   hints: any;
   categoryLabel: any = {};
   scoreMapping: any;
+  @ViewChild('editorOutlet', { read: ViewContainerRef }) editorOutlet: ViewContainerRef;
+  private activeEditorRef: ComponentRef<any> | null = null;
   condition = 'default';
   targetOption: any;
   responseVariable = 'response1';
@@ -124,7 +129,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     private questionService: QuestionService, public editorService: EditorService, public telemetryService: EditorTelemetryService,
     public playerService: PlayerService, private toasterService: ToasterService, private treeService: TreeService,
     private frameworkService: FrameworkService, private router: Router, public configService: ConfigService,
-    private editorCursor: EditorCursor) {
+    private editorCursor: EditorCursor, private editorRegistry: EditorQuestionTypeRegistryService,
+    private ngModuleRef: NgModuleRef<any>, public activeLang: ActiveLanguageService,
+    private changeDetectionRef: ChangeDetectorRef) {
     const { primaryCategory, label } = this.editorService.selectedChildren;
     this.questionPrimaryCategory = primaryCategory;
     this.pageStartTime = Date.now();
@@ -135,7 +142,27 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  currentLang = 'en';
+  langs = ActiveLanguageService.LANGS;
+
+  get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
+  get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
+
+  onLangChange(code: string): void { this.activeLang.set(code); }
+
+  get questionBody(): string {
+    const q = this.editorState.question as I18nValue;
+    if (!q) return '';
+    if (typeof q === 'string') {
+      return this.currentLang === 'en' ? q : '';
+    }
+    return (q as I18nMap)[this.currentLang] ?? '';
+  }
+
   ngOnInit() {
+    this.activeLang.lang$.pipe(takeUntil(this.onComponentDestroy$)).subscribe(lang => {
+      this.currentLang = lang;
+    });
     const { questionSetId, questionId, type, category, creationContext, creationMode } = this.questionInput;
     this.questionInteractionType = type;
     this.questionCategory = category;
@@ -178,7 +205,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       this.frameworkService.frameworkData$.pipe(
         takeUntil(this.onComponentDestroy$)
       ).subscribe(frameworkData => {
-        if (frameworkData?.frameworkdata[frameworkId]) {
+        if (frameworkData?.frameworkdata?.[frameworkId]) {
           const categories = frameworkData.frameworkdata[frameworkId].categories || [];
           if (categories.length) {
             this.categoryCodes = categories?.map(category => category.code)
@@ -205,6 +232,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    // Covers the synchronous new-question path where renderEditorComponent()
+    // was called in ngOnInit before the ViewChild was resolved.
+    this.renderEditorComponent();
     this.telemetryService.impression({
       type: 'edit', pageid: this.telemetryService.telemetryPageId, uri: this.router.url,
       duration: (Date.now() - this.pageStartTime) / 1000
@@ -237,9 +267,12 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
               this.questionInteractionType = _.get(this.questionMetaData,'interactionTypes') ? _.get(this.questionMetaData,'interactionTypes[0]') : 'default';
               this.editorService.setIsReviewModificationAllowed(_.get(this.questionMetaData, 'isReviewModificationAllowed', false));
               this.populateFormData();
-              if (_.includes(['default', 'text', 'date', 'slider'], this.questionInteractionType)) {
+              if (_.includes(['default', 'text', 'date', 'slider', 'match', 'order'], this.questionInteractionType)) {
                 if (this.questionMetaData.editorState) {
                   this.editorState = this.questionMetaData.editorState;
+                }
+                if (this.questionInteractionType === 'order' && this.questionMetaData.templateId) {
+                  this.editorState.templateId = this.questionMetaData.templateId;
                 }
               }
 
@@ -314,6 +347,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.previewContent();
               }
               this.showLoader = false;
+              this.changeDetectionRef.detectChanges();
+              this.renderEditorComponent();
             }
           }, (err: ServerResponse) => {
             const errInfo = {
@@ -340,8 +375,29 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         else if (this.questionInteractionType === 'choice') {
           this.editorState = new McqForm({ question: '', options: [] }, { numberOfOptions: _.get(this.questionInput, 'config.numberOfOptions'), maximumOptions: _.get(this.questionInput, 'config.maximumOptions') });
         }
+        else if (this.questionInteractionType === 'text') {
+          this.editorState = { question: '', solutions: '' };
+        }
+        else if (this.questionInteractionType === 'match') {
+          this.editorState = {
+            question: '', solutions: '',
+            pairs: [{ left: '', right: '' }, { left: '', right: '' }, { left: '', right: '' }],
+          };
+        }
+        else if (this.questionInteractionType === 'order') {
+          if ((this.questionPrimaryCategory || '').toLowerCase() === 'reorder question') {
+            this.editorState = { question: '', solutions: '', sentence: '' };
+          } else {
+            this.editorState = {
+              question: '', solutions: '',
+              options: [{ value: 'A', label: '' }, { value: 'B', label: '' }],
+              correctOrder: ['A', 'B'],
+            };
+          }
+        }
         this.showLoader = false;
-        /** for observation and survey to show hint,tip,dependent question option. */
+        this.changeDetectionRef.detectChanges();
+        this.renderEditorComponent();
         if(!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)){
           this.subMenuConfig();
         }
@@ -396,6 +452,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         this.showPreview = false;
         this.toolbarConfig.showPreview = false;
         this.previewFormData(!this.toolbarConfig.showPreview);
+        this.changeDetectionRef.detectChanges();
+        this.renderEditorComponent();
         break;
       case 'showReviewcomments':
         this.showReviewModal = !this.showReviewModal;
@@ -667,8 +725,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   editorDataHandler(event, type?) {
     if (type === 'question') {
-      this.editorState.question = event.body;
-      this.editorState.responseDeclaration = event.body.responseDeclaration
+      this.editorState.question = writeI18n(this.editorState.question as I18nValue, this.currentLang, event.body);
     } else if (type === 'solution') {
       this.editorState.solutions = event.body;
     } else {
@@ -809,31 +866,144 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   setQuestionProperties(metadata) {
     if (this.questionInteractionType != 'choice') {
       if (!_.isUndefined(metadata.answer)) {
-        const answerHtml = this.getAnswerHtml(metadata.answer);
-        const finalAnswer = this.getAnswerWrapperHtml(answerHtml);
-        metadata.answer = finalAnswer;
+        if (typeof metadata.answer === 'object') {
+          const answerI18n: Record<string, string> = {};
+          Object.entries(metadata.answer as Record<string, string>).forEach(([lang, text]) => {
+            if (text) {
+              answerI18n[lang] = this.getAnswerWrapperHtml(this.getAnswerHtml(text));
+            }
+          });
+          const keys = Object.keys(answerI18n);
+          metadata.answer = (keys.length === 1 && keys[0] === 'en')
+            ? answerI18n['en']
+            : JSON.stringify(answerI18n);
+        } else {
+          metadata.answer = this.getAnswerWrapperHtml(this.getAnswerHtml(metadata.answer));
+        }
       } else {
         metadata.answer = '';
       }
     }
 
     if (this.questionInteractionType === 'choice') {
-      metadata.body = this.getMcqQuestionHtmlBody(this.editorState.question, this.editorState.templateId);
+      metadata.body = this.buildI18nBody(
+        this.editorState.question as I18nValue,
+        (text) => this.getMcqQuestionHtmlBody(text, this.editorState.templateId)
+      );
       if(_.isNumber(metadata.answer)) {
         metadata.answer = [metadata.answer];
       }
       const correctAnswersData = this.getInteractionValues(metadata.answer, metadata.interactions);
-      let concatenatedAnswers = '';
+      const answerI18n: Record<string, string> = {};
       _.forEach(correctAnswersData, (answer) => {
-        const optionAnswer = this.getAnswerHtml(answer.label);
-        concatenatedAnswers = concatenatedAnswers.concat(optionAnswer);
-      })
-      const finalAnswer = this.getAnswerWrapperHtml(concatenatedAnswers);
-      metadata.answer = finalAnswer;
-    } else if (this.questionInteractionType != 'default' && this.questionInteractionType != 'choice') {
+        const label = answer.label;
+        if (label && typeof label === 'object') {
+          Object.entries(label as Record<string, string>).forEach(([lang, text]) => {
+            if (text) { answerI18n[lang] = (answerI18n[lang] || '') + this.getAnswerHtml(text); }
+          });
+        } else {
+          answerI18n['en'] = (answerI18n['en'] || '') + this.getAnswerHtml(label || '');
+        }
+      });
+      const answerKeys = Object.keys(answerI18n);
+      if (answerKeys.length === 0) {
+        metadata.answer = this.getAnswerWrapperHtml('');
+      } else if (answerKeys.length === 1 && answerKeys[0] === 'en') {
+        metadata.answer = this.getAnswerWrapperHtml(answerI18n['en']);
+      } else {
+        metadata.answer = JSON.stringify(
+          Object.fromEntries(
+            Object.entries(answerI18n).map(([lang, html]) => [lang, this.getAnswerWrapperHtml(html)])
+          )
+        );
+      }
+    } else if (this.questionInteractionType === 'text') {
+      // FTB: transform [[answer]] → [[responseN]] in stored body (language-agnostic keys).
+      // The editorState keeps [[answer]] for authoring; body uses [[responseN]] for the player.
+      const question = this.editorState.question as I18nValue;
+      const langs = typeof question === 'string' ? ['en'] : Object.keys(question as any);
+      const rd: any = {};
+      const interactions: any = {};
+      const transformedBody: Record<string, string> = {};
+      langs.forEach(lang => {
+        let blankIdx = 0;
+        const rawBody = readI18n(question, lang);
+        transformedBody[lang] = rawBody.replace(/\[\[(.*?)\]\]/g, (_: string, ans: string) => {
+          blankIdx++;
+          const key = `response${blankIdx}`;
+          const trimmed = ans.trim();
+          if (!rd[key]) {
+            rd[key] = { cardinality: 'single', type: 'string',
+              correctResponse: { value: lang === 'en' ? trimmed : '' }, mapping: [] };
+            interactions[key] = { type: 'text' };
+          }
+          if (lang === 'en') { rd[key].correctResponse.value = trimmed; }
+          rd[key].mapping.push({ value: trimmed, score: 1, caseSensitive: false });
+          return `[[${key}]]`;
+        });
+      });
+      // evalUnordered: encode the author's intent into the QuML payload by placing all correct
+      // answers in every blank's mapping. The player uses MAP_RESPONSE + set-intersection to
+      // award credit regardless of which blank the student fills. This is a serialization
+      // concern — the player is responsible for the runtime scoring algorithm.
+      const allAnswers = Object.values(rd).map((r: any) => r.correctResponse?.value).filter(Boolean);
+      if (this.editorState.evalUnordered && allAnswers.length > 1) {
+        Object.keys(rd).forEach(key => {
+          rd[key].mapping = allAnswers.map((ans: string) => ({ value: ans, score: 1, caseSensitive: false }));
+        });
+      }
+
+      const numBlanks = Object.keys(rd).length;
+      const isPartialScore = !!this.editorState.isPartialScore;
+      metadata.body = normalizeI18n(transformedBody);
+      metadata.responseDeclaration = rd;
+      metadata.interactions = { ...(metadata.interactions || {}), ...interactions };
+      metadata.interactionTypes = ['text'];
+      metadata.qType = 'FTB';
+      metadata.primaryCategory = this.questionPrimaryCategory;
+      metadata.scoringMode = 'responseProcessing';
+      metadata.responseProcessing = { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' };
+      metadata.outcomeDeclaration = {
+        maxScore: { cardinality: 'single', type: 'integer', defaultValue: isPartialScore ? numBlanks : 1 }
+      };
+    } else if (this.questionInteractionType === 'match') {
+      metadata.body = this.buildI18nBody(
+        this.editorState.question as I18nValue,
+        (text) => this.getMtfQuestionHtmlBody(text)
+      );
+    } else if (this.questionInteractionType === 'order') {
+      metadata.body = this.buildI18nBody(
+        this.editorState.question as I18nValue,
+        (text) => this.getOrderQuestionHtmlBody(text)
+      );
+      if (metadata.sentence && typeof metadata.sentence === 'object') {
+        metadata.sentence = readI18n(metadata.sentence as I18nValue, 'en');
+      }
+    } else if (this.questionInteractionType != 'default') {
       metadata.responseDeclaration = this.getResponseDeclaration(this.questionInteractionType);
     }
     return metadata;
+  }
+
+  buildI18nBody(question: I18nValue, buildFn: (text: string) => string): string {
+    if (!question) return buildFn('');
+    if (typeof question === 'string') return buildFn(question);
+    const bodyI18n: Record<string, string> = {};
+    Object.entries(question as Record<string, string>).forEach(([lang, text]) => {
+      if (text) { bodyI18n[lang] = buildFn(text); }
+    });
+    const keys = Object.keys(bodyI18n);
+    if (keys.length === 0) return buildFn('');
+    if (keys.length === 1 && keys[0] === 'en') return bodyI18n['en'];
+    return JSON.stringify(bodyI18n);
+  }
+
+  getMtfQuestionHtmlBody(question: string): string {
+    return `<div class='question-body' tabindex='-1'><div class='mtf-title' tabindex='0'>${question}</div><div data-match-interaction='response1'></div></div>`;
+  }
+
+  getOrderQuestionHtmlBody(question: string): string {
+    return `<div class='question-body' tabindex='-1'><div class='order-title' tabindex='0'>${question}</div><div data-ordered-interaction='response1'></div></div>`;
   }
 
   getQuestionMetadata() {
@@ -870,6 +1040,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     metadata['outcomeDeclaration'] = this.getOutcomeDeclaration(metadata);
     metadata = _.merge(metadata, _.pickBy(this.childFormData, _.identity));
+    if (!metadata.name) {
+      metadata.name = this.questionPrimaryCategory || 'Untitled Question';
+    }
     if (_.get(this.creationContext, 'objectType') === 'question') {
       metadata.isReviewModificationAllowed = !!_.get(this.questionMetaData, 'isReviewModificationAllowed');
     }
@@ -878,7 +1051,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       metadata.media = this.removeUnusedMedia(metadata);
     }
     // tslint:disable-next-line:max-line-length
-    return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions']);
+    return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions', 'i18n']);
   }
 
   removeUnusedMedia(questionMetadata: any) {
@@ -1049,7 +1222,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       };
   }
 
-    if (this.questionInteractionType === 'text') {
+    if (this.questionInteractionType === 'text' && this.questionPrimaryCategory !== 'FTB Question') {
       metaData.interactionTypes = [this.questionInteractionType];
       metaData.primaryCategory = this.questionPrimaryCategory;
       metaData.interactions = {
@@ -1531,7 +1704,30 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       show: _.get(this.sourcingSettings, 'showAddTips')
     }
   }
+  private renderEditorComponent(): void {
+    if (!this.editorOutlet) { return; }
+    const def = this.editorRegistry.resolveByCategory(this.questionPrimaryCategory) ||
+                this.editorRegistry.resolveByInteractionType(this.questionInteractionType);
+    if (!def) { return; }
+    this.activeEditorRef?.destroy();
+    this.editorOutlet.clear();
+    const ref = this.editorOutlet.createComponent(def.component, { ngModuleRef: this.ngModuleRef });
+    ref.instance.editorState            = this.editorState;
+    ref.instance.questionPrimaryCategory = this.questionPrimaryCategory;
+    ref.instance.showFormError          = this.showFormError;
+    ref.instance.isReadOnlyMode         = this.isReadOnlyMode;
+    if ('sourcingSettings' in ref.instance) { ref.instance['sourcingSettings'] = this.sourcingSettings; }
+    if ('mapping'          in ref.instance) { ref.instance['mapping']          = this.scoreMapping; }
+    if ('maxScore'         in ref.instance) { ref.instance['maxScore']         = this.maxScore; }
+    if ('activeLang'       in ref.instance) { (ref.instance as any)['activeLang'] = this.activeLang; }
+    ref.instance.editorDataOutput.subscribe((e: any) => this.editorDataHandler(e));
+    ref.changeDetectorRef.markForCheck();
+    this.activeEditorRef = ref;
+  }
+
   ngOnDestroy() {
+    try { this.activeEditorRef?.destroy(); } catch (_) {}
+    this.activeEditorRef = null;
     this.onComponentDestroy$.next();
     this.onComponentDestroy$.complete();
     this.editorCursor.clearQuestionMap();

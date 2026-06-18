@@ -1,0 +1,85 @@
+<div *ngIf="!isReadOnlyMode; else readOnlyOrder">
+
+  <!-- Layout selector (SEQ only) -->
+  <div *ngIf="!isReorder" class="pt-10 fs-0-92 sb-w-85 mb-10">
+    <label class="fs-0-92 d-inline-block">{{configService.labelConfig?.lbl?.selectLayout}}</label>
+    <i class="icon info circle ml-8" suiPopup popupDelay="500" popupText="Select how items are displayed to the learner."></i>
+    <span class="divider mr-8"></span>
+    <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray mr-5 q-sb-layout-single" [ngClass]="{active: 'seq-vertical' === templateId}" (click)="setLayout('seq-vertical')"><i class="mr-10 h-7"></i> {{configService.labelConfig?.lbl?.vertical}}</button></span>
+    <span><button class="sb-btn sb-btn-xs sb-btn-outline-gray q-sb-layout-three" [ngClass]="{active: 'seq-horizontal' === templateId}" (click)="setLayout('seq-horizontal')"><i class="mr-10 h-7"></i> {{configService.labelConfig?.lbl?.horizontal}}</button></span>
+  </div>
+
+  <div class="mt-15">
+    <label class="fs-0-92 font-weight-bold">{{ configService.labelConfig?.lbl?.seqItemsLabel }}</label>
+    <p class="fs-0-785 sb-color-gray-200 mb-10">{{ configService.labelConfig?.lbl?.seqItemsDesc }}</p>
+
+    <div cdkDropList (cdkDropListDropped)="dropOption($event)" class="order-list">
+      <div *ngFor="let option of options; let i = index" cdkDrag class="order-item-card mb-10">
+        <div class="order-item-card__body" [attr.dir]="globalDir">
+          <input class="order-item-card__input" type="text" [attr.maxlength]="120"
+            [placeholder]="'Enter Sequence ' + (i + 1)"
+            [value]="optionLabel(option)"
+            (input)="onLabelInput($event.target['value'], i)">
+          <span class="order-item-card__count fs-0-785 sb-color-gray-200">
+            {{ optionLabel(option).length }} / 120
+          </span>
+          <label *ngIf="showFormError && !optionLabel(option)" class="sb-color-error fs-0-785 d-block mt-4">
+            {{ configService.labelConfig?.lbl?.mtfRequired }}
+          </label>
+        </div>
+        <div class="order-item-card__footer">
+          <button class="order-item-card__delete sb-btn" [disabled]="options.length <= 2" (click)="deleteOption(i)"
+            cdkDragHandle>
+            <i class="trash alternate outline icon"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button *ngIf="options.length < 5"
+      class="sb-btn sb-btn-outline-primary sb-btn-xs sb-left-icon-btn text-inherit b-0 bg-none no-hover p-0 mb-10 mt-5"
+      (click)="addOption()">
+      <i class="plus circle icon fs-1-286 pull-left mr-0" aria-hidden="true"></i>
+      <span class="sb-line-height-24">{{ configService.labelConfig?.lbl?.seqAddItem }}</span>
+    </button>
+    <label *ngIf="showFormError && options.length < 2" class="sb-color-error fs-0-785 d-block">
+      {{ configService.labelConfig?.lbl?.seqMinItems }}
+    </label>
+
+    <div *ngIf="!isReorder" class="mt-15 br-4 b-1-100 px-16 py-12 sb-bg-color-white">
+      <label class="fs-0-92 font-weight-bold d-block mb-10">{{ configService.labelConfig?.lbl?.configuration }}</label>
+      <label class="d-flex flex-ai-center cursor-pointer pl-16">
+        <input type="checkbox" [(ngModel)]="isPartialScore" (change)="editorDataHandler()" class="mr-8">
+        <span class="fs-0-785">{{ configService.labelConfig?.lbl?.partialScoring }}</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Reorder: correct-order panel -->
+  <div *ngIf="isReorder" class="mt-20">
+    <label class="fs-0-92 font-weight-bold">{{ configService.labelConfig?.lbl?.seqCorrectOrder }}</label>
+    <p class="fs-0-785 sb-color-gray-200 mb-10">{{ configService.labelConfig?.lbl?.seqCorrectOrderDesc }}</p>
+    <div cdkDropList (cdkDropListDropped)="dropCorrectOrder($event)" class="order-list order-list--correct">
+      <div *ngFor="let opt of correctOrderOptions; let i = index"
+           cdkDrag class="order-item order-item--correct d-flex mb-5">
+        <div class="order-drag-handle d-flex flex-ai-center pr-5 sb-color-gray-200" cdkDragHandle>
+          <i class="icon bars"></i>
+        </div>
+        <div class="flex-1 py-5 px-5">
+          <span class="fs-0-785 sb-color-gray-500 mr-5">{{i + 1}}.</span>
+          <span class="fs-0-785">{{ optionLabel(opt) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<ng-template #readOnlyOrder>
+  <div class="mt-15">
+    <div *ngFor="let option of options; let i = index" class="d-flex mb-5">
+      <span class="fs-0-785 mr-10 sb-color-gray-200">{{i + 1}}.</span>
+      <p class="fs-0-785 p-0 m-0" [innerHTML]="optionLabel(option) | sanitizeHtml"></p>
+    </div>
+  </div>
+</ng-template>

@@ -565,3 +565,105 @@ lib-questionset-editor {
     }
   }
 }
+
+// Hide CKEditor accessibility voice label across all editor instances
+.ck.ck-label.ck-voice-label {
+  display: none !important;
+}
+
+[dir="rtl"] {
+  // Portaled Semantic UI modals
+  .ui.modal,
+  .ui.modal .sb-modal-header,
+  .ui.modal .sb-modal-content,
+  .ui.modal .sb-modal-actions {
+    direction: rtl;
+    text-align: right;
+  }
+
+  // Form field labels — right-align in RTL
+  lib-questionset-editor .input-label,
+  lib-questionset-editor label:not(.cursor-pointer):not(.d-flex):not(.sb-checkbox) {
+    text-align: right !important;
+    display: block;
+  }
+
+  lib-questionset-editor {
+    direction: rtl;
+
+    // Main two-panel layout: tree on RIGHT, form on LEFT
+    // direction:rtl on a flex container reverses item flow without flex-direction
+    .ui.twelve.column.grid.m-0 {
+      display: flex !important;
+      direction: rtl !important;
+    }
+    // Fix padding on the form panel
+    .eight.wide.column.bg-white {
+      padding-left: 0 !important;
+      padding-right: 40px !important;
+    }
+    // Move divider from left to right (border was border-left in LTR)
+    .eight.bg-white {
+      border-left: none !important;
+      border-right: solid 1px var(--gray-100) !important;
+    }
+
+    // Fancytree: move expander/icon to the LEFT of title for RTL
+    ul.fancytree-container { direction: rtl; }
+    span.fancytree-node {
+      direction: rtl;
+      unicode-bidi: bidi-override;
+      display: flex !important;
+      flex-direction: row-reverse;
+      align-items: center;
+      width: 100%;
+    }
+    ul.fancytree-container ul { padding: 0 16px 0 0; }
+    ul.fancytree-container.fancytree-connectors li {
+      background-position: right 0;
+      background-image: url(../../assets/images/vline-rtl.gif);
+    }
+    span.fancytree-expander,
+    span.fancytree-icon {
+      background-image: url(../../assets/images/icons-rtl.gif);
+    }
+
+  // Native selects and Semantic UI dropdowns: arrow on LEFT for RTL
+  select,
+  .sb-form select,
+  .sb-field select {
+    direction: rtl !important;
+    text-align: right !important;
+  }
+
+  // common-form-elements-full dropdown icons → LEFT for RTL
+  .dropdown-icon {
+    right: auto !important;
+    left: 8px !important;
+    pointer-events: none;
+  }
+  .caret-down {
+    right: auto !important;
+    left: 1.125rem !important;
+    pointer-events: none;
+  }
+  span.arrow-icon {
+    float: left !important;
+  }
+
+  .ui.selection.dropdown,
+  .ui.dropdown {
+    > .dropdown.icon,
+    > i.dropdown.icon {
+      right: auto !important;
+      left: 1em !important;
+    }
+    > .text {
+      margin-left: 2.1em;
+      margin-right: 0;
+    }
+  }
+
+
+  }
+}

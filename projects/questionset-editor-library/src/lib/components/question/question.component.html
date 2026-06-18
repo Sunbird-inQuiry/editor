@@ -28,15 +28,21 @@
               </sui-multi-select>
             </div>
           </div>
-          <div class="py-20 px-32 br-4 b-1-100" *ngIf="!showPreview" [ngClass]="{'sb-bg-color-primary-0': !isReadOnlyMode}">
+          <div class="py-20 px-32 br-4 b-1-100" *ngIf="!showPreview" [ngClass]="{'sb-bg-color-primary-0': !isReadOnlyMode}" [attr.dir]="globalDir">
             <div class="sb-field-group">
-              <label *ngIf="!isReadOnlyMode" class="fs-0-92 font-weight-bold">{{configService.labelConfig?.lbl?.question}}<span class="sb-required">*</span></label>
+              <label *ngIf="!isReadOnlyMode" class="fs-0-92 font-weight-bold d-block" [style.text-align]="globalDir === 'rtl' ? 'right' : 'left'">{{ questionInteractionType === 'match' ? 'Enter the question' : configService.labelConfig?.lbl?.question }}<span class="sb-required">*</span></label>
               <div class="sb-field">
                 <div [ngClass]="{'ckeditor-tool__question': !isReadOnlyMode, 'ckeditor-tool__question-readonly': isReadOnlyMode, 'mb-5': true}">
                   <lib-ckeditor-tool
                   *ngIf="!isReadOnlyMode"
                   (editorDataOutput)="editorDataHandler($event, 'question')"
-                  [editorDataInput]="editorState.question"
+                  [editorDataInput]="questionBody"
+                  [lang]="globalLang"
+                  [showLangSelector]="true"
+                  [langs]="langs"
+                  [activeLangCode]="currentLang"
+                  (langChange)="onLangChange($event)"
+                  [setCharacterLimit]="questionInteractionType === 'match' ? 1000 : 0"
                   ></lib-ckeditor-tool>
                     <lib-assets-browser
                     *ngIf="(assetType==='video' || assetType==='audio') && !isReadOnlyMode" [showAssetPicker]="showAssetPicker" 
@@ -58,17 +64,7 @@
               <lib-question-option-sub-menu *ngIf="subMenus?.length" [subMenus]="subMenus"
                 (onChange)="subMenuChange($event)"></lib-question-option-sub-menu>
 
-              <lib-answer *ngIf="questionInteractionType === 'default'"
-                [questionPrimaryCategory]="questionPrimaryCategory"
-                [editorState]="editorState" [showFormError]="showFormError"
-                (editorDataOutput)="editorDataHandler($event)" [isReadOnlyMode]="isReadOnlyMode"></lib-answer>
-
-              <lib-options *ngIf="questionInteractionType === 'choice'"
-                [questionPrimaryCategory]="questionPrimaryCategory"
-                [editorState]="editorState" [showFormError]="showFormError"
-                (editorDataOutput)="editorDataHandler($event)"
-                [sourcingSettings]="sourcingSettings" [mapping]="scoreMapping" [maxScore]="maxScore"
-                [isReadOnlyMode]="isReadOnlyMode"></lib-options>
+              <ng-container #editorOutlet></ng-container>
 
               <lib-slider *ngIf="questionInteractionType === 'slider'" [editorDataInput]="sliderOptions"
                 (onChange)="sliderData($event)"></lib-slider>
@@ -184,7 +180,7 @@
           </div>
           <hr>
           <div *ngIf="questionFormConfig">
-            <div class="pl-5 py-10 font-weight-bold fs-0-92">
+            <div class="pl-5 py-10 font-weight-bold fs-0-92" [style.text-align]="globalDir === 'rtl' ? 'right' : 'left'">
               {{configService.labelConfig?.lbl?.Questiondetails}}
             </div>
             <div class="form-container px-30">

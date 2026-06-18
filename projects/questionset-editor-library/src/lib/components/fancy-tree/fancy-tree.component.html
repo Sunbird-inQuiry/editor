@@ -1,5 +1,6 @@
 <div #fancyTree></div>
-<div class="sb-fixed-with-whitebg pr-20 d-flex flex-jc-space-between" *ngIf="config && config.mode === 'edit'">
+<div class="sb-fixed-with-whitebg pr-20 d-flex flex-jc-space-between" *ngIf="config && config.mode === 'edit'"
+  [style.flex-direction]="isRTL ? 'row-reverse' : 'row'">
   <div class="d-flex w-25">
     <div class="sb-btn-cover">
       <button [ngClass]="visibility?.addSibling ? '' : 'sb-disabled'" (click)="addSibling();"
