@@ -108,11 +108,31 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   currentLang = 'en';
   @HostBinding('attr.dir') get dir() { return this.currentLang === 'ar' ? 'rtl' : 'ltr'; }
 
+  /** Apply i18n translations from field.i18n[lang] to label/placeholder/description */
+  private applyI18nToFields(fields: any[], lang: string): void {
+    if (!fields?.length || lang === 'en') { return; }
+    fields.forEach(field => {
+      if (field.fields) { this.applyI18nToFields(field.fields, lang); return; }
+      const t = field.i18n?.[lang];
+      if (!t) { return; }
+      if (t.label)       { field.label       = t.label; }
+      if (t.placeholder) { field.placeholder = t.placeholder; }
+      if (t.description) { field.description = t.description; }
+      if (t.name)        { field.name        = t.name; }
+    });
+  }
+
   private _applyLang(lang: string) {
     this.currentLang = lang;
     this.configService.setLanguage(lang);
     document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
     document.documentElement.setAttribute('lang', lang);
+    // Re-apply i18n to already-loaded form configs when language changes at runtime
+    if (lang !== 'en') {
+      if (this.rootFormConfig) { this.applyI18nToFields(this.rootFormConfig, lang); }
+      if (this.unitFormConfig) { this.applyI18nToFields(this.unitFormConfig, lang); }
+      if (this.leafFormConfig) { this.applyI18nToFields(this.leafFormConfig, lang); }
+    }
   }
 
   private _onStorageChange = (e: StorageEvent) => {
@@ -352,6 +372,12 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.leafFormConfig = _.get(formsConfigObj, 'childMetadata.properties') || [];
     this.relationFormConfig = _.get(formsConfigObj, 'relationalMetadata.properties');
+    // Apply i18n to all form configs on initial load
+    if (this.currentLang !== 'en') {
+      this.applyI18nToFields(this.rootFormConfig || [], this.currentLang);
+      this.applyI18nToFields(this.unitFormConfig || [], this.currentLang);
+      this.applyI18nToFields(this.leafFormConfig || [], this.currentLang);
+    }
   }
 
   ngAfterViewInit() {
