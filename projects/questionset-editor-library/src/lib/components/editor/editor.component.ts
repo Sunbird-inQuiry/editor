@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { Observable, throwError, forkJoin, Subscription, Subject, merge, of } from 'rxjs';
 import * as _ from 'lodash-es';
+import { readI18n } from '../../utils/i18nField';
 import { ConfigService } from '../../services/config/config.service';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
@@ -108,17 +109,15 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
   currentLang = 'en';
   @HostBinding('attr.dir') get dir() { return this.currentLang === 'ar' ? 'rtl' : 'ltr'; }
 
-  /** Apply i18n translations from field.i18n[lang] to label/placeholder/description */
+  /** Resolve i18n map fields (label/placeholder/description as {en,ar,fr,pt} objects) to strings */
   private applyI18nToFields(fields: any[], lang: string): void {
-    if (!fields?.length || lang === 'en') { return; }
+    if (!fields?.length) { return; }
     fields.forEach(field => {
       if (field.fields) { this.applyI18nToFields(field.fields, lang); return; }
-      const t = field.i18n?.[lang];
-      if (!t) { return; }
-      if (t.label)       { field.label       = t.label; }
-      if (t.placeholder) { field.placeholder = t.placeholder; }
-      if (t.description) { field.description = t.description; }
-      if (t.name)        { field.name        = t.name; }
+      if (typeof field.label       === 'object') { field.label       = readI18n(field.label, lang); }
+      if (typeof field.placeholder === 'object') { field.placeholder = readI18n(field.placeholder, lang); }
+      if (typeof field.description === 'object') { field.description = readI18n(field.description, lang); }
+      if (typeof field.name        === 'object') { field.name        = readI18n(field.name, lang); }
     });
   }
 
@@ -128,11 +127,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
     document.documentElement.setAttribute('lang', lang);
     // Re-apply i18n to already-loaded form configs when language changes at runtime
-    if (lang !== 'en') {
-      if (this.rootFormConfig) { this.applyI18nToFields(this.rootFormConfig, lang); }
-      if (this.unitFormConfig) { this.applyI18nToFields(this.unitFormConfig, lang); }
-      if (this.leafFormConfig) { this.applyI18nToFields(this.leafFormConfig, lang); }
-    }
+    if (this.rootFormConfig) { this.applyI18nToFields(this.rootFormConfig, lang); }
+    if (this.unitFormConfig) { this.applyI18nToFields(this.unitFormConfig, lang); }
+    if (this.leafFormConfig) { this.applyI18nToFields(this.leafFormConfig, lang); }
   }
 
   private _onStorageChange = (e: StorageEvent) => {
@@ -373,11 +370,9 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.leafFormConfig = _.get(formsConfigObj, 'childMetadata.properties') || [];
     this.relationFormConfig = _.get(formsConfigObj, 'relationalMetadata.properties');
     // Apply i18n to all form configs on initial load
-    if (this.currentLang !== 'en') {
-      this.applyI18nToFields(this.rootFormConfig || [], this.currentLang);
-      this.applyI18nToFields(this.unitFormConfig || [], this.currentLang);
-      this.applyI18nToFields(this.leafFormConfig || [], this.currentLang);
-    }
+    this.applyI18nToFields(this.rootFormConfig || [], this.currentLang);
+    this.applyI18nToFields(this.unitFormConfig || [], this.currentLang);
+    this.applyI18nToFields(this.leafFormConfig || [], this.currentLang);
   }
 
   ngAfterViewInit() {
