@@ -30,6 +30,13 @@ export function writeI18n(current: I18nValue | undefined, lang: string, value: s
   return normalizeI18n(map);
 }
 
+/** Always return an I18nMap object — never collapses to a plain string. */
+export function asI18nMap(field: I18nValue | undefined): I18nMap {
+  if (!field) return {};
+  if (typeof field === 'string') return { [DEFAULT]: field };
+  return { ...(field as I18nMap) };
+}
+
 export function normalizeI18n(map: I18nMap): I18nValue {
   const filled: I18nMap = {};
   Object.keys(map).forEach(k => { if (map[k]) { filled[k] = map[k]; } });

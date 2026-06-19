@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import * as _ from 'lodash-es';
 import { ConfigService } from '../../services/config/config.service';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
-import { readI18nForEditor, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
+import { readI18nForEditor, writeI18n, normalizeI18n, asI18nMap, I18nValue } from '../../utils/i18nField';
 
 interface MtfPair {
   left: I18nValue;
@@ -85,11 +85,11 @@ export class MtfComponent implements OnInit {
     const pairs: MtfPair[] = this.editorState.pairs || [];
     const leftOptions  = pairs.map((p, i) => ({
       value: String(i),
-      label: normalizeI18n(typeof p.left === 'object' ? p.left as any : (p.left ? { en: p.left } : {})),
+      label: asI18nMap(p.left),
     }));
     const rightOptions = pairs.map((p, i) => ({
       value: String.fromCharCode(97 + i),
-      label: normalizeI18n(typeof p.right === 'object' ? p.right as any : (p.right ? { en: p.right } : {})),
+      label: asI18nMap(p.right),
     }));
     const correctValue = _.reduce(pairs, (acc, _, i) => {
       acc[String(i)] = String.fromCharCode(97 + i);
