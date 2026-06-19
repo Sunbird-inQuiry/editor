@@ -274,6 +274,14 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 if (this.questionInteractionType === 'order' && this.questionMetaData.templateId) {
                   this.editorState.templateId = this.questionMetaData.templateId;
                 }
+                // isPartialScore and evalUnordered are stored as top-level metadata fields;
+                // copy into editorState so sub-components can hydrate their toggles
+                if (this.questionMetaData.isPartialScore !== undefined) {
+                  this.editorState.isPartialScore = this.questionMetaData.isPartialScore;
+                }
+                if (this.questionMetaData.evalUnordered !== undefined) {
+                  this.editorState.evalUnordered = this.questionMetaData.evalUnordered;
+                }
               }
 
               if (this.questionInteractionType === 'slider') {
