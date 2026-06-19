@@ -646,6 +646,7 @@ lib-questionset-editor {
   }
 
   // common-form-elements-full dropdown icons → LEFT for RTL
+  // Two selectors: ancestor dir="rtl" OR @HostBinding dir="rtl" on the component itself
   .dropdown-icon {
     right: auto !important;
     left: 8px !important;
@@ -671,6 +672,30 @@ lib-questionset-editor {
       margin-left: 2.1em;
       margin-right: 0;
     }
+  }
+}
+
+// Also cover the case where @HostBinding sets dir="rtl" on lib-questionset-editor itself
+// (not just on an ancestor like document.documentElement)
+lib-questionset-editor[dir="rtl"] {
+  .dropdown-icon {
+    right: auto !important;
+    left: 8px !important;
+    pointer-events: none;
+  }
+  .caret-down {
+    right: auto !important;
+    left: 1.125rem !important;
+    pointer-events: none;
+  }
+  span.arrow-icon { float: left !important; }
+  .ui.selection.dropdown,
+  .ui.dropdown {
+    > .dropdown.icon, > i.dropdown.icon {
+      right: auto !important;
+      left: 1em !important;
+    }
+    > .text { margin-left: 2.1em; margin-right: 0; }
   }
 
 
