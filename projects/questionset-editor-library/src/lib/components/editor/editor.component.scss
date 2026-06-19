@@ -571,14 +571,9 @@ lib-questionset-editor {
   display: none !important;
 }
 
-// Translate "Reset" button in the third-party timer component (sb-dynamic-timer selector
-// from common-form-elements-full). Button text is hardcoded; use font-size:0 + ::after.
-@each $lang, $label in ("ar": "إعادة تعيين", "fr": "Réinitialiser", "pt": "Redefinir") {
-  [lang="#{$lang}"] sb-dynamic-timer button.sb-btn-outline-primary {
-    font-size: 0 !important;
-    &::after { content: $label; font-size: 0.875rem; }
-  }
-}
+// Note: sb-dynamic-timer "Reset" button text is hardcoded in common-form-elements-full.
+// CSS font-size:0+::after trick is not reliable (overflow:hidden clips ::after).
+// Translation requires an update to the upstream package.
 
 [dir="rtl"] {
   // Portaled Semantic UI modals
