@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import * as _ from 'lodash-es';
 import { ConfigService } from '../../services/config/config.service';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
-import { readI18nForEditor, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
+import { readI18nForEditor, writeI18n, normalizeI18n, asI18nMap, I18nValue } from '../../utils/i18nField';
 
 interface MtfPair {
   left: I18nValue;
@@ -47,9 +47,9 @@ export class MtfComponent implements OnInit {
     if (!this.editorState) { this.editorState = {}; }
     if (!_.isArray(this.editorState.pairs) || this.editorState.pairs.length === 0) {
       this.editorState.pairs = [
-        { left: '', right: '' },
-        { left: '', right: '' },
-        { left: '', right: '' },
+        { left: { en: '' }, right: { en: '' } },
+        { left: { en: '' }, right: { en: '' } },
+        { left: { en: '' }, right: { en: '' } },
       ];
     }
     this.isPartialScore = !!this.editorState.isPartialScore;
@@ -58,7 +58,7 @@ export class MtfComponent implements OnInit {
 
   addPair() {
     if (this.editorState.pairs.length < this.MAX_PAIRS) {
-      this.editorState.pairs = [...this.editorState.pairs, { left: '', right: '' }];
+      this.editorState.pairs = [...this.editorState.pairs, { left: { en: '' }, right: { en: '' } }];
       this.editorDataHandler();
     }
   }
@@ -71,8 +71,10 @@ export class MtfComponent implements OnInit {
   }
 
   onCellChange(event: any, pairIndex: number, side: 'left' | 'right') {
-    this.editorState.pairs[pairIndex][side] = writeI18n(
-      this.editorState.pairs[pairIndex][side] as I18nValue, this.lang, event.body);
+    // Always store as i18n map so single-language content has same structure as multilingual
+    const current = asI18nMap(this.editorState.pairs[pairIndex][side] as I18nValue);
+    current[this.lang] = event.body;
+    this.editorState.pairs[pairIndex][side] = current;
     this.editorDataHandler(event);
   }
 
@@ -85,11 +87,11 @@ export class MtfComponent implements OnInit {
     const pairs: MtfPair[] = this.editorState.pairs || [];
     const leftOptions  = pairs.map((p, i) => ({
       value: String(i),
-      label: normalizeI18n(typeof p.left === 'object' ? p.left as any : (p.left ? { en: p.left } : {})),
+      label: asI18nMap(p.left),
     }));
     const rightOptions = pairs.map((p, i) => ({
       value: String.fromCharCode(97 + i),
-      label: normalizeI18n(typeof p.right === 'object' ? p.right as any : (p.right ? { en: p.right } : {})),
+      label: asI18nMap(p.right),
     }));
     const correctValue = _.reduce(pairs, (acc, _, i) => {
       acc[String(i)] = String.fromCharCode(97 + i);

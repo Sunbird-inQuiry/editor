@@ -197,7 +197,13 @@ export class OptionsComponent implements OnInit, OnChanges {
     let index;
     const interactOptions = _.map(options, (opt, key) => {
       index = Number(key);
-      return { label: normalizeI18n(typeof opt.body === 'object' ? opt.body : (opt.body ? { en: opt.body } : {})), value: index,  hint: this.hints[this.editorState?.interactions?.response1?.options[index]?.hint] ? Object.keys(this.hints).find(element => element == this.editorState?.interactions?.response1?.options[index]?.hint) : '' };
+      const bodyI18n = typeof opt.body === 'object' ? opt.body : (opt.body ? { en: opt.body } : {});
+      return {
+        label: readI18n(bodyI18n as I18nValue, 'en'), // plain string — player compatibility
+        labelI18n: normalizeI18n(bodyI18n),            // i18n map — for multilingual-aware players
+        value: index,
+        hint: this.hints[this.editorState?.interactions?.response1?.options[index]?.hint] ? Object.keys(this.hints).find(element => element == this.editorState?.interactions?.response1?.options[index]?.hint) : ''
+      };
     });
     const interactions = {
       response1: {

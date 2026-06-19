@@ -274,6 +274,14 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 if (this.questionInteractionType === 'order' && this.questionMetaData.templateId) {
                   this.editorState.templateId = this.questionMetaData.templateId;
                 }
+                // isPartialScore and evalUnordered are stored as top-level metadata fields;
+                // copy into editorState so sub-components can hydrate their toggles
+                if (this.questionMetaData.isPartialScore !== undefined) {
+                  this.editorState.isPartialScore = this.questionMetaData.isPartialScore;
+                }
+                if (this.questionMetaData.evalUnordered !== undefined) {
+                  this.editorState.evalUnordered = this.questionMetaData.evalUnordered;
+                }
               }
 
               if (this.questionInteractionType === 'slider') {
@@ -1065,7 +1073,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   checkMediaExists(questionMetadata, mediaId) {
-    if (_.includes(questionMetadata.body, mediaId) || _.includes(questionMetadata.answer, mediaId)) {
+    // body/answer may be i18n map objects — stringify to enable substring search
+    const bodyStr   = typeof questionMetadata.body   === 'object' ? JSON.stringify(questionMetadata.body)   : questionMetadata.body;
+    const answerStr = typeof questionMetadata.answer === 'object' ? JSON.stringify(questionMetadata.answer) : questionMetadata.answer;
+    if (_.includes(bodyStr, mediaId) || _.includes(answerStr, mediaId)) {
       return true;
     }
 
