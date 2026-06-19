@@ -127,6 +127,19 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  private readonly _timerResetLabels: Record<string, string> = {
+    en: 'Reset', ar: 'إعادة تعيين', fr: 'Réinitialiser', pt: 'Redefinir'
+  };
+
+  private _translateTimerButtons(lang: string): void {
+    const label = this._timerResetLabels[lang] || 'Reset';
+    setTimeout(() => {
+      document.querySelectorAll('sb-dynamic-timer button.sb-btn-outline-primary').forEach(btn => {
+        if (btn.textContent?.trim()) { btn.textContent = label; }
+      });
+    }, 200);
+  }
+
   private _applyLang(lang: string) {
     this.currentLang = lang;
     this.configService.setLanguage(lang);
@@ -136,6 +149,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.rootFormConfig) { this.applyI18nToFields(this.rootFormConfig, lang); }
     if (this.unitFormConfig) { this.applyI18nToFields(this.unitFormConfig, lang); }
     if (this.leafFormConfig) { this.applyI18nToFields(this.leafFormConfig, lang); }
+    this._translateTimerButtons(lang);
   }
 
   private _onStorageChange = (e: StorageEvent) => {
@@ -379,6 +393,7 @@ export class EditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.applyI18nToFields(this.rootFormConfig || [], this.currentLang);
     this.applyI18nToFields(this.unitFormConfig || [], this.currentLang);
     this.applyI18nToFields(this.leafFormConfig || [], this.currentLang);
+    this._translateTimerButtons(this.currentLang);
   }
 
   ngAfterViewInit() {
