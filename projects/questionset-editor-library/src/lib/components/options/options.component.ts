@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output, OnChanges, SimpleChanges } from '@angular/core';
 import * as _ from 'lodash-es';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
-import { readI18n, readI18nForEditor, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
+import { readI18nForEditor, writeI18n, I18nValue } from '../../utils/i18nField';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { ConfigService } from '../../services/config/config.service';
 import { SubMenu } from '../question-option-sub-menu/question-option-sub-menu.component';
@@ -193,9 +193,7 @@ export class OptionsComponent implements OnInit, OnChanges {
     }
   }
 
-  // Extract a backend-safe label from option body HTML.
-  // The backend sanitizer strips HTML tags from the label field, so full <figure> HTML
-  // can't be stored there. For image options, fall back to the image src URL (plain string).
+  // Strip HTML from a single body string; fall back to image src URL for image-only content.
   private bodyToLabel(html: string): string {
     if (!html) return '';
     const text = html.replace(/<[^>]*>/g, '').trim();
@@ -204,15 +202,20 @@ export class OptionsComponent implements OnInit, OnChanges {
     return srcMatch ? srcMatch[1] : '';
   }
 
+  // Build an i18n label map: { en: "text or src", fr: "...", ... }
+  private bodyI18nToLabel(bodyI18n: Record<string, string>): Record<string, string> {
+    const result: Record<string, string> = {};
+    Object.keys(bodyI18n).forEach(lang => { result[lang] = this.bodyToLabel(bodyI18n[lang]); });
+    return result;
+  }
+
   getInteractions(options) {
     let index;
     const interactOptions = _.map(options, (opt, key) => {
       index = Number(key);
       const bodyI18n = typeof opt.body === 'object' ? opt.body : (opt.body ? { en: opt.body } : {});
-      const rawLabel = readI18n(bodyI18n as I18nValue, 'en');
       return {
-        label: this.bodyToLabel(rawLabel),  // plain string, HTML-stripped, image src as fallback
-        labelI18n: normalizeI18n(bodyI18n), // full i18n map for multilingual-aware players
+        label: this.bodyI18nToLabel(bodyI18n), // i18n map matching the options i18n label format
         value: index,
         hint: this.hints[this.editorState?.interactions?.response1?.options[index]?.hint] ? Object.keys(this.hints).find(element => element == this.editorState?.interactions?.response1?.options[index]?.hint) : ''
       };
