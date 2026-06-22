@@ -193,29 +193,13 @@ export class OptionsComponent implements OnInit, OnChanges {
     }
   }
 
-  // Strip HTML from a single body string; fall back to image src URL for image-only content.
-  private bodyToLabel(html: string): string {
-    if (!html) return '';
-    const text = html.replace(/<[^>]*>/g, '').trim();
-    if (text) return text;
-    const srcMatch = /src="([^"]+)"/.exec(html);
-    return srcMatch ? srcMatch[1] : '';
-  }
-
-  // Build an i18n label map: { en: "text or src", fr: "...", ... }
-  private bodyI18nToLabel(bodyI18n: Record<string, string>): Record<string, string> {
-    const result: Record<string, string> = {};
-    Object.keys(bodyI18n).forEach(lang => { result[lang] = this.bodyToLabel(bodyI18n[lang]); });
-    return result;
-  }
-
   getInteractions(options) {
     let index;
     const interactOptions = _.map(options, (opt, key) => {
       index = Number(key);
       const bodyI18n = typeof opt.body === 'object' ? opt.body : (opt.body ? { en: opt.body } : {});
       return {
-        label: this.bodyI18nToLabel(bodyI18n), // i18n map matching the options i18n label format
+        label: bodyI18n,
         value: index,
         hint: this.hints[this.editorState?.interactions?.response1?.options[index]?.hint] ? Object.keys(this.hints).find(element => element == this.editorState?.interactions?.response1?.options[index]?.hint) : ''
       };

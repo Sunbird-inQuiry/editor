@@ -83,32 +83,15 @@ export class MtfComponent implements OnInit {
     this.editorDataOutput.emit({ body, mediaobj: event?.mediaobj });
   }
 
-  // Extract backend-safe label from HTML: plain text if present, else image src URL.
-  private htmlToLabel(html: string): string {
-    if (!html) return '';
-    const text = html.replace(/<[^>]*>/g, '').trim();
-    if (text) return text;
-    const srcMatch = /src="([^"]+)"/.exec(html);
-    return srcMatch ? srcMatch[1] : '';
-  }
-
-  // Convert an i18n map of HTML values to a map of plain-text/src labels.
-  private mapToLabel(field: I18nValue): Record<string, string> {
-    const map = asI18nMap(field);
-    const result: Record<string, string> = {};
-    Object.keys(map).forEach(lang => { result[lang] = this.htmlToLabel(map[lang]); });
-    return result;
-  }
-
   private prepareMtfBody() {
     const pairs: MtfPair[] = this.editorState.pairs || [];
     const leftOptions  = pairs.map((p, i) => ({
       value: String(i),
-      label: this.mapToLabel(p.left),
+      label: asI18nMap(p.left),
     }));
     const rightOptions = pairs.map((p, i) => ({
       value: String.fromCharCode(97 + i),
-      label: this.mapToLabel(p.right),
+      label: asI18nMap(p.right),
     }));
     const correctValue = _.reduce(pairs, (acc, _, i) => {
       acc[String(i)] = String.fromCharCode(97 + i);
