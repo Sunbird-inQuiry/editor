@@ -181,7 +181,7 @@ export class OrderComponent implements OnInit {
       outcomeDeclaration: {
         maxScore: { cardinality: 'single', type: 'integer', defaultValue: isPartialScore ? options.length : 1 },
       },
-      editorState: { options, correctOrder },
+      editorState: { options, correctOrder, isPartialScore: isPartialScore || false },
     };
   }
 
