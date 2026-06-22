@@ -193,14 +193,26 @@ export class OptionsComponent implements OnInit, OnChanges {
     }
   }
 
+  // Extract a backend-safe label from option body HTML.
+  // The backend sanitizer strips HTML tags from the label field, so full <figure> HTML
+  // can't be stored there. For image options, fall back to the image src URL (plain string).
+  private bodyToLabel(html: string): string {
+    if (!html) return '';
+    const text = html.replace(/<[^>]*>/g, '').trim();
+    if (text) return text;
+    const srcMatch = /src="([^"]+)"/.exec(html);
+    return srcMatch ? srcMatch[1] : '';
+  }
+
   getInteractions(options) {
     let index;
     const interactOptions = _.map(options, (opt, key) => {
       index = Number(key);
       const bodyI18n = typeof opt.body === 'object' ? opt.body : (opt.body ? { en: opt.body } : {});
+      const rawLabel = readI18n(bodyI18n as I18nValue, 'en');
       return {
-        label: readI18n(bodyI18n as I18nValue, 'en'), // plain string — player compatibility
-        labelI18n: normalizeI18n(bodyI18n),            // i18n map — for multilingual-aware players
+        label: this.bodyToLabel(rawLabel),  // plain string, HTML-stripped, image src as fallback
+        labelI18n: normalizeI18n(bodyI18n), // full i18n map for multilingual-aware players
         value: index,
         hint: this.hints[this.editorState?.interactions?.response1?.options[index]?.hint] ? Object.keys(this.hints).find(element => element == this.editorState?.interactions?.response1?.options[index]?.hint) : ''
       };
