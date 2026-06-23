@@ -1090,9 +1090,16 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (questionMetadata?.qType !== 'SA' && questionMetadata?.interactions?.response1?.options) {
-      const interactionsOptions = questionMetadata.interactions.response1.options;
-      for (const option of interactionsOptions) {
-        if (_.includes(option?.label, mediaId)) {
+      const raw = questionMetadata.interactions.response1.options;
+      // MCQ: options is a flat array; MTF: options is { left: [...], right: [...] }
+      const optionsList: any[] = Array.isArray(raw)
+        ? raw
+        : ([] as any[]).concat(...Object.values(raw));
+      for (const option of optionsList) {
+        // MTF labels are i18n map objects — stringify for substring search
+        const labelStr = typeof option?.label === 'object'
+          ? JSON.stringify(option.label) : (option?.label ?? '');
+        if (_.includes(labelStr, mediaId)) {
           return true;
         }
       }

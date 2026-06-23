@@ -16,13 +16,16 @@
     <div cdkDropList (cdkDropListDropped)="dropOption($event)" class="order-list">
       <div *ngFor="let option of options; let i = index" cdkDrag class="order-item-card mb-10">
         <div class="order-item-card__body" [attr.dir]="globalDir">
-          <input class="order-item-card__input" type="text" [attr.maxlength]="120"
-            [placeholder]="'Enter Sequence ' + (i + 1)"
-            [value]="optionLabel(option)"
-            (input)="onLabelInput($event.target['value'], i)">
-          <span class="order-item-card__count fs-0-785 sb-color-gray-200">
-            {{ optionLabel(option).length }} / 120
-          </span>
+          <lib-ckeditor-tool [setCharacterLimit]="120"
+            (editorDataOutput)="onLabelChange($event, i)"
+            [editorDataInput]="optionLabel(option)"
+            [lang]="globalLang"
+            [showLangSelector]="true"
+            [langs]="langs"
+            [activeLangCode]="currentLang"
+            (langChange)="onLangChange($event)"
+            class="ckeditor-tool__option mb-10">
+          </lib-ckeditor-tool>
           <label *ngIf="showFormError && !optionLabel(option)" class="sb-color-error fs-0-785 d-block mt-4">
             {{ configService.labelConfig?.lbl?.mtfRequired }}
           </label>

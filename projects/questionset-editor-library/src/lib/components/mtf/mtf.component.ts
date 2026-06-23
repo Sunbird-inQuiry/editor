@@ -126,7 +126,7 @@ export class MtfComponent implements OnInit {
       outcomeDeclaration: {
         maxScore: { cardinality: 'single', type: 'integer', defaultValue: this.isPartialScore ? pairs.length : 1 },
       },
-      editorState: { pairs: this.editorState.pairs },
+      editorState: { pairs: this.editorState.pairs, isPartialScore: this.isPartialScore },
     };
   }
 

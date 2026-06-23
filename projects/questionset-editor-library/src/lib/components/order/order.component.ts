@@ -41,6 +41,8 @@ export class OrderComponent implements OnInit {
   get lang(): string    { return this.currentLang; }
   get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
   get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
+  langs = ActiveLanguageService.LANGS;
+  onLangChange(code: string): void { this._activeLang?.set(code); }
   optionLabel(opt: OrderOption): string { return readI18nForEditor(opt.label, this.lang); }
   isPartialScore = false;
 
@@ -179,7 +181,7 @@ export class OrderComponent implements OnInit {
       outcomeDeclaration: {
         maxScore: { cardinality: 'single', type: 'integer', defaultValue: isPartialScore ? options.length : 1 },
       },
-      editorState: { options, correctOrder },
+      editorState: { options, correctOrder, isPartialScore: isPartialScore || false },
     };
   }
 

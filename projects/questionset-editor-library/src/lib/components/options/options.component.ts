@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output, OnChanges, SimpleChanges } from '@angular/core';
 import * as _ from 'lodash-es';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
-import { readI18n, readI18nForEditor, writeI18n, normalizeI18n, I18nValue } from '../../utils/i18nField';
+import { readI18nForEditor, writeI18n, I18nValue } from '../../utils/i18nField';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
 import { ConfigService } from '../../services/config/config.service';
 import { SubMenu } from '../question-option-sub-menu/question-option-sub-menu.component';
@@ -199,8 +199,7 @@ export class OptionsComponent implements OnInit, OnChanges {
       index = Number(key);
       const bodyI18n = typeof opt.body === 'object' ? opt.body : (opt.body ? { en: opt.body } : {});
       return {
-        label: readI18n(bodyI18n as I18nValue, 'en'), // plain string — player compatibility
-        labelI18n: normalizeI18n(bodyI18n),            // i18n map — for multilingual-aware players
+        label: bodyI18n,
         value: index,
         hint: this.hints[this.editorState?.interactions?.response1?.options[index]?.hint] ? Object.keys(this.hints).find(element => element == this.editorState?.interactions?.response1?.options[index]?.hint) : ''
       };

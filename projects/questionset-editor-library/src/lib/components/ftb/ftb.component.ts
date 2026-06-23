@@ -68,6 +68,10 @@ export class FtbComponent implements OnInit {
         evalUnordered: this.evalUnordered,
         scoringMode: 'responseProcessing',
         responseProcessing: { template: 'MAP_RESPONSE' },
+        editorState: {
+          isPartialScore: this.isPartialScore,
+          evalUnordered: this.evalUnordered,
+        },
       }
     });
   }
