@@ -100,6 +100,7 @@ export class QuestionService {
         request: {
           asset: {
             primaryCategory: 'asset',
+            contentType: 'Asset',
             language: ['English'],
             code: uuidv4(),
           }
