@@ -1,0 +1,120 @@
+// ---------------------------------------------------------------------------
+// Root container
+// ---------------------------------------------------------------------------
+
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  font-family: var(--sbx-font-sans);
+  font-size: var(--sbx-text-base);
+  color: var(--sbx-color-text-primary);
+  background-color: var(--sbx-color-surface-base);
+  box-sizing: border-box;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Loading state
+// ---------------------------------------------------------------------------
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sbx-space-4);
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  color: var(--sbx-color-text-secondary);
+  font-size: var(--sbx-text-sm);
+  font-weight: var(--sbx-font-medium);
+}
+
+// ---------------------------------------------------------------------------
+// Spinner
+// ---------------------------------------------------------------------------
+
+.loadingSpinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--sbx-color-surface-dim);
+  border-top-color: var(--sbx-color-primary);
+  border-radius: var(--sbx-radius-full);
+  animation: spinnerRotate 0.75s linear infinite;
+}
+
+@keyframes spinnerRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Error state
+// ---------------------------------------------------------------------------
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sbx-space-3);
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  padding: var(--sbx-space-8);
+  text-align: center;
+}
+
+.errorTitle {
+  margin: 0;
+  font-size: var(--sbx-text-lg);
+  font-weight: var(--sbx-font-semibold);
+  color: var(--sbx-color-error);
+}
+
+.errorMessage {
+  margin: 0;
+  font-size: var(--sbx-text-sm);
+  color: var(--sbx-color-text-secondary);
+  max-width: 480px;
+}
+
+.retryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sbx-space-2) var(--sbx-space-6);
+  margin-top: var(--sbx-space-2);
+  font-size: var(--sbx-text-sm);
+  font-weight: var(--sbx-font-medium);
+  color: var(--sbx-color-primary-fg);
+  background-color: var(--sbx-color-primary);
+  border: none;
+  border-radius: var(--sbx-radius-md);
+  cursor: pointer;
+  transition: background-color var(--sbx-duration-base) var(--sbx-ease-default);
+
+  &:hover {
+    background-color: var(--sbx-color-primary-hover);
+  }
+
+  &:active {
+    background-color: var(--sbx-color-primary-active);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--sbx-shadow-focus);
+  }
+}

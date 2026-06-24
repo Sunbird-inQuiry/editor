@@ -1,0 +1,50 @@
+// =============================================================================
+// Spinner — CSS Module
+// =============================================================================
+
+@keyframes sbx-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  // The ring element
+  &__ring {
+    border-radius: 50%;
+    border-style: solid;
+    border-color: currentColor;
+    border-top-color: transparent;
+    animation: sbx-spin 0.65s linear infinite;
+
+    // Respect reduced-motion preference
+    @media (prefers-reduced-motion: reduce) {
+      animation-duration: 1.5s;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Size variants
+  // ---------------------------------------------------------------------------
+  &--sm &__ring {
+    width:  14px;
+    height: 14px;
+    border-width: 2px;
+  }
+
+  &--md &__ring {
+    width:  20px;
+    height: 20px;
+    border-width: 2px;
+  }
+
+  &--lg &__ring {
+    width:  32px;
+    height: 32px;
+    border-width: 3px;
+  }
+}

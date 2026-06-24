@@ -1,0 +1,107 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sbx-space-3);
+}
+
+.instructionBanner {
+  font-size: var(--sbx-text-xs);
+  color: var(--sbx-color-text-secondary);
+  padding: var(--sbx-space-2) var(--sbx-space-3);
+  background: var(--sbx-color-primary-subtle);
+  border-radius: var(--sbx-radius-md);
+  border-left: 3px solid var(--sbx-color-primary);
+  line-height: var(--sbx-leading-relaxed);
+
+  code {
+    font-family: var(--sbx-font-mono);
+    background: var(--sbx-color-primary-100);
+    padding: 0 4px;
+    border-radius: var(--sbx-radius-xs);
+    font-size: 11px;
+  }
+}
+
+.blankCount {
+  font-size: var(--sbx-text-xs);
+  font-weight: var(--sbx-font-semibold);
+  color: var(--sbx-color-text-secondary);
+}
+
+.noBlankMsg {
+  font-size: var(--sbx-text-xs);
+  color: var(--sbx-color-text-tertiary);
+  font-style: italic;
+}
+
+.blanksList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sbx-space-2);
+}
+
+.blankRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sbx-space-2);
+}
+
+.blankIndex {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--sbx-radius-full);
+  background: var(--sbx-color-primary-subtle);
+  border: 1px solid var(--sbx-color-primary-200);
+  font-size: var(--sbx-text-xs);
+  font-weight: var(--sbx-font-bold);
+  color: var(--sbx-color-primary);
+}
+
+.blankLabel {
+  font-size: var(--sbx-text-xs);
+  color: var(--sbx-color-text-secondary);
+  white-space: nowrap;
+}
+
+.blankInput {
+  flex: 1;
+  border: 1px solid var(--sbx-color-border-default);
+  border-radius: var(--sbx-radius-md);
+  padding: 5px var(--sbx-space-2);
+  font: inherit;
+  font-size: var(--sbx-text-sm);
+  color: var(--sbx-color-text-primary);
+  background: var(--sbx-color-surface-base);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--sbx-duration-fast), box-shadow var(--sbx-duration-fast);
+
+  &:focus {
+    border-color: var(--sbx-color-border-focus);
+    box-shadow: var(--sbx-shadow-focus);
+  }
+
+  &::placeholder {
+    color: var(--sbx-color-text-placeholder);
+  }
+}
+
+.caseSensitiveRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sbx-space-2);
+  font-size: var(--sbx-text-xs);
+  color: var(--sbx-color-text-secondary);
+  margin-top: var(--sbx-space-1);
+}
+
+.checkbox {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--sbx-color-primary);
+  cursor: pointer;
+}

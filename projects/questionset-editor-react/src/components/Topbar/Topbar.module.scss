@@ -1,0 +1,250 @@
+// ── Topbar shell ─────────────────────────────────────────────────────────────
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--sbx-topbar-h, 56px);
+  padding: 0 16px;
+  background: white;
+  border-bottom: 1px solid var(--sbx-gray-200, #E5E7EB);
+  box-shadow: var(--sbx-shadow-1, 0 1px 3px rgba(0, 0, 0, 0.06));
+  flex-shrink: 0;
+  gap: 16px;
+  z-index: 10;
+  position: sticky;
+  top: 0;
+}
+
+// ── Left: back button + title + status chip ───────────────────────────────────
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--sbx-gray-600, #4B5563);
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: var(--sbx-gray-100, #F3F4F6);
+    color: var(--sbx-gray-900, #111827);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--sbx-primary, #2D6AE3);
+    outline-offset: 2px;
+  }
+}
+
+.title {
+  font-family: var(--sbx-font, inherit);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sbx-gray-900, #111827);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+  flex-shrink: 1;
+}
+
+.statusChip {
+  font-family: var(--sbx-font, inherit);
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+  padding: 2px 10px;
+  border-radius: var(--sbx-r-xl, 999px);
+  background: var(--sbx-primary-50, #EFF6FF);
+  color: var(--sbx-primary-700, #1D4ED8);
+  border: 1px solid var(--sbx-primary-200, #BFDBFE);
+  line-height: 1.6;
+  text-transform: capitalize;
+}
+
+// ── Right: indicators + action buttons ───────────────────────────────────────
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+// ── Save / dirty indicator ────────────────────────────────────────────────────
+
+.savedIndicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--sbx-font, inherit);
+  font-size: 12px;
+  color: var(--sbx-gray-500, #6B7280);
+  white-space: nowrap;
+}
+
+.unsaved {
+  color: var(--sbx-warning, #D97706);
+  font-weight: 600;
+}
+
+// ── Review mode button group ──────────────────────────────────────────────────
+
+.reviewBtns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 8px;
+  border-left: 1px solid var(--sbx-gray-200, #E5E7EB);
+  margin-left: 4px;
+}
+
+// ── Sourcing-review mode button group ─────────────────────────────────────────
+
+.sourcingBtns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 8px;
+  border-left: 1px solid var(--sbx-gray-200, #E5E7EB);
+  margin-left: 4px;
+}
+
+// ── Inline modal overlay ──────────────────────────────────────────────────────
+
+.sbOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+// ── Inline modal card ─────────────────────────────────────────────────────────
+
+.sbModal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--sbx-shadow-3, 0 8px 32px rgba(0, 0, 0, 0.18));
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Modal header ──────────────────────────────────────────────────────────────
+
+.sbModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--sbx-gray-200, #E5E7EB);
+  flex-shrink: 0;
+}
+
+.sbModalTitle {
+  font-family: var(--sbx-font, inherit);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sbx-gray-900, #111827);
+}
+
+.sbModalClose {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--sbx-gray-400, #9CA3AF);
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.12s, background 0.12s;
+
+  &:hover {
+    color: var(--sbx-gray-900, #111827);
+    background: var(--sbx-gray-100, #F3F4F6);
+  }
+}
+
+// ── Modal body ────────────────────────────────────────────────────────────────
+
+.sbModalBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+// ── Modal footer ──────────────────────────────────────────────────────────────
+
+.sbModalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--sbx-gray-200, #E5E7EB);
+  flex-shrink: 0;
+}
+
+// ── Form elements inside inline modals ───────────────────────────────────────
+
+.sbLabel {
+  font-family: var(--sbx-font, inherit);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sbx-gray-700, #374151);
+}
+
+.sbTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--sbx-font, inherit);
+  font-size: 13px;
+  color: var(--sbx-gray-900, #111827);
+  border: 1.5px solid var(--sbx-gray-300, #D1D5DB);
+  border-radius: var(--sbx-r-sm, 6px);
+  padding: 10px 12px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+
+  &:focus {
+    border-color: var(--sbx-primary, #2D6AE3);
+    box-shadow: 0 0 0 3px rgba(45, 106, 227, 0.1);
+  }
+
+  &::placeholder {
+    color: var(--sbx-gray-400, #9CA3AF);
+  }
+}
+
+.sbError {
+  font-family: var(--sbx-font, inherit);
+  font-size: 12px;
+  color: var(--sbx-error, #DC2626);
+  margin: 0;
+}
