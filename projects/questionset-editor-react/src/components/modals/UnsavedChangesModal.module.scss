@@ -1,0 +1,23 @@
+// =============================================================================
+// UnsavedChangesModal — CSS Module
+// =============================================================================
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sbx-space-3);
+}
+
+.message {
+  margin: 0;
+  font-size: var(--sbx-text-sm);
+  color: var(--sbx-color-text-secondary);
+  line-height: var(--sbx-leading-relaxed);
+}
+
+// Spacer used inside the Modal footer to push action buttons to the right
+// while keeping "Stay" (ghost) aligned left. Because the Modal footer uses
+// justify-content: flex-end, we use flex-grow on the spacer instead.
+.spacer {
+  flex: 1;
+}

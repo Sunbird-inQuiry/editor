@@ -1,0 +1,212 @@
+// =============================================================================
+// Global Stylesheet — QuML Editor React
+// Entry point: imports tokens → fonts → question types, then sets base styles.
+// =============================================================================
+
+@use 'tokens'        as *;
+@use 'fonts'         as *;
+@use 'question-types' as *;
+
+// ---------------------------------------------------------------------------
+// Modern CSS Reset (based on Andy Bell's reset + Josh Comeau additions)
+// ---------------------------------------------------------------------------
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  // Prevent font size inflation on mobile
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+
+  // Smooth scroll when JS is not driving scroll
+  scroll-behavior: smooth;
+
+  // Full height to allow sticky footers
+  block-size: 100%;
+}
+
+body {
+  min-block-size: 100%;
+
+  font-family:    var(--sbx-font-sans);
+  font-size:      var(--sbx-text-base);
+  font-weight:    var(--sbx-font-regular);
+  line-height:    var(--sbx-leading-normal);
+  color:          var(--sbx-color-text-primary);
+  background-color: var(--sbx-color-surface-sunken);
+
+  // Sub-pixel antialiasing on retina displays
+  -webkit-font-smoothing:  antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Remove list styles on ul/ol elements that carry a role attribute
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+}
+
+// Balance text wrapping on headings
+h1, h2, h3, h4, h5, h6 {
+  text-wrap: balance;
+  line-height: var(--sbx-leading-tight);
+  font-weight: var(--sbx-font-semibold);
+  color: var(--sbx-color-text-primary);
+}
+
+// Readable line length for body text
+p, li, figcaption {
+  max-inline-size: 70ch;
+  text-wrap: pretty;
+}
+
+// Responsive images
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-inline-size: 100%;
+}
+
+// Inherit fonts for form elements
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+// Remove built-in textarea resize handle in the block direction only
+textarea {
+  resize: vertical;
+}
+
+// Remove default button styles — components apply their own
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+// Links
+a {
+  color: var(--sbx-color-text-link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+
+  &:hover {
+    color: var(--sbx-color-text-link-hover);
+  }
+}
+
+// Focus visible — unified ring across browsers
+:focus-visible {
+  outline: 2px solid var(--sbx-color-border-focus);
+  outline-offset: 2px;
+  border-radius: var(--sbx-radius-sm);
+}
+
+// Remove animations for users who prefer reduced motion
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Typography utility classes
+// ---------------------------------------------------------------------------
+
+.sbx-text-xs       { font-size: var(--sbx-text-xs); }
+.sbx-text-sm       { font-size: var(--sbx-text-sm); }
+.sbx-text-base     { font-size: var(--sbx-text-base); }
+.sbx-text-lg       { font-size: var(--sbx-text-lg); }
+.sbx-text-xl       { font-size: var(--sbx-text-xl); }
+.sbx-text-2xl      { font-size: var(--sbx-text-2xl); }
+.sbx-text-3xl      { font-size: var(--sbx-text-3xl); }
+
+.sbx-font-regular  { font-weight: var(--sbx-font-regular); }
+.sbx-font-medium   { font-weight: var(--sbx-font-medium); }
+.sbx-font-semibold { font-weight: var(--sbx-font-semibold); }
+.sbx-font-bold     { font-weight: var(--sbx-font-bold); }
+
+.sbx-text-primary   { color: var(--sbx-color-text-primary); }
+.sbx-text-secondary { color: var(--sbx-color-text-secondary); }
+.sbx-text-tertiary  { color: var(--sbx-color-text-tertiary); }
+.sbx-text-error     { color: var(--sbx-color-error); }
+.sbx-text-success   { color: var(--sbx-color-success); }
+
+// ---------------------------------------------------------------------------
+// Layout utility classes
+// ---------------------------------------------------------------------------
+
+.sbx-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sbx-flex         { display: flex; }
+.sbx-flex-col     { flex-direction: column; }
+.sbx-items-center { align-items: center; }
+.sbx-justify-between { justify-content: space-between; }
+.sbx-gap-1  { gap: var(--sbx-space-1); }
+.sbx-gap-2  { gap: var(--sbx-space-2); }
+.sbx-gap-3  { gap: var(--sbx-space-3); }
+.sbx-gap-4  { gap: var(--sbx-space-4); }
+
+// ---------------------------------------------------------------------------
+// Scrollbar styling (Webkit)
+// ---------------------------------------------------------------------------
+
+::-webkit-scrollbar {
+  inline-size: 6px;
+  block-size: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--sbx-color-neutral-300);
+  border-radius: var(--sbx-radius-full);
+
+  &:hover {
+    background-color: var(--sbx-color-neutral-400);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Editor shell root
+// ---------------------------------------------------------------------------
+
+#quml-editor-root {
+  display: flex;
+  flex-direction: column;
+  block-size: 100dvh;
+  inline-size: 100%;
+  overflow: hidden;
+  font-family: var(--sbx-font-sans);
+}

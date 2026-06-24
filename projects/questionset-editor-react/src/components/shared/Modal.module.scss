@@ -1,0 +1,183 @@
+// =============================================================================
+// Modal — CSS Module
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// Overlay — fixed backdrop covering the full viewport
+// ---------------------------------------------------------------------------
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--sbx-z-modal);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sbx-space-4);
+
+  background-color: rgba(17, 24, 39, 0.55);   // neutral-900 @ 55%
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+
+  // Entry animation
+  animation: sbx-overlay-in var(--sbx-duration-slow) var(--sbx-ease-out) both;
+
+  @keyframes sbx-overlay-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  // Reduced motion: skip fade, keep display
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+// When the modal is closing (consumer adds .overlayClosing via state)
+.overlayClosing {
+  animation: sbx-overlay-out var(--sbx-duration-slow) var(--sbx-ease-in) both;
+
+  @keyframes sbx-overlay-out {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Card — the white dialog surface
+// ---------------------------------------------------------------------------
+.card {
+  position: relative;
+  z-index: calc(var(--sbx-z-modal) + 1);
+
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100dvh - var(--sbx-space-8));
+
+  background-color: var(--sbx-color-surface-raised);
+  border-radius:    var(--sbx-radius-xl);
+  box-shadow:       var(--sbx-shadow-xl);
+  border:           1px solid var(--sbx-color-border-subtle);
+
+  overflow: hidden;
+
+  // Entry animation
+  animation: sbx-card-in var(--sbx-duration-slow) var(--sbx-ease-bounce) both;
+
+  @keyframes sbx-card-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+// Width variants (apply additional class to .card)
+.card--sm  { max-width: 400px; }
+.card--md  { max-width: 560px; }   // default
+.card--lg  { max-width: 720px; }
+.card--xl  { max-width: 960px; }
+.card--full {
+  max-width: none;
+  width: calc(100vw - var(--sbx-space-8));
+}
+
+// ---------------------------------------------------------------------------
+// Header
+// ---------------------------------------------------------------------------
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sbx-space-3);
+
+  padding: var(--sbx-space-4) var(--sbx-space-6);
+  border-bottom: 1px solid var(--sbx-color-border-subtle);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size:   var(--sbx-text-lg);
+  font-weight: var(--sbx-font-semibold);
+  color:       var(--sbx-color-text-primary);
+  line-height: var(--sbx-leading-snug);
+  margin: 0;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  width: 32px;
+  height: 32px;
+  border-radius: var(--sbx-radius-md);
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--sbx-color-text-tertiary);
+
+  transition:
+    background-color var(--sbx-duration-base) var(--sbx-ease-default),
+    color            var(--sbx-duration-base) var(--sbx-ease-default);
+
+  &:hover {
+    background-color: var(--sbx-color-surface-muted);
+    color: var(--sbx-color-text-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--sbx-color-border-focus);
+    outline-offset: 2px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Body — scrollable content area
+// ---------------------------------------------------------------------------
+.body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--sbx-space-6);
+
+  // Subtle inset shadow when content overflows
+  scroll-padding-block: var(--sbx-space-4);
+
+  // Thin scrollbar
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--sbx-color-neutral-300);
+    border-radius:    var(--sbx-radius-full);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Footer — action buttons
+// ---------------------------------------------------------------------------
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sbx-space-3);
+
+  padding: var(--sbx-space-4) var(--sbx-space-6);
+  border-top: 1px solid var(--sbx-color-border-subtle);
+  background-color: var(--sbx-color-surface-sunken);
+  flex-shrink: 0;
+}
