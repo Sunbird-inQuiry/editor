@@ -99,8 +99,7 @@ export class QuestionService {
       data: {
         request: {
           asset: {
-            primaryCategory: 'asset',
-            contentType: 'Asset',
+            primaryCategory: 'Asset',
             language: ['English'],
             code: uuidv4(),
           }
