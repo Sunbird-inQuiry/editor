@@ -361,12 +361,17 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
               this.setQuestionTitle(this.questionId);
               if (!_.isEmpty(this.editorState.solutions)) {
                 const savedSolutions: any[] = this.editorState.solutions;
-                this.solutionUUID = savedSolutions[0]?.id?.split('_')[0] || savedSolutions[0]?.id;
-                const solutionsMap: Record<string, { type: string; value: string }> = {};
-                savedSolutions.forEach((sol: any) => {
-                  const lang = sol.lang || 'en'; // backward compat: old format has no lang field
-                  solutionsMap[lang] = { type: sol.type, value: sol.value };
-                });
+                this.solutionUUID = savedSolutions[0]?.id || uuidv4();
+                const saved = savedSolutions[0];
+                let solutionsMap: Record<string, { type: string; value: string }> = {};
+
+                if (saved?.value && typeof saved.value === 'object' && !Array.isArray(saved.value)) {
+                  // New format: [{ id, value: { lang: { type, value } } }]
+                  solutionsMap = saved.value as Record<string, { type: string; value: string }>;
+                } else if (saved?.type) {
+                  // Legacy format: [{ id, type, value }] — single lang (en)
+                  solutionsMap = { en: { type: saved.type, value: saved.value } };
+                }
                 this.editorState.solutions = solutionsMap;
               }
               if (this.questionMetaData.media) {
@@ -1063,14 +1068,17 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const solutionsMap = this._getSolutionsMap();
     if (Object.keys(solutionsMap).length > 0) {
-      const solutionObjs = Object.entries(solutionsMap).map(([lang, sol]) => ({
-        id: `${this.solutionUUID}_${lang}`,
-        type: sol.type,
-        value: sol.value,
-        lang
-      }));
-      metadata.editorState.solutions = solutionObjs;
-      metadata.solutions = this._buildSolutionsHtml(solutionObjs);
+      // editorState.solutions: { uuid: { lang: { type, value } } }
+      // — editor needs type+value per lang for rehydration (to show CKEditor vs asset picker)
+      const editorStateSolValue: Record<string, { type: string; value: string }> = {};
+      Object.entries(solutionsMap).forEach(([lang, sol]) => {
+        editorStateSolValue[lang] = { type: sol.type, value: sol.value };
+      });
+      metadata.editorState.solutions = [{ id: this.solutionUUID, value: editorStateSolValue }];
+
+      // metadata.solutions: { uuid: { lang: "<rendered html>" } }
+      // — player only needs HTML per lang, not the type
+      metadata.solutions = this._buildSolutionsHtml(solutionsMap);
     }
     if (_.isEmpty(this.editorState.solutions)) {
       metadata.solutions = {};
@@ -1194,27 +1202,29 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return _.find(this.mediaArr, { 'id': mediaId });
   }
 
-  private _buildSolutionsHtml(solutionObjs: Array<{ id: string; type: string; value: string; lang: string }>): Record<string, any> {
-    const result: Record<string, any> = {};
-    solutionObjs.forEach(sol => {
+  private _buildSolutionsHtml(solutionsMap: Record<string, { type: string; value: string }>): Record<string, any> {
+    const perLang: Record<string, string> = {};
+    Object.entries(solutionsMap).forEach(([lang, sol]) => {
+      let html = '';
       if (sol.type === 'html') {
-        result[sol.id] = { [sol.lang]: sol.value };
+        html = sol.value;
       } else if (sol.type === 'video' || sol.type === 'audio') {
         const media = this.getMediaById(sol.value);
         if (media) {
-          result[sol.id] = { [sol.lang]: this.getAssetSolutionHtml(media.thumbnail || '', media.src, media.id, sol.type) };
+          html = this.getAssetSolutionHtml(media.thumbnail || '', media.src, media.id, sol.type);
         }
       }
+      if (html) perLang[lang] = html;
     });
-    // Flatten single-lang single-entry to plain string for backward compat
-    const keys = Object.keys(result);
-    if (keys.length === 1) {
-      const langKeys = Object.keys(result[keys[0]]);
-      if (langKeys.length === 1 && langKeys[0] === 'en') {
-        return { [keys[0]]: result[keys[0]]['en'] };
-      }
+
+    if (Object.keys(perLang).length === 0) return {};
+
+    // Single EN-only: keep as plain string for backward compat with existing players
+    const langKeys = Object.keys(perLang);
+    if (langKeys.length === 1 && langKeys[0] === 'en') {
+      return { [this.solutionUUID]: perLang['en'] };
     }
-    return result;
+    return { [this.solutionUUID]: perLang };
   }
 
   getResponseDeclaration(type) {
