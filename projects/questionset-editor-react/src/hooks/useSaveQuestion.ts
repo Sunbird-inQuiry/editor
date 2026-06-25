@@ -7,7 +7,25 @@ import { createQuestion, updateQuestion } from '../api/question';
 import { PRIMARY_CATEGORY_MAP } from '../types/question';
 
 export function useSaveQuestion() {
-  const { activeQuestion, questionType, questionBody, options, matchPairs, sequence, hints, solutionText, setIsDirty, setIsSaving } = useQuestionStore();
+  const {
+    activeQuestion,
+    questionType,
+    questionBody,
+    options,
+    matchPairs,
+    sequence,
+    hints,
+    solutionText,
+    difficultyLevel,
+    bloomsLevel,
+    purpose,
+    maxScore,
+    expectedDuration,
+    showHints,
+    showSolutions,
+    setIsDirty,
+    setIsSaving,
+  } = useQuestionStore();
   const config = useEditorStore((s) => s.editorConfig);
   const { selectedNodeId, updateNode } = useTreeStore();
 
@@ -34,6 +52,14 @@ export function useSaveQuestion() {
         channel,
         framework,
         createdBy,
+        // Metadata fields
+        difficultyLevel,
+        bloomsLevel,
+        purpose,
+        maxScore,
+        expectedDuration,
+        showHints,
+        showSolutions,
       };
 
       if (activeQuestion?.identifier && !activeQuestion.identifier.startsWith('temp-')) {
@@ -55,7 +81,12 @@ export function useSaveQuestion() {
     } finally {
       setIsSaving(false);
     }
-  }, [activeQuestion, questionType, questionBody, options, matchPairs, sequence, solutionText, hints, config, selectedNodeId, updateNode, setIsDirty, setIsSaving]);
+  }, [
+    activeQuestion, questionType, questionBody, options, matchPairs, sequence,
+    solutionText, hints, difficultyLevel, bloomsLevel, purpose, maxScore,
+    expectedDuration, showHints, showSolutions,
+    config, selectedNodeId, updateNode, setIsDirty, setIsSaving,
+  ]);
 
   return { save };
 }

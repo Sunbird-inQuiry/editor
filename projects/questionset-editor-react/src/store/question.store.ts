@@ -12,6 +12,15 @@ interface QuestionState {
   hints: IHint[];
   solutionText: string;
   questionBody: string;
+  // Question-level metadata (persisted on save)
+  difficultyLevel: string;
+  bloomsLevel: string;
+  purpose: string;
+  maxScore: number;
+  expectedDuration: number;
+  showHints: boolean;
+  showSolutions: boolean;
+  // Actions
   setActiveQuestion: (question: IQuestion | null) => void;
   setQuestionType: (type: QuestionType) => void;
   setQuestionBody: (body: string) => void;
@@ -29,6 +38,13 @@ interface QuestionState {
   removeHint: (id: string) => void;
   updateHint: (id: string, body: string) => void;
   setSolutionText: (text: string) => void;
+  setDifficultyLevel: (v: string) => void;
+  setBloomsLevel: (v: string) => void;
+  setPurpose: (v: string) => void;
+  setMaxScore: (v: number) => void;
+  setExpectedDuration: (v: number) => void;
+  setShowHints: (v: boolean) => void;
+  setShowSolutions: (v: boolean) => void;
   setIsDirty: (dirty: boolean) => void;
   setIsSaving: (saving: boolean) => void;
   resetQuestion: () => void;
@@ -45,6 +61,16 @@ const DEFAULT_OPTIONS: IOption[] = [
   { id: makeId(), body: '', isCorrect: false },
 ];
 
+const DEFAULT_META = {
+  difficultyLevel: 'medium',
+  bloomsLevel: 'understand',
+  purpose: 'practice',
+  maxScore: 1,
+  expectedDuration: 60,
+  showHints: true,
+  showSolutions: true,
+};
+
 export const useQuestionStore = create<QuestionState>((set) => ({
   activeQuestion: null,
   questionType: null,
@@ -56,10 +82,22 @@ export const useQuestionStore = create<QuestionState>((set) => ({
   hints: [],
   solutionText: '',
   questionBody: '',
+  ...DEFAULT_META,
 
   setActiveQuestion: (question) => {
     if (!question) {
-      set({ activeQuestion: null, questionType: null, options: DEFAULT_OPTIONS, matchPairs: [], sequence: [], hints: [], solutionText: '', questionBody: '', isDirty: false });
+      set({
+        activeQuestion: null,
+        questionType: null,
+        options: DEFAULT_OPTIONS,
+        matchPairs: [],
+        sequence: [],
+        hints: [],
+        solutionText: '',
+        questionBody: '',
+        isDirty: false,
+        ...DEFAULT_META,
+      });
       return;
     }
     set({
@@ -72,6 +110,14 @@ export const useQuestionStore = create<QuestionState>((set) => ({
       solutionText: question.solutions?.[0]?.value ?? '',
       questionBody: question.editorState?.question ?? question.body ?? '',
       isDirty: false,
+      // Metadata from the question object, fall back to defaults
+      difficultyLevel: question.difficultyLevel ?? DEFAULT_META.difficultyLevel,
+      bloomsLevel: question.bloomsLevel ?? DEFAULT_META.bloomsLevel,
+      purpose: question.purpose ?? DEFAULT_META.purpose,
+      maxScore: question.maxScore ?? DEFAULT_META.maxScore,
+      expectedDuration: question.expectedDuration ?? DEFAULT_META.expectedDuration,
+      showHints: question.showHints ?? DEFAULT_META.showHints,
+      showSolutions: question.showSolutions ?? DEFAULT_META.showSolutions,
     });
   },
 
@@ -120,6 +166,15 @@ export const useQuestionStore = create<QuestionState>((set) => ({
     })),
 
   setSolutionText: (text) => set({ solutionText: text, isDirty: true }),
+
+  setDifficultyLevel: (v) => set({ difficultyLevel: v, isDirty: true }),
+  setBloomsLevel: (v) => set({ bloomsLevel: v, isDirty: true }),
+  setPurpose: (v) => set({ purpose: v, isDirty: true }),
+  setMaxScore: (v) => set({ maxScore: Math.max(0, v), isDirty: true }),
+  setExpectedDuration: (v) => set({ expectedDuration: Math.max(0, v), isDirty: true }),
+  setShowHints: (v) => set({ showHints: v, isDirty: true }),
+  setShowSolutions: (v) => set({ showSolutions: v, isDirty: true }),
+
   setIsDirty: (dirty) => set({ isDirty: dirty }),
   setIsSaving: (saving) => set({ isSaving: saving }),
 
@@ -135,5 +190,6 @@ export const useQuestionStore = create<QuestionState>((set) => ({
       questionBody: '',
       isDirty: false,
       isSaving: false,
+      ...DEFAULT_META,
     }),
 }));

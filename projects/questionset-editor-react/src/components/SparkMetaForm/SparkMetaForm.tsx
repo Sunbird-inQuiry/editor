@@ -8,6 +8,13 @@ import styles from './SparkMetaForm.module.scss';
 // Props
 // ---------------------------------------------------------------------------
 
+/** Shape of a single framework term entry. */
+export interface FrameworkTerm {
+  name: string;
+  identifier: string;
+  code: string;
+}
+
 export interface SparkMetaFormProps {
   /** Field configuration array from category-definition API. */
   fields: ICategoryField[];
@@ -25,6 +32,34 @@ export interface SparkMetaFormProps {
    * undefined (i.e. the "Details" tab).
    */
   section?: string;
+  /**
+   * Framework terms keyed by sourceCategory (e.g. "board", "medium",
+   * "gradeLevel", "subject").  When provided, fields whose `sourceCategory`
+   * matches a key will be populated from this map instead of falling back to
+   * `field.range` / `field.enum`.
+   *
+   * Each term has shape: { name, identifier, code }
+   * — `identifier` is used as the option value, `name` as the visible label.
+   */
+  frameworkTerms?: Map<string, FrameworkTerm[]>;
+}
+
+// ---------------------------------------------------------------------------
+// Timer helpers — convert seconds ↔ HH:mm:ss
+// ---------------------------------------------------------------------------
+
+function secondsToHms(totalSeconds: number): string {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  return [h, m, s].map((v) => String(v).padStart(2, '0')).join(':');
+}
+
+function hmsToSeconds(hms: string): number {
+  const parts = hms.split(':').map(Number);
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return Number(hms) || 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -105,15 +140,26 @@ interface SelectOption {
   label: string;
 }
 
-function buildOptions(field: ICategoryField): SelectOption[] {
-  // range takes precedence (framework-driven, array of { name, identifier })
+function buildOptions(
+  field: ICategoryField,
+  frameworkTerms?: Map<string, FrameworkTerm[]>,
+): SelectOption[] {
+  // 1. Framework terms map — highest priority when sourceCategory is set
+  if (field.sourceCategory && frameworkTerms) {
+    const terms = frameworkTerms.get(field.sourceCategory);
+    if (terms && terms.length > 0) {
+      return terms.map((t) => ({ value: t.identifier, label: t.name }));
+    }
+  }
+
+  // 2. Inline range (framework-driven, array of { name, identifier })
   if (Array.isArray(field.range)) {
     return (field.range as unknown[])
       .filter(isRangeItem)
       .map((item) => ({ value: item.identifier, label: item.name }));
   }
 
-  // enum — plain string array
+  // 3. Enum — plain string array
   if (Array.isArray(field.enum)) {
     return (field.enum as string[]).map((v) => ({ value: v, label: v }));
   }
@@ -252,6 +298,7 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
   onValidityChange,
   readOnly = false,
   section,
+  frameworkTerms,
 }) => {
   // Filter to only visible fields for this section
   const visibleFields = fields.filter(
@@ -347,7 +394,7 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
 
                 // ── select (single) ───────────────────────────────────────
                 if (inputType === 'select') {
-                  const options = buildOptions(field);
+                  const options = buildOptions(field, frameworkTerms);
                   return (
                     <select
                       id={fieldId}
@@ -374,24 +421,10 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
 
                 // ── multiselect ───────────────────────────────────────────
                 if (inputType === 'multiselect') {
-                  const options = buildOptions(field);
+                  const options = buildOptions(field, frameworkTerms);
                   const currentVal = Array.isArray(rhfField.value)
                     ? (rhfField.value as string[])
                     : [];
-
-                  // Framework data not yet loaded; render disabled placeholder
-                  if (options.length === 0 && field.sourceCategory) {
-                    return (
-                      <select
-                        id={fieldId}
-                        className={styles.select}
-                        disabled
-                        aria-label={`${field.label} — loading options…`}
-                      >
-                        <option>Loading {field.sourceCategory}…</option>
-                      </select>
-                    );
-                  }
 
                   return (
                     <select
@@ -482,6 +515,29 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                       }}
                       readOnly={isDisabled}
                       placeholder={field.placeholder}
+                    />
+                  );
+                }
+
+                // ── timepicker (HH:mm:ss ↔ seconds) ──────────────────────
+                if (inputType === 'timepicker' || field.code === 'maxTime' || field.code === 'warningTime') {
+                  const numVal = Number(rhfField.value) || 0;
+                  return (
+                    <input
+                      id={fieldId}
+                      type="time"
+                      step="1"
+                      className={`${styles.input} ${error ? styles.inputError : ''}`}
+                      value={secondsToHms(numVal)}
+                      onChange={(e) => {
+                        const secs = hmsToSeconds(e.target.value);
+                        rhfField.onChange(secs);
+                        onChange(field.code, secs);
+                      }}
+                      onBlur={rhfField.onBlur}
+                      disabled={isDisabled}
+                      aria-invalid={!!error}
+                      aria-describedby={error ? `${fieldId}-error` : undefined}
                     />
                   );
                 }

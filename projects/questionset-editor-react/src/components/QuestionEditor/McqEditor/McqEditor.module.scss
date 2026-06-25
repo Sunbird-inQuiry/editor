@@ -146,3 +146,51 @@
   color: var(--sbx-color-text-tertiary);
   margin-top: 4px;
 }
+
+.hintTextarea {
+  width: 100%;
+  border: 1px solid var(--sbx-color-border-default);
+  border-radius: var(--sbx-radius-sm);
+  padding: 4px var(--sbx-space-2);
+  font: inherit;
+  font-size: var(--sbx-text-xs);
+  color: var(--sbx-color-text-secondary);
+  background: var(--sbx-color-surface-muted);
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--sbx-duration-fast), box-shadow var(--sbx-duration-fast);
+  min-height: 52px;
+
+  &:focus {
+    border-color: var(--sbx-color-border-focus);
+    box-shadow: var(--sbx-shadow-focus);
+    background: var(--sbx-color-surface-base);
+  }
+
+  &::placeholder {
+    color: var(--sbx-color-text-placeholder);
+  }
+}
+
+.hintBtnActive {
+  color: var(--sbx-color-warning, #d97706);
+  background: var(--sbx-color-warning-subtle, #fef3c7);
+
+  &:hover {
+    color: var(--sbx-color-warning, #d97706);
+    background: var(--sbx-color-warning-subtle, #fef3c7);
+  }
+}
+
+.rteFallback {
+  height: 78px;
+  border-radius: var(--sbx-radius-sm, 4px);
+  background: var(--sbx-color-surface-muted, #f3f4f6);
+  animation: pulse 1.5s ease-in-out infinite;
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+}

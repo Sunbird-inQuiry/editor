@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { IEditorConfig, EditorMode, IButtonLoaders } from '../types/editor';
 import type { ICategoryField, IParsedCategoryDefinition } from '../api/categoryDefinition';
+import type { IComment } from '../api/comments';
 
 interface EditorState {
   editorConfig: IEditorConfig | null;
@@ -21,6 +22,8 @@ interface EditorState {
   publishChecklist: ICategoryField[] | null;
   reviewChecklist: ICategoryField[] | null;
   rfcChecklist: ICategoryField[] | null;
+  reviewComments: IComment[];
+  setReviewComments: (comments: IComment[]) => void;
   categoryMeta: {
     schemaDefaults: Record<string, unknown>;
     frameworkMetadata: { orgFWType?: string[]; targetFWType?: string[] };
@@ -63,6 +66,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   publishChecklist: null,
   reviewChecklist: null,
   rfcChecklist: null,
+  reviewComments: [],
   categoryMeta: null,
 
   setEditorConfig: (config) => set({ editorConfig: config }),
@@ -79,6 +83,7 @@ export const useEditorStore = create<EditorState>((set) => ({
     }),
   setLastSaved: (ts) => set({ lastSaved: ts }),
   setIsDirty: (dirty) => set({ isDirty: dirty }),
+  setReviewComments: (comments) => set({ reviewComments: comments }),
   setCategoryDefinition: (parsed) =>
     set({
       rootFormConfig: parsed.rootForm,

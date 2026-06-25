@@ -200,6 +200,131 @@
 }
 
 // ---------------------------------------------------------------------------
+// Advanced Filters — collapsible section driven by searchFormConfig
+// ---------------------------------------------------------------------------
+
+.advancedFiltersSection {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--sbx-color-border-subtle, #eceef4);
+}
+
+.advancedFiltersToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 7px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--sbx-color-text-secondary, #4b5563);
+  text-align: left;
+  transition: background var(--sbx-duration-fast, 100ms), color var(--sbx-duration-fast, 100ms);
+
+  span:first-child {
+    flex: 1;
+  }
+
+  &:hover {
+    background: var(--sbx-color-surface-muted, #f1f3f7);
+    color: var(--sbx-color-text-primary, #111827);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--sbx-color-border-focus, #1b4fd8);
+    outline-offset: -2px;
+  }
+}
+
+.advancedFiltersToggleActive {
+  color: var(--sbx-color-primary-700, #1b4fd8);
+}
+
+.advancedFiltersBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--sbx-radius-full, 9999px);
+  background: var(--sbx-color-primary-600, #2563eb);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.advancedFiltersPanel {
+  padding: 8px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--sbx-color-surface-subtle, #f9fafb);
+}
+
+.advancedFilterField {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.advancedFilterLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--sbx-color-text-tertiary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.advancedFilterSelect {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--sbx-color-border-default, #dde1ea);
+  border-radius: var(--sbx-radius-sm, 4px);
+  background: var(--sbx-color-surface-base, #ffffff);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--sbx-color-text-primary, #111827);
+  cursor: pointer;
+  appearance: auto;
+  transition: border-color var(--sbx-duration-fast, 100ms);
+
+  &:focus {
+    outline: none;
+    border-color: var(--sbx-color-border-focus, #1b4fd8);
+    box-shadow: 0 0 0 2px rgba(27, 79, 216, 0.15);
+  }
+}
+
+.advancedFiltersClear {
+  align-self: flex-start;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--sbx-color-text-secondary, #4b5563);
+  background: transparent;
+  border: 1px solid var(--sbx-color-border-default, #dde1ea);
+  border-radius: var(--sbx-radius-sm, 4px);
+  cursor: pointer;
+  transition: background var(--sbx-duration-fast, 100ms), color var(--sbx-duration-fast, 100ms);
+
+  &:hover {
+    background: var(--sbx-color-surface-muted, #f1f3f7);
+    color: var(--sbx-color-text-primary, #111827);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--sbx-color-border-focus, #1b4fd8);
+    outline-offset: 1px;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Sort + count row
 // ---------------------------------------------------------------------------
 
@@ -364,6 +489,12 @@
 .typeBadge--reo {
   background: #ccfbf1;
   color: #0f766e;
+}
+
+// Slider — orange
+.typeBadge--slider {
+  background: #ffedd5;
+  color: #c2410c;
 }
 
 // ---------------------------------------------------------------------------

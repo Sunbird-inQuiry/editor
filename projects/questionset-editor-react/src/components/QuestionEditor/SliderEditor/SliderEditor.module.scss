@@ -1,0 +1,183 @@
+// SliderEditor.module.scss
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sbx-space-4, 16px);
+  padding: var(--sbx-space-4, 16px);
+  border: 1px solid var(--sbx-color-border-default, #e2e8f0);
+  border-radius: var(--sbx-radius-md, 8px);
+  background: var(--sbx-color-surface-base, #ffffff);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--sbx-text-sm, 0.875rem);
+  font-weight: var(--sbx-font-semibold, 600);
+  color: var(--sbx-color-text-primary, #1a202c);
+  letter-spacing: 0.01em;
+}
+
+// ── config grids ──────────────────────────────────────────────────────────────
+
+.configGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sbx-space-3, 12px);
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.labelGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sbx-space-3, 12px);
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.configField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sbx-space-1, 4px);
+}
+
+.configLabel {
+  font-size: var(--sbx-text-xs, 0.75rem);
+  font-weight: var(--sbx-font-medium, 500);
+  color: var(--sbx-color-text-secondary, #4a5568);
+}
+
+// ── inputs ────────────────────────────────────────────────────────────────────
+
+%input-base {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px var(--sbx-space-2, 8px);
+  border: 1px solid var(--sbx-color-border-default, #e2e8f0);
+  border-radius: var(--sbx-radius-sm, 4px);
+  font: inherit;
+  font-size: var(--sbx-text-sm, 0.875rem);
+  color: var(--sbx-color-text-primary, #1a202c);
+  background: var(--sbx-color-surface-base, #ffffff);
+  outline: none;
+  transition: border-color var(--sbx-duration-fast, 150ms),
+    box-shadow var(--sbx-duration-fast, 150ms);
+
+  &:focus {
+    border-color: var(--sbx-color-border-focus, #4c9cf8);
+    box-shadow: var(--sbx-shadow-focus, 0 0 0 3px rgba(76, 156, 248, 0.2));
+  }
+
+  &::placeholder {
+    color: var(--sbx-color-text-placeholder, #a0aec0);
+  }
+}
+
+.numberInput {
+  @extend %input-base;
+
+  // Remove spinner in Firefox
+  appearance: textfield;
+
+  // Remove spinner in Chrome/Safari/Edge
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+}
+
+.textInput {
+  @extend %input-base;
+}
+
+.inputError {
+  border-color: var(--sbx-color-error, #e53e3e) !important;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.15) !important;
+}
+
+.errorMsg {
+  font-size: var(--sbx-text-xs, 0.75rem);
+  color: var(--sbx-color-error, #e53e3e);
+  margin-top: 2px;
+}
+
+// ── preview ───────────────────────────────────────────────────────────────────
+
+.previewSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sbx-space-2, 8px);
+  padding-top: var(--sbx-space-3, 12px);
+  border-top: 1px solid var(--sbx-color-border-subtle, #edf2f7);
+}
+
+.previewTitle {
+  font-size: var(--sbx-text-xs, 0.75rem);
+  font-weight: var(--sbx-font-semibold, 600);
+  color: var(--sbx-color-text-tertiary, #718096);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.previewHint {
+  font-size: var(--sbx-text-xs, 0.75rem);
+  color: var(--sbx-color-text-tertiary, #718096);
+  margin: 0;
+}
+
+.previewTrack {
+  display: flex;
+  align-items: center;
+  gap: var(--sbx-space-2, 8px);
+  flex-wrap: wrap;
+  padding: var(--sbx-space-2, 8px) 0;
+}
+
+.tickWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.previewCircle {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--sbx-color-primary, #4c9cf8);
+  background: var(--sbx-color-surface-base, #ffffff);
+  font-size: var(--sbx-text-xs, 0.75rem);
+  font-weight: var(--sbx-font-semibold, 600);
+  color: var(--sbx-color-primary, #4c9cf8);
+  flex-shrink: 0;
+  user-select: none;
+  transition: background var(--sbx-duration-fast, 150ms),
+    color var(--sbx-duration-fast, 150ms);
+
+  &:hover {
+    background: var(--sbx-color-primary, #4c9cf8);
+    color: #ffffff;
+    cursor: default;
+  }
+}
+
+.previewEndLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.endLabel {
+  font-size: var(--sbx-text-xs, 0.75rem);
+  color: var(--sbx-color-text-secondary, #4a5568);
+  max-width: 45%;
+  word-break: break-word;
+}

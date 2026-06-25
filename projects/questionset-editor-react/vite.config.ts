@@ -84,6 +84,18 @@ const MOCK_HIERARCHY = {
               body: '<p>Explain photosynthesis in your own words.</p>',
               children: [],
             },
+            {
+              identifier: 'question-slider-001',
+              name: 'Rate your understanding on a scale of 1-5',
+              objectType: 'Question',
+              primaryCategory: 'Slider Question',
+              mimeType: 'application/vnd.sunbird.question',
+              visibility: 'Parent',
+              status: 'Draft',
+              questionType: 'slider',
+              body: '<p>Rate your understanding on a scale of 1-5</p>',
+              children: [],
+            },
           ],
         },
       ],
@@ -147,6 +159,15 @@ const MOCK_CATEGORY_DEFINITION = {
         childMetadata: {
           properties: [
             { code: 'name', label: 'Question Title', inputType: 'text', required: false, editable: true, visible: true, index: 1 },
+            { code: 'difficultyLevel', label: 'Difficulty Level', inputType: 'select', required: false, editable: true, visible: true, enum: ['easy', 'medium', 'hard'], index: 2 },
+            { code: 'bloomsLevel', label: "Bloom's Level", inputType: 'select', required: false, editable: true, visible: true, enum: ['remember', 'understand', 'apply', 'analyze', 'evaluate', 'create'], index: 3 },
+            { code: 'maxScore', label: 'Max Score', inputType: 'text', required: false, editable: true, visible: true, index: 4 },
+          ],
+        },
+        searchConfig: {
+          properties: [
+            { code: 'difficultyLevel', label: 'Difficulty', inputType: 'select', required: false, editable: true, visible: true, enum: ['easy', 'medium', 'hard'], index: 1 },
+            { code: 'bloomsLevel', label: "Bloom's Level", inputType: 'select', required: false, editable: true, visible: true, enum: ['remember', 'understand', 'apply', 'analyze', 'evaluate', 'create'], index: 2 },
           ],
         },
       },
@@ -197,8 +218,28 @@ function mockApiPlugin(): Plugin {
           return json({ responseCode: 'OK', result: { identifier: MOCK_QUESTIONSET_ID } });
         }
 
+        // Asset create — must come before composite/v3/search to avoid URL conflicts
+        if (url.includes('/action/asset/v1/create') && req.method === 'POST') {
+          return json({ responseCode: 'OK', result: { identifier: 'asset-' + Date.now(), versionKey: '1' } });
+        }
+
+        // Asset upload finalize
+        if (url.includes('/action/asset/v1/upload/')) {
+          return json({ responseCode: 'OK', result: { content_url: 'https://via.placeholder.com/400x300.png?text=Uploaded+Image' } });
+        }
+
+        // Pre-signed URL for upload
+        if (url.includes('/action/content/v3/upload/url/')) {
+          return json({ responseCode: 'OK', result: { preSignedUrl: 'https://mock-storage.example.com/upload', url: 'https://mock-storage.example.com/asset' } });
+        }
+
+        // Asset search (composite search for assets)
+        if (url.includes('/action/composite/v3/search') && req.method === 'POST') {
+          return json({ responseCode: 'OK', result: { count: 0, content: [] } });
+        }
+
         // Question search / list
-        if (url.includes('/action/composite/v3/search') || url.includes('/action/question/v1/list')) {
+        if (url.includes('/action/question/v1/list')) {
           return json(MOCK_QUESTION_LIST);
         }
 
@@ -212,6 +253,14 @@ function mockApiPlugin(): Plugin {
           return json({ responseCode: 'OK', result: {} });
         }
 
+        // Comments read/write
+        if (url.includes('/action/questionset/v1/comment/')) {
+          if (req.method === 'GET') {
+            return json({ responseCode: 'OK', result: { content: [] } });
+          }
+          return json({ responseCode: 'OK', result: {} });
+        }
+
         // Review / publish / reject
         if (url.includes('/action/questionset/v1/review/') || url.includes('/action/questionset/v1/publish/') || url.includes('/action/questionset/v1/reject/')) {
           return json({ responseCode: 'OK', result: { identifier: MOCK_QUESTIONSET_ID } });
@@ -220,10 +269,51 @@ function mockApiPlugin(): Plugin {
         // Framework
         if (url.includes('/api/framework/v1/read/')) {
           return json({ responseCode: 'OK', result: { framework: { identifier: 'NCF', name: 'NCF', categories: [
-            { identifier: 'board', code: 'board', name: 'Board', terms: [{ identifier: 'cbse', code: 'cbse', name: 'CBSE' }, { identifier: 'state', code: 'state', name: 'State Board' }] },
-            { identifier: 'medium', code: 'medium', name: 'Medium', terms: [{ identifier: 'english', code: 'english', name: 'English' }, { identifier: 'hindi', code: 'hindi', name: 'Hindi' }] },
-            { identifier: 'gradeLevel', code: 'gradeLevel', name: 'Grade', terms: [{ identifier: 'class1', code: 'class1', name: 'Class 1' }, { identifier: 'class2', code: 'class2', name: 'Class 2' }, { identifier: 'class6', code: 'class6', name: 'Class 6' }] },
-            { identifier: 'subject', code: 'subject', name: 'Subject', terms: [{ identifier: 'mathematics', code: 'mathematics', name: 'Mathematics' }, { identifier: 'science', code: 'science', name: 'Science' }] },
+            {
+              identifier: 'board', code: 'board', name: 'Board',
+              terms: [
+                { identifier: 'cbse', code: 'cbse', name: 'CBSE' },
+                { identifier: 'icse', code: 'icse', name: 'ICSE' },
+                { identifier: 'state', code: 'state', name: 'State Board' },
+              ],
+            },
+            {
+              identifier: 'medium', code: 'medium', name: 'Medium',
+              terms: [
+                { identifier: 'english', code: 'english', name: 'English' },
+                { identifier: 'hindi', code: 'hindi', name: 'Hindi' },
+                { identifier: 'tamil', code: 'tamil', name: 'Tamil' },
+                { identifier: 'telugu', code: 'telugu', name: 'Telugu' },
+              ],
+            },
+            {
+              identifier: 'gradeLevel', code: 'gradeLevel', name: 'Grade',
+              terms: [
+                { identifier: 'class1', code: 'class1', name: 'Class 1' },
+                { identifier: 'class2', code: 'class2', name: 'Class 2' },
+                { identifier: 'class3', code: 'class3', name: 'Class 3' },
+                { identifier: 'class4', code: 'class4', name: 'Class 4' },
+                { identifier: 'class5', code: 'class5', name: 'Class 5' },
+                { identifier: 'class6', code: 'class6', name: 'Class 6' },
+                { identifier: 'class7', code: 'class7', name: 'Class 7' },
+                { identifier: 'class8', code: 'class8', name: 'Class 8' },
+                { identifier: 'class9', code: 'class9', name: 'Class 9' },
+                { identifier: 'class10', code: 'class10', name: 'Class 10' },
+              ],
+            },
+            {
+              identifier: 'subject', code: 'subject', name: 'Subject',
+              terms: [
+                { identifier: 'mathematics', code: 'mathematics', name: 'Mathematics' },
+                { identifier: 'science', code: 'science', name: 'Science' },
+                { identifier: 'english', code: 'english', name: 'English' },
+                { identifier: 'socialscience', code: 'socialscience', name: 'Social Science' },
+                { identifier: 'hindi', code: 'hindi', name: 'Hindi' },
+                { identifier: 'physics', code: 'physics', name: 'Physics' },
+                { identifier: 'chemistry', code: 'chemistry', name: 'Chemistry' },
+                { identifier: 'biology', code: 'biology', name: 'Biology' },
+              ],
+            },
           ] } } });
         }
 
@@ -307,5 +397,8 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src'),
     },
+  },
+  optimizeDeps: {
+    include: ['@tiptap/extension-mathematics', 'katex'],
   },
 });

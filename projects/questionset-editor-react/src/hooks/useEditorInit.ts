@@ -16,7 +16,7 @@ export function useEditorInit({ config, onError }: UseEditorInitOptions) {
   const [error, setError] = useState<Error | null>(null);
   const [isReady, setIsReady] = useState(false);
 
-  const { setEditorConfig, setEditorMode, setCategoryDefinition } = useEditorStore();
+  const { setEditorConfig, setEditorMode, setCategoryDefinition, setReviewComments } = useEditorStore();
   const { setTreeData, selectNode } = useTreeStore();
 
   useEffect(() => {
@@ -61,6 +61,14 @@ export function useEditorInit({ config, onError }: UseEditorInitOptions) {
             }
           } catch {
             // silently fall back
+          }
+
+          if (config.config.mode !== 'read') {
+            try {
+              const { readComments } = await import('../api/comments');
+              const comments = await readComments(contentId);
+              if (!cancelled) setReviewComments(comments);
+            } catch { /* silent */ }
           }
         }
 

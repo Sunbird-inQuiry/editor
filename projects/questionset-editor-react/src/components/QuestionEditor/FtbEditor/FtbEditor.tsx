@@ -16,6 +16,8 @@ export default function FtbEditor() {
   // Answers keyed by blank index
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [caseSensitive, setCaseSensitive] = useState(false);
+  const [isPartialScore, setIsPartialScore] = useState(false);
+  const [evalUnordered, setEvalUnordered] = useState(false);
 
   function setAnswer(idx: number, value: string) {
     setAnswers((prev) => ({ ...prev, [idx]: value }));
@@ -63,6 +65,28 @@ export default function FtbEditor() {
               onChange={(e) => setCaseSensitive(e.target.checked)}
             />
             <label htmlFor="ftb-case-sensitive">Case sensitive matching</label>
+          </div>
+
+          <div className={styles.caseSensitiveRow}>
+            <input
+              id="ftb-partial-score"
+              type="checkbox"
+              className={styles.checkbox}
+              checked={isPartialScore}
+              onChange={(e) => setIsPartialScore(e.target.checked)}
+            />
+            <label htmlFor="ftb-partial-score">Partial Scoring</label>
+          </div>
+
+          <div className={styles.caseSensitiveRow}>
+            <input
+              id="ftb-eval-unordered"
+              type="checkbox"
+              className={styles.checkbox}
+              checked={evalUnordered}
+              onChange={(e) => setEvalUnordered(e.target.checked)}
+            />
+            <label htmlFor="ftb-eval-unordered">Order doesn&apos;t matter (evalUnordered)</label>
           </div>
         </>
       )}
