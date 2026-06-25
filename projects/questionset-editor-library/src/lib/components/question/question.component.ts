@@ -166,6 +166,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit() {
     this.activeLang.lang$.pipe(takeUntil(this.onComponentDestroy$)).subscribe(lang => {
       this.currentLang = lang;
+      this._updateVideoAudioSolutionDisplay();
     });
     const { questionSetId, questionId, type, category, creationContext, creationMode } = this.questionInput;
     this.questionInteractionType = type;
@@ -337,12 +338,23 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.showSolutionDropDown = false;
                 this.showSolution = true;
                 if (this.selectedSolutionType === 'video' || this.selectedSolutionType === 'audio') {
-                  const index = _.findIndex(this.questionMetaData.media, (o) => {
-                    return o.type === this.selectedSolutionType && o.id === this.editorState.solutions[0].value;
-                  });
-                  this.assetSolutionName = this.questionMetaData.media[index].name;
-                  this.assetThumbnail = this.questionMetaData.media[index].thumbnail;
-                } 
+                  const solutionValue = this.editorState.solutions[0].value;
+                  // Support both legacy string and new i18n map
+                  const assetId = (typeof solutionValue === 'object' && solutionValue)
+                    ? (solutionValue[this.currentLang] || Object.values(solutionValue as any)[0])
+                    : solutionValue;
+                  if (assetId) {
+                    const index = _.findIndex(this.questionMetaData.media, (o: any) =>
+                      o.type === this.selectedSolutionType && o.id === assetId);
+                    if (index !== -1) {
+                      this.assetSolutionName = this.questionMetaData.media[index].name;
+                      this.assetThumbnail = this.questionMetaData.media[index].thumbnail;
+                    }
+                  }
+                  // Normalise to i18n map for in-memory use
+                  this.editorState.solutions = (typeof solutionValue === 'object' && solutionValue)
+                    ? solutionValue : { en: solutionValue };
+                }
                 if (this.selectedSolutionType === 'html') {
                   this.editorState.solutions = this.editorState.solutions[0].value;
                 }
@@ -798,31 +810,51 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   }
 
+  private _updateVideoAudioSolutionDisplay() {
+    const sols = this.editorState?.solutions;
+    if ((this.selectedSolutionType === 'video' || this.selectedSolutionType === 'audio') &&
+        sols && typeof sols === 'object' && !Array.isArray(sols)) {
+      const id = (sols as any)[this.currentLang];
+      if (id) {
+        const media = this.mediaArr.find((m: any) => m.id === id);
+        this.assetSolutionName = media?.name || '';
+        this.assetThumbnail = media?.thumbnail || '';
+        this.showSolution = true;
+      } else {
+        this.assetSolutionName = '';
+        this.assetThumbnail = '';
+        this.showSolution = false;
+      }
+    }
+  }
+
   assetDataOutput(event) {
     if (event) {
+      const lang = this.currentLang;
+      const host = _.get(this.editorService.editorConfig, 'context.host') || document.location.origin;
+      // Store asset ID per language in a map
+      const current: Record<string, string> = (this.editorState.solutions && typeof this.editorState.solutions === 'object' && !Array.isArray(this.editorState.solutions))
+        ? { ...(this.editorState.solutions as any) } : {};
+      this.editorState.solutions = { ...current, [lang]: event.identifier };
+
       this.assetSolutionData = event;
       this.assetSolutionName = event.name;
-      this.editorState.solutions = event.identifier;
-      this.assetThumbnail = event?.thumbnail;
-      const assetMedia: any = {};
-      assetMedia.id = event.identifier;
-      assetMedia.src = event.src;
-      assetMedia.type = this.assetType;
-      assetMedia.assetId = event.identifier;
-      assetMedia.name = event.name;
+      this.assetThumbnail = event?.thumbnail || '';
+
+      if (!this.mediaArr.find((m: any) => m.id === event.identifier)) {
+        const assetMedia: any = {
+          id: event.identifier, src: event.src, type: this.assetType,
+          assetId: event.identifier, name: event.name, baseUrl: host,
+        };
+        if (event?.thumbnail) { assetMedia.thumbnail = event.thumbnail; }
+        this.mediaArr.push(assetMedia);
+      }
       if (event?.thumbnail) {
-        assetMedia.thumbnail = this.assetThumbnail;
+        const thumbId = `${this.assetType}_${event.identifier}`;
+        if (!this.mediaArr.find((m: any) => m.id === thumbId)) {
+          this.mediaArr.push({ src: event.thumbnail, type: 'image', id: thumbId, baseUrl: host });
+        }
       }
-      assetMedia.baseUrl = _.get(this.editorService.editorConfig, 'context.host') || document.location.origin;
-      if (assetMedia.thumbnail) {
-        const thumbnailMedia: any = {};
-        thumbnailMedia.src = this.assetThumbnail;
-        thumbnailMedia.type = 'image';
-        thumbnailMedia.id = `${this.assetType}_${event.identifier}`;
-        thumbnailMedia.baseUrl = _.get(this.editorService.editorConfig, 'context.host') || document.location.origin;
-        this.mediaArr.push(thumbnailMedia);
-      }
-      this.mediaArr.push(assetMedia);
       this.showSolutionDropDown = false;
       this.showSolution = true;
     } else {
@@ -848,13 +880,35 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   deleteSolution() {
     if (this.selectedSolutionType === 'video' || this.selectedSolutionType === 'audio') {
-      this.mediaArr = _.filter(this.mediaArr, (item: any) => item.id !== this.editorState.solutions);
-    } 
+      const sols = this.editorState.solutions;
+      if (sols && typeof sols === 'object' && !Array.isArray(sols)) {
+        const currentId = (sols as any)[this.currentLang];
+        if (currentId) {
+          this.mediaArr = _.filter(this.mediaArr, (item: any) =>
+            item.id !== currentId && item.id !== `${this.assetType}_${currentId}`);
+          const remaining = { ...(sols as any) };
+          delete remaining[this.currentLang];
+          if (Object.keys(remaining).length > 0) {
+            // Other languages still have assets — only clear current lang display
+            this.editorState.solutions = remaining;
+            this.assetSolutionName = '';
+            this.assetThumbnail = '';
+            this.showSolution = false;
+            return;
+          }
+          this.editorState.solutions = '';
+        }
+      } else {
+        this.mediaArr = _.filter(this.mediaArr, (item: any) => item.id !== sols);
+        this.editorState.solutions = '';
+      }
+    } else {
+      this.editorState.solutions = '';
+    }
     this.showSolutionDropDown = true;
     this.selectedSolutionType = '';
     this.assetType = '';
     this.assetSolutionName = '';
-    this.editorState.solutions = '';
     this.assetThumbnail = '';
     this.showSolution = false;
   }
@@ -1137,11 +1191,28 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     if (solutionObj?.type === 'html') {
       return {[solutionObj?.id]: solutionObj.value};
     } else if (solutionObj?.type === 'video' || solutionObj?.type === 'audio') {
-      const assetMedia = this.getMediaById(solutionObj?.value);
-      const assetThumbnail = assetMedia?.thumbnail ? assetMedia?.thumbnail : '';
-      const assetSolution = this.getAssetSolutionHtml(assetThumbnail, assetMedia?.src, assetMedia.id);
-      return {[solutionObj.id]: assetSolution};
-    } 
+      const val = solutionObj?.value;
+      if (val && typeof val === 'object' && !Array.isArray(val)) {
+        // i18n map of asset IDs → build per-language HTML
+        const solutionHtml: Record<string, string> = {};
+        Object.entries(val as Record<string, string>).forEach(([lang, assetId]) => {
+          const media = this.getMediaById(assetId);
+          if (media) {
+            solutionHtml[lang] = this.getAssetSolutionHtml(media.thumbnail || '', media.src, media.id);
+          }
+        });
+        const keys = Object.keys(solutionHtml);
+        if (keys.length === 0) return {[solutionObj.id]: ''};
+        if (keys.length === 1 && keys[0] === 'en') return {[solutionObj.id]: solutionHtml['en']};
+        return {[solutionObj.id]: solutionHtml};
+      } else {
+        // Legacy single-asset string
+        const assetMedia = this.getMediaById(val);
+        if (!assetMedia) return {[solutionObj.id]: ''};
+        const assetSolution = this.getAssetSolutionHtml(assetMedia?.thumbnail || '', assetMedia?.src, assetMedia.id);
+        return {[solutionObj.id]: assetSolution};
+      }
+    }
   }
 
   getMediaById(mediaId) {
