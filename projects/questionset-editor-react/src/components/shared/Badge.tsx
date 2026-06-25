@@ -7,6 +7,7 @@ import {
   Shuffle,
   List,
   ArrowUpDown,
+  SlidersHorizontal,
   type LucideIcon,
 } from 'lucide-react';
 import type { QuestionType } from '../../types/question';
@@ -25,6 +26,7 @@ const ICON_MAP: Record<QuestionType, LucideIcon> = {
   mtf: Shuffle,
   seq: List,
   reo: ArrowUpDown,
+  slider: SlidersHorizontal,
 };
 
 // -----------------------------------------------------------------------------

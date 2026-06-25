@@ -1,10 +1,20 @@
-export type QuestionType = 'mcq' | 'msq' | 'sa' | 'ftb' | 'mtf' | 'seq' | 'reo';
+export type QuestionType = 'mcq' | 'msq' | 'sa' | 'ftb' | 'mtf' | 'seq' | 'reo' | 'slider';
 
 export interface IOption {
   id: string;
   body: string;
   isCorrect?: boolean;
   value?: number;
+  hint?: string;
+  score?: number;
+}
+
+export interface ISliderConfig {
+  min: number;
+  max: number;
+  step: number;
+  minLabel?: string;
+  maxLabel?: string;
 }
 
 export interface IMatchPair {
@@ -89,6 +99,7 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   mtf: 'Match the Following',
   seq: 'Sequence',
   reo: 'Reorder',
+  slider: 'Slider / Rating',
 };
 
 export const QUESTION_TYPE_ICONS: Record<QuestionType, string> = {
@@ -99,6 +110,7 @@ export const QUESTION_TYPE_ICONS: Record<QuestionType, string> = {
   mtf: 'Shuffle',
   seq: 'List',
   reo: 'ArrowUpDown',
+  slider: 'SlidersHorizontal',
 };
 
 export const PRIMARY_CATEGORY_MAP: Record<QuestionType, string> = {
@@ -109,4 +121,5 @@ export const PRIMARY_CATEGORY_MAP: Record<QuestionType, string> = {
   mtf: 'Match The Following',
   seq: 'Sequence Question',
   reo: 'Reorder Question',
+  slider: 'Slider Question',
 };

@@ -1,0 +1,125 @@
+// =============================================================================
+// Portal Theme Bridge — QuML Editor React
+//
+// Maps --sbx-* design tokens to the Sunbird Spark Portal CSS variable system.
+// When the editor runs inside the portal, portal variables take precedence.
+// When standalone (dev/storybook), the fallback values ensure a clean default.
+//
+// Portal variable format:  --primary: H S% L%  (raw HSL components)
+//                          Usage:  hsl(var(--primary))
+// Portal radius tokens:    --r-sm, --r-md, --r-lg, --r-xl
+// Portal shadow tokens:    --sunbird-shadow-sm, --sunbird-shadow-md
+// Portal font token:       --app-font-family
+// =============================================================================
+
+:root,
+:host {
+  // ---------------------------------------------------------------------------
+  // Typography
+  // ---------------------------------------------------------------------------
+  --sbx-font-sans: var(--app-font-family, 'Rubik', 'Plus Jakarta Sans', system-ui, sans-serif);
+
+  // ---------------------------------------------------------------------------
+  // Primary color — portal primary hue drives all CTA elements
+  // ---------------------------------------------------------------------------
+  --sbx-color-primary:        hsl(var(--primary,          12 50% 45%));
+  --sbx-color-primary-hover:  hsl(var(--primary,          12 50% 38%));
+  --sbx-color-primary-active: hsl(var(--primary,          12 50% 32%));
+  --sbx-color-primary-subtle: hsl(var(--accent,           12 50% 94%));
+  --sbx-color-primary-fg:     hsl(var(--primary-foreground, 0 0% 100%));
+
+  // ---------------------------------------------------------------------------
+  // Surfaces
+  // ---------------------------------------------------------------------------
+  --sbx-color-surface-base:    hsl(var(--background,   0 0% 100%));
+  --sbx-color-surface-raised:  hsl(var(--card,         45 100% 97%));
+  --sbx-color-surface-overlay: hsl(var(--popover,      0 0% 100%));
+  --sbx-color-surface-sunken:  hsl(var(--muted,        210 20% 96%));
+  --sbx-color-surface-muted:   hsl(var(--muted,        210 20% 96%));
+  --sbx-color-surface-dim:     hsl(var(--accent,       210 20% 92%));
+
+  // ---------------------------------------------------------------------------
+  // Text
+  // ---------------------------------------------------------------------------
+  --sbx-color-text-primary:     hsl(var(--foreground,        0 0% 13%));
+  --sbx-color-text-secondary:   hsl(var(--card-foreground,   0 0% 20%));
+  --sbx-color-text-tertiary:    hsl(var(--muted-foreground,  210 11% 45%));
+  --sbx-color-text-placeholder: hsl(var(--muted-foreground,  210 11% 60%));
+  --sbx-color-text-disabled:    hsl(var(--muted-foreground,  210 11% 70%));
+  --sbx-color-text-inverse:     hsl(var(--primary-foreground, 0 0% 100%));
+  --sbx-color-text-link:        hsl(var(--primary,            12 50% 45%));
+  --sbx-color-text-link-hover:  hsl(var(--primary,            12 50% 35%));
+
+  // ---------------------------------------------------------------------------
+  // Borders
+  // ---------------------------------------------------------------------------
+  --sbx-color-border-default: hsl(var(--border,  210 25% 80%));
+  --sbx-color-border-strong:  hsl(var(--input,   210 25% 70%));
+  --sbx-color-border-focus:   hsl(var(--ring,    12 50% 45%));
+  --sbx-color-border-subtle:  hsl(var(--border,  210 25% 88%));
+
+  // ---------------------------------------------------------------------------
+  // Semantic — Error / Destructive
+  // ---------------------------------------------------------------------------
+  --sbx-color-error:        hsl(var(--destructive,            0 84% 60%));
+  --sbx-color-error-hover:  hsl(var(--destructive,            0 84% 52%));
+  --sbx-color-error-subtle: hsl(var(--destructive,            0 84% 96%));
+  --sbx-color-error-fg:     hsl(var(--destructive-foreground, 0 0% 100%));
+
+  // ---------------------------------------------------------------------------
+  // Semantic — Success
+  // ---------------------------------------------------------------------------
+  --sbx-color-success:        hsl(var(--sunbird-success-green,  145 63% 49%) / 1);
+  --sbx-color-success-subtle: hsl(var(--sunbird-success-green,  145 63% 96%) / 1);
+
+  // ---------------------------------------------------------------------------
+  // Semantic — Warning
+  // ---------------------------------------------------------------------------
+  --sbx-color-warning:        hsl(var(--sunbird-warning-text, 32 90% 35%) / 1);
+  --sbx-color-warning-bg:     var(--sunbird-warning-bg, hsl(38 100% 94%));
+  --sbx-color-warning-border: var(--sunbird-warning-border, hsl(38 80% 70%));
+
+  // ---------------------------------------------------------------------------
+  // Border radius — maps to portal template-aware radius tokens
+  // ---------------------------------------------------------------------------
+  --sbx-radius-none: 0px;
+  --sbx-radius-sm:   var(--r-sm,  4px);
+  --sbx-radius-md:   var(--r-xs,  6px);
+  --sbx-radius-lg:   var(--r-md,  8px);
+  --sbx-radius-xl:   var(--r-lg,  12px);
+  --sbx-radius-2xl:  var(--r-xl,  16px);
+  --sbx-radius-full: var(--r-pill, 9999px);
+
+  // ---------------------------------------------------------------------------
+  // Shadows — portal provides shadow tokens
+  // ---------------------------------------------------------------------------
+  --sbx-shadow-xs:  var(--sunbird-shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+  --sbx-shadow-sm:  var(--sunbird-shadow-sm, 0 1px 4px rgba(0,0,0,0.06));
+  --sbx-shadow-md:  var(--sunbird-shadow-md, 0 4px 6px rgba(0,0,0,0.07));
+  --sbx-shadow-lg:  var(--sunbird-shadow-lg, 0 10px 20px rgba(0,0,0,0.10));
+  --sbx-shadow-focus: 0 0 0 3px hsl(var(--ring, 12 50% 45%) / 0.25);
+
+  // ---------------------------------------------------------------------------
+  // Success color scale (used by MCQ/MSQ correct-answer highlights)
+  // ---------------------------------------------------------------------------
+  --sbx-color-success-50:  hsl(145 63% 96%);
+  --sbx-color-success-100: hsl(145 63% 90%);
+  --sbx-color-success-600: hsl(145 63% 35%);
+  --sbx-color-success-700: hsl(145 63% 28%);
+
+  // ---------------------------------------------------------------------------
+  // Warning color scale (used by Reo item badges, dismissable banners)
+  // ---------------------------------------------------------------------------
+  --sbx-color-warning-subtle: hsl(38 100% 94%);
+  --sbx-color-warning-500:    hsl(32 90% 50%);
+  --sbx-color-warning-700:    hsl(32 90% 30%);
+
+  // ---------------------------------------------------------------------------
+  // Alias shorthands used widely across component scss
+  // ---------------------------------------------------------------------------
+  --sbx-color-primary-light: var(--sbx-color-primary-subtle);
+  --sbx-color-hover:         var(--sbx-color-surface-dim);
+  --sbx-color-surface:       var(--sbx-color-surface-base);
+  --sbx-color-border:        var(--sbx-color-border-default);
+  --sbx-color-error-bg:      var(--sbx-color-error-subtle);
+}

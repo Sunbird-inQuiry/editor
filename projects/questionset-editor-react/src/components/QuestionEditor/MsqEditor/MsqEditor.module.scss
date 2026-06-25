@@ -153,3 +153,15 @@
   font-weight: var(--sbx-font-medium);
   margin-top: 4px;
 }
+
+.rteFallback {
+  height: 78px;
+  border-radius: var(--sbx-radius-sm, 4px);
+  background: var(--sbx-color-surface-muted, #f3f4f6);
+  animation: pulse 1.5s ease-in-out infinite;
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+}

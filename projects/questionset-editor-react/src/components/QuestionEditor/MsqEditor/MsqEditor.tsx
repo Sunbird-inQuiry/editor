@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Plus, X, Check } from 'lucide-react';
 import { useQuestionStore } from '../../../store/question.store';
+import RichTextEditor from '../../RichTextEditor/RichTextEditor';
 import styles from './MsqEditor.module.scss';
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -8,11 +9,6 @@ const MAX_OPTIONS = 6;
 
 export default function MsqEditor() {
   const { options, updateOption, addOption, removeOption } = useQuestionStore();
-
-  function autoResize(el: HTMLTextAreaElement) {
-    el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
-  }
 
   const correctCount = options.filter((o) => o.isCorrect).length;
 
@@ -39,19 +35,18 @@ export default function MsqEditor() {
             />
           </div>
 
-          {/* Option text + correct label */}
+          {/* Option rich text + correct label */}
           <div className={styles.optionBody}>
-            <textarea
-              className={styles.optionTextarea}
-              value={option.body}
-              placeholder={`Option ${OPTION_LETTERS[idx] ?? idx + 1}…`}
-              rows={1}
-              onChange={(e) => {
-                updateOption(option.id, { body: e.target.value });
-                autoResize(e.target);
-              }}
-              onFocus={(e) => autoResize(e.target)}
-            />
+            <Suspense fallback={<div className={styles.rteFallback} />}>
+              <RichTextEditor
+                compact
+                enableImages
+                maxLength={160}
+                value={option.body}
+                placeholder={`Option ${OPTION_LETTERS[idx] ?? idx + 1}…`}
+                onChange={(html) => updateOption(option.id, { body: html })}
+              />
+            </Suspense>
             {option.isCorrect && (
               <span className={styles.correctLabel}>
                 <Check size={12} /> Correct answer
@@ -66,6 +61,7 @@ export default function MsqEditor() {
             onClick={() => removeOption(option.id)}
             disabled={options.length <= 2}
             title="Remove option"
+            style={{ marginTop: 6 }}
           >
             <X size={14} />
           </button>

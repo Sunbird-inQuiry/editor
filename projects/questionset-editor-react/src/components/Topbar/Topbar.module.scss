@@ -11,9 +11,6 @@
   box-shadow: var(--sbx-shadow-1, 0 1px 3px rgba(0, 0, 0, 0.06));
   flex-shrink: 0;
   gap: 16px;
-  z-index: 10;
-  position: sticky;
-  top: 0;
 }
 
 // ── Left: back button + title + status chip ───────────────────────────────────
@@ -125,6 +122,71 @@
   padding-left: 8px;
   border-left: 1px solid var(--sbx-gray-200, #E5E7EB);
   margin-left: 4px;
+}
+
+// ── Reviewer comment banner ───────────────────────────────────────────────────
+
+.commentBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--sbx-amber-50, #FFFBEB);
+  border-bottom: 1px solid var(--sbx-amber-200, #FDE68A);
+  font-family: var(--sbx-font, inherit);
+  font-size: 13px;
+  color: var(--sbx-amber-900, #78350F);
+  line-height: 1.5;
+}
+
+.commentBannerIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.commentBannerBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.commentBannerText {
+  font-weight: 500;
+}
+
+.commentBannerMeta {
+  font-size: 11px;
+  color: var(--sbx-amber-700, #B45309);
+  margin-top: 1px;
+}
+
+.commentBannerDismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--sbx-amber-600, #D97706);
+  padding: 0 2px;
+  border-radius: 4px;
+  transition: color 0.12s, background 0.12s;
+  align-self: flex-start;
+
+  &:hover {
+    color: var(--sbx-amber-900, #78350F);
+    background: var(--sbx-amber-100, #FEF3C7);
+  }
+}
+
+// ── Topbar wrapper (banner + toolbar row) ─────────────────────────────────────
+
+.topbarWrapper {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-shrink: 0;
 }
 
 // ── Inline modal overlay ──────────────────────────────────────────────────────

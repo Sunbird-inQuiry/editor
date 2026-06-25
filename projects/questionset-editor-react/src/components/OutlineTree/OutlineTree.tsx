@@ -18,6 +18,7 @@ import {
   Shuffle,
   List,
   ArrowUpDown,
+  SlidersHorizontal,
   GripVertical,
 } from 'lucide-react';
 import { useTreeStore } from '../../store/tree.store';
@@ -48,6 +49,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Shuffle,
   List,
   ArrowUpDown,
+  SlidersHorizontal,
 };
 
 function QuestionTypeIcon({

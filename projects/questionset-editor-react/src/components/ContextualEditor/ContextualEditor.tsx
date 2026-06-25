@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import type { EditorMode, ToolbarAction } from '../../types/editor';
 import { useEditorStore } from '../../store/editor.store';
 import { useTreeStore } from '../../store/tree.store';
+import { useFramework } from '../../hooks/useFramework';
 import SparkMetaForm from '../SparkMetaForm/SparkMetaForm';
 import styles from './ContextualEditor.module.scss';
 
@@ -77,6 +78,9 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   onToolbarEvent,
   hasContent = true,
 }) => {
+  // ── Framework ───────────────────────────────────────────────────────────────
+  const { frameworkTerms } = useFramework();
+
   // ── Stores ──────────────────────────────────────────────────────────────────
   const storeEditorMode = useEditorStore((s) => s.editorMode);
   const showPreview = useEditorStore((s) => s.showPreview);
@@ -85,6 +89,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   const isCurrentNodeQuestion = useEditorStore((s) => s.isCurrentNodeQuestion);
   const rootFormConfig = useEditorStore((s) => s.rootFormConfig);
   const unitFormConfig = useEditorStore((s) => s.unitFormConfig);
+  const relationalFormConfig = useEditorStore((s) => s.relationalFormConfig);
 
   const selectedNodeId = useTreeStore((s) => s.selectedNodeId);
   const activeNodeMeta = useTreeStore((s) => s.activeNodeMeta);
@@ -98,6 +103,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
 
   // ── Local UI state ──────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<TabKey>('details');
+  const [showRelational, setShowRelational] = useState(false);
 
   // Inline title editing
   const [titleValue, setTitleValue] = useState<string>('');
@@ -308,11 +314,42 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                     onValidityChange={handleFormValidityChange}
                     readOnly={isReadOnly}
                     section={tabSection(activeTab)}
+                    frameworkTerms={frameworkTerms}
                   />
                 ) : (
                   <p className={styles.emptyState}>No fields configured for this node type.</p>
                 )}
               </div>
+
+              {/* Relational Metadata collapsible section */}
+              {relationalFormConfig && relationalFormConfig.length > 0 && (
+                <div className={styles.relationalSection}>
+                  <button
+                    type="button"
+                    className={styles.relationalToggle}
+                    onClick={() => setShowRelational((prev) => !prev)}
+                    aria-expanded={showRelational}
+                  >
+                    Relational Metadata
+                    {showRelational
+                      ? <ChevronUp size={16} aria-hidden="true" />
+                      : <ChevronDown size={16} aria-hidden="true" />
+                    }
+                  </button>
+                  {showRelational && (
+                    <div className={styles.relationalContent}>
+                      <SparkMetaForm
+                        fields={relationalFormConfig}
+                        values={activeNodeMeta ?? {}}
+                        onChange={handleFormChange}
+                        onValidityChange={handleFormValidityChange}
+                        readOnly={isReadOnly}
+                        frameworkTerms={frameworkTerms}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           )}
         </>

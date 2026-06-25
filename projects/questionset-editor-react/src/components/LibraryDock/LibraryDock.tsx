@@ -7,6 +7,8 @@ import {
   ArrowUpDown,
   Plus,
   Loader2,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { useLibrary } from '../../hooks/useLibrary';
 import { useTreeStore } from '../../store/tree.store';
@@ -31,6 +33,7 @@ function getCategoryBadge(primaryCategory?: string): string {
   if (cat.includes('match')) return 'MTF';
   if (cat.includes('sequence')) return 'SEQ';
   if (cat.includes('reorder')) return 'REO';
+  if (cat.includes('slider')) return 'Slider';
   return 'Q';
 }
 
@@ -46,6 +49,7 @@ function getBadgeVariant(primaryCategory?: string): string {
   if (cat.includes('match')) return 'mtf';
   if (cat.includes('sequence')) return 'seq';
   if (cat.includes('reorder')) return 'reo';
+  if (cat.includes('slider')) return 'slider';
   return 'default';
 }
 
@@ -164,6 +168,7 @@ export function LibraryDock({ onCollapse }: LibraryDockProps) {
     hasMore,
     search,
     setFilter,
+    applyAdvancedFilters,
     toggleSort,
     loadMore,
   } = useLibrary();
@@ -174,12 +179,19 @@ export function LibraryDock({ onCollapse }: LibraryDockProps) {
   const getNodeById = useTreeStore((s) => s.getNodeById);
   const editorMode = useEditorStore((s) => s.editorMode);
 
+  // ── Store: dynamic search form config from category definition ────────────
+  const searchFormConfig = useEditorStore((s) => s.searchFormConfig);
+
   // ── Toast ─────────────────────────────────────────────────────────────────
   const { toasts, show: showToast } = useToast();
 
   // ── Search input local state (controlled) ─────────────────────────────────
   const [inputValue, setInputValue] = useState(searchQuery);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // ── Advanced filters local state ──────────────────────────────────────────
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [advancedFilters, setAdvancedFiltersLocal] = useState<Record<string, string>>({});
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,6 +207,39 @@ export function LibraryDock({ onCollapse }: LibraryDockProps) {
     setInputValue('');
     search('');
   }, [search]);
+
+  // ── Advanced filter change handler ────────────────────────────────────────
+  const handleAdvancedFilterChange = useCallback(
+    (code: string, value: string) => {
+      const updated = { ...advancedFilters, [code]: value };
+      // Remove empty values
+      if (!value) delete updated[code];
+      setAdvancedFiltersLocal(updated);
+
+      // Build LibraryFilters-compatible object from the current selections
+      const libraryFilters: Record<string, string[]> = {};
+      for (const [key, val] of Object.entries(updated)) {
+        if (val) libraryFilters[key] = [val];
+      }
+      applyAdvancedFilters(libraryFilters);
+    },
+    [advancedFilters, applyAdvancedFilters],
+  );
+
+  const handleClearAdvancedFilters = useCallback(() => {
+    setAdvancedFiltersLocal({});
+    applyAdvancedFilters({});
+  }, [applyAdvancedFilters]);
+
+  // ── Derive which searchFormConfig fields should render as dropdowns ────────
+  const selectFields = (searchFormConfig ?? []).filter(
+    (f) =>
+      (f.inputType === 'select' || f.inputType === 'multiselect') &&
+      ((Array.isArray(f.enum) && f.enum.length > 0) ||
+        (Array.isArray(f.range) && (f.range as unknown[]).length > 0)),
+  );
+
+  const hasActiveAdvancedFilters = Object.keys(advancedFilters).length > 0;
 
   // ── Add question to tree ──────────────────────────────────────────────────
   const handleAdd = useCallback(
@@ -285,6 +330,82 @@ export function LibraryDock({ onCollapse }: LibraryDockProps) {
           </button>
         ))}
       </div>
+
+      {/* ── Advanced Filters (dynamic from searchFormConfig) ───────────────── */}
+      {selectFields.length > 0 && (
+        <div className={styles.advancedFiltersSection}>
+          <button
+            className={[
+              styles.advancedFiltersToggle,
+              hasActiveAdvancedFilters ? styles.advancedFiltersToggleActive : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            onClick={() => setAdvancedOpen((prev) => !prev)}
+            aria-expanded={advancedOpen}
+            aria-controls="advanced-filters-panel"
+          >
+            <span>Advanced Filters</span>
+            {hasActiveAdvancedFilters && (
+              <span className={styles.advancedFiltersBadge}>
+                {Object.keys(advancedFilters).length}
+              </span>
+            )}
+            {advancedOpen ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
+          </button>
+
+          {advancedOpen && (
+            <div
+              id="advanced-filters-panel"
+              className={styles.advancedFiltersPanel}
+              role="group"
+              aria-label="Advanced filter options"
+            >
+              {selectFields.map((field) => {
+                const options: string[] = Array.isArray(field.enum)
+                  ? field.enum
+                  : Array.isArray(field.range)
+                  ? (field.range as string[])
+                  : [];
+                return (
+                  <div key={field.code} className={styles.advancedFilterField}>
+                    <label
+                      className={styles.advancedFilterLabel}
+                      htmlFor={`adv-filter-${field.code}`}
+                    >
+                      {field.label}
+                    </label>
+                    <select
+                      id={`adv-filter-${field.code}`}
+                      className={styles.advancedFilterSelect}
+                      value={advancedFilters[field.code] ?? ''}
+                      onChange={(e) => handleAdvancedFilterChange(field.code, e.target.value)}
+                      aria-label={`Filter by ${field.label}`}
+                    >
+                      <option value="">All</option>
+                      {options.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })}
+
+              {hasActiveAdvancedFilters && (
+                <button
+                  className={styles.advancedFiltersClear}
+                  onClick={handleClearAdvancedFilters}
+                  aria-label="Clear all advanced filters"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Sort + count row ───────────────────────────────────────────────── */}
       <div className={styles.sortRow}>

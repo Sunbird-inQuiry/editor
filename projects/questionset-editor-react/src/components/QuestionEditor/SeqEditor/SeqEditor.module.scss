@@ -22,7 +22,7 @@
 
 .itemRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sbx-space-2);
   padding: var(--sbx-space-2);
   border: 1px solid var(--sbx-color-border-default);
@@ -41,6 +41,7 @@
   cursor: grab;
   display: flex;
   align-items: center;
+  padding-top: 6px;
 
   &:active {
     cursor: grabbing;
@@ -59,6 +60,7 @@
   font-size: var(--sbx-text-xs);
   font-weight: var(--sbx-font-bold);
   color: var(--sbx-color-primary);
+  margin-top: 6px;
 }
 
 .itemInput {
@@ -80,6 +82,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  align-self: center;
 }
 
 .moveBtn {
@@ -112,6 +115,7 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  align-self: center;
   padding: var(--sbx-space-1);
   border: none;
   background: transparent;
@@ -158,4 +162,10 @@
   font-size: var(--sbx-text-xs);
   color: var(--sbx-color-text-tertiary);
   font-style: italic;
+}
+
+.rteFallback {
+  height: 78px;
+  border-radius: var(--sbx-radius-sm, 4px);
+  background: var(--sbx-color-surface-muted, #f3f4f6);
 }

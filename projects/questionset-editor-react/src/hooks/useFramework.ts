@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useEditorStore } from '../store/editor.store';
 import { getFramework } from '../api/framework';
-import type { IFramework } from '../types/framework';
+import type { IFramework, ITerm } from '../types/framework';
 
 export function useFramework() {
   const config = useEditorStore((s) => s.editorConfig);
@@ -23,9 +24,20 @@ export function useFramework() {
     staleTime: 10 * 60 * 1000,
   }));
 
+  const frameworkTerms = useMemo<Map<string, Array<ITerm>>>(() => {
+    const map = new Map<string, Array<ITerm>>();
+    if (orgQuery.data?.categories) {
+      for (const cat of orgQuery.data.categories) {
+        map.set(cat.code, cat.terms ?? []);
+      }
+    }
+    return map;
+  }, [orgQuery.data]);
+
   return {
     orgFramework: orgQuery.data,
     isLoading: orgQuery.isLoading,
     targetFrameworkIds: targetFWIds as string[],
+    frameworkTerms,
   };
 }

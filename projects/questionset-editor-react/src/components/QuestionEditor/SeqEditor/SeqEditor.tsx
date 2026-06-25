@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { GripVertical, Plus, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { useQuestionStore } from '../../../store/question.store';
+import RichTextEditor from '../../RichTextEditor/RichTextEditor';
 import styles from './SeqEditor.module.scss';
 
 export default function SeqEditor() {
@@ -55,14 +56,19 @@ export default function SeqEditor() {
             {/* Position badge */}
             <span className={styles.orderIndex}>{idx + 1}</span>
 
-            {/* Item text input */}
-            <input
-              type="text"
-              className={styles.itemInput}
-              value={item}
-              onChange={(e) => updateItem(idx, e.target.value)}
-              placeholder={`Step ${idx + 1}…`}
-            />
+            {/* Rich text item editor */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <Suspense fallback={<div className={styles.rteFallback} />}>
+                <RichTextEditor
+                  compact
+                  enableImages
+                  maxLength={120}
+                  value={item}
+                  placeholder={`Step ${idx + 1}…`}
+                  onChange={(html) => updateItem(idx, html)}
+                />
+              </Suspense>
+            </div>
 
             {/* Up / Down reorder */}
             <div className={styles.moveButtons}>

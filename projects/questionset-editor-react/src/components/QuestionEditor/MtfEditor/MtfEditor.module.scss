@@ -29,7 +29,7 @@
   display: grid;
   grid-template-columns: 1fr 32px 1fr 32px;
   gap: var(--sbx-space-2);
-  align-items: center;
+  align-items: start;
 }
 
 .pairInput {
@@ -62,12 +62,14 @@
   color: var(--sbx-color-text-tertiary);
   font-size: var(--sbx-text-base);
   user-select: none;
+  padding-top: 8px;
 }
 
 .removeBtn {
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: center;
   padding: var(--sbx-space-1);
   border: none;
   background: transparent;
@@ -113,4 +115,27 @@
 .hint {
   font-size: var(--sbx-text-xs);
   color: var(--sbx-color-text-tertiary);
+}
+
+.rteFallback {
+  height: 78px;
+  border: 1px solid var(--sbx-color-border-default);
+  border-radius: var(--sbx-radius-sm, 4px);
+  background: var(--sbx-color-surface-muted, #f3f4f6);
+}
+
+.partialScoreRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sbx-space-2);
+  font-size: var(--sbx-text-xs);
+  color: var(--sbx-color-text-secondary);
+  margin-top: var(--sbx-space-1);
+}
+
+.checkbox {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--sbx-color-primary);
+  cursor: pointer;
 }

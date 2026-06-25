@@ -225,6 +225,7 @@ export const Topbar: React.FC<TopbarProps> = ({
   onToolbarEvent,
 }) => {
   // ── Store selectors ──────────────────────────────────────────────────────
+  const reviewComments = useEditorStore((s) => s.reviewComments);
   const treeData = useTreeStore((s) => s.treeData);
   const rootNode = treeData[0];
   const title = rootNode?.name ?? 'Untitled';
@@ -248,6 +249,12 @@ export const Topbar: React.FC<TopbarProps> = ({
   const isReviewMode = editorMode === 'review';
   const isSourcingReviewMode = editorMode === 'sourcingreview';
   const isReadOnly = editorMode === 'read';
+
+  // ── Dismissed comment banner indices ──────────────────────────────────────
+  const [dismissedComments, setDismissedComments] = useState<Set<string>>(new Set());
+  const visibleComments = isEditMode
+    ? reviewComments.filter((c) => !dismissedComments.has(c.id))
+    : [];
 
   // ── Emit helper ───────────────────────────────────────────────────────────
   const emit = useCallback(
@@ -287,7 +294,35 @@ export const Topbar: React.FC<TopbarProps> = ({
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
-      <header className={styles.topbar} role="banner">
+      <div className={styles.topbarWrapper}>
+        {visibleComments.map((c) => (
+          <div key={c.id} className={styles.commentBanner} role="alert">
+            <span className={styles.commentBannerIcon} aria-hidden="true">⚠</span>
+            <div className={styles.commentBannerBody}>
+              <div className={styles.commentBannerText}>
+                Reviewer feedback: &ldquo;{c.text}&rdquo;
+              </div>
+              {c.createdOn && (
+                <div className={styles.commentBannerMeta}>
+                  {new Date(c.createdOn).toLocaleDateString([], {
+                    day: 'numeric', month: 'short', year: 'numeric',
+                  })}
+                </div>
+              )}
+            </div>
+            <button
+              className={styles.commentBannerDismiss}
+              aria-label="Dismiss reviewer feedback"
+              type="button"
+              onClick={() =>
+                setDismissedComments((prev) => new Set([...prev, c.id]))
+              }
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+        <header className={styles.topbar} role="banner">
         {/* ── Left: Back + Title + Status ─────────────────────── */}
         <div className={styles.left}>
           <button
@@ -428,7 +463,8 @@ export const Topbar: React.FC<TopbarProps> = ({
             </div>
           )}
         </div>
-      </header>
+        </header>
+      </div>
 
       {/* ── Modals ─────────────────────────────────────────────── */}
 
