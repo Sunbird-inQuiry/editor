@@ -106,7 +106,12 @@
                       </button>
                       <lib-ckeditor-tool (editorDataOutput)="
                           editorDataHandler($event, 'solution')
-                        "[editorDataInput]="editorState.solutions"
+                        "[editorDataInput]="solutionBody"
+                        [lang]="globalLang"
+                        [showLangSelector]="true"
+                        [langs]="langs"
+                        [activeLangCode]="currentLang"
+                        (langChange)="onLangChange($event)"
                         class="ckeditor-tool__option"></lib-ckeditor-tool>
                     </div>
                   </div>

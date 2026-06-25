@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, ComponentRef, EventEmitter, Input, NgModuleRef, OnInit, Output, AfterViewInit, ViewChild, ViewContainerRef, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { EditorQuestionTypeRegistryService } from '../../registry';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
-import { readI18n, writeI18n, normalizeI18n, I18nValue, I18nMap } from '../../utils/i18nField';
+import { readI18n, readI18nForEditor, writeI18n, normalizeI18n, I18nValue, I18nMap } from '../../utils/i18nField';
 import * as _ from 'lodash-es';
 import { v4 as uuidv4 } from 'uuid';
 import { McqForm } from '../../interfaces/McqForm';
@@ -157,6 +157,10 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       return this.currentLang === 'en' ? q : '';
     }
     return (q as I18nMap)[this.currentLang] ?? '';
+  }
+
+  get solutionBody(): string {
+    return readI18nForEditor(this.editorState.solutions as I18nValue, this.currentLang);
   }
 
   ngOnInit() {
@@ -735,7 +739,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     if (type === 'question') {
       this.editorState.question = writeI18n(this.editorState.question as I18nValue, this.currentLang, event.body);
     } else if (type === 'solution') {
-      this.editorState.solutions = event.body;
+      this.editorState.solutions = writeI18n(this.editorState.solutions as I18nValue, this.currentLang, event.body);
     } else {
       this.editorState = _.assign(this.editorState, event.body);
     }
@@ -862,11 +866,13 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     solutionObj.type = selectedSolutionType;
     if (_.isString(editorStateSolutions)) {
       solutionObj.value = editorStateSolutions;
-    }
-    if (_.isArray(editorStateSolutions)) {
+    } else if (_.isArray(editorStateSolutions)) {
       if (_.has(editorStateSolutions[0], 'value')) {
         solutionObj.value = editorStateSolutions[0].value;
       }
+    } else if (editorStateSolutions && typeof editorStateSolutions === 'object') {
+      // i18n map — store as-is so the player can render per language
+      solutionObj.value = editorStateSolutions;
     }
     return solutionObj;
   }
