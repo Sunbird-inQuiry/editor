@@ -116,6 +116,13 @@
                     </div>
                   </div>
                 </div>
+                <!-- When solution type is set but current language has no asset yet -->
+                <div class="d-flex flex-ai-center px-16 py-8" *ngIf="(selectedSolutionType == 'audio' || selectedSolutionType == 'video') && !showSolution">
+                  <span class="fs-0-785 sb-color-gray-200 mr-10">{{ configService.labelConfig?.lbl?.noSolutionForLang || ('No ' + selectedSolutionType + ' added for this language') }}</span>
+                  <button class="sb-btn sb-btn-outline-primary sb-btn-xs" (click)="selectSolutionType(assetType)">
+                    <i class="plus icon mr-5"></i>{{ configService.labelConfig?.lbl?.add || 'Add' }}
+                  </button>
+                </div>
                 <div class="solution_video" *ngIf="(selectedSolutionType == 'audio' || selectedSolutionType == 'video') && showSolution">
                   <div class="ckeditor-tool__solution sb-bg-color-white sb-ckeditor relative">
                     <div class="solution-media p-16 d-flex flex-ai-center ckeditor-tool__option p-16">
