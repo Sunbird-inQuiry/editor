@@ -18,6 +18,8 @@ import OutlineTree from '../OutlineTree/OutlineTree';
 import ContextualEditor from '../ContextualEditor/ContextualEditor';
 import LibraryDock from '../LibraryDock/LibraryDock';
 import UnsavedChangesModal from '../modals/UnsavedChangesModal';
+import { QuestionTypeSelectorModal } from '../modals/QuestionTypeSelectorModal';
+import { ConnectedConfirmDialog } from '../modals/ConfirmDialog';
 import styles from './SplitEditorShell.module.scss';
 
 // ---------------------------------------------------------------------------
@@ -245,6 +247,12 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
             isSaving={isSaving}
           />
         )}
+
+        {/* ── Question type picker ─────────────────────────────────────────── */}
+        <QuestionTypeSelectorModal />
+
+        {/* ── Confirm delete ───────────────────────────────────────────────── */}
+        <ConnectedConfirmDialog />
 
         {/* ── Drag overlay ────────────────────────────────────────────────── */}
         <DragOverlay dropAnimation={null}>

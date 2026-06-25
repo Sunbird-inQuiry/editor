@@ -53,6 +53,7 @@ export async function readHierarchy(
     { params: { mode: 'edit' } },
   );
   const content = response.data?.result?.questionSet as Record<string, unknown> | undefined
+    ?? response.data?.result?.questionset as Record<string, unknown> | undefined
     ?? response.data?.result?.content as Record<string, unknown> | undefined;
 
   if (!content || !content['identifier']) {
