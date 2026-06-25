@@ -1182,7 +1182,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         Object.entries(val as Record<string, string>).forEach(([lang, assetId]) => {
           const media = this.getMediaById(assetId);
           if (media) {
-            solutionHtml[lang] = this.getAssetSolutionHtml(media.thumbnail || '', media.src, media.id);
+            solutionHtml[lang] = this.getAssetSolutionHtml(media.thumbnail || '', media.src, media.id, solutionObj.type);
           }
         });
         const keys = Object.keys(solutionHtml);
@@ -1193,7 +1193,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         // Legacy single-asset string
         const assetMedia = this.getMediaById(val);
         if (!assetMedia) return {[solutionObj.id]: ''};
-        const assetSolution = this.getAssetSolutionHtml(assetMedia?.thumbnail || '', assetMedia?.src, assetMedia.id);
+        const assetSolution = this.getAssetSolutionHtml(assetMedia?.thumbnail || '', assetMedia?.src, assetMedia.id, solutionObj.type);
         return {[solutionObj.id]: assetSolution};
       }
     }
@@ -1237,16 +1237,16 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return responseDeclaration;
   }
 
-  getAssetSolutionHtml(posterURL, srcUrl, solutionMediaId, solType?: string) {
-    const type = solType || this.selectedSolutionType;
+  getAssetSolutionHtml(posterURL, srcUrl, solutionMediaId, solType: string) {
     let assetSolutionHtml: string;
-    if (type === 'video') {
-      assetSolutionHtml = '<video data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'video/mp4\' src=\'{sourceURL}\'><source type=\'video/webm\' src=\'{sourceURL}\'></video>'
+    if (solType === 'video') {
+      assetSolutionHtml = '<video data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'video/mp4\' src=\'{sourceURL}\'><source type=\'video/webm\' src=\'{sourceURL}\'></video>';
+    } else if (solType === 'audio') {
+      assetSolutionHtml = '<audio data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'audio/mp3\' src=\'{sourceURL}\'><source type=\'audio/wav\' src=\'{sourceURL}\'></audio>';
     } else {
-      assetSolutionHtml = '<audio data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'audio/mp3\' src=\'{sourceURL}\'><source type=\'audio/wav\' src=\'{sourceURL}\'></audio>'
+      return '';
     }
-    const assetSolutionValue = assetSolutionHtml.replace('{posterUrl}', posterURL).replace('{sourceURL}', srcUrl).replace('{sourceURL}', srcUrl).replace('{solutionMediaId}', solutionMediaId);
-    return assetSolutionValue;
+    return assetSolutionHtml.replace('{posterUrl}', posterURL).replace('{sourceURL}', srcUrl).replace('{sourceURL}', srcUrl).replace('{solutionMediaId}', solutionMediaId);
   }
 
   getMcqQuestionHtmlBody(question, templateId) {
