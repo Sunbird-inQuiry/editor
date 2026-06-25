@@ -1126,7 +1126,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     if (questionMetadata?.solutions) {
       const solutionValues = _.values(questionMetadata.solutions);
       for (const solution of solutionValues) {
-        if (_.includes(solution, mediaId)) {
+        const solStr = typeof solution === 'object' ? JSON.stringify(solution) : solution;
+        if (_.includes(solStr, mediaId)) {
           return true;
         }
       }
