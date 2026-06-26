@@ -1,28 +1,36 @@
 <div #fancyTree></div>
-<div class="sb-fixed-with-whitebg pr-20 d-flex flex-jc-space-between" *ngIf="config && config.mode === 'edit'"
-  [style.flex-direction]="isRTL ? 'row-reverse' : 'row'">
-  <div class="d-flex w-25">
-    <div class="sb-btn-cover">
-      <button [ngClass]="visibility?.addSibling ? '' : 'sb-disabled'" (click)="addSibling();"
-        class="sb-btn sb-btn-outline-primary sb-btn-normal sb-btn-radius p-0 b-none"><i aria-hidden="true" class="icon plus"></i>
+@if (config && config.mode === 'edit') {
+  <div class="sb-fixed-with-whitebg pr-20 d-flex flex-jc-space-between"
+    [style.flex-direction]="isRTL ? 'row-reverse' : 'row'">
+    <div class="d-flex w-25">
+      <div class="sb-btn-cover">
+        <button [ngClass]="visibility?.addSibling ? '' : 'sb-disabled'" (click)="addSibling();"
+          class="sb-btn sb-btn-outline-primary sb-btn-normal sb-btn-radius p-0 b-none"><i aria-hidden="true" class="icon plus"></i>
         {{configService.labelConfig?.button_labels?.add_sibling_btn_label}} </button>
-    </div>
-    <div class="sb-btn-cover">
-      <button [ngClass]="visibility?.addChild ? '' : 'sb-disabled'" (click)="addChild();"
-        class="sb-btn sb-btn-outline-primary sb-btn-normal sb-btn-radius b-none p-0"><i class="icon plus"></i>
+      </div>
+      <div class="sb-btn-cover">
+        <button [ngClass]="visibility?.addChild ? '' : 'sb-disabled'" (click)="addChild();"
+          class="sb-btn sb-btn-outline-primary sb-btn-normal sb-btn-radius b-none p-0"><i class="icon plus"></i>
         {{configService.labelConfig?.button_labels?.add_child_btn_label}} </button>
+      </div>
     </div>
+    @if (config.objectType === 'QuestionSet') {
+      <div class="d-flex mt-10 mr-30">
+        <button class="sb-btn sb-btn-normal sb-btn-primary" [disabled]="!visibility?.createNew"
+          [ngClass]="[!visibility?.createNew ? 'sb-btn-outline-disabled' : '', (visibility?.createNew && buttonLoaders?.addFromLibraryButtonLoader) ? 'sb-btn-loading-spinner sb-btn-outline-disabled': '']"
+          type="button"  (click)="createNewContent()"
+          libTelemetryInteract
+          [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('create_new','click','launch', telemetryService.telemetryPageId)">
+          @if (!buttonLoaders?.addFromLibraryButtonLoader) {
+            <i class="icon plus"></i>
+          }
+          @if (buttonLoaders?.addFromLibraryButtonLoader) {
+            <div class="sb-loading-spinner" role="status" aria-hidden="true">
+            </div>
+          }
+          {{configService.labelConfig?.button_labels?.create_new_btn_label}}
+        </button>
+      </div>
+    }
   </div>
-  <div class="d-flex mt-10 mr-30" *ngIf="config.objectType === 'QuestionSet'">
-  <button class="sb-btn sb-btn-normal sb-btn-primary" [disabled]="!visibility?.createNew"
-    [ngClass]="[!visibility?.createNew ? 'sb-btn-outline-disabled' : '', (visibility?.createNew && buttonLoaders?.addFromLibraryButtonLoader) ? 'sb-btn-loading-spinner sb-btn-outline-disabled': '']"
-    type="button"  (click)="createNewContent()"
-    libTelemetryInteract
-    [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('create_new','click','launch', telemetryService.telemetryPageId)">
-    <i class="icon plus" *ngIf="!buttonLoaders?.addFromLibraryButtonLoader"></i>
-    <div class="sb-loading-spinner" *ngIf="buttonLoaders?.addFromLibraryButtonLoader" role="status" aria-hidden="true">
-    </div>
-    {{configService.labelConfig?.button_labels?.create_new_btn_label}}
-  </button>
-  </div>
-</div>
+}

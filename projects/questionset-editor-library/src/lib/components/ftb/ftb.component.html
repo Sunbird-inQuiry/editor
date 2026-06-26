@@ -1,36 +1,41 @@
-<div *ngIf="!isReadOnlyMode">
-  <div class="ftb-hint mt-10 fs-0-785 sb-color-gray-200">
-    <ul class="mb-0 pl-20">
-      <li>{{ configService.labelConfig?.lbl?.ftbHint1 }}</li>
-      <li>{{ configService.labelConfig?.lbl?.ftbHint2 }}</li>
-    </ul>
-  </div>
-
-  <div *ngIf="parsedBlanks.length > 0" class="mt-10">
-    <label class="fs-0-785 font-weight-bold d-block mb-5">
-      {{ configService.labelConfig?.lbl?.ftbBlanksLabel }} ({{ lang | uppercase }})
-    </label>
-    <div class="d-flex flex-w-wrap">
-      <span *ngFor="let blank of parsedBlanks; let i = index"
-            class="sb-tag sb-tag-primary mr-10 mb-5 px-10 py-5 fs-0-785">
-        Blank {{ i + 1 }}: <strong>{{ blank.answer || '(empty)' }}</strong>
-      </span>
+@if (!isReadOnlyMode) {
+  <div>
+    <div class="ftb-hint mt-10 fs-0-785 sb-color-gray-200">
+      <ul class="mb-0 pl-20">
+        <li>{{ configService.labelConfig?.lbl?.ftbHint1 }}</li>
+        <li>{{ configService.labelConfig?.lbl?.ftbHint2 }}</li>
+      </ul>
+    </div>
+    @if (parsedBlanks.length > 0) {
+      <div class="mt-10">
+        <label class="fs-0-785 font-weight-bold d-block mb-5">
+          {{ configService.labelConfig?.lbl?.ftbBlanksLabel }} ({{ lang | uppercase }})
+        </label>
+        <div class="d-flex flex-w-wrap">
+          @for (blank of parsedBlanks; track blank; let i = $index) {
+            <span
+              class="sb-tag sb-tag-primary mr-10 mb-5 px-10 py-5 fs-0-785">
+              Blank {{ i + 1 }}: <strong>{{ blank.answer || '(empty)' }}</strong>
+            </span>
+          }
+        </div>
+      </div>
+    }
+    @if (showFormError && parsedBlanks.length === 0) {
+      <label class="sb-color-error fs-0-785 d-block mt-5">
+        {{ configService.labelConfig?.lbl?.ftbBlankRequired }}
+      </label>
+    }
+    <div class="mt-15 br-4 b-1-100 px-16 py-12 sb-bg-color-white">
+      <label class="fs-0-92 font-weight-bold d-block mb-10">{{ configService.labelConfig?.lbl?.configuration }}</label>
+      <label class="d-flex flex-ai-center mb-8 cursor-pointer pl-16">
+        <input type="checkbox" [(ngModel)]="isPartialScore" (change)="onToggle()" class="mr-8">
+        <span class="fs-0-785">{{ configService.labelConfig?.lbl?.partialScoring }}</span>
+      </label>
+      <label class="d-flex flex-ai-center cursor-pointer pl-16">
+        <input type="checkbox" [(ngModel)]="evalUnordered" (change)="onToggle()" class="mr-8">
+        <span class="fs-0-785">{{ configService.labelConfig?.lbl?.evalUnordered }}</span>
+      </label>
     </div>
   </div>
-
-  <label *ngIf="showFormError && parsedBlanks.length === 0" class="sb-color-error fs-0-785 d-block mt-5">
-    {{ configService.labelConfig?.lbl?.ftbBlankRequired }}
-  </label>
-
-  <div class="mt-15 br-4 b-1-100 px-16 py-12 sb-bg-color-white">
-    <label class="fs-0-92 font-weight-bold d-block mb-10">{{ configService.labelConfig?.lbl?.configuration }}</label>
-    <label class="d-flex flex-ai-center mb-8 cursor-pointer pl-16">
-      <input type="checkbox" [(ngModel)]="isPartialScore" (change)="onToggle()" class="mr-8">
-      <span class="fs-0-785">{{ configService.labelConfig?.lbl?.partialScoring }}</span>
-    </label>
-    <label class="d-flex flex-ai-center cursor-pointer pl-16">
-      <input type="checkbox" [(ngModel)]="evalUnordered" (change)="onToggle()" class="mr-8">
-      <span class="fs-0-785">{{ configService.labelConfig?.lbl?.evalUnordered }}</span>
-    </label>
-  </div>
-</div>
+}

@@ -9,16 +9,18 @@
     </div>
     <div class="twelve wide column">
       <div class="ui grid flex-jc-center my-16">
-        <div class="ui card text-center common-contribution-card m-16" *ngFor="let template of templateList"
-          (click)="showButton=true; templateSelected = template"
-          [ngClass]="{'active': templateSelected === template}">
-          <div class="content">
-            <i class="check circle icon"></i>
-            <img class="mt-16" rel="placeholder" src="assets/images/MCQ.png" alt="{{template + 'icon' }}">
-            <div class="content-title pt-16 pb-8 fsmall">{{configService.labelConfig?.categoryLabels[template] || template}}
+        @for (template of templateList; track template) {
+          <div class="ui card text-center common-contribution-card m-16"
+            (click)="showButton=true; templateSelected = template"
+            [ngClass]="{'active': templateSelected === template}">
+            <div class="content">
+              <i class="check circle icon"></i>
+              <img class="mt-16" rel="placeholder" src="assets/images/MCQ.png" alt="{{template + 'icon' }}">
+              <div class="content-title pt-16 pb-8 fsmall">{{configService.labelConfig?.categoryLabels[template] || template}}
+              </div>
             </div>
           </div>
-        </div>
+        }
       </div>
     </div>
   </div>
@@ -26,6 +28,6 @@
     <button type="button" class="sb-btn sb-btn-normal"
       [ngClass]="{'sb-btn-primary': showButton, 'sb-btn-disabled': !showButton}" [disabled]="!showButton" (click)="next()"
       libTelemetryInteract
-      [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('next','click','submit', this.telemetryService.telemetryPageId, {key: 'dialog_id', value: 'create_new','template_id' : templateSelected})">{{configService.labelConfig?.button_labels?.next_btn_label}} </button>
+    [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('next','click','submit', this.telemetryService.telemetryPageId, {key: 'dialog_id', value: 'create_new','template_id' : templateSelected})">{{configService.labelConfig?.button_labels?.next_btn_label}} </button>
   </div>
 </sui-modal>

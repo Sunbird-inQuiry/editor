@@ -13,10 +13,6 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "types": [],
-    "lib": [
-      "dom",
-      "ES2022"
-    ],
     "strict": false,
     "skipLibCheck": true
   },

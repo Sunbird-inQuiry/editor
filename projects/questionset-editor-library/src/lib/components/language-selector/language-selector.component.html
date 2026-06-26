@@ -1,12 +1,13 @@
 <div class="lang-selector d-flex flex-ai-center mb-10"
-     [style.flex-direction]="globalIsRTL ? 'row-reverse' : 'row'"
-     [style.justify-content]="globalIsRTL ? 'flex-end' : 'flex-start'">
+  [style.flex-direction]="globalIsRTL ? 'row-reverse' : 'row'"
+  [style.justify-content]="globalIsRTL ? 'flex-end' : 'flex-start'">
   <span class="fs-0-785 sb-color-gray-200 mr-10">{{ configService.labelConfig?.lbl?.langSelectorLabel }}:</span>
-  <button
-    *ngFor="let lang of languages"
-    class="lang-btn sb-btn sb-btn-xs mr-5"
-    [class.lang-btn--active]="activeLang.current === lang.code"
-    (click)="activeLang.set(lang.code)">
-    {{ lang.label }}
-  </button>
+  @for (lang of languages; track lang) {
+    <button
+      class="lang-btn sb-btn sb-btn-xs mr-5"
+      [class.lang-btn--active]="activeLang.current === lang.code"
+      (click)="activeLang.set(lang.code)">
+      {{ lang.label }}
+    </button>
+  }
 </div>

@@ -4,11 +4,17 @@
     {{ configService.labelConfig?.lbl?.publishCollection | interpolate: '${objectType}': objectType }}
   </div>
   <div class="sb-modal-content">
-    <span *ngIf="!publishchecklist?.length"> {{configService.labelConfig?.lbl?.confirmPublishCollection | interpolate: '${objectType}': objectType}} </span>
-    <div class="sectionTitle" *ngIf="publishchecklist?.length">{{configService.labelConfig?.lbl?.publishchecklistTitle}}</div>
-    <sb-dynamic-form *ngIf="publishchecklist?.length" [config]="publishchecklist"
-      (statusChanges)="onStatusChanges($event)" (valueChanges)="valueChanges($event)">
-    </sb-dynamic-form>
+    @if (!publishchecklist?.length) {
+      <span> {{configService.labelConfig?.lbl?.confirmPublishCollection | interpolate: '${objectType}': objectType}} </span>
+    }
+    @if (publishchecklist?.length) {
+      <div class="sectionTitle">{{configService.labelConfig?.lbl?.publishchecklistTitle}}</div>
+    }
+    @if (publishchecklist?.length) {
+      <sb-dynamic-form [config]="publishchecklist"
+        (statusChanges)="onStatusChanges($event)" (valueChanges)="valueChanges($event)">
+      </sb-dynamic-form>
+    }
   </div>
   <div class="sb-modal-actions">
     <button class="sb-btn sb-btn-normal"
