@@ -30,15 +30,6 @@
     "sockjs": {
       "uuid": "^11.1.1"
     },
-    "@cypress/request": {
-      "uuid": "^11.1.1"
-    },
-    "request": {
-      "uuid": "^11.1.1"
-    },
-    "webdriver-manager": {
-      "uuid": "^11.1.1"
-    },
     "form-data": "^4.0.4",
     "xmldom": "npm:@xmldom/xmldom@^0.8.12",
     "braces": "^3.0.3",
@@ -56,8 +47,7 @@
     "file-type": "^21.3.1",
     "phin": "^3.7.1",
     "tmp": "^0.2.3",
-    "xml2js": "^0.6.2",
-    "request": "npm:@cypress/request@^3.0.0"
+    "xml2js": "^0.6.2"
   },
   "dependencies": {
     "@angular-devkit/core": "^21.2.17",
@@ -126,7 +116,6 @@
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
     "ng-packagr": "^21.2.5",
-    "protractor": "~7.0.0",
     "ts-node": "~10.9.0",
     "tslint": "~6.1.0",
     "typescript": "~5.9.3"
