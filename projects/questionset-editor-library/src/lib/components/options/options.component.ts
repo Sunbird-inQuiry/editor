@@ -65,6 +65,10 @@ export class OptionsComponent implements OnInit, OnChanges {
     if (!_.isUndefined(this.editorState.templateId)) {
       this.templateType = this.editorState.templateId;
     }
+    if (this.templateType === 'mcq-boolean') {
+      this.editorService.optionsLength = 2;
+      this.editorState.maximumOptions = 2;
+    }
     this.mapping = _.get(this.editorState, 'responseDeclaration.response1.mapping') || [];
     this.editorDataHandler();
     if (!_.isUndefined(this.editorService.editorConfig.config.renderTaxonomy)) {
