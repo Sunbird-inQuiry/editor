@@ -1,0 +1,45 @@
+<ng-container *ngIf="!isReadOnlyMode; else readOnlyContainer">
+  <div class="d-flex pt-10 flex-dc sb-mcq-form">
+    <div class="d-flex sb-mcq-item flex-w-wrap" *ngFor="let option of editorState.options; let i = index">
+      <div class="sb-w-85 sb-ckeditor relative mb-15">
+        <lib-ckeditor-tool [setCharacterLimit]="setCharacterLimit"
+          (editorDataOutput)="setOptionBody(option, $event.body); option.length = $event.length; editorDataHandler($event)"
+          [editorDataInput]="optionBody(option)" [lang]="globalLang" class="ckeditor-tool__option mb-10"
+          [class.mb-5]="showFormError && ([undefined, ''].includes(optionBody(option)) || option.length > setCharacterLimit)"
+          [showLangSelector]="true" [langs]="langs" [activeLangCode]="currentLang" (langChange)="onLangChange($event)">
+        </lib-ckeditor-tool>
+        <label *ngIf="showFormError && !optionBody(option)" class="sb-color-error fs-0-785">{{configService.labelConfig?.lbl?.fillThisOption}}</label>
+        <label *ngIf="option.length > setCharacterLimit" class="ui basic red error label pt-1">
+          {{configService.labelConfig?.lbl?.reduceSize}}</label>
+      </div>
+      <div class="sb-checkbox sb-checkbox-primary pl-10 mt-0 pt-0" [class.selected]="option.selected === true" *ngIf="sourcingSettings?.enforceCorrectAnswer !== false">
+        <input type="checkbox" id="answer_{{ i + 1 }}" name="example" value="{{ i }}"  (click)="onOptionChange($event);"
+        [checked]="option.selected === true"
+        libTelemetryInteract
+        [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('mark_as_right_anwser','click',undefined,telemetryService.telemetryPageId,{answer:i.toString()})" />
+        <label for="answer_{{ i + 1 }}" class="mr-0 fs-0-785">{{configService.labelConfig?.lbl?.correctAns}}</label>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #readOnlyContainer>
+  <div class="row mb-0 p-0" *ngFor="let option of editorState.options; let i=index">
+    <div class="twelve wide column p-0">
+      <div class="ckeditor-tool width-100">
+        <div class="ckeditor-tool__question-readonly mb-24">
+          <label class="px-16 py-8 fs-0-92 mb-0 ckeditor-tool__label width-100">Option {{ i+1 }}</label>
+          <div class="ckeditor-tool__solution__body">
+            <p class="fs-0-785 p-16" [innerHTML]="option.body | sanitizeHtml"></p>
+            <div class="mcq-checkbox-answer" *ngIf="editorState.answer === i">
+              <div class="sb-checkbox sb-checkbox-primary mr-auto selected">
+                <input type="checkbox" id="check1" name="example" disabled checked>
+                <label for="check1">{{configService.labelConfig?.lbl?.correctAns}}</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

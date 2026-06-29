@@ -227,6 +227,7 @@
   "categoryLabels": {
     "Multiselect Multiple Choice Question": "سؤال اختيار متعدد",
     "Multiple Choice Question": "سؤال الاختيار من متعدد",
+    "Boolean Question": "سؤال منطقي",
     "Subjective Question": "سؤال إنشائي",
     "FTB Question": "سؤال ملء الفراغات",
     "Match The Following Question": "سؤال المطابقة",

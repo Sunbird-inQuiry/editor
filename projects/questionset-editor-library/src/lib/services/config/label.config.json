@@ -266,6 +266,7 @@
     }
   },
   "categoryLabels": {
-    "Multiselect Multiple Choice Question": "Multiple Choice Question"
+    "Multiselect Multiple Choice Question": "Multiple Choice Question",
+    "Boolean Question": "Boolean Question"
   }
 }

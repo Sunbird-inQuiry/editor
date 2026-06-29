@@ -46,6 +46,7 @@ import { LanguageSelectorComponent } from './components/language-selector/langua
 import { ReorderComponent } from './components/reorder/reorder.component';
 import { ActiveLanguageService } from './services/language/active-language.service';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { BooleanComponent } from './components/boolean/boolean.component';
 @NgModule({
   declarations: [
     QuestionsetEditorLibraryComponent,
@@ -58,6 +59,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     MetaFormComponent,
     QuestionComponent,
     OptionsComponent,
+    BooleanComponent,
     AnswerComponent,
     CkeditorToolComponent,
     TemplateComponent,
@@ -89,6 +91,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     EditorQuestionTypeRegistryService,
     ActiveLanguageService,
     { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'multiple choice question', interactionType: 'choice', qType: 'MCQ', component: OptionsComponent }, multi: true },
+    { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'boolean question', interactionType: 'choice', qType: 'BOOL', component: BooleanComponent }, multi: true },
     { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'subjective question', interactionType: 'default', qType: 'SA', component: AnswerComponent }, multi: true },
     { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'ftb question', interactionType: 'text', qType: 'FTB', component: FtbComponent }, multi: true },
     { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'match the following question', interactionType: 'match', qType: 'MTF', component: MtfComponent }, multi: true },

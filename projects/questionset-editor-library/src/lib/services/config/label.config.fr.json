@@ -227,6 +227,7 @@
   "categoryLabels": {
     "Multiselect Multiple Choice Question": "Question à choix multiple",
     "Multiple Choice Question": "Question à Choix Multiple",
+    "Boolean Question": "Question Booléenne",
     "Subjective Question": "Question Subjective",
     "FTB Question": "Question à Trous",
     "Match The Following Question": "Question d'Appariement",

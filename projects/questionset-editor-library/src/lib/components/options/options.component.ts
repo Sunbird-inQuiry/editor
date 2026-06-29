@@ -65,10 +65,6 @@ export class OptionsComponent implements OnInit, OnChanges {
     if (!_.isUndefined(this.editorState.templateId)) {
       this.templateType = this.editorState.templateId;
     }
-    if (this.templateType === 'mcq-boolean') {
-      this.editorService.optionsLength = 2;
-      this.editorState.maximumOptions = 2;
-    }
     this.mapping = _.get(this.editorState, 'responseDeclaration.response1.mapping') || [];
     this.editorDataHandler();
     if (!_.isUndefined(this.editorService.editorConfig.config.renderTaxonomy)) {
@@ -220,21 +216,7 @@ export class OptionsComponent implements OnInit, OnChanges {
 
   setTemplete(template: string) {
     this.templateType = template;
-    if (template === 'mcq-boolean') {
-      // Boolean layout requires exactly 2 options pre-filled with True / False.
-      // Authors can still edit the labels (e.g. to Yes/No or a localised equivalent).
-      this.editorState.options = [
-        new McqOptions('<p>True</p>'),
-        new McqOptions('<p>False</p>'),
-      ];
-      this.editorService.optionsLength = 2;
-      this.editorState.answer = 0;
-      this.selectedOptions = [0];
-      this.mapping = [];
-      this.editorState.maximumOptions = 2;
-    } else {
-      this.editorState.maximumOptions = 4;
-    }
+    this.editorState.maximumOptions = 4;
     this.editorDataHandler();
   }
 
@@ -276,26 +258,12 @@ export class OptionsComponent implements OnInit, OnChanges {
 
   onOptionChange(event) {
     const optionIndex = _.parseInt(event.target.value);
-    if (this.templateType === 'mcq-boolean') {
-      if (event.target.checked === true) {
-        this.selectedOptions = [optionIndex];
-        _.forEach(this.editorState.options, (opt, idx) => {
-          opt.selected = idx === optionIndex;
-        });
-      } else {
-        this.selectedOptions = [];
-        _.forEach(this.editorState.options, (opt) => {
-          opt.selected = false;
-        });
-      }
-    } else {
-      if (event.target.checked === true && !_.includes(this.selectedOptions, optionIndex)) {
-        this.selectedOptions.push(optionIndex);
-      } else if (event.target.checked === false) {
-        _.remove(this.selectedOptions, (n) => {
-          return n === optionIndex;
-        });
-      }
+    if (event.target.checked === true && !_.includes(this.selectedOptions, optionIndex)) {
+      this.selectedOptions.push(optionIndex);
+    } else if (event.target.checked === false) {
+      _.remove(this.selectedOptions, (n) => {
+        return n === optionIndex;
+      });
     }
     if (this.selectedOptions.length === 1) {
       this.editorState.answer = this.selectedOptions[0];

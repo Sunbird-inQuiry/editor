@@ -21,7 +21,7 @@
             "accepted": "mp3, wav"
           }
     },
-    "questionPrimaryCategories": ["Multiple Choice Question", "Subjective Question", "FTB Question", "Match The Following Question", "Sequence Question", "Reorder Question"],
+    "questionPrimaryCategories": ["Multiple Choice Question", "Boolean Question", "Subjective Question", "FTB Question", "Match The Following Question", "Sequence Question", "Reorder Question"],
     "contentPrimaryCategories": ["Course Assessment", "eTextbook", "Explanation Content", "Learning Resource", "Practice Question Set"],
     "readQuestionFields": "body,primaryCategory,mimeType,qType,answer,templateId,responseDeclaration,interactionTypes,interactions,name,solutions,editorState,media,remarks,evidence,hints,instructions,outcomeDeclaration,isPartialScore,evalUnordered,",
     "omitFalseyProperties":["topic", "topicsIds", "targetTopicIds", "keywords"],
