@@ -276,12 +276,26 @@ export class OptionsComponent implements OnInit, OnChanges {
 
   onOptionChange(event) {
     const optionIndex = _.parseInt(event.target.value);
-    if (event.target.checked === true && !_.includes(this.selectedOptions, optionIndex)) {
-      this.selectedOptions.push(optionIndex);
-    } else if (event.target.checked === false) {
-      _.remove(this.selectedOptions, (n) => {
-        return n === optionIndex;
-      });
+    if (this.templateType === 'mcq-boolean') {
+      if (event.target.checked === true) {
+        this.selectedOptions = [optionIndex];
+        _.forEach(this.editorState.options, (opt, idx) => {
+          opt.selected = idx === optionIndex;
+        });
+      } else {
+        this.selectedOptions = [];
+        _.forEach(this.editorState.options, (opt) => {
+          opt.selected = false;
+        });
+      }
+    } else {
+      if (event.target.checked === true && !_.includes(this.selectedOptions, optionIndex)) {
+        this.selectedOptions.push(optionIndex);
+      } else if (event.target.checked === false) {
+        _.remove(this.selectedOptions, (n) => {
+          return n === optionIndex;
+        });
+      }
     }
     if (this.selectedOptions.length === 1) {
       this.editorState.answer = this.selectedOptions[0];
