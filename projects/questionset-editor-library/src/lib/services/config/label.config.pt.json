@@ -125,6 +125,7 @@
     "vertical": "Vertical",
     "grid": "Grade",
     "horizontal": "Horizontal",
+    "boolean": "Booleano (Verdadeiro/Falso)",
     "sliderValue": "Valor do Controle Deslizante",
     "left": "Esquerda",
     "stepSize": "Tamanho do passo",

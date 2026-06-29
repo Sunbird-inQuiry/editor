@@ -137,6 +137,7 @@
     "vertical": "Vertical",
     "grid": "Grid",
     "horizontal": "Horizontal",
+    "boolean": "Boolean (True/False)",
     "sliderValue": "Slider Value",
     "left": "Left",
     "stepSize": "Step size",

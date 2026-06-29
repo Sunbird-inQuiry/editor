@@ -8,6 +8,7 @@
     "vertical": "ऊर्ध्वाधर",
     "grid": "ग्रिड",
     "horizontal": "क्षैतिज",
+    "boolean": "बूलियन (सही/गलत)",
     "selectOneAns": "एक सही उत्तर चुनें",
     "fillThisOption": "यह विकल्प भरें",
     "correctAns": "सही उत्तर",

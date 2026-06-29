@@ -95,6 +95,16 @@
   }
 }
 
+.q-sb-layout-boolean{
+  &.active,
+  &:hover
+  {
+    border-color: var(--primary-400);
+    background-color: #ffffff;
+    color: var(--primary-400);
+  }
+}
+
 .h-7 {
   height: 7px;
 }

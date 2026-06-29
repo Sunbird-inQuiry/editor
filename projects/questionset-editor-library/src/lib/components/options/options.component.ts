@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, EventEmitter, Output, OnChanges, SimpleChanges } from '@angular/core';
 import * as _ from 'lodash-es';
+import { McqOptions } from '../../interfaces/McqForm';
 import { ActiveLanguageService } from '../../services/language/active-language.service';
 import { readI18nForEditor, writeI18n, I18nValue } from '../../utils/i18nField';
 import { EditorTelemetryService } from '../../services/telemetry/telemetry.service';
@@ -32,9 +33,9 @@ export class OptionsComponent implements OnInit, OnChanges {
   @Output() editorDataOutput: EventEmitter<any> = new EventEmitter<any>();
 
   currentLang = 'en';
-  get lang(): string    { return this.currentLang; }
+  get lang(): string { return this.currentLang; }
   get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
-  get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
+  get globalDir(): string { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
   langs = ActiveLanguageService.LANGS;
   onLangChange(code: string): void { this._activeLang?.set(code); }
   optionBody(option: any): string { return readI18nForEditor(option.body as I18nValue, this.lang); }
@@ -45,8 +46,8 @@ export class OptionsComponent implements OnInit, OnChanges {
   public setImageLimit = 1;
   public templateType = 'mcq-vertical';
   subMenus: SubMenu[][];
-  hints:any = {};
-  showSubMenu:boolean=false;
+  hints: any = {};
+  showSubMenu: boolean = false;
   parentMeta: any;
   selectedOptions = [];
   constructor(
@@ -54,11 +55,11 @@ export class OptionsComponent implements OnInit, OnChanges {
     public configService: ConfigService,
     public treeService: TreeService,
     private editorService: EditorService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.hints = this.editorState.hints ? this.editorState.hints : {};
-    if(!_.isUndefined(this.editorState.answer)) {
+    if (!_.isUndefined(this.editorState.answer)) {
       this.addSelectedOptions();
     }
     if (!_.isUndefined(this.editorState.templateId)) {
@@ -66,13 +67,13 @@ export class OptionsComponent implements OnInit, OnChanges {
     }
     this.mapping = _.get(this.editorState, 'responseDeclaration.response1.mapping') || [];
     this.editorDataHandler();
-    if(!_.isUndefined(this.editorService.editorConfig.config.renderTaxonomy)){
+    if (!_.isUndefined(this.editorService.editorConfig.config.renderTaxonomy)) {
       this.parentMeta = this.treeService.getFirstChild().data.metadata;
-      this.showSubMenu=true;
+      this.showSubMenu = true;
     }
   }
 
-  ngOnChanges(changes: SimpleChanges){
+  ngOnChanges(changes: SimpleChanges) {
     if (!_.isUndefined(changes.maxScore.previousValue) && !_.isNaN(changes.maxScore.currentValue)) {
       this.setMapping();
       this.editorDataHandler();
@@ -133,7 +134,7 @@ export class OptionsComponent implements OnInit, OnChanges {
       outcomeDeclaration: this.getOutcomeDeclaration(),
       interactionTypes: ['choice'],
       interactions: this.getInteractions(editorState.options),
-      hints:this.hints,
+      hints: this.hints,
       editorState: {
         options,
       },
@@ -178,9 +179,9 @@ export class OptionsComponent implements OnInit, OnChanges {
   }
 
   setMapping() {
-    if(!_.isEmpty(this.selectedOptions)) {
+    if (!_.isEmpty(this.selectedOptions)) {
       this.mapping = [];
-      const scoreForEachOption = _.round((this.maxScore/this.selectedOptions.length), 2);
+      const scoreForEachOption = _.round((this.maxScore / this.selectedOptions.length), 2);
       _.forEach(this.selectedOptions, (value) => {
         const optionMapping = {
           value: value,
@@ -213,15 +214,30 @@ export class OptionsComponent implements OnInit, OnChanges {
     return interactions;
   }
 
-  setTemplete(template) {
+  setTemplete(template: string) {
     this.templateType = template;
+    if (template === 'mcq-boolean') {
+      // Boolean layout requires exactly 2 options pre-filled with True / False.
+      // Authors can still edit the labels (e.g. to Yes/No or a localised equivalent).
+      this.editorState.options = [
+        new McqOptions('<p>True</p>'),
+        new McqOptions('<p>False</p>'),
+      ];
+      this.editorService.optionsLength = 2;
+      this.editorState.answer = 0;
+      this.selectedOptions = [0];
+      this.mapping = [];
+      this.editorState.maximumOptions = 2;
+    } else {
+      this.editorState.maximumOptions = 4;
+    }
     this.editorDataHandler();
   }
 
   subMenuChange({ index, value }, optionIndex) {
-    if(value.length && Object.keys(this.hints).length < this.editorState.interactions.response1.options.length ) {
-      const hint = {[uuidv4()] : {en:value}}
-      this.hints = {...this.hints, ...hint}
+    if (value.length && Object.keys(this.hints).length < this.editorState.interactions.response1.options.length) {
+      const hint = { [uuidv4()]: { en: value } }
+      this.hints = { ...this.hints, ...hint }
       this.editorState.interactions.response1.options[optionIndex].hint = Object.keys(hint)[0]
     }
     else if (value.length) {
@@ -232,13 +248,13 @@ export class OptionsComponent implements OnInit, OnChanges {
   subMenuConfig(options) {
     this.subMenus = []
     options.map((opt, index) => {
-      const uuid  = _.get(this.editorState, `interactions.response1.options[${index}].hint`)
+      const uuid = _.get(this.editorState, `interactions.response1.options[${index}].hint`)
       this.subMenus[index] = [
         {
           id: 'addHint',
           name: 'Add Hint',
-          value: (():any => {
-            if(this.hints[uuid]) {
+          value: ((): any => {
+            if (this.hints[uuid]) {
               return this.hints[uuid].en
             }
             else {
@@ -256,22 +272,22 @@ export class OptionsComponent implements OnInit, OnChanges {
 
   onOptionChange(event) {
     const optionIndex = _.parseInt(event.target.value);
-      if(event.target.checked === true && !_.includes(this.selectedOptions, optionIndex)) {
-        this.selectedOptions.push(optionIndex);
-      } else if(event.target.checked === false) {
-        _.remove(this.selectedOptions, (n) => {
-          return n === optionIndex;
-        });
-      }
-      if (this.selectedOptions.length === 1) {
-        this.editorState.answer = this.selectedOptions[0];
-      } else if(this.selectedOptions.length > 1) {
-        this.editorState.answer = this.selectedOptions;
-      } else {
-        this.editorState.answer = undefined;
-      }
-      this.setMapping();
-      this.editorDataHandler();
+    if (event.target.checked === true && !_.includes(this.selectedOptions, optionIndex)) {
+      this.selectedOptions.push(optionIndex);
+    } else if (event.target.checked === false) {
+      _.remove(this.selectedOptions, (n) => {
+        return n === optionIndex;
+      });
+    }
+    if (this.selectedOptions.length === 1) {
+      this.editorState.answer = this.selectedOptions[0];
+    } else if (this.selectedOptions.length > 1) {
+      this.editorState.answer = this.selectedOptions;
+    } else {
+      this.editorState.answer = undefined;
+    }
+    this.setMapping();
+    this.editorDataHandler();
   }
 
   setScore(value, scoreIndex) {

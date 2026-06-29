@@ -125,6 +125,7 @@
     "vertical": "Vertical",
     "grid": "Grille",
     "horizontal": "Horizontal",
+    "boolean": "Booléen (Vrai/Faux)",
     "sliderValue": "Valeur du curseur",
     "left": "Gauche",
     "stepSize": "Taille du pas",

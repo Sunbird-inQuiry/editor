@@ -125,6 +125,7 @@
     "vertical": "عمودي",
     "grid": "شبكة",
     "horizontal": "أفقي",
+    "boolean": "منطقي (صح/خطأ)",
     "sliderValue": "قيمة المنزلق",
     "left": "يسار",
     "stepSize": "حجم الخطوة",
