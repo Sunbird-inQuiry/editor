@@ -68,9 +68,13 @@ export class BooleanComponent implements OnInit {
       ];
       this.editorService.optionsLength = 2;
       this.editorState.maximumOptions = 2;
-    }
-    if (_.isUndefined(this.editorState.answer) || !_.includes([0, 1], this.editorState.answer)) {
-      this.editorState.answer = 0;
+    } else {
+      if (!this.optionBody(this.editorState.options[0])) {
+        this.setOptionBody(this.editorState.options[0], '<p>True</p>');
+      }
+      if (!this.optionBody(this.editorState.options[1])) {
+        this.setOptionBody(this.editorState.options[1], '<p>False</p>');
+      }
     }
     this.addSelectedOptions();
     this.mapping = _.get(this.editorState, 'responseDeclaration.response1.mapping') || [];

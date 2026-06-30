@@ -1,5 +1,7 @@
 <ng-container *ngIf="!isReadOnlyMode; else readOnlyContainer">
   <div class="d-flex pt-10 flex-dc sb-mcq-form">
+    <label *ngIf="showFormError && editorState.answer == undefined && sourcingSettings?.enforceCorrectAnswer !== false" class="ui basic red error label pt-1 mt-10">
+      {{configService.labelConfig?.lbl?.selectOneAns}}</label>
     <div class="d-flex sb-mcq-item flex-w-wrap" *ngFor="let option of editorState.options; let i = index">
       <div class="sb-w-85 sb-ckeditor relative mb-15">
         <lib-ckeditor-tool [setCharacterLimit]="setCharacterLimit"
