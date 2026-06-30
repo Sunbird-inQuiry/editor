@@ -4,7 +4,7 @@
     "outDir": "../../out-tsc/lib",
     "declarationMap": true,
     "module": "ES2022",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "declaration": true,
     "sourceMap": true,
     "inlineSources": true,
@@ -13,10 +13,6 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "types": [],
-    "lib": [
-      "dom",
-      "ES2022"
-    ],
     "strict": false,
     "skipLibCheck": true
   },

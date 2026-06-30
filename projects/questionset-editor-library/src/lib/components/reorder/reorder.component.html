@@ -1,33 +1,39 @@
-<div *ngIf="!isReadOnlyMode; else readOnlyReorder" class="mt-15">
-  <label class="fs-0-92 font-weight-bold d-block">{{ configService.labelConfig?.lbl?.reoAnswers }}</label>
-  <p class="fs-0-785 mb-10">{{ configService.labelConfig?.lbl?.reoAnswersDesc }}</p>
-
-  <div class="reorder-input-wrap">
-    <textarea class="reorder-textarea" [attr.maxlength]="MAX_CHARS" [value]="sentence"
-      [attr.dir]="globalDir"
-      (input)="onSentenceChange($event.target['value'])" rows="3"
+@if (!isReadOnlyMode) {
+  <div class="mt-15">
+    <label class="fs-0-92 font-weight-bold d-block">{{ configService.labelConfig?.lbl?.reoAnswers }}</label>
+    <p class="fs-0-785 mb-10">{{ configService.labelConfig?.lbl?.reoAnswersDesc }}</p>
+    <div class="reorder-input-wrap">
+      <textarea class="reorder-textarea" [attr.maxlength]="MAX_CHARS" [value]="sentence"
+        [attr.dir]="globalDir"
+        (input)="onSentenceChange($event.target['value'])" rows="3"
       [placeholder]="configService.labelConfig?.lbl?.reoPlaceholder"></textarea>
-    <span class="reorder-counter fs-0-785 sb-color-gray-200">{{ charCount }} / {{ MAX_CHARS }}</span>
+      <span class="reorder-counter fs-0-785 sb-color-gray-200">{{ charCount }} / {{ MAX_CHARS }}</span>
+    </div>
+    @if (showFormError && tokens.length === 0) {
+      <label class="sb-color-error fs-0-785 d-block mt-5">
+        {{ configService.labelConfig?.lbl?.reoTokensRequired }}
+      </label>
+    }
+    @if (tokens.length > 0) {
+      <div class="d-flex flex-w-wrap mt-15">
+        @for (token of tokens; track token) {
+          <span class="reorder-chip mr-8 mb-8 px-12 py-5 fs-0-785">
+            {{ token.label }}
+          </span>
+        }
+      </div>
+    }
   </div>
-
-  <label *ngIf="showFormError && tokens.length === 0" class="sb-color-error fs-0-785 d-block mt-5">
-    {{ configService.labelConfig?.lbl?.reoTokensRequired }}
-  </label>
-
-  <div *ngIf="tokens.length > 0" class="d-flex flex-w-wrap mt-15">
-    <span *ngFor="let token of tokens" class="reorder-chip mr-8 mb-8 px-12 py-5 fs-0-785">
-      {{ token.label }}
-    </span>
-  </div>
-</div>
-
-<ng-template #readOnlyReorder>
+} @else {
   <div class="mt-15">
     <label class="fs-0-92 font-weight-bold d-block mb-10">{{ configService.labelConfig?.lbl?.reoWordsLabel }}</label>
     <div class="d-flex flex-w-wrap">
-      <span *ngFor="let token of tokens" class="reorder-chip mr-8 mb-8 px-12 py-5 fs-0-785">
-        {{ token.label }}
-      </span>
+      @for (token of tokens; track token) {
+        <span class="reorder-chip mr-8 mb-8 px-12 py-5 fs-0-785">
+          {{ token.label }}
+        </span>
+      }
     </div>
   </div>
-</ng-template>
+}
+
