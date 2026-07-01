@@ -194,7 +194,15 @@ function TablePickerPopup({ anchor, onClose }: { anchor: DOMRect; onClose: () =>
 // ---------------------------------------------------------------------------
 // SharedRichToolbar
 // ---------------------------------------------------------------------------
+const LANGUAGES = [
+  { code: 'EN', label: 'EN', dir: 'ltr' },
+  { code: 'AR', label: 'AR', dir: 'rtl' },
+  { code: 'FR', label: 'FR', dir: 'ltr' },
+  { code: 'PT', label: 'PT', dir: 'ltr' },
+] as const;
+
 export default function SharedRichToolbar({ disabled = false }: { disabled?: boolean }) {
+  const [lang, setLang] = useState<'EN' | 'AR' | 'FR' | 'PT'>('EN');
   const [menu, setMenu] = useState<'align' | 'size' | 'chars' | 'table' | null>(null);
   const [mathOpen, setMathOpen] = useState(false);
   const [mathAnchor, setMathAnchor] = useState<DOMRect | null>(null);
@@ -302,8 +310,18 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
       {/* Language */}
       <label className="re-lang" onMouseDown={keep}>
         <span>Language</span>
-        <select defaultValue="EN" onChange={() => {}}>
-          <option>EN</option><option>HI</option><option>TE</option><option>TA</option><option>KN</option>
+        <select value={lang} onChange={e => {
+          const selected = e.target.value as typeof lang;
+          setLang(selected);
+          const dir = LANGUAGES.find(l => l.code === selected)?.dir ?? 'ltr';
+          // Notify ContentEditable fields to update text direction
+          document.dispatchEvent(new CustomEvent('ce-lang-changed', { detail: { lang: selected, dir } }));
+          // Apply direction to currently focused contenteditable
+          const active = document.activeElement as HTMLElement | null;
+          const ce = active?.closest('[contenteditable]') as HTMLElement | null;
+          if (ce) { ce.setAttribute('dir', dir); document.execCommand('styleWithCSS', false, 'true'); }
+        }}>
+          {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
         </select>
       </label>
       <span className="re-div" />

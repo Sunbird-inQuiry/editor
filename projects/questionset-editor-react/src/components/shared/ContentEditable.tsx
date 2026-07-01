@@ -106,6 +106,19 @@ export default function ContentEditable({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Apply language/direction changes from SharedRichToolbar
+  useEffect(() => {
+    const h = (e: Event) => {
+      const { dir } = (e as CustomEvent).detail as { dir: 'ltr' | 'rtl' };
+      // Only apply to the currently focused field
+      if (ref.current && document.activeElement && ref.current.contains(document.activeElement)) {
+        ref.current.setAttribute('dir', dir);
+      }
+    };
+    document.addEventListener('ce-lang-changed', h);
+    return () => document.removeEventListener('ce-lang-changed', h);
+  }, []);
+
   // Sync external value
   useEffect(() => {
     if (!ref.current) return;
