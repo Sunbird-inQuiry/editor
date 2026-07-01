@@ -1,6 +1,7 @@
 // =============================================================================
 // Question Type — Badge Colors & Icon Associations
 // =============================================================================
+@use 'sass:map';
 // Each question type gets a semantic color palette:
 //   --sbx-qt-{type}-color      → foreground / text
 //   --sbx-qt-{type}-bg         → badge background
@@ -125,11 +126,11 @@ $question-type-palettes: (
 //   }
 // ---------------------------------------------------------------------------
 @mixin qt-colors($type) {
-  $palette: map-get($question-type-palettes, $type);
+  $palette: map.get($question-type-palettes, $type);
   @if $palette {
-    color:            map-get($palette, color);
-    background-color: map-get($palette, bg);
-    border-color:     map-get($palette, border);
+    color:            map.get($palette, color);
+    background-color: map.get($palette, bg);
+    border-color:     map.get($palette, border);
   } @else {
     @warn "Unknown question type: #{$type}";
   }
@@ -140,8 +141,8 @@ $question-type-palettes: (
 // ---------------------------------------------------------------------------
 @each $type, $palette in $question-type-palettes {
   .sbx-qt-badge--#{$type} {
-    color:            map-get($palette, color);
-    background-color: map-get($palette, bg);
-    border-color:     map-get($palette, border);
+    color:            map.get($palette, color);
+    background-color: map.get($palette, bg);
+    border-color:     map.get($palette, border);
   }
 }
