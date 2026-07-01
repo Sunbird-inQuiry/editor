@@ -15,6 +15,20 @@ function injectGoogleFonts(root: ShadowRoot): void {
   root.prepend(link);
 }
 
+// react-to-webcomponent reads ReactComponent.propTypes to build observedAttributes.
+// QuestionsetEditor uses TypeScript interfaces only (no runtime propTypes), so
+// nothing would be observed without this stub. Values don't matter — only the
+// keys are used (via Object.keys) to produce the observedAttributes list.
+(QuestionsetEditor as unknown as Record<string, unknown>).propTypes = {
+  context:          null,
+  config:           null,
+  metadata:         null,
+  onToolbarEvent:   null,
+  onQuestionSaved:  null,
+  onHierarchySaved: null,
+  onError:          null,
+};
+
 const BaseWebComponent = reactToWebComponent(QuestionsetEditor, React, ReactDOM as unknown as typeof import('react-dom'), {
   shadow: 'open',
 });
