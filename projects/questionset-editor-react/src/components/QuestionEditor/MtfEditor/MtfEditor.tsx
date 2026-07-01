@@ -1,97 +1,64 @@
-import React, { Suspense, useState } from 'react';
-import { Plus, X } from 'lucide-react';
-import { useQuestionStore } from '../../../store/question.store';
-import RichTextEditor from '../../RichTextEditor/RichTextEditor';
-import styles from './MtfEditor.module.scss';
+import React, { useRef, useState } from 'react';
+import { Icon } from '../../shared/Icon';
+import ContentEditable from '../../shared/ContentEditable';
 
-const MIN_PAIRS = 2;
-const MAX_PAIRS = 5;
+interface MtfEditorProps { readOnly?: boolean; }
+interface Pair { id: string; left: string; right: string; }
 
-export default function MtfEditor() {
-  const { matchPairs, addMatchPair, removeMatchPair, updateMatchPair } = useQuestionStore();
-  const [isPartialScore, setIsPartialScore] = useState(false);
+export default function MtfEditor({ readOnly = false }: MtfEditorProps) {
+  const [pairs, setPairs] = useState<Pair[]>([
+    { id: 'p1', left: '', right: '' },
+    { id: 'p2', left: '', right: '' },
+    { id: 'p3', left: '', right: '' },
+  ]);
+  const nextId = useRef(4);
+
+  const addPair   = () => setPairs(p => [...p, { id: `p${nextId.current++}`, left: '', right: '' }]);
+  const removePair = (id: string) => setPairs(p => p.filter(x => x.id !== id));
+  const update    = (id: string, k: 'left' | 'right', v: string) =>
+    setPairs(p => p.map(x => x.id === id ? { ...x, [k]: v } : x));
+
+  const fieldStyle = { border: '1px solid var(--sb-border)', borderRadius: 12, padding: '11px 13px', background: '#fff', minHeight: 20 };
 
   return (
-    <div className={styles.container}>
-      {/* Column headers */}
-      <div className={styles.columnsHeader}>
-        <span className={styles.columnLabel}>Left (Question)</span>
-        <span />
-        <span className={styles.columnLabel}>Right (Answer)</span>
-        <span />
+    <div className="ce-ed-sec">
+      <div className="ce-ed-lbl">
+        Matching pairs <span className="hint">Left items are shuffled for the learner</span>
       </div>
 
-      <div className={styles.pairsList}>
-        {matchPairs.map((pair, idx) => (
-          <div key={pair.id} className={styles.pairRow}>
-            {/* Left rich text */}
-            <Suspense fallback={<div className={styles.rteFallback} />}>
-              <RichTextEditor
-                compact
-                enableImages
-                maxLength={160}
-                value={pair.left}
-                placeholder={`Left ${idx + 1}…`}
-                onChange={(html) => updateMatchPair(pair.id, { left: html })}
-              />
-            </Suspense>
+      <div className="ce-match-head">
+        <span>Item</span><span /><span>Match</span><span />
+      </div>
 
-            {/* Visual connector */}
-            <span className={styles.arrow} title="Match">↔</span>
-
-            {/* Right rich text */}
-            <Suspense fallback={<div className={styles.rteFallback} />}>
-              <RichTextEditor
-                compact
-                enableImages
-                maxLength={160}
-                value={pair.right}
-                placeholder={`Right ${idx + 1}…`}
-                onChange={(html) => updateMatchPair(pair.id, { right: html })}
-              />
-            </Suspense>
-
-            {/* Remove pair button — minimum 2 pairs enforced */}
-            <button
-              type="button"
-              className={styles.removeBtn}
-              onClick={() => removeMatchPair(pair.id)}
-              disabled={matchPairs.length <= MIN_PAIRS}
-              title="Remove pair"
-            >
-              <X size={14} />
-            </button>
+      {pairs.map(p => (
+        <div key={p.id} className="ce-pair">
+          <div className="ce-pair-fld">
+            <div style={fieldStyle}>
+              <ContentEditable value={p.left} onChange={v => update(p.id, 'left', v)}
+                placeholder="Left item" inline disabled={readOnly} bodyClass="cell" />
+            </div>
           </div>
-        ))}
-      </div>
+          <span className="link"><Icon name="link" size={18} /></span>
+          <div className="ce-pair-fld">
+            <div style={fieldStyle}>
+              <ContentEditable value={p.right} onChange={v => update(p.id, 'right', v)}
+                placeholder="Correct match" inline disabled={readOnly} bodyClass="cell" />
+            </div>
+          </div>
+          <button type="button" className="del" title="Remove pair"
+            disabled={pairs.length <= 2 || readOnly} onClick={() => removePair(p.id)}>
+            <Icon name="trash" size={16} />
+          </button>
+        </div>
+      ))}
 
-      {/* Add Pair — maximum 5 pairs enforced */}
-      <button
-        type="button"
-        className={styles.addBtn}
-        onClick={addMatchPair}
-        disabled={matchPairs.length >= MAX_PAIRS}
-      >
-        <Plus size={12} /> Add Pair
-      </button>
-
-      {matchPairs.length < MIN_PAIRS && (
-        <p className={styles.hint}>Add at least {MIN_PAIRS} matching pairs.</p>
+      {!readOnly && (
+        <div style={{ marginTop: 4 }}>
+          <button type="button" className="ce-addrow" onClick={addPair}>
+            <Icon name="plus" size={15} />Add pair
+          </button>
+        </div>
       )}
-
-      {/* Partial scoring toggle */}
-      <div className={styles.partialScoreRow}>
-        <input
-          id="mtf-partial-score"
-          type="checkbox"
-          className={styles.checkbox}
-          checked={isPartialScore}
-          onChange={(e) => setIsPartialScore(e.target.checked)}
-        />
-        <label htmlFor="mtf-partial-score">
-          Partial Scoring — each correct pair earns 1 point independently
-        </label>
-      </div>
     </div>
   );
 }

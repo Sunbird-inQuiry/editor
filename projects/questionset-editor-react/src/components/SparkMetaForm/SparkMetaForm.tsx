@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { X } from 'lucide-react';
+import { Icon } from '../shared/Icon';
 import type { ICategoryField } from '../../api/categoryDefinition';
 import styles from './SparkMetaForm.module.scss';
 
@@ -266,7 +266,7 @@ const KeywordChips: React.FC<KeywordChipsProps> = ({
               onClick={() => removeChip(chip)}
               aria-label={`Remove ${chip}`}
             >
-              <X size={10} aria-hidden="true" />
+              <Icon name="x" size={10} />
             </button>
           )}
         </span>
@@ -349,8 +349,13 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
         const isDisabled = readOnly || !field.editable;
         const validator = makeFieldValidator(field);
 
+        // Full-width: textarea, richtext, keywords/chips, multiselect, checkbox, time
+        const isFullWidth = ['textarea', 'richtext', 'keywords', 'checkbox', 'time'].includes(field.inputType ?? '')
+          || field.span === 'full';
+        const fieldClass = [styles.field, isFullWidth ? styles.fieldFull : ''].filter(Boolean).join(' ');
+
         return (
-          <div key={field.code} className={styles.field}>
+          <div key={field.code} className={fieldClass}>
             {/* Label */}
             <label className={styles.label} htmlFor={fieldId}>
               {field.label}
@@ -419,32 +424,29 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                   );
                 }
 
-                // ── multiselect ───────────────────────────────────────────
+                // ── multiselect — rendered as a single dropdown ───────────
                 if (inputType === 'multiselect') {
                   const options = buildOptions(field, frameworkTerms);
                   const currentVal = Array.isArray(rhfField.value)
-                    ? (rhfField.value as string[])
-                    : [];
+                    ? (rhfField.value as string[])[0] ?? ''
+                    : String(rhfField.value ?? '');
 
                   return (
                     <select
                       id={fieldId}
                       className={`${styles.select} ${error ? styles.inputError : ''}`}
-                      multiple
-                      size={Math.min(options.length || 4, 6)}
                       value={currentVal}
                       onChange={(e) => {
-                        const selected = Array.from(e.target.selectedOptions).map(
-                          (o) => o.value,
-                        );
-                        rhfField.onChange(selected);
-                        onChange(field.code, selected);
+                        const val = e.target.value ? [e.target.value] : [];
+                        rhfField.onChange(val);
+                        onChange(field.code, val);
                       }}
                       onBlur={rhfField.onBlur}
                       disabled={isDisabled}
                       aria-invalid={!!error}
                       aria-describedby={error ? `${fieldId}-error` : undefined}
                     >
+                      <option value="">Select…</option>
                       {options.map((opt) => (
                         <option key={opt.value} value={opt.value}>
                           {opt.label}

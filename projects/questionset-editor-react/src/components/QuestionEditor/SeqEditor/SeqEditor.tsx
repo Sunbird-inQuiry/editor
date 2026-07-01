@@ -1,114 +1,70 @@
-import React, { Suspense } from 'react';
-import { GripVertical, Plus, X, ChevronUp, ChevronDown } from 'lucide-react';
-import { useQuestionStore } from '../../../store/question.store';
-import RichTextEditor from '../../RichTextEditor/RichTextEditor';
-import styles from './SeqEditor.module.scss';
+import React, { useRef, useState } from 'react';
+import { Icon } from '../../shared/Icon';
+import ContentEditable from '../../shared/ContentEditable';
 
-export default function SeqEditor() {
-  const { sequence, setSequence } = useQuestionStore();
+interface SeqEditorProps { readOnly?: boolean; }
+interface Item { id: string; value: string; }
 
-  function addItem() {
-    setSequence([...sequence, '']);
-  }
+export default function SeqEditor({ readOnly = false }: SeqEditorProps) {
+  const [items, setItems] = useState<Item[]>([
+    { id: 'i1', value: '' }, { id: 'i2', value: '' },
+  ]);
+  const [layout, setLayout] = useState<'vertical' | 'horizontal'>('vertical');
+  const nextId = useRef(3);
 
-  function removeItem(idx: number) {
-    const next = sequence.filter((_, i) => i !== idx);
-    setSequence(next);
-  }
+  const addItem    = () => setItems(it => [...it, { id: `i${nextId.current++}`, value: '' }]);
+  const removeItem = (id: string) => setItems(it => it.filter(x => x.id !== id));
+  const update     = (id: string, v: string) => setItems(it => it.map(x => x.id === id ? { ...x, value: v } : x));
 
-  function updateItem(idx: number, value: string) {
-    const next = sequence.map((item, i) => (i === idx ? value : item));
-    setSequence(next);
-  }
+  const glyph = (k: string) =>
+    k === 'vertical' ? <span className="g-v"><i /><i /></span>
+                     : <span className="g-h"><i /><i /><i /><i /></span>;
 
-  function moveUp(idx: number) {
-    if (idx === 0) return;
-    const next = [...sequence];
-    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-    setSequence(next);
-  }
-
-  function moveDown(idx: number) {
-    if (idx === sequence.length - 1) return;
-    const next = [...sequence];
-    [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
-    setSequence(next);
-  }
+  const fieldStyle = { flex: 1, border: 'none', background: 'transparent', outline: 'none', minHeight: 20 };
 
   return (
-    <div className={styles.container}>
-      <p className={styles.header}>
-        Arrange items in the correct sequence. The order shown here is the correct answer.
-      </p>
+    <div className="ce-ed-sec">
+      <div className="ce-ed-lbl">
+        Items in correct order <span className="hint">Order here is the answer; learners see them shuffled</span>
+      </div>
 
-      {sequence.length === 0 && (
-        <p className={styles.emptyMsg}>No sequence items added yet.</p>
-      )}
+      <div className="ce-layout">
+        <span className="lbl">Select layout <Icon name="info" size={14} /></span>
+        <div className="seg">
+          {(['vertical', 'horizontal'] as const).map(k => (
+            <button key={k} type="button" className={layout === k ? 'on' : ''} onClick={() => setLayout(k)}>
+              {glyph(k)}{k.charAt(0).toUpperCase() + k.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      <div className={styles.itemsList}>
-        {sequence.map((item, idx) => (
-          <div key={idx} className={styles.itemRow}>
-            {/* Drag handle (visual only — manual reorder via buttons) */}
-            <span className={styles.dragHandle}>
-              <GripVertical size={16} />
-            </span>
-
-            {/* Position badge */}
-            <span className={styles.orderIndex}>{idx + 1}</span>
-
-            {/* Rich text item editor */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <Suspense fallback={<div className={styles.rteFallback} />}>
-                <RichTextEditor
-                  compact
-                  enableImages
-                  maxLength={120}
-                  value={item}
-                  placeholder={`Step ${idx + 1}…`}
-                  onChange={(html) => updateItem(idx, html)}
-                />
-              </Suspense>
+      <div className={`ce-seq lay-${layout}`}>
+        {items.map((it, i) => (
+          <div key={it.id} className="ce-seqitem">
+            <button type="button" className="grip" tabIndex={-1} title="Drag to reorder">
+              <Icon name="drag" size={16} />
+            </button>
+            <span className="ord">{i + 1}</span>
+            <div style={fieldStyle}>
+              <ContentEditable value={it.value} onChange={v => update(it.id, v)}
+                placeholder={`Step ${i + 1}`} inline disabled={readOnly} bodyClass="seqline" />
             </div>
-
-            {/* Up / Down reorder */}
-            <div className={styles.moveButtons}>
-              <button
-                type="button"
-                className={styles.moveBtn}
-                onClick={() => moveUp(idx)}
-                disabled={idx === 0}
-                title="Move up"
-              >
-                <ChevronUp size={10} />
-              </button>
-              <button
-                type="button"
-                className={styles.moveBtn}
-                onClick={() => moveDown(idx)}
-                disabled={idx === sequence.length - 1}
-                title="Move down"
-              >
-                <ChevronDown size={10} />
-              </button>
-            </div>
-
-            {/* Remove */}
-            <button
-              type="button"
-              className={styles.removeBtn}
-              onClick={() => removeItem(idx)}
-              disabled={sequence.length <= 1}
-              title="Remove item"
-            >
-              <X size={14} />
+            <button type="button" className="del" title="Remove"
+              disabled={items.length <= 2 || readOnly} onClick={() => removeItem(it.id)}>
+              <Icon name="trash" size={16} />
             </button>
           </div>
         ))}
       </div>
 
-      <button type="button" className={styles.addBtn} onClick={addItem}>
-        <Plus size={12} /> Add Item
-      </button>
+      {!readOnly && (
+        <div style={{ marginTop: 12 }}>
+          <button type="button" className="ce-addrow" onClick={addItem}>
+            <Icon name="plus" size={15} />Add item
+          </button>
+        </div>
+      )}
     </div>
   );
 }

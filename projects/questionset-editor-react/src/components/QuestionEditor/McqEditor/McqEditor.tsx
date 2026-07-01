@@ -1,129 +1,76 @@
-import React, { Suspense, useState } from 'react';
-import { Plus, X, Check, Lightbulb } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Icon } from '../../shared/Icon';
+import ContentEditable from '../../shared/ContentEditable';
 import { useQuestionStore } from '../../../store/question.store';
-import RichTextEditor from '../../RichTextEditor/RichTextEditor';
-import styles from './McqEditor.module.scss';
 
-const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
-const MAX_OPTIONS = 6;
+interface McqEditorProps { readOnly?: boolean; }
 
-export default function McqEditor() {
-  const { options, updateOption, addOption, removeOption } = useQuestionStore();
+export default function McqEditor({ readOnly = false }: McqEditorProps) {
+  const { options, setOptions } = useQuestionStore();
+  const [layout, setLayout] = useState<'vertical' | 'grid' | 'horizontal'>('vertical');
+  const nextId = useRef(Date.now());
 
-  // Track which option IDs have their hint textarea open
-  const [openHints, setOpenHints] = useState<Set<string>>(new Set());
+  const addOption = () =>
+    setOptions([...options, { id: `opt-${nextId.current++}`, body: '', isCorrect: false }]);
+  const removeOption = (id: string) =>
+    setOptions(options.filter(o => o.id !== id));
+  const markCorrect = (id: string) =>
+    setOptions(options.map(o => ({ ...o, isCorrect: o.id === id })));
+  const updateBody = (id: string, body: string) =>
+    setOptions(options.map(o => o.id === id ? { ...o, body } : o));
 
-  function handleSelectCorrect(id: string) {
-    // Deselect all then select the clicked one (single correct)
-    options.forEach((o) => {
-      updateOption(o.id, { isCorrect: o.id === id });
-    });
-  }
-
-  function toggleHint(id: string) {
-    setOpenHints((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }
+  const glyph = (k: string) =>
+    k === 'vertical'   ? <span className="g-v"><i /><i /></span> :
+    k === 'grid'       ? <span className="g-g"><i /><i /><i /><i /></span> :
+                         <span className="g-h"><i /><i /><i /><i /></span>;
 
   return (
-    <div className={styles.container}>
-      {options.map((option, idx) => (
-        <div
-          key={option.id}
-          className={[styles.optionRow, option.isCorrect ? styles.correct : '']
-            .filter(Boolean)
-            .join(' ')}
-        >
-          {/* Letter badge */}
-          <span className={styles.optionLetter}>{OPTION_LETTERS[idx] ?? idx + 1}</span>
+    <div className="ce-ed-sec">
+      <div className="ce-ed-lbl">
+        Options <span className="hint">Select the radio to mark the correct answer</span>
+      </div>
 
-          {/* Radio — selecting marks as the single correct answer */}
-          <div className={styles.radioWrapper}>
-            <input
-              type="radio"
-              className={styles.radio}
-              name="mcq-correct"
-              checked={!!option.isCorrect}
-              onChange={() => handleSelectCorrect(option.id)}
-              aria-label={`Mark option ${OPTION_LETTERS[idx] ?? idx + 1} as correct`}
-            />
-          </div>
-
-          {/* Option rich text + correct label + hint textarea */}
-          <div className={styles.optionBody}>
-            <Suspense fallback={<div className={styles.rteFallback} />}>
-              <RichTextEditor
-                compact
-                enableImages
-                maxLength={160}
-                value={option.body}
-                placeholder={`Option ${OPTION_LETTERS[idx] ?? idx + 1}…`}
-                onChange={(html) => updateOption(option.id, { body: html })}
-              />
-            </Suspense>
-            {option.isCorrect && (
-              <span className={styles.correctLabel}>
-                <Check size={12} /> Correct answer
-              </span>
-            )}
-            {openHints.has(option.id) && (
-              <textarea
-                className={styles.hintTextarea}
-                value={option.hint ?? ''}
-                placeholder="Enter a hint for this option…"
-                rows={2}
-                onChange={(e) => updateOption(option.id, { hint: e.target.value })}
-                aria-label={`Hint for option ${OPTION_LETTERS[idx] ?? idx + 1}`}
-              />
-            )}
-          </div>
-
-          {/* Hint toggle button */}
-          <button
-            type="button"
-            className={[styles.removeBtn, openHints.has(option.id) ? styles.hintBtnActive : '']
-              .filter(Boolean)
-              .join(' ')}
-            onClick={() => toggleHint(option.id)}
-            title={openHints.has(option.id) ? 'Hide hint' : 'Add hint'}
-            aria-pressed={openHints.has(option.id)}
-            style={{ marginTop: 6 }}
-          >
-            <Lightbulb size={14} />
-          </button>
-
-          {/* Remove button (keep at least 2 options) */}
-          <button
-            type="button"
-            className={styles.removeBtn}
-            onClick={() => removeOption(option.id)}
-            disabled={options.length <= 2}
-            title="Remove option"
-            style={{ marginTop: 6 }}
-          >
-            <X size={14} />
-          </button>
+      <div className="ce-layout">
+        <span className="lbl">Select layout <Icon name="info" size={14} /></span>
+        <div className="seg">
+          {(['vertical', 'grid', 'horizontal'] as const).map(k => (
+            <button key={k} type="button" className={layout === k ? 'on' : ''} onClick={() => setLayout(k)}>
+              {glyph(k)}{k.charAt(0).toUpperCase() + k.slice(1)}
+            </button>
+          ))}
         </div>
-      ))}
+      </div>
 
-      <button
-        type="button"
-        className={styles.addBtn}
-        onClick={addOption}
-        disabled={options.length >= MAX_OPTIONS}
-      >
-        <Plus size={12} /> Add Option
-      </button>
+      <div className={`ce-opts lay-${layout}`}>
+        {options.map(o => (
+          <div key={o.id} className={`ce-opt${o.isCorrect ? ' correct' : ''}`}>
+            <button type="button" className="pick" title="Mark correct" onClick={() => !readOnly && markCorrect(o.id)}>
+              <span className="ring">{o.isCorrect && <Icon name="check" size={12} />}</span>
+            </button>
+            <div className="re">
+              <ContentEditable
+                value={o.body}
+                onChange={html => updateBody(o.id, html)}
+                placeholder="Option text…"
+                inline
+                disabled={readOnly}
+                bodyClass="opt"
+              />
+            </div>
+            {o.isCorrect && <span className="badge-correct">Correct</span>}
+            <button type="button" className="del" title="Remove option"
+              disabled={options.length <= 2 || readOnly}
+              onClick={() => removeOption(o.id)}>
+              <Icon name="trash" size={16} />
+            </button>
+          </div>
+        ))}
+      </div>
 
-      {options.filter((o) => o.isCorrect).length === 0 && (
-        <p className={styles.hint}>Select a radio button to mark the correct answer.</p>
+      {!readOnly && (
+        <button type="button" className="ce-addrow" onClick={addOption}>
+          <Icon name="plus" size={15} />Add option
+        </button>
       )}
     </div>
   );

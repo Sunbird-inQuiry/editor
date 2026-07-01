@@ -1,94 +1,35 @@
-import React, { useState, useMemo } from 'react';
-import { useQuestionStore } from '../../../store/question.store';
-import styles from './FtbEditor.module.scss';
+import React from 'react';
+import { Icon } from '../../shared/Icon';
 
-const BLANK_PATTERN = /\{\{blank\}\}/g;
+interface FtbEditorProps {
+  stemText: string;  // plain text of the stem — blanks detected from [[text]]
+  readOnly?: boolean;
+}
 
-export default function FtbEditor() {
-  const { questionBody } = useQuestionStore();
-
-  // Count blanks from the question body
-  const blankCount = useMemo(() => {
-    const matches = questionBody.match(BLANK_PATTERN);
-    return matches ? matches.length : 0;
-  }, [questionBody]);
-
-  // Answers keyed by blank index
-  const [answers, setAnswers] = useState<Record<number, string>>({});
-  const [caseSensitive, setCaseSensitive] = useState(false);
-  const [isPartialScore, setIsPartialScore] = useState(false);
-  const [evalUnordered, setEvalUnordered] = useState(false);
-
-  function setAnswer(idx: number, value: string) {
-    setAnswers((prev) => ({ ...prev, [idx]: value }));
-  }
+export default function FtbEditor({ stemText, readOnly = false }: FtbEditorProps) {
+  // Extract blanks from [[text]] markers in the stem's plain text
+  const blanks = [...(stemText ?? '').matchAll(/\[\[(.+?)\]\]/g)].map(m => m[1].trim());
 
   return (
-    <div className={styles.container}>
-      <div className={styles.instructionBanner}>
-        Use <code>{'{{blank}}'}</code> in the question body above to mark blank positions.
-        Each <code>{'{{blank}}'}</code> will appear as a text field for the learner to fill in.
+    <div className="ce-ed-sec">
+      <div className="ce-ed-lbl">
+        Detected blanks <span className="hint">Parsed from the [[ ]] markers in your question</span>
       </div>
 
-      {blankCount === 0 ? (
-        <p className={styles.noBlankMsg}>
-          No blanks detected yet. Add <code>{'{{blank}}'}</code> to the question body.
-        </p>
+      {blanks.length === 0 ? (
+        <div className="ce-ftb-none">
+          <Icon name="info" size={16} />
+          No blanks yet — wrap an answer in <code>[[ ]]</code> in the question above.
+        </div>
       ) : (
-        <>
-          <p className={styles.blankCount}>
-            {blankCount} blank{blankCount > 1 ? 's' : ''} detected
-          </p>
-
-          <div className={styles.blanksList}>
-            {Array.from({ length: blankCount }, (_, i) => (
-              <div key={i} className={styles.blankRow}>
-                <span className={styles.blankIndex}>{i + 1}</span>
-                <span className={styles.blankLabel}>Blank {i + 1}:</span>
-                <input
-                  type="text"
-                  className={styles.blankInput}
-                  value={answers[i] ?? ''}
-                  onChange={(e) => setAnswer(i, e.target.value)}
-                  placeholder={`Expected answer for blank ${i + 1}…`}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className={styles.caseSensitiveRow}>
-            <input
-              id="ftb-case-sensitive"
-              type="checkbox"
-              className={styles.checkbox}
-              checked={caseSensitive}
-              onChange={(e) => setCaseSensitive(e.target.checked)}
-            />
-            <label htmlFor="ftb-case-sensitive">Case sensitive matching</label>
-          </div>
-
-          <div className={styles.caseSensitiveRow}>
-            <input
-              id="ftb-partial-score"
-              type="checkbox"
-              className={styles.checkbox}
-              checked={isPartialScore}
-              onChange={(e) => setIsPartialScore(e.target.checked)}
-            />
-            <label htmlFor="ftb-partial-score">Partial Scoring</label>
-          </div>
-
-          <div className={styles.caseSensitiveRow}>
-            <input
-              id="ftb-eval-unordered"
-              type="checkbox"
-              className={styles.checkbox}
-              checked={evalUnordered}
-              onChange={(e) => setEvalUnordered(e.target.checked)}
-            />
-            <label htmlFor="ftb-eval-unordered">Order doesn&apos;t matter (evalUnordered)</label>
-          </div>
-        </>
+        <div className="ce-ftb-blanks">
+          {blanks.map((b, i) => (
+            <div key={i} className="ce-ftb-blank">
+              <span className="n">Blank {i + 1}</span>
+              <span className="v">{b}</span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

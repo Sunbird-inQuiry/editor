@@ -1,5 +1,6 @@
 import 'katex/dist/katex.min.css';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -10,6 +11,10 @@ import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import Link from '@tiptap/extension-link';
 import Mathematics from '@tiptap/extension-mathematics';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 import {
   Bold,
   Italic,
@@ -27,7 +32,140 @@ import {
   Undo,
   Redo,
   Sigma,
+  Grid2x2,
 } from 'lucide-react';
+
+// ---------------------------------------------------------------------------
+// Special characters
+// ---------------------------------------------------------------------------
+
+const SPECIAL_CHARS = '× ÷ ± ≤ ≥ ≠ ≈ → ← ↔ ∞ π α β γ θ λ μ Ω Δ √ ∫ ° ½ ¼ ¾ ² ³ ₂ • —'.split(' ');
+
+// ---------------------------------------------------------------------------
+// SpecialCharsPopup
+// ---------------------------------------------------------------------------
+
+interface SpecialCharsPopupProps {
+  anchor: DOMRect;
+  onInsert: (ch: string) => void;
+  onClose: () => void;
+}
+
+function SpecialCharsPopup({ anchor, onInsert, onClose }: SpecialCharsPopupProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
+
+  // Estimated popup height — flip above if it would go off-screen
+  const estimatedH = 220;
+  const spaceBelow = window.innerHeight - anchor.bottom - 6;
+  const top = spaceBelow >= estimatedH
+    ? anchor.bottom + 6
+    : anchor.top - estimatedH - 6;
+
+  const popup = (
+    <div ref={ref} style={{
+      position: 'fixed',
+      top,
+      left: anchor.left + anchor.width / 2,
+      transform: 'translateX(-50%)',
+      zIndex: 9999, background: '#fff', border: '1px solid var(--sb-border)',
+      borderRadius: 14, boxShadow: 'var(--sb-shadow-deep)', padding: 12,
+      display: 'grid', gridTemplateColumns: 'repeat(7, 36px)', gap: 4, minWidth: 280,
+    }}>
+      {SPECIAL_CHARS.map((ch, i) => (
+        <button
+          key={i}
+          type="button"
+          title={ch}
+          onMouseDown={e => { e.preventDefault(); onInsert(ch); onClose(); }}
+          style={{
+            width: 36, height: 36, border: '1px solid transparent', borderRadius: 8,
+            background: 'transparent', cursor: 'pointer', fontSize: 16,
+            display: 'grid', placeItems: 'center', fontFamily: 'inherit',
+            color: 'var(--sb-text)',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent-soft)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--accent)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'transparent'; }}
+        >
+          {ch}
+        </button>
+      ))}
+    </div>
+  );
+  return createPortal(popup, document.body);
+}
+
+// ---------------------------------------------------------------------------
+// TablePickerPopup
+// ---------------------------------------------------------------------------
+
+interface TablePickerPopupProps {
+  anchor: DOMRect;
+  onInsert: (rows: number, cols: number) => void;
+  onClose: () => void;
+}
+
+function TablePickerPopup({ anchor, onInsert, onClose }: TablePickerPopupProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [hover, setHover] = useState<{ r: number; c: number } | null>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
+
+  const MAX = 10;
+  const hr = hover?.r ?? 0;
+  const hc = hover?.c ?? 0;
+
+  // Estimated popup height — flip above if it would go off-screen
+  const estH2 = 260;
+  const below2 = window.innerHeight - anchor.bottom - 6;
+  const top2 = below2 >= estH2 ? anchor.bottom + 6 : anchor.top - estH2 - 6;
+
+  const popup = (
+    <div ref={ref} style={{
+      position: 'fixed',
+      top: top2,
+      right: Math.max(8, window.innerWidth - anchor.right),
+      zIndex: 9999, background: '#fff', border: '1px solid var(--sb-border)',
+      borderRadius: 14, boxShadow: 'var(--sb-shadow-deep)', padding: 12,
+    }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${MAX}, 22px)`, gap: 2, marginBottom: 8 }}>
+        {Array.from({ length: MAX }, (_, r) =>
+          Array.from({ length: MAX }, (_, c) => {
+            const active = r < hr && c < hc;
+            return (
+              <div
+                key={`${r}-${c}`}
+                onMouseEnter={() => setHover({ r: r + 1, c: c + 1 })}
+                onMouseDown={e => { e.preventDefault(); onInsert(r + 1, c + 1); onClose(); }}
+                style={{
+                  width: 22, height: 22, border: `1.5px solid ${active ? 'var(--accent)' : 'var(--sb-border)'}`,
+                  borderRadius: 3, background: active ? 'var(--accent-soft)' : '#fff', cursor: 'pointer',
+                }}
+              />
+            );
+          })
+        )}
+      </div>
+      <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--sb-text-muted)' }}>
+        {hr > 0 ? `${hr} × ${hc}` : '0 × 0'}
+      </div>
+    </div>
+  );
+  return createPortal(popup, document.body);
+}
 import AssetBrowser from '../AssetBrowser/AssetBrowser';
 import { useEditorStore } from '../../store/editor.store';
 import styles from './RichTextEditor.module.scss';
@@ -48,6 +186,10 @@ export interface RichTextEditorProps {
   compact?: boolean;
   /** No outer border — use when parent container already provides a border */
   borderless?: boolean;
+  /** Hide the built-in toolbar (use when rendering the toolbar externally) */
+  hideToolbar?: boolean;
+  /** Called once the editor instance is ready — use to render an external toolbar */
+  onEditorReady?: (editor: Editor) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -85,18 +227,30 @@ function ToolbarDivider() {
 }
 
 // ---------------------------------------------------------------------------
-// Full toolbar
+// Full toolbar (exported so QuestionEditor can render it externally)
 // ---------------------------------------------------------------------------
 
-interface ToolbarProps {
+export interface ToolbarProps {
   editor: Editor | null;
   disabled?: boolean;
   enableImages?: boolean;
   onImageClick?: () => void;
 }
 
-function Toolbar({ editor, disabled, enableImages, onImageClick }: ToolbarProps) {
+export function Toolbar({ editor, disabled, enableImages, onImageClick }: ToolbarProps) {
+  const [popup, setPopup] = useState<'chars' | 'table' | null>(null);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  const charsRef = useRef<HTMLButtonElement>(null);
+  const tableRef = useRef<HTMLButtonElement>(null);
   if (!editor) return null;
+
+  const openPopup = (name: 'chars' | 'table') => {
+    const el = name === 'chars' ? charsRef.current : tableRef.current;
+    if (!el) return;
+    if (popup === name) { setPopup(null); setAnchorRect(null); return; }
+    setAnchorRect(el.getBoundingClientRect());
+    setPopup(name);
+  };
 
   const addLink = () => {
     const url = window.prompt('Enter URL');
@@ -114,8 +268,16 @@ function Toolbar({ editor, disabled, enableImages, onImageClick }: ToolbarProps)
     editor.chain().focus().insertContent(`<span data-type="inlineMath" data-latex="${latex}"></span>`).run();
   };
 
+  const insertChar = (ch: string) => {
+    editor.chain().focus().insertContent(ch).run();
+  };
+
+  const insertTable = (rows: number, cols: number) => {
+    editor.chain().focus().insertTable({ rows, cols, withHeaderRow: false }).run();
+  };
+
   return (
-    <div className={styles.toolbar} role="toolbar" aria-label="Text formatting">
+    <div className={styles.toolbar} role="toolbar" aria-label="Text formatting" style={{ position: 'relative' }}>
       <ToolbarBtn onClick={() => editor.chain().focus().undo().run()} title="Undo" disabled={disabled || !editor.can().undo()}>
         <Undo size={13} />
       </ToolbarBtn>
@@ -164,24 +326,53 @@ function Toolbar({ editor, disabled, enableImages, onImageClick }: ToolbarProps)
 
       <ToolbarDivider />
 
-      <ToolbarBtn onClick={addLink} active={editor.isActive('link')} title="Insert link" disabled={disabled}>
-        <LinkIcon size={13} />
+      {/* Special characters */}
+      <button
+        ref={charsRef}
+        type="button"
+        className={[styles.toolbarBtn, popup === 'chars' ? styles.toolbarBtnActive : ''].filter(Boolean).join(' ')}
+        onMouseDown={e => e.preventDefault()}
+        onClick={() => !disabled && openPopup('chars')}
+        title="Special characters"
+        disabled={disabled}
+        aria-pressed={popup === 'chars'}
+      >
+        <span style={{ fontSize: 14, fontWeight: 600 }}>Ω</span>
+      </button>
+      {popup === 'chars' && anchorRect && (
+        <SpecialCharsPopup anchor={anchorRect} onInsert={insertChar} onClose={() => { setPopup(null); setAnchorRect(null); }} />
+      )}
+
+      {/* KaTeX math equations */}
+      <ToolbarBtn onClick={insertMath} title="Add Equations" disabled={disabled}>
+        <Sigma size={13} />
       </ToolbarBtn>
+
+      <ToolbarDivider />
+
+      {/* Image */}
       {enableImages && (
         <ToolbarBtn onClick={() => onImageClick?.()} title="Insert image" disabled={disabled}>
           <ImageIcon size={13} />
         </ToolbarBtn>
       )}
-      <ToolbarBtn onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Horizontal rule" disabled={disabled}>
-        <Minus size={13} />
-      </ToolbarBtn>
 
-      <ToolbarDivider />
-
-      {/* KaTeX math */}
-      <ToolbarBtn onClick={insertMath} title="Insert math (KaTeX)" disabled={disabled}>
-        <Sigma size={13} />
-      </ToolbarBtn>
+      {/* Table */}
+      <button
+        ref={tableRef}
+        type="button"
+        className={[styles.toolbarBtn, popup === 'table' ? styles.toolbarBtnActive : ''].filter(Boolean).join(' ')}
+        onMouseDown={e => e.preventDefault()}
+        onClick={() => !disabled && openPopup('table')}
+        title="Insert table"
+        disabled={disabled}
+        aria-pressed={popup === 'table'}
+      >
+        <Grid2x2 size={13} />
+      </button>
+      {popup === 'table' && anchorRect && (
+        <TablePickerPopup anchor={anchorRect} onInsert={insertTable} onClose={() => { setPopup(null); setAnchorRect(null); }} />
+      )}
     </div>
   );
 }
@@ -264,6 +455,8 @@ export default function RichTextEditor({
   maxLength,
   compact = false,
   borderless = false,
+  hideToolbar = false,
+  onEditorReady,
 }: RichTextEditorProps) {
   const editorConfig = useEditorStore((s) => s.editorConfig);
   const [showAssetBrowser, setShowAssetBrowser] = useState(false);
@@ -285,6 +478,10 @@ export default function RichTextEditor({
       Superscript,
       Link.configure({ openOnClick: false }),
       Mathematics,
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content: value || '',
     editable: !disabled,
@@ -295,6 +492,7 @@ export default function RichTextEditor({
     },
     onCreate: ({ editor: ed }) => {
       setCharCount(getCharCount(ed));
+      onEditorReady?.(ed);
     },
   });
 
@@ -336,7 +534,7 @@ export default function RichTextEditor({
 
   return (
     <div className={wrapperClass}>
-      {compact ? (
+      {!hideToolbar && (compact ? (
         <CompactToolbar
           editor={editor}
           disabled={disabled}
@@ -350,7 +548,7 @@ export default function RichTextEditor({
           enableImages={enableImages}
           onImageClick={() => setShowAssetBrowser(true)}
         />
-      )}
+      ))}
 
       <div
         className={editorAreaClass}

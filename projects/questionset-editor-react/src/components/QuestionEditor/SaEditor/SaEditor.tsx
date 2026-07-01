@@ -1,63 +1,24 @@
 import React, { useState } from 'react';
-import { useQuestionStore } from '../../../store/question.store';
-import styles from './SaEditor.module.scss';
+import ContentEditable from '../../shared/ContentEditable';
 
-export default function SaEditor() {
-  const { solutionText, setSolutionText } = useQuestionStore();
-  const [wordLimit, setWordLimit] = useState<number>(200);
-  const [evaluatorNotes, setEvaluatorNotes] = useState<string>('');
+interface SaEditorProps { readOnly?: boolean; }
+
+export default function SaEditor({ readOnly = false }: SaEditorProps) {
+  const [answer, setAnswer] = useState('');
 
   return (
-    <div className={styles.container}>
-      <p className={styles.infoNote}>
-        Subjective questions are evaluated manually or via an AI evaluator. Provide a model
-        answer and notes to guide evaluation.
-      </p>
-
-      {/* Expected answer — stored in solutionText */}
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="sa-expected-answer">
-          Expected Answer
-        </label>
-        <textarea
-          id="sa-expected-answer"
-          className={styles.textarea}
-          value={solutionText}
-          onChange={(e) => setSolutionText(e.target.value)}
-          placeholder="Enter the model / expected answer here…"
-          rows={5}
-        />
+    <div className="ce-ed-sec ce-ed-stem">
+      <div className="ce-ed-lbl">
+        Model answer <span className="hint">Shown to learners after submission</span>
       </div>
-
-      {/* Word limit */}
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="sa-word-limit">
-          Word Limit
-        </label>
-        <input
-          id="sa-word-limit"
-          type="number"
-          className={styles.numberInput}
-          min={0}
-          step={10}
-          value={wordLimit}
-          onChange={(e) => setWordLimit(Math.max(0, Number(e.target.value)))}
-          placeholder="e.g. 200"
-        />
-      </div>
-
-      {/* Evaluator notes */}
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="sa-evaluator-notes">
-          Evaluator Notes
-        </label>
-        <textarea
-          id="sa-evaluator-notes"
-          className={styles.textarea}
-          value={evaluatorNotes}
-          onChange={(e) => setEvaluatorNotes(e.target.value)}
-          placeholder="Notes for the evaluator — key concepts to look for, scoring criteria…"
-          rows={3}
+      <div style={{ border: '1px solid var(--sb-border)', borderRadius: 12, padding: '12px 15px', background: '#fff', minHeight: 110 }}>
+        <ContentEditable
+          value={answer}
+          onChange={setAnswer}
+          placeholder="Write the model answer / marking guidance…"
+          minHeight={110}
+          disabled={readOnly}
+          bodyClass="write"
         />
       </div>
     </div>
