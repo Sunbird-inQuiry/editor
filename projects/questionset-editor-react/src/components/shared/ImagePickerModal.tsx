@@ -266,12 +266,15 @@ function UploadTab({ onUploaded, triggerRef }: UploadTabProps) {
       </div>
 
       {/* Copyright & License — informational only */}
-      <div style={{ borderTop: '1px solid var(--sb-border)', paddingTop: 14 }}>
-        <p style={{ fontWeight: 700, fontSize: 12, color: 'var(--sb-text)', margin: '0 0 4px' }}>
+      <div style={{
+        borderTop: '1px solid var(--sb-border)', paddingTop: 12,
+        fontFamily: 'var(--sb-font, "Plus Jakarta Sans", system-ui, sans-serif)',
+      }}>
+        <p style={{ fontWeight: 700, fontSize: '12px', color: '#1a1a1a', margin: '0 0 5px', lineHeight: 1.4 }}>
           Copyright &amp; License
-          <span style={{ color: 'var(--sb-red)', marginLeft: 2 }}>*</span>
+          <span style={{ color: '#d22e2e', marginLeft: 2 }}>*</span>
         </p>
-        <p style={{ fontSize: 11, color: 'var(--sb-text-muted)', lineHeight: 1.6, margin: 0 }}>
+        <p style={{ fontSize: '11.5px', color: '#6b6b6b', lineHeight: 1.65, margin: 0 }}>
           {COPYRIGHT_TEXT}
         </p>
       </div>
