@@ -1,13 +1,11 @@
 import React from 'react';
 import {
   CircleDot,
-  CheckSquare,
   AlignLeft,
   Underline,
   Shuffle,
   List,
   ArrowUpDown,
-  SlidersHorizontal,
   type LucideIcon,
 } from 'lucide-react';
 import type { QuestionType } from '../../types/question';
@@ -20,13 +18,11 @@ import styles from './Badge.module.scss';
 
 const ICON_MAP: Record<QuestionType, LucideIcon> = {
   mcq: CircleDot,
-  msq: CheckSquare,
   sa:  AlignLeft,
   ftb: Underline,
   mtf: Shuffle,
   seq: List,
   reo: ArrowUpDown,
-  slider: SlidersHorizontal,
 };
 
 // -----------------------------------------------------------------------------
