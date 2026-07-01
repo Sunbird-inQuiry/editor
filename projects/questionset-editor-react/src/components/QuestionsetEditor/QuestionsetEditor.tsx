@@ -115,8 +115,26 @@ function InnerEditor({ config, events }: InnerEditorProps) {
 // Public component
 // ---------------------------------------------------------------------------
 
+// When the component is used as a web component, HTML attributes arrive as
+// JSON strings. This helper parses them back to objects so the rest of the
+// component can treat all inputs uniformly.
+function parseJsonProp<T>(val: T | string | undefined): T | undefined {
+  if (typeof val === 'string') {
+    try { return JSON.parse(val) as T; } catch { return undefined; }
+  }
+  return val as T | undefined;
+}
+
 export function QuestionsetEditor(props: QuestionsetEditorProps) {
-  const { onToolbarEvent, onQuestionSaved, onHierarchySaved, onError, ...editorConfig } = props;
+  const { onToolbarEvent, onQuestionSaved, onHierarchySaved, onError, ...rest } = props;
+
+  // Normalize: attributes from the WC arrive as JSON strings; React usage passes objects.
+  const editorConfig = {
+    ...rest,
+    context:  parseJsonProp(rest.context)  ?? rest.context,
+    config:   parseJsonProp(rest.config)   ?? rest.config,
+    metadata: parseJsonProp(rest.metadata) ?? rest.metadata,
+  };
 
   const config: IEditorConfig = editorConfig as IEditorConfig;
   const events: IEditorEvents = { onToolbarEvent, onQuestionSaved, onHierarchySaved, onError };
