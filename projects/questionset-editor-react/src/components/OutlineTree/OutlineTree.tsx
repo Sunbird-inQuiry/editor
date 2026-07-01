@@ -188,10 +188,6 @@ const TreeNode: React.FC<NodeProps> = ({
           <span className="qbadge">{node.children?.length ?? 0}</span>
         )}
 
-        {/* Status dot (questions only) */}
-        {isQuestion && (
-          <span className={`stat ${getStatusClass(node.status ?? (node.metadata?.status as string))}`} />
-        )}
 
         {/* Context menu */}
         {isEditMode && (

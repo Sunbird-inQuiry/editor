@@ -214,12 +214,15 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
   const [tableRect, setTableRect] = useState<DOMRect | null>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
 
-  // Track whether a contenteditable is focused — disable toolbar when none is
+  // Track whether a contenteditable is focused — disable toolbar when none is.
+  // Also stays enabled when focus is within the toolbar itself (e.g. language select).
   const [editorFocused, setEditorFocused] = useState(false);
   useEffect(() => {
     const check = () => {
       const el = document.activeElement as HTMLElement | null;
-      setEditorFocused(!!el?.closest('[contenteditable]'));
+      const inEditor  = !!el?.closest('[contenteditable]');
+      const inToolbar = !!toolbarRef.current?.contains(el);
+      setEditorFocused(inEditor || inToolbar);
     };
     document.addEventListener('focusin', check);
     document.addEventListener('focusout', () => setTimeout(check, 0));
@@ -310,17 +313,25 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
       {/* Language */}
       <label className="re-lang" onMouseDown={keep}>
         <span>Language</span>
-        <select value={lang} onChange={e => {
-          const selected = e.target.value as typeof lang;
-          setLang(selected);
-          const dir = LANGUAGES.find(l => l.code === selected)?.dir ?? 'ltr';
-          // Notify ContentEditable fields to update text direction
-          document.dispatchEvent(new CustomEvent('ce-lang-changed', { detail: { lang: selected, dir } }));
-          // Apply direction to currently focused contenteditable
-          const active = document.activeElement as HTMLElement | null;
-          const ce = active?.closest('[contenteditable]') as HTMLElement | null;
-          if (ce) { ce.setAttribute('dir', dir); document.execCommand('styleWithCSS', false, 'true'); }
-        }}>
+        <select value={lang}
+          onMouseDown={e => { e.stopPropagation(); saveRange(); }}
+          onChange={e => {
+            const selected = e.target.value as typeof lang;
+            setLang(selected);
+            const dir = LANGUAGES.find(l => l.code === selected)?.dir ?? 'ltr';
+            document.dispatchEvent(new CustomEvent('ce-lang-changed', { detail: { lang: selected, dir } }));
+            // Restore focus + selection to the editor after select closes
+            const range = savedRange.current;
+            if (range) {
+              const sel = window.getSelection();
+              const host = (range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+                ? range.commonAncestorContainer as HTMLElement
+                : (range.commonAncestorContainer as ChildNode).parentElement
+              )?.closest('[contenteditable]') as HTMLElement | null;
+              if (host) { host.focus(); host.setAttribute('dir', dir); }
+              if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+            }
+          }}>
           {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
         </select>
       </label>
