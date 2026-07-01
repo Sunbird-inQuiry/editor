@@ -29,28 +29,17 @@ function injectGoogleFonts(root: ShadowRoot): void {
   onError:          null,
 };
 
-const BaseWebComponent = reactToWebComponent(QuestionsetEditor, React, ReactDOM as unknown as typeof import('react-dom'), {
-  shadow: 'open',
-});
+// No shadow DOM — styles from dist/style.css (loaded by the host page) apply
+// directly to the component. Shadow DOM would isolate the component from those
+// styles, breaking the Sunbird design system.
+const BaseWebComponent = reactToWebComponent(QuestionsetEditor, React, ReactDOM as unknown as typeof import('react-dom'), {});
 
-// Extend as a plain function to avoid TypeScript's strict `super` rules
-// around extending non-class constructor values from react-to-webcomponent.
 function SbQuestionsetEditor(this: HTMLElement) {
   const inst = Reflect.construct(BaseWebComponent, [], SbQuestionsetEditor);
   return inst;
 }
 SbQuestionsetEditor.prototype = Object.create((BaseWebComponent as unknown as { prototype: object }).prototype, {
   constructor: { value: SbQuestionsetEditor },
-  connectedCallback: {
-    value(this: HTMLElement) {
-      const base = BaseWebComponent as unknown as { prototype: { connectedCallback?: () => void } };
-      base.prototype.connectedCallback?.call(this);
-      const shadow = (this as unknown as { shadowRoot: ShadowRoot | null }).shadowRoot;
-      if (shadow) injectGoogleFonts(shadow);
-    },
-    writable: true,
-    configurable: true,
-  },
 });
 
 export function registerQuestionsetEditor(): void {
