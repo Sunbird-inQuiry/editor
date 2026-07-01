@@ -41,6 +41,7 @@ export interface IContext {
     provider?: string;
     presigned_headers?: Record<string, string>;
   };
+  cloudStorageUrls?: string[];
 }
 
 export interface IConfig {

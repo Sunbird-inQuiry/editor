@@ -49,7 +49,7 @@ export function mockApiPlugin(): Plugin {
           return json({ responseCode: 'OK', result: { preSignedUrl: 'https://mock-storage.example.com/upload', url: 'https://mock-storage.example.com/asset' } });
 
         if (url.includes('/action/composite/v3/search') && method === 'POST')
-          return json({ responseCode: 'OK', result: { count: 0, content: [] } });
+          return json({ responseCode: 'OK', result: { count: 0, content: [], Question: [] } });
 
         if (url.includes('/action/question/v2/list'))
           return json(MOCK_QUESTION_LIST);

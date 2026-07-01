@@ -1,10 +1,70 @@
 import { apiClient } from './client';
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
 export interface IAssetCreateResult {
   identifier: string;
   versionKey: string;
 }
 
+export interface IAssetItem {
+  identifier: string;
+  name: string;
+  downloadUrl?: string;
+  appIcon?: string;
+  thumbnail?: string;
+  mimeType?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Asset search (image/video/audio assets — NOT questions)
+// ---------------------------------------------------------------------------
+
+export async function searchAssets(params: {
+  mediaType: 'image' | 'video' | 'audio';
+  query?: string;
+  limit?: number;
+  offset?: number;
+  createdBy?: string;
+}): Promise<{ items: IAssetItem[]; count: number }> {
+  const filters: Record<string, unknown> = {
+    contentType: ['Asset'],
+    mediaType: [params.mediaType],
+    status: ['Live'],
+  };
+  if (params.query)     filters['name']      = params.query;
+  if (params.createdBy) filters['createdBy'] = params.createdBy;
+
+  const response = await apiClient.post('/action/composite/v3/search', {
+    request: {
+      filters,
+      limit:   params.limit  ?? 24,
+      offset:  params.offset ?? 0,
+      sort_by: { lastUpdatedOn: 'desc' },
+      fields: ['identifier', 'name', 'downloadUrl', 'appIcon', 'thumbnail', 'mimeType'],
+    },
+  });
+
+  const result = response.data?.result ?? {};
+  return {
+    items: (result.content ?? []) as IAssetItem[],
+    count: (result.count  ?? 0)  as number,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 5-step asset upload pipeline
+//
+// Step 1  POST  asset/v1/create              → get assetId
+// Step 2  POST  content/v3/upload/url/{id}   → get pre-signed blob URL
+// Step 3  PUT   {preSignedUrl}               → upload binary to blob storage
+// Step 4  POST  asset/v1/upload/{id}         → register finalised URL with Sunbird
+// Step 5  GET   asset/v1/read/{id}           → fetch downloadUrl for insertion
+// ---------------------------------------------------------------------------
+
+// Step 1
 export async function createMediaAsset(
   file: File,
   channel: string,
@@ -16,7 +76,9 @@ export async function createMediaAsset(
         name: file.name,
         mimeType: file.type,
         primaryCategory: 'asset',
-        mediaType: file.type.startsWith('image/') ? 'image' : 'video',
+        mediaType: file.type.startsWith('image/') ? 'image'
+                 : file.type.startsWith('video/') ? 'video'
+                 : 'audio',
         channel,
         createdBy,
         contentType: 'Asset',
@@ -26,47 +88,69 @@ export async function createMediaAsset(
   return response.data?.result as IAssetCreateResult;
 }
 
+// Step 2
 export async function getPreSignedUrl(
   assetId: string,
   fileName: string,
-  mimeType: string,
-): Promise<{ preSignedUrl: string; url: string; fields?: Record<string, string> }> {
+): Promise<{ preSignedUrl: string; url: string }> {
   const response = await apiClient.post(
     `/action/content/v3/upload/url/${assetId}`,
     { request: { content: { fileName } } },
-    { headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'Content-Type-Original': mimeType } },
   );
-  return response.data?.result as { preSignedUrl: string; url: string; fields?: Record<string, string> };
+  return response.data?.result as { preSignedUrl: string; url: string };
 }
 
+// Step 3 — direct PUT to blob storage (external URL, not through apiClient)
 export async function uploadToBlob(
   preSignedUrl: string,
   file: File,
-  fields?: Record<string, string>,
+  presignedHeaders: Record<string, string> = {},
 ): Promise<void> {
-  if (fields) {
-    const formData = new FormData();
-    Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
-    formData.append('file', file);
-    await fetch(preSignedUrl, { method: 'POST', body: formData });
-  } else {
-    await fetch(preSignedUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
-  }
+  await fetch(preSignedUrl, {
+    method: 'PUT',
+    body: file,
+    headers: {
+      'Content-Type': file.type,
+      'x-ms-blob-type': 'BlockBlob',
+      ...presignedHeaders,
+    },
+  });
 }
 
-export async function finalizeAssetUpload(assetId: string): Promise<string> {
-  const response = await apiClient.post(`/action/asset/v1/upload/${assetId}`, {});
-  return response.data?.result?.content_url as string;
+// Step 4 — register the blob URL with Sunbird via FormData
+export async function finalizeAssetUpload(
+  assetId: string,
+  blobUrl: string,
+  mimeType: string,
+): Promise<void> {
+  const fd = new FormData();
+  fd.append('fileUrl', blobUrl);
+  fd.append('mimeType', mimeType);
+  await apiClient.post(`/action/asset/v1/upload/${assetId}`, fd, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 }
+
+// Step 5
+export async function readAsset(assetId: string): Promise<IAssetItem> {
+  const response = await apiClient.get(`/action/asset/v1/read/${assetId}`);
+  return response.data?.result?.content as IAssetItem;
+}
+
+// ---------------------------------------------------------------------------
+// Orchestrator — runs all 5 steps, returns the final downloadUrl
+// ---------------------------------------------------------------------------
 
 export async function uploadAsset(
   file: File,
   channel: string,
   createdBy: string,
+  presignedHeaders: Record<string, string> = {},
 ): Promise<string> {
-  const { identifier } = await createMediaAsset(file, channel, createdBy);
-  const { preSignedUrl, fields } = await getPreSignedUrl(identifier, file.name, file.type);
-  await uploadToBlob(preSignedUrl, file, fields);
-  const url = await finalizeAssetUpload(identifier);
-  return url;
+  const { identifier }        = await createMediaAsset(file, channel, createdBy);
+  const { preSignedUrl, url } = await getPreSignedUrl(identifier, file.name);
+  await uploadToBlob(preSignedUrl, file, presignedHeaders);
+  await finalizeAssetUpload(identifier, url, file.type);
+  const asset = await readAsset(identifier);
+  return asset.downloadUrl ?? url;
 }

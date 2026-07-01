@@ -10,20 +10,15 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from './Icon';
+import { searchAssets, uploadAsset, type IAssetItem } from '../../api/asset';
+import { useEditorStore } from '../../store/editor.store';
+import { rewriteAssetUrl } from '../../utils/assetUrl';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 type Tab = 'my' | 'all' | 'upload';
-
-interface ImageItem {
-  identifier: string;
-  name: string;
-  downloadUrl?: string;
-  appIcon?: string;
-  thumbnail?: string;
-}
 
 export interface ImagePickerModalProps {
   onSelect: (url: string) => void;
@@ -36,50 +31,8 @@ export interface ImagePickerModalProps {
 
 const LIMIT = 24;
 
-function resolveUrl(img: ImageItem): string {
+function resolveUrl(img: IAssetItem): string {
   return img.downloadUrl ?? img.appIcon ?? img.thumbnail ?? '';
-}
-
-async function searchImages(
-  offset: number,
-  query: string,
-): Promise<{ items: ImageItem[]; count: number }> {
-  const filters: Record<string, unknown> = { contentType: ['Asset'], mediaType: ['image'] };
-  if (query) filters['name'] = query;
-  try {
-    const res = await fetch('/action/composite/v3/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ request: { filters, limit: LIMIT, offset } }),
-    });
-    const data = (await res.json()) as { result?: { content?: ImageItem[]; count?: number } };
-    return { items: data.result?.content ?? [], count: data.result?.count ?? 0 };
-  } catch {
-    return { items: [], count: 0 };
-  }
-}
-
-async function uploadImage(file: File): Promise<string> {
-  const createRes = await fetch('/action/asset/v1/create', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      request: {
-        asset: { name: file.name, mimeType: file.type, mediaType: 'image', contentType: 'Asset' },
-      },
-    }),
-  });
-  const createData = (await createRes.json()) as { result?: { identifier?: string } };
-  const identifier = createData.result?.identifier;
-  if (!identifier) throw new Error('Asset creation failed');
-
-  const fd = new FormData();
-  fd.append('file', file);
-  const uploadRes = await fetch(`/action/asset/v1/upload/${identifier}`, { method: 'POST', body: fd });
-  const uploadData = (await uploadRes.json()) as { result?: { content_url?: string } };
-  const url = uploadData.result?.content_url;
-  if (!url) throw new Error('No content_url returned');
-  return url;
 }
 
 // ---------------------------------------------------------------------------
@@ -87,12 +40,15 @@ async function uploadImage(file: File): Promise<string> {
 // ---------------------------------------------------------------------------
 
 interface ImageGridProps {
+  tab: 'my' | 'all';
+  createdBy: string;
+  cloudStorageUrls: string[];
   selectedUrl: string | null;
   onSelectedChange: (url: string | null) => void;
 }
 
-function ImageGrid({ selectedUrl, onSelectedChange }: ImageGridProps) {
-  const [images, setImages]   = useState<ImageItem[]>([]);
+function ImageGrid({ tab, createdBy, cloudStorageUrls, selectedUrl, onSelectedChange }: ImageGridProps) {
+  const [images, setImages]   = useState<IAssetItem[]>([]);
   const [count, setCount]     = useState(0);
   const [offset, setOffset]   = useState(0);
   const [query, setQuery]     = useState('');
@@ -100,18 +56,27 @@ function ImageGrid({ selectedUrl, onSelectedChange }: ImageGridProps) {
 
   const load = useCallback(async (nextOffset: number, nextQuery: string, replace: boolean) => {
     setLoading(true);
-    const { items, count: total } = await searchImages(nextOffset, nextQuery);
-    setImages(prev => replace ? items : [...prev, ...items]);
-    setCount(total);
-    setOffset(nextOffset);
-    setLoading(false);
-  }, []);
+    try {
+      const { items, count: total } = await searchAssets({
+        mediaType: 'image',
+        query:     nextQuery || undefined,
+        limit:     LIMIT,
+        offset:    nextOffset,
+        createdBy: tab === 'my' ? createdBy : undefined,
+      });
+      setImages(prev => replace ? items : [...prev, ...items]);
+      setCount(total);
+      setOffset(nextOffset);
+    } finally {
+      setLoading(false);
+    }
+  }, [tab, createdBy]);
 
   useEffect(() => {
     onSelectedChange(null);
     void load(0, query, true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  }, [tab, query]);
 
   const hasMore = images.length < count;
 
@@ -146,7 +111,7 @@ function ImageGrid({ selectedUrl, onSelectedChange }: ImageGridProps) {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8 }}>
           {images.map(img => {
-            const url = resolveUrl(img);
+            const url = rewriteAssetUrl(resolveUrl(img), cloudStorageUrls);
             const isSel = selectedUrl === url && !!url;
             return (
               <div
@@ -196,6 +161,10 @@ function ImageGrid({ selectedUrl, onSelectedChange }: ImageGridProps) {
 // ---------------------------------------------------------------------------
 
 interface UploadTabProps {
+  channel: string;
+  createdBy: string;
+  presignedHeaders: Record<string, string>;
+  cloudStorageUrls: string[];
   onUploaded: (url: string) => void;
   triggerRef: React.MutableRefObject<(() => void) | null>;
 }
@@ -207,7 +176,7 @@ const COPYRIGHT_TEXT =
   'enable) and will be licensed under terms & conditions and policy guidelines of the platform. ' +
   'In doing so, the copyright and license of the original author is not infringed.';
 
-function UploadTab({ onUploaded, triggerRef }: UploadTabProps) {
+function UploadTab({ channel, createdBy, presignedHeaders, cloudStorageUrls, onUploaded, triggerRef }: UploadTabProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging,  setDragging]  = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -224,8 +193,8 @@ function UploadTab({ onUploaded, triggerRef }: UploadTabProps) {
     setError('');
     setUploading(true);
     try {
-      const url = await uploadImage(file);
-      onUploaded(url);
+      const rawUrl = await uploadAsset(file, channel, createdBy, presignedHeaders);
+      onUploaded(rewriteAssetUrl(rawUrl, cloudStorageUrls));
     } catch {
       setError('Upload failed. Please try again.');
     } finally {
@@ -294,6 +263,13 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
   const [tab, setTab]                 = useState<Tab>('my');
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
   const uploadTriggerRef              = useRef<(() => void) | null>(null);
+
+  // Read context values from editor store
+  const editorConfig     = useEditorStore(s => s.editorConfig);
+  const channel          = editorConfig?.context.channel          ?? '';
+  const createdBy        = editorConfig?.context.userId           ?? '';
+  const cloudStorageUrls = editorConfig?.context.cloudStorageUrls ?? [];
+  const presignedHeaders = editorConfig?.context.cloudStorage?.presigned_headers ?? {};
 
   const switchTab = (next: Tab) => {
     setTab(next);
@@ -381,18 +357,28 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
         <div style={{ overflow: 'auto', padding: 24, minHeight: tab !== 'upload' ? 260 : 0 }}>
           {tab === 'my'  && (
             <ImageGrid
+              tab="my"
+              createdBy={createdBy}
+              cloudStorageUrls={cloudStorageUrls}
               selectedUrl={selectedUrl}
               onSelectedChange={setSelectedUrl}
             />
           )}
           {tab === 'all' && (
             <ImageGrid
+              tab="all"
+              createdBy={createdBy}
+              cloudStorageUrls={cloudStorageUrls}
               selectedUrl={selectedUrl}
               onSelectedChange={setSelectedUrl}
             />
           )}
           {tab === 'upload' && (
             <UploadTab
+              channel={channel}
+              createdBy={createdBy}
+              presignedHeaders={presignedHeaders}
+              cloudStorageUrls={cloudStorageUrls}
               onUploaded={url => onSelect(url)}
               triggerRef={uploadTriggerRef}
             />
