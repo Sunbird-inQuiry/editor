@@ -56,7 +56,14 @@ app.use(express.static(join(__dirname, 'public')));
 // ── Test-harness page ─────────────────────────────────────────────────────────
 // Dynamically rendered so env vars (CONTENT_ID, CHANNEL, …) are injected at
 // request time — same idea as Vite's __EDITOR_ENV__ injection at dev-start.
-app.get(['/', '/index.html'], (req, res) => {
+// Also serve the test harness at the same path the old Angular editor used,
+// so existing bookmarks / scripts keep working.
+app.get([
+  '/',
+  '/index.html',
+  '/web-component/assets/quml-editor/',
+  '/web-component/assets/quml-editor/index.html',
+], (req, res) => {
   const contentId = process.env.CONTENT_ID || '';
   const channel   = process.env.CHANNEL    || '';
   const framework = process.env.FRAMEWORK  || 'NCF';
@@ -203,7 +210,8 @@ app.use(['/action', '/api'], makeProxy(action));
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 http.createServer(app).listen(PORT, () => {
-  console.log(`\n[react-editor] server → http://localhost:${PORT}`);
+  console.log(`\n[react-editor] server  → http://localhost:${PORT}`);
   console.log(`[react-editor] backend → ${BASE_URL}`);
-  console.log(`[react-editor] open   → http://localhost:${PORT}/index.html\n`);
+  console.log(`[react-editor] open    → http://localhost:${PORT}/web-component/assets/quml-editor/`);
+  console.log(`[react-editor]           http://localhost:${PORT}/\n`);
 });
