@@ -106,10 +106,12 @@ function SolutionBlock() {
       </div>
       <div className="ce-sol2-body">
         {kind === 'text' && (
-          <div className="ce-sol-drop" style={{ minHeight: 96, fontStyle: 'normal', gap: 0 }}>
-            <textarea
-              style={{ width: '100%', minHeight: 80, border: 'none', background: 'transparent', outline: 'none', fontFamily: 'inherit', fontSize: 15, resize: 'none', padding: 8 }}
+          <div style={{ border: '1px solid var(--sb-border)', borderRadius: 12, padding: '10px 14px', background: '#fff', minHeight: 96 }}>
+            <ContentEditable
               placeholder="Explain the answer — add text, images or equations…"
+              minHeight={80}
+              bodyClass="stem-field"
+              disabled={false}
             />
           </div>
         )}
