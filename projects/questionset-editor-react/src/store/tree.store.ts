@@ -20,6 +20,9 @@ interface TreeState {
   getNodeById: (id: string) => INode | undefined;
   getChildrenOf: (id: string) => INode[];
   getBreadcrumb: (id: string) => Array<{ id: string; name: string }>;
+  /** Merge extra fields into a node's metadata WITHOUT marking the set dirty.
+   *  Used to hydrate fields (e.g. instructions) from a secondary API response. */
+  mergeNodeMeta: (id: string, patch: Record<string, unknown>) => void;
 }
 
 function bfsFind(nodes: INode[], id: string): INode | undefined {
@@ -148,6 +151,20 @@ export const useTreeStore = create<TreeState>((set, get) => ({
       treeCache: { ...state.treeCache, [id]: { ...(state.treeCache[id] ?? {}), ...patch } },
     }));
     useEditorStore.getState().setIsDirty(true);
+  },
+
+  mergeNodeMeta: (id, patch) => {
+    set((state) => {
+      const nextCache  = { ...state.treeCache, [id]: { ...(state.treeCache[id] ?? {}), ...patch } };
+      const nextTree   = deepMergeNode(state.treeData, id, patch);
+      // If this node is currently selected, also refresh activeNodeMeta so
+      // the form receives the new values without requiring a re-selection.
+      const nextMeta   = state.selectedNodeId === id
+        ? { ...state.activeNodeMeta, ...patch }
+        : state.activeNodeMeta;
+      return { treeData: nextTree, treeCache: nextCache, activeNodeMeta: nextMeta };
+    });
+    // Does NOT call setIsDirty — this is a read-only hydration, not a user edit.
   },
 
   addNode: (parentId, type, questionType) => {
