@@ -315,7 +315,7 @@
 .ce-ed-head { display: flex; align-items: center; gap: 14px; padding: 22px 30px; border-bottom: 1px solid var(--sb-divider); }
 .ce-ed-head .badge { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--accent-deep); background: var(--accent-soft); border-radius: 999px; padding: 7px 14px; }
 /* Sticky toolbar inside the card — sticks to top of ce-main-scroll viewport as user scrolls */
-.ce-ed-toolbar { position: sticky; top: 0; z-index: 20; padding: 8px 28px; background: var(--sb-card); border-bottom: 1px solid var(--sb-divider); }
+.ce-ed-toolbar { position: sticky; top: 0; z-index: 20; padding: 10px 28px; background: var(--sb-card); border-bottom: 1px solid var(--sb-divider); }
 .ce-ed-body { padding: 26px 30px 32px; display: flex; flex-direction: column; gap: 26px; }
 .ce-ed-lbl { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--sb-text-2); margin-bottom: 12px; }
 .ce-ed-lbl .hint { margin-left: auto; font-size: 11px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--sb-text-faint); }
@@ -433,9 +433,10 @@
   box-shadow: var(--sb-shadow-deep);
 }
 .re-toolbar.docked {
-  position: static; transform: none; box-shadow: none; border-radius: 0;
-  border: none; border-bottom: 1px solid var(--sb-divider); flex-wrap: wrap;
-  padding: 8px 30px; background: var(--sb-card);
+  position: static; transform: none; flex-wrap: wrap;
+  border: 1px solid var(--sb-border); border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(20,14,8,.06);
+  padding: 6px 14px; background: var(--sb-card);
 }
 .re-grp { display: flex; align-items: center; gap: 1px; }
 .re-lang { display: inline-flex; align-items: center; gap: 7px; }
