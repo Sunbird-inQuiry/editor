@@ -196,8 +196,6 @@ function ImageGrid({ selectedUrl, onSelectedChange }: ImageGridProps) {
 // ---------------------------------------------------------------------------
 
 interface UploadTabProps {
-  licenseAgreed: boolean;
-  onLicenseChange: (v: boolean) => void;
   onUploaded: (url: string) => void;
   triggerRef: React.MutableRefObject<(() => void) | null>;
 }
@@ -209,21 +207,18 @@ const COPYRIGHT_TEXT =
   'enable) and will be licensed under terms & conditions and policy guidelines of the platform. ' +
   'In doing so, the copyright and license of the original author is not infringed.';
 
-function UploadTab({ licenseAgreed, onLicenseChange, onUploaded, triggerRef }: UploadTabProps) {
+function UploadTab({ onUploaded, triggerRef }: UploadTabProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging,  setDragging]  = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error,     setError]     = useState('');
 
-  // Expose trigger to parent for "Upload & Use" footer button
   useEffect(() => {
     triggerRef.current = () => fileRef.current?.click();
   }, [triggerRef]);
 
-  const canUpload = licenseAgreed && !uploading;
-
   const handle = async (file: File | undefined) => {
-    if (!file || !canUpload) return;
+    if (!file || uploading) return;
     if (!file.type.startsWith('image/')) { setError('Please select an image file.'); return; }
     if (file.size > 1024 * 1024)         { setError('File exceeds 1 MB limit.'); return; }
     setError('');
@@ -242,16 +237,15 @@ function UploadTab({ licenseAgreed, onLicenseChange, onUploaded, triggerRef }: U
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Drop zone */}
       <div
-        onDragOver={e => { e.preventDefault(); if (canUpload) setDragging(true); }}
+        onDragOver={e => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={e => { e.preventDefault(); setDragging(false); void handle(e.dataTransfer.files?.[0]); }}
-        onClick={() => canUpload && fileRef.current?.click()}
+        onClick={() => !uploading && fileRef.current?.click()}
         style={{
-          border: `2px dashed ${dragging ? 'var(--accent)' : canUpload ? '#c4c4c4' : 'var(--sb-border)'}`,
+          border: `2px dashed ${dragging ? 'var(--accent)' : '#c4c4c4'}`,
           borderRadius: 12, padding: '52px 40px', textAlign: 'center',
-          cursor: canUpload ? 'pointer' : 'default',
-          background: dragging ? 'var(--accent-soft)' : canUpload ? '#fafafa' : '#f9f9f9',
-          opacity: licenseAgreed ? 1 : 0.55,
+          cursor: uploading ? 'default' : 'pointer',
+          background: dragging ? 'var(--accent-soft)' : '#fafafa',
           transition: 'all .15s', userSelect: 'none',
         }}
       >
@@ -271,27 +265,15 @@ function UploadTab({ licenseAgreed, onLicenseChange, onUploaded, triggerRef }: U
         />
       </div>
 
-      {/* Copyright & License */}
-      <div style={{
-        borderTop: '1px solid var(--sb-border)', paddingTop: 16,
-      }}>
-        <label style={{ display: 'flex', gap: 12, cursor: 'pointer', alignItems: 'flex-start' }}>
-          <input
-            type="checkbox"
-            checked={licenseAgreed}
-            onChange={e => onLicenseChange(e.target.checked)}
-            style={{ marginTop: 2, flexShrink: 0, accentColor: 'var(--accent)', width: 15, height: 15 }}
-          />
-          <span>
-            <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--sb-text)' }}>
-              Copyright &amp; License
-              <span style={{ color: 'var(--sb-red)', marginLeft: 2 }}>*</span>
-            </span>
-            <span style={{ display: 'block', fontSize: 13, color: 'var(--sb-text-2)', lineHeight: 1.65, marginTop: 6 }}>
-              {COPYRIGHT_TEXT}
-            </span>
-          </span>
-        </label>
+      {/* Copyright & License — informational only */}
+      <div style={{ borderTop: '1px solid var(--sb-border)', paddingTop: 16 }}>
+        <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--sb-text)', margin: '0 0 6px' }}>
+          Copyright &amp; License
+          <span style={{ color: 'var(--sb-red)', marginLeft: 2 }}>*</span>
+        </p>
+        <p style={{ fontSize: 13, color: 'var(--sb-text-2)', lineHeight: 1.65, margin: 0 }}>
+          {COPYRIGHT_TEXT}
+        </p>
       </div>
 
       {error && (
@@ -308,14 +290,11 @@ function UploadTab({ licenseAgreed, onLicenseChange, onUploaded, triggerRef }: U
 export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModalProps) {
   const [tab, setTab]                 = useState<Tab>('my');
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
-  const [licenseAgreed, setLicenseAgreed] = useState(false);
   const uploadTriggerRef              = useRef<(() => void) | null>(null);
 
-  // Reset selection / license when switching tabs
   const switchTab = (next: Tab) => {
     setTab(next);
     setSelectedUrl(null);
-    if (next !== 'upload') setLicenseAgreed(false);
   };
 
   // Escape key to close
@@ -407,8 +386,6 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
           )}
           {tab === 'upload' && (
             <UploadTab
-              licenseAgreed={licenseAgreed}
-              onLicenseChange={setLicenseAgreed}
               onUploaded={url => onSelect(url)}
               triggerRef={uploadTriggerRef}
             />
@@ -434,7 +411,6 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
             <button
               type="button"
               className="ce-btn primary"
-              disabled={!licenseAgreed}
               onClick={() => uploadTriggerRef.current?.()}
             >
               <Icon name="upload" size={15} />
