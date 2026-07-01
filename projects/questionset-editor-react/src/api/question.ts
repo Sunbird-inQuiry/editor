@@ -77,7 +77,7 @@ export async function createQuestion(payload: CreateQuestionPayload): Promise<IQ
   const responseDeclaration = buildResponseDeclaration(payload.type, payload.options, payload.matchPairs);
   const outcomeDeclaration = buildOutcomeDeclaration(payload.maxScore ?? 1);
 
-  const response = await apiClient.post('/action/question/v1/create', {
+  const response = await apiClient.post('/action/question/v2/create', {
     request: {
       question: {
         name: 'Question',
@@ -113,7 +113,7 @@ export async function createQuestion(payload: CreateQuestionPayload): Promise<IQ
 }
 
 export async function readQuestion(questionId: string): Promise<IQuestion> {
-  const response = await apiClient.get(`/action/question/v1/read/${questionId}`);
+  const response = await apiClient.get(`/action/question/v2/read/${questionId}`);
   return response.data?.result?.question as IQuestion;
 }
 
@@ -142,7 +142,7 @@ export async function updateQuestion(
     updates['interactions'] = buildInteractions(payload.type, payload.options);
   }
 
-  await apiClient.patch(`/action/question/v1/update/${questionId}`, {
+  await apiClient.patch(`/action/question/v2/update/${questionId}`, {
     request: { question: updates },
   });
 }
@@ -151,12 +151,12 @@ export async function listQuestions(
   questionIds: string[],
 ): Promise<IQuestion[]> {
   if (questionIds.length === 0) return [];
-  const response = await apiClient.post('/action/question/v1/list', {
+  const response = await apiClient.post('/action/question/v2/list', {
     request: { search: { identifier: questionIds } },
   });
   return (response.data?.result?.questions ?? []) as IQuestion[];
 }
 
 export async function deleteQuestion(questionId: string): Promise<void> {
-  await apiClient.delete(`/action/question/v1/retire/${questionId}`);
+  await apiClient.delete(`/action/question/v2/retire/${questionId}`);
 }

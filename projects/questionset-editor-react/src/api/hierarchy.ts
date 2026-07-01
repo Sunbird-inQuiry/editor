@@ -49,7 +49,7 @@ export async function readHierarchy(
   contentId: string,
 ): Promise<{ content: Record<string, unknown>; rootNode: INode }> {
   const response = await apiClient.get(
-    `/action/questionset/v1/hierarchy/${contentId}`,
+    `/action/questionset/v2/hierarchy/${contentId}`,
     { params: { mode: 'edit' } },
   );
   const content = response.data?.result?.questionSet as Record<string, unknown> | undefined
@@ -72,7 +72,7 @@ export async function updateHierarchy(
   hierarchy: Record<string, unknown>,
   lastUpdatedBy?: string,
 ): Promise<void> {
-  await apiClient.patch('/action/questionset/v1/hierarchy/update', {
+  await apiClient.patch('/action/questionset/v2/hierarchy/update', {
     request: {
       data: {
         nodesModified,
@@ -84,19 +84,19 @@ export async function updateHierarchy(
 }
 
 export async function publishContent(contentId: string, lastPublishedBy = ''): Promise<void> {
-  await apiClient.post(`/action/questionset/v1/publish/${contentId}`, {
+  await apiClient.post(`/action/questionset/v2/publish/${contentId}`, {
     request: { questionset: { lastPublishedBy } },
   });
 }
 
 export async function sendForReview(contentId: string): Promise<void> {
-  await apiClient.post(`/action/questionset/v1/review/${contentId}`, {
+  await apiClient.post(`/action/questionset/v2/review/${contentId}`, {
     request: { questionset: {} },
   });
 }
 
 export async function rejectContent(contentId: string, comment: string): Promise<void> {
-  await apiClient.post(`/action/questionset/v1/reject/${contentId}`, {
+  await apiClient.post(`/action/questionset/v2/reject/${contentId}`, {
     request: { questionset: { rejectComment: comment } },
   });
 }

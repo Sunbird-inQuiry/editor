@@ -181,12 +181,10 @@ const compose = (url) => url.replace('/action/composite/v3/', '/api/composite/v1
 // Multipart asset upload — stream body through without buffering
 app.post('/action/asset/v1/upload/*', makeProxy(action, true));
 
-// QuestionSet + Question (support both v1 and v2 endpoints)
+// QuestionSet + Question (v2 endpoints, matching the old Angular editor)
 app.use(
   [
-    '/action/questionset/v1/*',
     '/action/questionset/v2/*',
-    '/action/question/v1/*',
     '/action/question/v2/*',
     '/action/object/category/definition/*',
     '/action/asset/v1/create',

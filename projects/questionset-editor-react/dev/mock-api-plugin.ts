@@ -30,10 +30,10 @@ export function mockApiPlugin(): Plugin {
 
         function ok() { return json({ responseCode: 'OK', result: {} }); }
 
-        if (url.includes('/action/questionset/v1/hierarchy/update') && method === 'PATCH')
+        if (url.includes('/action/questionset/v2/hierarchy/update') && method === 'PATCH')
           return ok();
 
-        if (url.includes('/action/questionset/v1/hierarchy/'))
+        if (url.includes('/action/questionset/v2/hierarchy/'))
           return json(MOCK_HIERARCHY);
 
         if (url.includes('/action/object/category/definition') || url.includes('/object/category/definition'))
@@ -51,21 +51,21 @@ export function mockApiPlugin(): Plugin {
         if (url.includes('/action/composite/v3/search') && method === 'POST')
           return json({ responseCode: 'OK', result: { count: 0, content: [] } });
 
-        if (url.includes('/action/question/v1/list'))
+        if (url.includes('/action/question/v2/list'))
           return json(MOCK_QUESTION_LIST);
 
-        if (url.includes('/action/question/v1/create') && method === 'POST')
+        if (url.includes('/action/question/v2/create') && method === 'POST')
           return json({ responseCode: 'OK', result: { question: { identifier: `question-new-${Date.now()}`, name: 'New Question' } } });
 
-        if (url.match(/\/action\/question\/v1\/update\//) && method === 'PATCH')
+        if (url.match(/\/action\/question\/v2\/update\//) && method === 'PATCH')
           return ok();
 
-        if (url.includes('/action/questionset/v1/comment/'))
+        if (url.includes('/action/questionset/v2/comment/'))
           return method === 'GET'
             ? json({ responseCode: 'OK', result: { content: [] } })
             : ok();
 
-        if (url.includes('/action/questionset/v1/review/') || url.includes('/action/questionset/v1/publish/') || url.includes('/action/questionset/v1/reject/'))
+        if (url.includes('/action/questionset/v2/review/') || url.includes('/action/questionset/v2/publish/') || url.includes('/action/questionset/v2/reject/'))
           return json({ responseCode: 'OK', result: { identifier: MOCK_QUESTIONSET_ID } });
 
         if (url.includes('/api/framework/v1/read/'))
