@@ -183,6 +183,38 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
   const fileRef  = useRef<HTMLInputElement>(null);
   const [charsRect, setCharsRect] = useState<DOMRect | null>(null);
   const [tableRect, setTableRect] = useState<DOMRect | null>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+
+  // Track whether a contenteditable is focused — disable toolbar when none is
+  const [editorFocused, setEditorFocused] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      const el = document.activeElement as HTMLElement | null;
+      setEditorFocused(!!el?.closest('[contenteditable]'));
+    };
+    document.addEventListener('focusin', check);
+    document.addEventListener('focusout', () => setTimeout(check, 0));
+    return () => {
+      document.removeEventListener('focusin', check);
+      document.removeEventListener('focusout', check);
+    };
+  }, []);
+
+  // Effective disabled: prop OR no editor focused
+  const off = disabled || !editorFocused;
+
+  // Close inline dropdowns (align/size) on outside click
+  useEffect(() => {
+    if (menu !== 'align' && menu !== 'size') return;
+    const h = (e: MouseEvent) => {
+      if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
+        setMenu(null);
+      }
+    };
+    const t = setTimeout(() => document.addEventListener('mousedown', h), 50);
+    return () => { clearTimeout(t); document.removeEventListener('mousedown', h); };
+  }, [menu]);
+
   // Save selection before any operation that steals focus
   const savedRange = useRef<Range | null>(null);
 
@@ -240,11 +272,12 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
   };
 
   const Btn = ({ cmd, val, title, children }: { cmd: string; val?: string; title: string; children: React.ReactNode }) => (
-    <button type="button" className="re-tb" title={title} onMouseDown={run(cmd, val)} disabled={disabled}>{children}</button>
+    <button type="button" className="re-tb" title={title} onMouseDown={run(cmd, val)} disabled={off}>{children}</button>
   );
 
   return (
-    <div className="re-toolbar docked" role="toolbar" aria-label="Text formatting" onMouseDown={keep}>
+    <div ref={toolbarRef} className="re-toolbar docked" role="toolbar" aria-label="Text formatting" onMouseDown={keep}
+      style={{ opacity: off ? 0.4 : 1, pointerEvents: off ? 'none' : undefined, transition: 'opacity .15s' }}>
       {/* Language */}
       <label className="re-lang" onMouseDown={keep}>
         <span>Language</span>
@@ -273,7 +306,7 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
       <div className="re-grp">
         <span className="re-pop">
           <button type="button" className={`re-tb caret${menu === 'align' ? ' on' : ''}`} title="Alignment"
-            onMouseDown={e => { e.preventDefault(); toggle('align'); }}>
+            onMouseDown={e => { e.preventDefault(); toggle('align'); }} disabled={off}>
             <Icon name="align" size={17} /><Icon name="caret" size={10} />
           </button>
           {menu === 'align' && (
@@ -291,7 +324,7 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
       <div className="re-grp">
         <span className="re-pop">
           <button type="button" className={`re-tb caret${menu === 'size' ? ' on' : ''}`} title="Font size"
-            onMouseDown={e => { e.preventDefault(); toggle('size'); }}>
+            onMouseDown={e => { e.preventDefault(); toggle('size'); }} disabled={off}>
             <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-1px' }}>A</span><Icon name="caret" size={10} />
           </button>
           {menu === 'size' && (
@@ -313,7 +346,7 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
       {/* Special chars + equation */}
       <div className="re-grp">
         <button ref={charsRef} type="button" className={`re-tb${menu === 'chars' ? ' on' : ''}`} title="Special characters"
-          onMouseDown={e => { e.preventDefault(); openChars(); }} disabled={disabled}>
+          onMouseDown={e => { e.preventDefault(); openChars(); }} disabled={off}>
           <span style={{ fontSize: 16, fontWeight: 600 }}>Ω</span>
         </button>
         <button ref={mathBtnRef} type="button" className="re-tb" title="Insert equation"
@@ -322,7 +355,7 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
             saveRange();
             if (mathBtnRef.current) setMathAnchor(mathBtnRef.current.getBoundingClientRect());
             setMathOpen(v => !v);
-          }} disabled={disabled}>
+          }} disabled={off}>
           <span style={{ fontSize: 16, fontWeight: 700 }}>Σ</span>
         </button>
       </div>
@@ -331,7 +364,7 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
       {/* Image */}
       <button type="button" className="re-tb" title="Insert image"
         onMouseDown={e => { e.preventDefault(); saveRange(); fileRef.current?.click(); }}
-        disabled={disabled}>
+        disabled={off}>
         <Icon name="image" size={17} />
       </button>
       <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onFileChange} />
@@ -339,7 +372,7 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
       {/* Table */}
       <div className="re-grp">
         <button ref={tableRef} type="button" className={`re-tb${menu === 'table' ? ' on' : ''}`} title="Insert table"
-          onMouseDown={e => { e.preventDefault(); openTable(); }} disabled={disabled}>
+          onMouseDown={e => { e.preventDefault(); openTable(); }} disabled={off}>
           <Icon name="table" size={17} />
         </button>
       </div>
