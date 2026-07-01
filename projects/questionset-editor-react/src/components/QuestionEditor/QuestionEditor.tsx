@@ -180,6 +180,11 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
         <Icon name="arrow-left" size={16} />Back to set
       </button>
 
+      {/* Shared toolbar — sticky outside the card so overflow:hidden doesn't break it */}
+      <div className="ce-ed-toolbar" style={{ position: 'sticky', top: 0, zIndex: 30 }}>
+        <SharedRichToolbar disabled={isReadOnly} />
+      </div>
+
       <div className="ce-ed-card">
         {/* Header — type badge */}
         <div className="ce-ed-head">
@@ -187,11 +192,6 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
             <Icon name={typeIcon} size={15} />
             {typeLabel}
           </span>
-        </div>
-
-        {/* Shared toolbar — sticky, one toolbar for ALL contenteditable fields */}
-        <div className="ce-ed-toolbar">
-          <SharedRichToolbar disabled={isReadOnly} />
         </div>
 
         {/* Body */}
