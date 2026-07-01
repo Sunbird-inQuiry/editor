@@ -236,7 +236,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                       className="ce-thumb"
                       title={isReadOnly ? undefined : 'Click to change icon'}
                       onClick={() => !isReadOnly && setIconPickerOpen(true)}
-                      style={{ cursor: isReadOnly ? 'default' : 'pointer', border: 'none', padding: 0, background: 'transparent' }}
+                      style={{ cursor: isReadOnly ? 'default' : 'pointer' }}
                     >
                       {activeNodeMeta?.appIcon ? (
                         <img src={activeNodeMeta.appIcon as string} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />

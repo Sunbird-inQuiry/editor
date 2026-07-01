@@ -145,8 +145,18 @@ export async function getCategoryDefinition(
   const objectMetadata = (ocd?.objectMetadata ?? {}) as Record<string, unknown>;
   const config = (objectMetadata.config ?? {}) as Record<string, unknown>;
 
+  // Move primaryCategory (Type) to sit right after name so they appear
+  // side-by-side in the 2-column form grid (matching the design).
+  const rootFormRaw = parseForm(forms.create);
+  const nameIdx = rootFormRaw.findIndex(f => f.code === 'name');
+  const typeIdx = rootFormRaw.findIndex(f => f.code === 'primaryCategory');
+  if (nameIdx !== -1 && typeIdx !== -1 && typeIdx !== nameIdx + 1) {
+    const [typeField] = rootFormRaw.splice(typeIdx, 1);
+    rootFormRaw.splice(nameIdx + 1, 0, typeField);
+  }
+
   return {
-    rootForm: parseForm(forms.create),
+    rootForm: rootFormRaw,
     unitForm: parseForm(forms.unitMetadata, true),
     childForm: parseForm(forms.childMetadata ?? forms.questionMetadata),
     searchForm: parseForm(forms.search ?? forms.searchConfig),
