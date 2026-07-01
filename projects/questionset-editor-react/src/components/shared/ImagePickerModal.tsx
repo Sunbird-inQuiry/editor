@@ -327,8 +327,7 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
       <div
         style={{
           background: 'var(--sb-card)', borderRadius: 18,
-          width: 680, maxWidth: '100%',
-          height: 580, maxHeight: 'calc(100vh - 48px)',
+          width: 680, maxWidth: '100%', maxHeight: 'calc(100vh - 48px)',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
           boxShadow: 'var(--sb-shadow-deep)',
         }}
@@ -376,7 +375,7 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
         </div>
 
         {/* ── Body ────────────────────────────────── */}
-        <div style={{ flex: 1, overflow: 'auto', padding: 24, minHeight: 0 }}>
+        <div style={{ overflow: 'auto', padding: 24, minHeight: tab !== 'upload' ? 260 : 0 }}>
           {tab === 'my'  && (
             <ImageGrid
               selectedUrl={selectedUrl}
