@@ -28,6 +28,9 @@ import { dirname, join } from 'path';
 import dotenv         from 'dotenv';
 import { convert }    from './latexService.js';
 
+// Match Vite's env-file precedence: .env.local overrides .env.
+// dotenv won't override variables already set, so the first call wins.
+dotenv.config({ path: '.env.local' });
 dotenv.config();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
