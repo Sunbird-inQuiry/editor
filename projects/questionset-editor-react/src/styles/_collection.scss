@@ -447,7 +447,7 @@
 }
 .re-tb:hover { background: var(--sb-bg-warm); color: var(--ink, #1a1a1a); }
 .re-tb.on { background: var(--accent-soft); color: var(--accent-deep); }
-.re-tb.caret { gap: 3px; min-width: 42px; }
+.re-tb.caret { display: inline-flex; flex-direction: row; align-items: center; gap: 2px; min-width: 38px; }
 .re-tb .b { font-weight: 800; font-size: 14px; }
 .re-tb .i { font-style: italic; font-family: Georgia, serif; font-size: 15px; }
 .re-tb .u { text-decoration: underline; text-underline-offset: 2px; font-size: 14px; }

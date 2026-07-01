@@ -10,11 +10,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from './Icon';
 import MathModal from './MathModal';
-
-// ---------------------------------------------------------------------------
-// Special characters list (from design)
-// ---------------------------------------------------------------------------
-const SPECIAL_CHARS = '× ÷ ± ≤ ≥ ≠ ≈ → ← ↔ ∞ π α β γ θ λ μ Ω Δ √ ∫ ° ½ ¼ ¾ ² ³ ₂ • —'.split(' ');
+import { SPECIAL_CHAR_GROUPS, ALL_CATEGORIES, type CharCategory } from './specialCharsData';
 
 const FONT_SIZES = [8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 36];
 
@@ -53,32 +49,77 @@ const run  = (cmd: string, val?: string) => (e: React.MouseEvent) => {
 const keep = (e: React.MouseEvent) => e.preventDefault();
 
 // ---------------------------------------------------------------------------
-// SpecialCharsPopup
+// SpecialCharsPopup — full character set matching the old Angular editor
 // ---------------------------------------------------------------------------
 function SpecialCharsPopup({ anchor, onClose }: { anchor: DOMRect; onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [category, setCategory] = useState<CharCategory>('All');
+  const [hovered, setHovered] = useState<{ char: string; title: string } | null>(null);
+
   useEffect(() => {
     const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) onClose(); };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
+    const t = setTimeout(() => document.addEventListener('mousedown', h), 100);
+    return () => { clearTimeout(t); document.removeEventListener('mousedown', h); };
   }, [onClose]);
-  const estimatedH = 220;
-  const top = window.innerHeight - anchor.bottom > estimatedH ? anchor.bottom + 6 : anchor.top - estimatedH - 6;
+
+  const chars = category === 'All'
+    ? Object.values(SPECIAL_CHAR_GROUPS).flat()
+    : SPECIAL_CHAR_GROUPS[category] ?? [];
+
+  const W = 340;
+  const H = 340;
+  const spaceBelow = window.innerHeight - anchor.bottom - 8;
+  const top = spaceBelow >= H ? anchor.bottom + 6 : Math.max(8, anchor.top - H - 6);
+  const left = Math.min(anchor.left, window.innerWidth - W - 8);
+
   return createPortal(
     <div ref={ref} style={{
-      position: 'fixed', top, left: anchor.left + anchor.width / 2, transform: 'translateX(-50%)',
-      zIndex: 9999, background: '#fff', border: '1px solid var(--sb-border)',
-      borderRadius: 14, boxShadow: 'var(--sb-shadow-deep)', padding: 12,
-      display: 'grid', gridTemplateColumns: 'repeat(7, 36px)', gap: 4,
+      position: 'fixed', top, left, zIndex: 9999,
+      width: W, background: '#fff',
+      border: '1px solid var(--sb-border)', borderRadius: 14,
+      boxShadow: 'var(--sb-shadow-deep)',
+      display: 'flex', flexDirection: 'column',
     }}>
-      {SPECIAL_CHARS.map((ch, i) => (
-        <button key={i} type="button" title={ch}
-          onMouseDown={e => { e.preventDefault(); document.execCommand('insertText', false, ch); onClose(); }}
-          style={{ width: 36, height: 36, border: '1px solid transparent', borderRadius: 8, background: 'transparent', cursor: 'pointer', fontSize: 16, display: 'grid', placeItems: 'center', fontFamily: 'inherit' }}
-          onMouseEnter={e => { (e.currentTarget).style.background = 'var(--accent-soft)'; (e.currentTarget).style.borderColor = 'var(--accent)'; }}
-          onMouseLeave={e => { (e.currentTarget).style.background = 'transparent'; (e.currentTarget).style.borderColor = 'transparent'; }}
-        >{ch}</button>
-      ))}
+      {/* Header: title + category filter */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px 8px', borderBottom: '1px solid var(--sb-divider)' }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--sb-text-2)' }}>Special characters</span>
+        <select
+          value={category}
+          onChange={e => setCategory(e.target.value as CharCategory)}
+          onMouseDown={e => e.stopPropagation()}
+          style={{ fontSize: 12, border: '1px solid var(--sb-border)', borderRadius: 6, padding: '3px 8px', fontFamily: 'inherit', cursor: 'pointer', background: '#fff' }}
+        >
+          {ALL_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+
+      {/* Character grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 36px)', gap: 2, padding: 10, maxHeight: 240, overflowY: 'auto' }}>
+        {chars.map((item, i) => (
+          <button key={i} type="button"
+            onMouseDown={e => { e.preventDefault(); document.execCommand('insertText', false, item.char); onClose(); }}
+            onMouseEnter={() => setHovered(item)}
+            onMouseLeave={() => setHovered(null)}
+            style={{
+              width: 34, height: 34, border: `1px solid ${hovered?.char === item.char ? 'var(--accent)' : 'transparent'}`,
+              borderRadius: 6, background: hovered?.char === item.char ? 'var(--accent-soft)' : 'transparent',
+              cursor: 'pointer', fontSize: 15, display: 'grid', placeItems: 'center', fontFamily: 'inherit',
+            }}
+          >{item.char}</button>
+        ))}
+      </div>
+
+      {/* Status bar: name + unicode */}
+      <div style={{ borderTop: '1px solid var(--sb-divider)', padding: '6px 14px', display: 'flex', justifyContent: 'space-between', minHeight: 28 }}>
+        <span style={{ fontSize: 11, color: 'var(--sb-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em' }}>
+          {hovered?.title?.toUpperCase() ?? ''}
+        </span>
+        {hovered && (
+          <span style={{ fontSize: 11, color: 'var(--sb-text-faint)', fontFamily: 'monospace' }}>
+            U+{hovered.char.codePointAt(0)?.toString(16).toUpperCase().padStart(4, '0')}
+          </span>
+        )}
+      </div>
     </div>,
     document.body,
   );
