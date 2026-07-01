@@ -153,61 +153,103 @@ function decorateHeaders(proxyReqOpts) {
   return proxyReqOpts;
 }
 
-/**
- * Create an express-http-proxy middleware.
- * @param {((url: string) => string) | null} rewrite  Optional path-rewrite fn.
- * @param {boolean} streamBody  Set true for multipart/binary uploads.
- */
-function makeProxy(rewrite, streamBody = false) {
-  return proxy(BASE_URL, {
-    https: true,
-    limit: '30mb',
-    parseReqBody: !streamBody,
-    proxyReqPathResolver(req) {
-      const url = rewrite ? rewrite(req.originalUrl) : req.originalUrl;
-      console.log('[proxy]', req.method, req.originalUrl, '→', url);
-      return url;
-    },
-    proxyReqOptDecorator: decorateHeaders,
-  });
+// Extract path+query from a URL string (equivalent to urlHelper.parse(url).path)
+function parsePath(url) {
+  try { return new URL(url, 'http://x').pathname + (new URL(url, 'http://x').search || ''); }
+  catch { return url; }
 }
 
-// Path-rewrite shortcuts
-const action  = (url) => url.replace('/action/', '/api/');
-const compose = (url) => url.replace('/action/composite/v3/', '/api/composite/v1/');
+// ── API proxy routes — same structure as editor/server.js ────────────────────
 
-// ── API proxy routes (order matters — most-specific first) ───────────────────
+// Asset upload — no body buffering (multipart stream)
+app.post(['/action/asset/v1/upload/*'], proxy(BASE_URL, {
+  https: true,
+  parseReqBody: false,
+  proxyReqPathResolver(req) {
+    const url = req.originalUrl.replace('/action/', '/api/');
+    console.log('[proxy]', req.method, req.originalUrl, '→', url);
+    return parsePath(url);
+  },
+  proxyReqOptDecorator: decorateHeaders,
+}));
 
-// Multipart asset upload — stream body through without buffering
-app.post('/action/asset/v1/upload/*', makeProxy(action, true));
+// Framework + channel reads (no path rewrite)
+app.get([
+  '/api/framework/v1/read/*',
+  '/learner/framework/v1/read/*',
+  '/api/channel/v1/read/*',
+], proxy(BASE_URL, {
+  https: true,
+  proxyReqPathResolver(req) {
+    console.log('[proxy]', req.method, req.url);
+    return parsePath(req.url);
+  },
+  proxyReqOptDecorator: decorateHeaders,
+}));
 
-// QuestionSet + Question (v2 endpoints, matching the old Angular editor)
-app.use(
-  [
-    '/action/questionset/v2/*',
-    '/action/question/v2/*',
-    '/action/object/category/definition/*',
-    '/action/asset/v1/create',
-    '/action/content/v3/upload/url/*',
-    '/action/content/v3/*',
-  ],
-  makeProxy(action),
-);
+// QuestionSet + Question (v2) + category definition
+app.use([
+  '/action/questionset/v2/*',
+  '/action/question/v2/*',
+  '/action/object/category/definition/v1/*',
+  '/api/question/v2/*',
+], proxy(BASE_URL, {
+  https: true,
+  limit: '30mb',
+  proxyReqPathResolver(req) {
+    const url = req.originalUrl.replace('/action/', '/api/');
+    console.log('[proxy]', req.method, req.originalUrl, '→', url);
+    return parsePath(url);
+  },
+  proxyReqOptDecorator: decorateHeaders,
+}));
 
-// Composite search  (/action/composite/v3/ → /api/composite/v1/ on backend)
-app.use('/action/composite/v3/*', makeProxy(compose));
+// Composite search (v3 path → v1 on backend)
+app.use(['/action/composite/v3/search'], proxy(BASE_URL, {
+  https: true,
+  limit: '30mb',
+  proxyReqPathResolver(req) {
+    const url = req.originalUrl.replace('/action/composite/v3/', '/api/composite/v1/');
+    console.log('[proxy]', req.method, req.originalUrl, '→', url);
+    return parsePath(url);
+  },
+  proxyReqOptDecorator: decorateHeaders,
+}));
 
-// Framework + channel  (no path rewrite)
-app.use(
-  ['/api/framework/v1/*', '/api/channel/v1/*', '/learner/framework/v1/*'],
-  makeProxy(null),
-);
+// Program + bulk question operations
+app.use([
+  '/action/program/v1/*',
+  '/action/question/v2/bulkUpload',
+  '/action/question/v2/bulkUploadStatus',
+], proxy(BASE_URL, {
+  https: true,
+  limit: '30mb',
+  proxyReqPathResolver(req) {
+    const url = req.originalUrl.replace('/action/', '/api/');
+    console.log('[proxy]', req.method, req.originalUrl, '→', url);
+    return parsePath(url);
+  },
+  proxyReqOptDecorator: decorateHeaders,
+}));
 
-// Blob-storage assets served through portal proxy
-app.use('/assets/public/*', makeProxy(null));
+// Catch-all for any remaining /api, /assets, /action paths
+app.use(['/api', '/assets', '/action'], proxy(BASE_URL, {
+  https: true,
+  limit: '30mb',
+  proxyReqPathResolver(req) {
+    console.log('[proxy]', req.method, req.url);
+    return parsePath(req.url);
+  },
+  proxyReqOptDecorator: decorateHeaders,
+}));
 
-// Catch-all for any remaining /action and /api paths
-app.use(['/action', '/api'], makeProxy(action));
+// Blob-storage assets via portal proxy
+app.use(['/assets/public/*'], proxy(BASE_URL, {
+  https: true,
+  proxyReqPathResolver(req) {
+    return parsePath(`https://${BASE_URL}${req.originalUrl}`);
+  },
+}));
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
