@@ -19,6 +19,8 @@ export default defineConfig(({ mode }) => {
 
     // Expose only non-sensitive dev config to the browser bundle.
     // Auth tokens stay server-side (used only in proxy-config.ts).
+    // Also replace process.env.NODE_ENV so the library build doesn't
+    // reference the Node.js `process` global when loaded in a browser.
     define: {
       __EDITOR_ENV__: JSON.stringify({
         CONTENT_ID: env.CONTENT_ID ?? '',
@@ -29,6 +31,7 @@ export default defineConfig(({ mode }) => {
         DID:        env.DID        ?? '',
         MODE:       env.MODE       ?? '',
       }),
+      'process.env.NODE_ENV': JSON.stringify(mode === 'development' ? 'development' : 'production'),
     },
 
     build: {
