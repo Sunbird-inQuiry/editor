@@ -32,7 +32,7 @@ dotenv.config();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const BASE_URL   = (process.env.BASE_URL   || 'dev.sunbirded.org').replace(/^https?:\/\//, '');
+const BASE_URL   = (process.env.BASE_URL   || 'test.sunbirded.org').replace(/^https?:\/\//, '');
 const AUTH_TOKEN = process.env.AUTH_TOKEN  || '';
 const USER_TOKEN = process.env.USER_TOKEN  || '';
 const PORT       = parseInt(process.env.PORT   || '9001', 10);
