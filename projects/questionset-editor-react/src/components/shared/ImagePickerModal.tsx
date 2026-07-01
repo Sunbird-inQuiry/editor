@@ -266,12 +266,12 @@ function UploadTab({ onUploaded, triggerRef }: UploadTabProps) {
       </div>
 
       {/* Copyright & License — informational only */}
-      <div style={{ borderTop: '1px solid var(--sb-border)', paddingTop: 16 }}>
-        <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--sb-text)', margin: '0 0 6px' }}>
+      <div style={{ borderTop: '1px solid var(--sb-border)', paddingTop: 14 }}>
+        <p style={{ fontWeight: 700, fontSize: 12, color: 'var(--sb-text)', margin: '0 0 4px' }}>
           Copyright &amp; License
           <span style={{ color: 'var(--sb-red)', marginLeft: 2 }}>*</span>
         </p>
-        <p style={{ fontSize: 13, color: 'var(--sb-text-2)', lineHeight: 1.65, margin: 0 }}>
+        <p style={{ fontSize: 11, color: 'var(--sb-text-muted)', lineHeight: 1.6, margin: 0 }}>
           {COPYRIGHT_TEXT}
         </p>
       </div>
@@ -327,7 +327,8 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
       <div
         style={{
           background: 'var(--sb-card)', borderRadius: 18,
-          width: 680, maxWidth: '100%', maxHeight: 'calc(100vh - 48px)',
+          width: 680, maxWidth: '100%',
+          height: 580, maxHeight: 'calc(100vh - 48px)',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
           boxShadow: 'var(--sb-shadow-deep)',
         }}
