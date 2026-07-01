@@ -1,3 +1,11 @@
+export interface ITermAssociation {
+  identifier: string;
+  code: string;
+  name: string;
+  category: string;
+  status?: string;
+}
+
 export interface ITerm {
   identifier: string;
   code: string;
@@ -6,6 +14,7 @@ export interface ITerm {
   index?: number;
   category?: string;
   status?: string;
+  associations?: ITermAssociation[];
 }
 
 export interface ICategory {

@@ -1,5 +1,6 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react';
+import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import type { ITerm } from '../../types/framework';
 import { Icon } from '../shared/Icon';
 import type { ICategoryField } from '../../api/categoryDefinition';
 import styles from './SparkMetaForm.module.scss';
@@ -176,6 +177,40 @@ function buildOptions(
   }
 
   return [];
+}
+
+// ---------------------------------------------------------------------------
+// Cascading options — filter child options by parent term's associations
+// ---------------------------------------------------------------------------
+
+function buildCascadedOptions(
+  field: ICategoryField,
+  frameworkTerms: Map<string, FrameworkTerm[]> | undefined,
+  formValues: Record<string, unknown>,
+): SelectOption[] {
+  if (!field.depends?.length || !frameworkTerms) {
+    return buildOptions(field, frameworkTerms);
+  }
+
+  // Use the most specific parent (last entry in depends[])
+  const parentCode = field.depends[field.depends.length - 1];
+  const parentValue = String(formValues[parentCode] ?? '');
+  if (!parentValue) return [];
+
+  // Find the selected parent term
+  const parentTerms = frameworkTerms.get(parentCode) ?? [];
+  const parentTerm = parentTerms.find(t => t.name === parentValue) as (ITerm) | undefined;
+
+  if (!parentTerm?.associations?.length) {
+    // No associations defined — show all terms for this category
+    return buildOptions(field, frameworkTerms);
+  }
+
+  // Filter parent's associations to only those matching this field's category
+  const filtered = parentTerm.associations.filter(a => a.category === field.code);
+  if (filtered.length === 0) return buildOptions(field, frameworkTerms);
+
+  return filtered.map(a => ({ value: a.name, label: a.name }));
 }
 
 // ---------------------------------------------------------------------------
@@ -369,10 +404,40 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
     formState: { errors, isValid },
     reset,
     trigger,
+    watch,
+    setValue,
   } = useForm({
     defaultValues: buildDefaultValues(fields, values, section),
     mode: 'onChange',
   });
+
+  // Current values of all form fields — used to compute cascaded options.
+  const watchedValues = watch();
+
+  // Map from each field code to the list of fields that depend on it.
+  // Used to reset child fields when a parent changes.
+  const dependentsMap = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const f of fields) {
+      for (const dep of f.depends ?? []) {
+        if (!map[dep]) map[dep] = [];
+        map[dep].push(f.code);
+      }
+    }
+    return map;
+  }, [fields]);
+
+  const resetDependents = useCallback((parentCode: string) => {
+    for (const dep of dependentsMap[parentCode] ?? []) {
+      setValue(dep, '');
+      onChange(dep, '');
+      // Recursively reset grandchildren
+      for (const grandDep of dependentsMap[dep] ?? []) {
+        setValue(grandDep, '');
+        onChange(grandDep, '');
+      }
+    }
+  }, [dependentsMap, setValue, onChange]);
 
   // Sync form values when values, section, or frameworkTerms change.
   // frameworkTerms is included so the reset fires once terms arrive — the
@@ -481,11 +546,12 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
 
                 // ── select (single) ───────────────────────────────────────
                 if (inputType === 'select') {
-                  const options = buildOptions(field, frameworkTerms);
+                  // Use cascaded options when field has depends[] — filters by
+                  // parent term's associations (board→medium→gradeLevel→subject).
+                  const options = buildCascadedOptions(field, frameworkTerms, watchedValues);
                   const currentVal = String(rhfField.value ?? '');
-                  // If the saved value isn't in the option list yet (framework
-                  // still loading or API unavailable), add it as a synthetic
-                  // option so the select always shows the saved value.
+                  // Add saved value as a synthetic option when options aren't
+                  // loaded yet (framework loading / API down).
                   const displayOptions =
                     currentVal && !options.find((o) => o.value === currentVal)
                       ? [{ value: currentVal, label: currentVal }, ...options]
@@ -496,8 +562,11 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                       className={`${styles.select} ${error ? styles.inputError : ''}`}
                       value={currentVal}
                       onChange={(e) => {
-                        rhfField.onChange(e.target.value);
-                        onChange(field.code, e.target.value);
+                        const newVal = e.target.value;
+                        rhfField.onChange(newVal);
+                        onChange(field.code, newVal);
+                        // Reset all fields that depend on this one
+                        resetDependents(field.code);
                       }}
                       onBlur={rhfField.onBlur}
                       disabled={isDisabled}
