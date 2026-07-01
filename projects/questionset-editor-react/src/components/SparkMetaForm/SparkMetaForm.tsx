@@ -374,13 +374,14 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
     mode: 'onChange',
   });
 
-  // Sync form values when external `values` or `section` changes (e.g. node switch / tab change)
+  // Sync form values when values, section, or frameworkTerms change.
+  // frameworkTerms is included so the reset fires once terms arrive — the
+  // select can only show a saved value after its option list is populated.
   useEffect(() => {
     reset(buildDefaultValues(fields, values, section));
-    // Re-trigger validation after reset
     void trigger();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(values), section]);
+  }, [JSON.stringify(values), section, frameworkTerms]);
 
   // Notify parent of validity changes
   useEffect(() => {
@@ -481,11 +482,19 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                 // ── select (single) ───────────────────────────────────────
                 if (inputType === 'select') {
                   const options = buildOptions(field, frameworkTerms);
+                  const currentVal = String(rhfField.value ?? '');
+                  // If the saved value isn't in the option list yet (framework
+                  // still loading or API unavailable), add it as a synthetic
+                  // option so the select always shows the saved value.
+                  const displayOptions =
+                    currentVal && !options.find((o) => o.value === currentVal)
+                      ? [{ value: currentVal, label: currentVal }, ...options]
+                      : options;
                   return (
                     <select
                       id={fieldId}
                       className={`${styles.select} ${error ? styles.inputError : ''}`}
-                      value={String(rhfField.value ?? '')}
+                      value={currentVal}
                       onChange={(e) => {
                         rhfField.onChange(e.target.value);
                         onChange(field.code, e.target.value);
@@ -496,7 +505,7 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                       aria-describedby={error ? `${fieldId}-error` : undefined}
                     >
                       <option value="">{field.placeholder ?? `Select ${field.label}`}</option>
-                      {options.map((opt) => (
+                      {displayOptions.map((opt) => (
                         <option key={opt.value} value={opt.value}>
                           {opt.label}
                         </option>
