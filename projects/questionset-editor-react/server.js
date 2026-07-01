@@ -47,11 +47,83 @@ app.get('/latex/convert', convert);
 app.post('/latex/convert', bodyParser.json({ limit: '1mb' }), convert);
 
 // ── Static assets ─────────────────────────────────────────────────────────────
-// dist/  → built web component (JS, CSS, assets)
-// root   → index.html test harness + public/
+// Serve built web component assets from dist/ (JS, CSS, ckeditor, fonts…).
+// Do NOT serve the project root — index.html there is the Vite dev entry and
+// references .tsx files that Express cannot compile.
 app.use(express.static(join(__dirname, 'dist')));
 app.use(express.static(join(__dirname, 'public')));
-app.use(express.static(__dirname));
+
+// ── Test-harness page ─────────────────────────────────────────────────────────
+// Dynamically rendered so env vars (CONTENT_ID, CHANNEL, …) are injected at
+// request time — same idea as Vite's __EDITOR_ENV__ injection at dev-start.
+app.get(['/', '/index.html'], (req, res) => {
+  const contentId = process.env.CONTENT_ID || '';
+  const channel   = process.env.CHANNEL    || '';
+  const framework = process.env.FRAMEWORK  || 'NCF';
+  const mode      = process.env.MODE       || 'edit';
+
+  const context = JSON.stringify({
+    authToken:  '',
+    userId:     'user-001',
+    channel,
+    pdata:      { id: 'sunbird.portal', ver: '1.0' },
+    env:        'questionset_editor',
+    contentId,
+    identifier: contentId,
+    framework,
+  });
+
+  const config = JSON.stringify({
+    mode,
+    objectType:      'QuestionSet',
+    primaryCategory: 'Practice Question Set',
+    maxDepth:        3,
+  });
+
+  res.setHeader('Content-Type', 'text/html');
+  res.send(`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuML Editor – Standalone</title>
+
+  <!-- Resolve React/ReactDOM peer-deps that are external in the dist bundle -->
+  <script type="importmap">
+  {
+    "imports": {
+      "react":             "https://esm.sh/react@18",
+      "react/jsx-runtime": "https://esm.sh/react@18/jsx-runtime",
+      "react-dom":         "https://esm.sh/react-dom@18",
+      "react-dom/client":  "https://esm.sh/react-dom@18/client"
+    }
+  }
+  <\/script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <!-- CKEditor must be on window before the WC initialises -->
+  <script src="/ckeditor/ckeditor.js"><\/script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { height: 100vh; overflow: hidden; }
+    sb-questionset-editor { display: block; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <sb-questionset-editor id="editor"></sb-questionset-editor>
+
+  <script type="module">
+    import { registerQuestionsetEditor } from '/index.js';
+    registerQuestionsetEditor();
+
+    const editor = document.getElementById('editor');
+    editor.setAttribute('context', ${JSON.stringify(context)});
+    editor.setAttribute('config',  ${JSON.stringify(config)});
+  <\/script>
+</body>
+</html>`);
+});
 
 // ── Proxy helpers ─────────────────────────────────────────────────────────────
 
