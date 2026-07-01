@@ -100,6 +100,11 @@ app.get(['/', '/index.html'], (req, res) => {
   }
   <\/script>
 
+  <!-- Plus Jakarta Sans — same font the web component injects into shadow DOM -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="/style.css" />
   <!-- CKEditor must be on window before the WC initialises -->
   <script src="/ckeditor/ckeditor.js"><\/script>
@@ -118,8 +123,8 @@ app.get(['/', '/index.html'], (req, res) => {
     registerQuestionsetEditor();
 
     const editor = document.getElementById('editor');
-    editor.setAttribute('context', ${JSON.stringify(context)});
-    editor.setAttribute('config',  ${JSON.stringify(config)});
+    editor.setAttribute('context', '${context}');
+    editor.setAttribute('config',  '${config}');
   <\/script>
 </body>
 </html>`);
