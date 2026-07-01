@@ -146,19 +146,28 @@ function buildOptions(
   field: ICategoryField,
   frameworkTerms?: Map<string, FrameworkTerm[]>,
 ): SelectOption[] {
-  // 1. Framework terms map — highest priority when sourceCategory is set
-  if (field.sourceCategory && frameworkTerms) {
-    const terms = frameworkTerms.get(field.sourceCategory);
+  // 1. Framework terms — use sourceCategory if set, otherwise fall back to field.code.
+  //    Sunbird stores board/medium/gradeLevel/subject as the term NAME (not identifier),
+  //    so we use t.name as the option value to ensure the saved value matches.
+  if (frameworkTerms) {
+    const termKey = field.sourceCategory ?? field.code;
+    const terms = frameworkTerms.get(termKey);
     if (terms && terms.length > 0) {
-      return terms.map((t) => ({ value: t.identifier, label: t.name }));
+      return terms.map((t) => ({ value: t.name, label: t.name }));
     }
   }
 
-  // 2. Inline range (framework-driven, array of { name, identifier })
+  // 2. Inline range — can be { name, identifier } objects, plain strings, or numbers
   if (Array.isArray(field.range)) {
-    return (field.range as unknown[])
-      .filter(isRangeItem)
-      .map((item) => ({ value: item.identifier, label: item.name }));
+    return (field.range as unknown[]).map((item) => {
+      if (item !== null && typeof item === 'object') {
+        const o = item as Record<string, unknown>;
+        const v = String(o.identifier ?? o.name ?? '');
+        const l = String(o.label ?? o.name ?? v);
+        return { value: v, label: l };
+      }
+      return { value: String(item), label: String(item) };
+    });
   }
 
   // 3. Enum — plain string array
@@ -183,11 +192,14 @@ function buildDefaultValues(
     if (!f.visible || !fieldMatchesSection(f, section)) continue;
     const v = values[f.code];
     if (f.inputType === 'multiselect' || f.inputType === 'keywords') {
-      defaults[f.code] = Array.isArray(v) ? v : v ? [v] : [];
+      defaults[f.code] = Array.isArray(v) ? v : v ? [String(v)] : [];
     } else if (f.inputType === 'checkbox') {
       defaults[f.code] = Boolean(v);
     } else {
-      defaults[f.code] = v !== undefined && v !== null ? String(v) : '';
+      // API stores board/medium/gradeLevel/subject as arrays — extract the first
+      // element so the single-select value matches the option string.
+      const scalar = Array.isArray(v) ? (v[0] ?? '') : v;
+      defaults[f.code] = scalar !== undefined && scalar !== null ? String(scalar) : '';
     }
   }
   return defaults;
