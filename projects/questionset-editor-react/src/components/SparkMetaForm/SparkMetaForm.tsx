@@ -400,9 +400,16 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
           || field.span === 'full';
         const fieldClass = [styles.field, isFullWidth ? styles.fieldFull : ''].filter(Boolean).join(' ');
 
+        // showTimer: separator above + no separate label (label is inline with checkbox)
+        const isShowTimer = field.code === 'showTimer';
+
         return (
           <div key={field.code} className={fieldClass}>
-            {/* Label */}
+            {isShowTimer && (
+              <div style={{ gridColumn: '1 / -1', borderTop: '1px solid var(--sb-border)', margin: '8px 0 4px' }} />
+            )}
+            {/* Label — hidden for showTimer (text shown inside the checkbox row) */}
+            {!isShowTimer && (
             <label className={styles.label} htmlFor={fieldId}>
               {field.label}
               {field.required && (
@@ -411,6 +418,7 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                 </span>
               )}
             </label>
+            )}
 
             {/* Field control */}
             <Controller
@@ -520,8 +528,9 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                         aria-invalid={!!error}
                         aria-describedby={error ? `${fieldId}-error` : undefined}
                       />
-                      <span className={styles.checkboxLabel}>
-                        {field.placeholder ?? ''}
+                      <span className={styles.checkboxLabel}
+                        style={isShowTimer ? { fontWeight: 700, fontSize: 15 } : undefined}>
+                        {field.label ?? field.placeholder ?? ''}
                       </span>
                     </div>
                   );
@@ -567,26 +576,39 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                   );
                 }
 
-                // ── timepicker (HH:mm:ss ↔ seconds) ──────────────────────
-                if (inputType === 'timepicker' || field.code === 'maxTime' || field.code === 'warningTime') {
+                // ── timer — HH : mm split inputs ─────────────────────────
+                if (inputType === 'timepicker' || inputType === 'timer' || field.code === 'maxTime' || field.code === 'warningTime') {
                   const numVal = Number(rhfField.value) || 0;
+                  const hms    = secondsToHms(numVal).split(':');
+                  const hh = hms[0] ?? '00';
+                  const mm = hms[1] ?? '00';
+                  const update = (newHH: string, newMM: string) => {
+                    const secs = hmsToSeconds(`${newHH.padStart(2,'0')}:${newMM.padStart(2,'0')}:00`);
+                    rhfField.onChange(secs);
+                    onChange(field.code, secs);
+                  };
                   return (
-                    <input
-                      id={fieldId}
-                      type="time"
-                      step="1"
-                      className={`${styles.input} ${error ? styles.inputError : ''}`}
-                      value={secondsToHms(numVal)}
-                      onChange={(e) => {
-                        const secs = hmsToSeconds(e.target.value);
-                        rhfField.onChange(secs);
-                        onChange(field.code, secs);
-                      }}
-                      onBlur={rhfField.onBlur}
-                      disabled={isDisabled}
-                      aria-invalid={!!error}
-                      aria-describedby={error ? `${fieldId}-error` : undefined}
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <input
+                        type="text" maxLength={2} placeholder="HH"
+                        className={styles.input}
+                        style={{ width: 72, textAlign: 'center' }}
+                        value={hh === '00' ? '' : hh}
+                        onChange={e => update(e.target.value.replace(/\D/g,''), mm)}
+                        onBlur={rhfField.onBlur}
+                        disabled={isDisabled}
+                      />
+                      <span style={{ fontWeight: 700, color: 'var(--sb-text-muted)', fontSize: 18 }}>:</span>
+                      <input
+                        type="text" maxLength={2} placeholder="mm"
+                        className={styles.input}
+                        style={{ width: 72, textAlign: 'center' }}
+                        value={mm === '00' ? '' : mm}
+                        onChange={e => update(hh, e.target.value.replace(/\D/g,''))}
+                        onBlur={rhfField.onBlur}
+                        disabled={isDisabled}
+                      />
+                    </div>
                   );
                 }
 

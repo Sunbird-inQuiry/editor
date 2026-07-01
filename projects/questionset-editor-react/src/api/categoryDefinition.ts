@@ -145,9 +145,9 @@ export async function getCategoryDefinition(
   const objectMetadata = (ocd?.objectMetadata ?? {}) as Record<string, unknown>;
   const config = (objectMetadata.config ?? {}) as Record<string, unknown>;
 
-  // Move primaryCategory (Type) to sit right after name so they appear
-  // side-by-side in the 2-column form grid (matching the design).
   const rootFormRaw = parseForm(forms.create);
+
+  // Move primaryCategory (Type) beside name → same grid row
   const nameIdx = rootFormRaw.findIndex(f => f.code === 'name');
   const typeIdx = rootFormRaw.findIndex(f => f.code === 'primaryCategory');
   if (nameIdx !== -1 && typeIdx !== -1 && typeIdx !== nameIdx + 1) {
@@ -155,8 +155,17 @@ export async function getCategoryDefinition(
     rootFormRaw.splice(nameIdx + 1, 0, typeField);
   }
 
+  // Reorder Behaviour fields to match design:
+  // maxTime | maxAttempts → requiresSubmit | summaryType → showTimer (full-width last)
+  const BEHAVIOUR_ORDER = ['maxTime', 'maxAttempts', 'requiresSubmit', 'summaryType', 'showTimer'];
+  const behaviourFields = rootFormRaw.filter(f => BEHAVIOUR_ORDER.includes(f.code));
+  const otherFields     = rootFormRaw.filter(f => !BEHAVIOUR_ORDER.includes(f.code));
+  const sortedBehaviour = BEHAVIOUR_ORDER
+    .map(code => behaviourFields.find(f => f.code === code))
+    .filter((f): f is ICategoryField => !!f);
+
   return {
-    rootForm: rootFormRaw,
+    rootForm: [...otherFields, ...sortedBehaviour],
     unitForm: parseForm(forms.unitMetadata, true),
     childForm: parseForm(forms.childMetadata ?? forms.questionMetadata),
     searchForm: parseForm(forms.search ?? forms.searchConfig),
