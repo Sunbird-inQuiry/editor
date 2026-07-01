@@ -73,18 +73,36 @@ function normalizeField(raw: Record<string, unknown>, section?: string): ICatego
   };
 }
 
-function parseForm(form: unknown): ICategoryField[] {
+// Maps API group names to canonical section strings used by the tab filter.
+const GROUP_SECTION_MAP: Record<string, string> = {
+  'Basic details':            'Details',
+  'Framework details':        'Audience & Curriculum',
+  'Question set behaviour':   'Behaviour',
+  // Section (unitMetadata) — no groups, assigned by field code below
+};
+
+// unitMetadata fields that belong to the Behaviour tab.
+const UNIT_BEHAVIOUR_FIELDS = new Set([
+  'maxQuestions', 'shuffle', 'showFeedback', 'showSolutions', 'showHint',
+]);
+
+function parseForm(form: unknown, isUnit = false): ICategoryField[] {
   const properties = (form as { properties?: unknown })?.properties;
   if (!Array.isArray(properties)) return [];
   const fields: ICategoryField[] = [];
   for (const item of properties as Array<Record<string, unknown>>) {
     if (Array.isArray(item.fields)) {
-      const sectionTitle = (item.title as string) ?? (item.name as string) ?? undefined;
+      const groupName = (item.name as string) ?? (item.title as string) ?? '';
+      const section = GROUP_SECTION_MAP[groupName] ?? groupName ?? 'Details';
       for (const f of item.fields as Array<Record<string, unknown>>) {
-        if (f.code) fields.push(normalizeField(f, sectionTitle));
+        if (f.code) fields.push(normalizeField(f, section));
       }
     } else if (item.code) {
-      fields.push(normalizeField(item));
+      const code = item.code as string;
+      const section = isUnit
+        ? (UNIT_BEHAVIOUR_FIELDS.has(code) ? 'Behaviour' : 'Details')
+        : 'Details';
+      fields.push(normalizeField(item, section));
     }
   }
   return fields.sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
@@ -126,7 +144,7 @@ export async function getCategoryDefinition(
 
   return {
     rootForm: parseForm(forms.create),
-    unitForm: parseForm(forms.unitMetadata),
+    unitForm: parseForm(forms.unitMetadata, true),
     childForm: parseForm(forms.childMetadata ?? forms.questionMetadata),
     searchForm: parseForm(forms.search ?? forms.searchConfig),
     relationalForm: parseForm(forms.relationalMetadata),

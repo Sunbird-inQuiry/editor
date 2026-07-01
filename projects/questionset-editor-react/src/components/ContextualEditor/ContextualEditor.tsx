@@ -8,8 +8,6 @@ import { useUiStore } from '../../store/ui.store';
 import { useFramework } from '../../hooks/useFramework';
 import SparkMetaForm from '../SparkMetaForm/SparkMetaForm';
 import QuestionDetail from '../QuestionDetail/QuestionDetail';
-import SetBehaviourForm from '../BehaviourForm/SetBehaviourForm';
-import SectionBehaviourForm from '../SectionBehaviourForm/SectionBehaviourForm';
 
 const QuestionEditor = lazy(() => import('../QuestionEditor/QuestionEditor'));
 const QumlPlayer    = lazy(() => import('../QumlPlayer/QumlPlayer'));
@@ -343,7 +341,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                         onChange={handleFormChange}
                         onValidityChange={handleFormValidityChange}
                         readOnly={isReadOnly}
-                        section={undefined}
+                        section="Details"
                         frameworkTerms={frameworkTerms}
                       />
                     ) : (
@@ -352,7 +350,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   </div>
                 )}
 
-                {/* ── Set: audience tab ── */}
+                {/* ── Set: audience & curriculum tab ── */}
                 {isCurrentNodeRoot && activeTab === 'audience' && (
                   <div className="ce-tabbody">
                     <h2 className="ce-secttl">Target Audience</h2>
@@ -369,21 +367,30 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   </div>
                 )}
 
-                {/* ── Set: behaviour tab ── */}
-                {isCurrentNodeRoot && activeTab === 'behaviour' && (
+                {/* ── Set/Section: behaviour tab (data-driven from category definition) ── */}
+                {!isCurrentNodeQuestion && activeTab === 'behaviour' && (
                   <div className="ce-tabbody">
-                    <h2 className="ce-secttl">Behaviour & Scoring</h2>
-                    <p className="ce-sectsub">How the set is timed, attempted and summarised.</p>
-                    <SetBehaviourForm nodeId={selectedNodeId ?? ''} readOnly={isReadOnly} />
-                  </div>
-                )}
-
-                {/* ── Section: behaviour tab ── */}
-                {isCurrentNodeFolder && !isCurrentNodeRoot && activeTab === 'behaviour' && (
-                  <div className="ce-tabbody">
-                    <h2 className="ce-secttl">Section Behaviour</h2>
-                    <p className="ce-sectsub">Controls applied to this section inside the set.</p>
-                    <SectionBehaviourForm nodeId={selectedNodeId ?? ''} readOnly={isReadOnly} />
+                    {isCurrentNodeRoot && (
+                      <>
+                        <h2 className="ce-secttl">Behaviour & Scoring</h2>
+                        <p className="ce-sectsub">How the set is timed, attempted and summarised.</p>
+                      </>
+                    )}
+                    {isCurrentNodeFolder && !isCurrentNodeRoot && (
+                      <>
+                        <h2 className="ce-secttl">Section Behaviour</h2>
+                        <p className="ce-sectsub">Controls applied to this section inside the set.</p>
+                      </>
+                    )}
+                    <SparkMetaForm
+                      fields={formConfig ?? []}
+                      values={activeNodeMeta as Record<string, unknown>}
+                      onChange={handleFormChange}
+                      onValidityChange={handleFormValidityChange}
+                      readOnly={isReadOnly}
+                      section="Behaviour"
+                      frameworkTerms={frameworkTerms}
+                    />
                   </div>
                 )}
 
