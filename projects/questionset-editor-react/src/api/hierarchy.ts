@@ -45,6 +45,23 @@ function mapToINode(raw: unknown, parentId?: string): INode {
   };
 }
 
+// Fields not present in the hierarchy response that are needed for the form.
+const EXTRA_FIELDS = 'instructions,outcomeDeclaration';
+
+export async function readQuestionSet(
+  contentId: string,
+): Promise<Record<string, unknown>> {
+  const response = await apiClient.get(
+    `/action/questionset/v2/read/${contentId}`,
+    { params: { mode: 'edit', fields: EXTRA_FIELDS } },
+  );
+  return (
+    response.data?.result?.questionSet as Record<string, unknown> | undefined ??
+    response.data?.result?.questionset as Record<string, unknown> | undefined ??
+    {}
+  );
+}
+
 export async function readHierarchy(
   contentId: string,
 ): Promise<{ content: Record<string, unknown>; rootNode: INode }> {

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import type { IEditorConfig } from '../types/editor';
 import { useEditorStore } from '../store/editor.store';
 import { useTreeStore } from '../store/tree.store';
-import { readHierarchy } from '../api/hierarchy';
+import { readHierarchy, readQuestionSet } from '../api/hierarchy';
+import { useTreeStore as treeStoreModule } from '../store/tree.store';
 import { getCategoryDefinition } from '../api/categoryDefinition';
 import { setApiBaseUrl } from '../api/client';
 
@@ -17,7 +18,7 @@ export function useEditorInit({ config, onError }: UseEditorInitOptions) {
   const [isReady, setIsReady] = useState(false);
 
   const { setEditorConfig, setEditorMode, setCategoryDefinition, setReviewComments } = useEditorStore();
-  const { setTreeData, selectNode } = useTreeStore();
+  const { setTreeData, selectNode, updateNode } = useTreeStore();
 
   useEffect(() => {
     let cancelled = false;
@@ -40,6 +41,17 @@ export function useEditorInit({ config, onError }: UseEditorInitOptions) {
             const nodes = rootNode ? [rootNode] : [];
             setTreeData(nodes);
             if (rootNode) selectNode(rootNode.id);
+          }
+
+          // Fetch fields not included in hierarchy (instructions, outcomeDeclaration).
+          // Merge into the root node so the Details form shows the correct values.
+          if (rootNode && !cancelled) {
+            try {
+              const extra = await readQuestionSet(contentId);
+              if (!cancelled && Object.keys(extra).length > 0) {
+                updateNode(rootNode.id, extra);
+              }
+            } catch { /* non-critical — form still renders without instructions */ }
           }
 
           const primaryCategory = config.config.primaryCategory ?? 'Question Set';
