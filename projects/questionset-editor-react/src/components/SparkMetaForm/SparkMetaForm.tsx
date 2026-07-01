@@ -346,8 +346,9 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
   frameworkTerms,
 }) => {
   // Filter to only visible fields for this section
+  // appIcon is handled by the card-header thumbnail, not the form.
   const visibleFields = fields.filter(
-    (f) => f.visible && fieldMatchesSection(f, section),
+    (f) => f.visible && f.inputType !== 'appIcon' && fieldMatchesSection(f, section),
   );
 
   const {

@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useRef, useEffect, lazy, Suspense, Fragment } from 'react';
+import ImagePickerModal from '../shared/ImagePickerModal';
 import { Icon } from '../shared/Icon';
 import type { EditorMode, ToolbarAction } from '../../types/editor';
 import { QUESTION_TYPE_LABELS, type QuestionType } from '../../types/question';
@@ -90,6 +91,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
 
   const [activeTab, setActiveTab] = useState<TabKey>('details');
   const [inlineEditorOpen, setInlineEditorOpen] = useState(false);
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [isTitleEditing, setIsTitleEditing] = useState(false);
   const [titleValue, setTitleValue] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -228,9 +230,30 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
               {/* Card header */}
               <div className="ce-card-head">
                 {isCurrentNodeRoot && (
-                  <div className="ce-thumb">
-                    <Icon name="image" size={28} />
-                  </div>
+                  <>
+                    <button
+                      type="button"
+                      className="ce-thumb"
+                      title={isReadOnly ? undefined : 'Click to change icon'}
+                      onClick={() => !isReadOnly && setIconPickerOpen(true)}
+                      style={{ cursor: isReadOnly ? 'default' : 'pointer', border: 'none', padding: 0, background: 'transparent' }}
+                    >
+                      {activeNodeMeta?.appIcon ? (
+                        <img src={activeNodeMeta.appIcon as string} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+                      ) : (
+                        <Icon name="image" size={28} />
+                      )}
+                    </button>
+                    {iconPickerOpen && (
+                      <ImagePickerModal
+                        onSelect={(url) => {
+                          if (selectedNodeId) handleFormChange('appIcon', url);
+                          setIconPickerOpen(false);
+                        }}
+                        onClose={() => setIconPickerOpen(false)}
+                      />
+                    )}
+                  </>
                 )}
                 {isCurrentNodeFolder && !isCurrentNodeRoot && (
                   <div className="ce-thumb folder">
