@@ -60,3 +60,8 @@ project-sunbird-sunbird-questionset-editor-web-component-*
 /projects/questionset-editor-react/.env.local
 /projects/questionset-editor-react/.env.*.local
 /projects/questionset-editor-react/node_modules/.vite
+
+# Plan / design documents — not for version control
+DESIGN_PLAN.md
+*_plan.md
+*_overview.md
