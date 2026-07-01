@@ -66,11 +66,11 @@ function SpecialCharsPopup({ anchor, onClose }: { anchor: DOMRect; onClose: () =
     ? Object.values(SPECIAL_CHAR_GROUPS).flat()
     : SPECIAL_CHAR_GROUPS[category] ?? [];
 
-  const W = 340;
-  const H = 340;
+  const W = 390;
+  const H = 360;
   const spaceBelow = window.innerHeight - anchor.bottom - 8;
   const top = spaceBelow >= H ? anchor.bottom + 6 : Math.max(8, anchor.top - H - 6);
-  const left = Math.min(anchor.left, window.innerWidth - W - 8);
+  const left = Math.max(8, Math.min(anchor.left, window.innerWidth - W - 8));
 
   return createPortal(
     <div ref={ref} style={{
@@ -94,14 +94,14 @@ function SpecialCharsPopup({ anchor, onClose }: { anchor: DOMRect; onClose: () =
       </div>
 
       {/* Character grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 36px)', gap: 2, padding: 10, maxHeight: 240, overflowY: 'auto' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 34px)', gap: 2, padding: 10, maxHeight: 260, overflowY: 'auto' }}>
         {chars.map((item, i) => (
           <button key={i} type="button"
             onMouseDown={e => { e.preventDefault(); document.execCommand('insertText', false, item.char); onClose(); }}
             onMouseEnter={() => setHovered(item)}
             onMouseLeave={() => setHovered(null)}
             style={{
-              width: 34, height: 34, border: `1px solid ${hovered?.char === item.char ? 'var(--accent)' : 'transparent'}`,
+              width: 32, height: 32, border: `1px solid ${hovered?.char === item.char ? 'var(--accent)' : 'transparent'}`,
               borderRadius: 6, background: hovered?.char === item.char ? 'var(--accent-soft)' : 'transparent',
               cursor: 'pointer', fontSize: 15, display: 'grid', placeItems: 'center', fontFamily: 'inherit',
             }}
