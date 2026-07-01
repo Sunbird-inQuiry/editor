@@ -131,40 +131,61 @@ function SpecialCharsPopup({ anchor, onClose }: { anchor: DOMRect; onClose: () =
 function TablePickerPopup({ anchor, onClose }: { anchor: DOMRect; onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState({ r: 0, c: 0 });
+
   useEffect(() => {
     const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) onClose(); };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
+    // Delay to avoid closing on the same mousedown that opened the picker
+    const t = setTimeout(() => document.addEventListener('mousedown', h), 100);
+    return () => { clearTimeout(t); document.removeEventListener('mousedown', h); };
   }, [onClose]);
+
   const MAX = 10;
-  const estimatedH = 260;
-  const top = window.innerHeight - anchor.bottom > estimatedH ? anchor.bottom + 6 : anchor.top - estimatedH - 6;
+  const estimatedH = 280;
+  const spaceBelow = window.innerHeight - anchor.bottom - 8;
+  const top = spaceBelow >= estimatedH ? anchor.bottom + 6 : anchor.top - estimatedH - 6;
+  const left = Math.max(8, Math.min(anchor.left, window.innerWidth - (MAX * 22 + 28) - 8));
+
   const insertTable = (rows: number, cols: number) => {
     let html = '<table style="border-collapse:collapse;width:100%"><tbody>';
     for (let r = 0; r < rows; r++) {
       html += '<tr>';
-      for (let c = 0; c < cols; c++) html += '<td style="border:1px solid #ccc;padding:6px 8px;min-width:40px">&nbsp;</td>';
+      for (let c = 0; c < cols; c++) html += '<td style="border:1px solid #c4c4c4;padding:6px 10px;min-width:40px">&nbsp;</td>';
       html += '</tr>';
     }
-    html += '</tbody></table><p></p>';
+    html += '</tbody></table><p><br></p>';
     document.execCommand('insertHTML', false, html);
     onClose();
   };
+
+  const label = hover.r > 0 ? `${hover.r} × ${hover.c}` : '0 × 0';
+
   return createPortal(
-    <div ref={ref} style={{ position: 'fixed', top, right: Math.max(8, window.innerWidth - anchor.right), zIndex: 9999, background: '#fff', border: '1px solid var(--sb-border)', borderRadius: 14, boxShadow: 'var(--sb-shadow-deep)', padding: 12 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${MAX}, 22px)`, gap: 2, marginBottom: 8 }}>
+    <div ref={ref} style={{
+      position: 'fixed', top, left, zIndex: 9999,
+      background: '#fff', border: '1px solid #c4c4c4',
+      borderRadius: 4, boxShadow: '0 2px 8px rgba(0,0,0,.15)', padding: '8px 8px 6px',
+    }}>
+      <div
+        style={{ display: 'grid', gridTemplateColumns: `repeat(${MAX}, 22px)`, gap: 1, marginBottom: 6 }}
+        onMouseLeave={() => setHover({ r: 0, c: 0 })}
+      >
         {Array.from({ length: MAX }, (_, r) => Array.from({ length: MAX }, (_, c) => {
           const active = r < hover.r && c < hover.c;
           return (
             <div key={`${r}-${c}`}
               onMouseEnter={() => setHover({ r: r + 1, c: c + 1 })}
               onMouseDown={e => { e.preventDefault(); insertTable(r + 1, c + 1); }}
-              style={{ width: 22, height: 22, border: `1.5px solid ${active ? '#4a9ef8' : 'var(--sb-border)'}`, borderRadius: 3, background: active ? '#d0e9fd' : '#fff', cursor: 'pointer' }}
+              style={{
+                width: 22, height: 22,
+                border: `1px solid ${active ? '#4a9ef8' : '#bfbfbf'}`,
+                background: active ? '#d0e9fd' : '#fff',
+                cursor: 'pointer', boxSizing: 'border-box',
+              }}
             />
           );
         }))}
       </div>
-      <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--sb-text-muted)' }}>{hover.r > 0 ? `${hover.r} × ${hover.c}` : '0 × 0'}</div>
+      <div style={{ textAlign: 'center', fontSize: 11, color: '#555', fontWeight: 500 }}>{label}</div>
     </div>,
     document.body,
   );
