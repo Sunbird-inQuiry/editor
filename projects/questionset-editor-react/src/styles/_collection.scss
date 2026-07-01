@@ -467,6 +467,11 @@
 /* contenteditable body */
 .re-body { outline: none; }
 .re-body:empty::before { content: attr(data-ph); color: var(--sb-text-faint); }
+/* Make inserted tables and images discoverable */
+.re-body table { cursor: pointer; }
+.re-body table:hover { outline: 2px solid var(--accent-soft); }
+.re-body img { cursor: pointer; max-width: 100%; display: block; margin: 4px 0; }
+.re-body img:hover { outline: 2px solid var(--accent-soft); }
 .re-body ul, .re-body ol { margin: 6px 0; padding-left: 24px; }
 .re-body table { border-collapse: collapse; margin: 10px 0; width: 100%; }
 .re-body td { border: 1px solid var(--sb-border); padding: 6px 8px; min-width: 40px; }
