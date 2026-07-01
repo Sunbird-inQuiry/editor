@@ -490,6 +490,26 @@ export const SPECIAL_CHAR_GROUPS: Record<string, SpecialChar[]> = {
     {
       "char": "\u21a8",
       "title": "Up down arrow with base"
+    },
+    {
+      "char": "\ud83d\udd19",
+      "title": "Back with leftwards arrow above"
+    },
+    {
+      "char": "\ud83d\udd1a",
+      "title": "End with leftwards arrow above"
+    },
+    {
+      "char": "\ud83d\udd1b",
+      "title": "On with exclamation mark with left right arrow above"
+    },
+    {
+      "char": "\ud83d\udd1c",
+      "title": "Soon with rightwards arrow above"
+    },
+    {
+      "char": "\ud83d\udd1d",
+      "title": "Top with upwards arrow above"
     }
   ],
   "Latin": [
