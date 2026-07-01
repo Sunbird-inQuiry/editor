@@ -196,17 +196,34 @@ function ImageGrid({ selectedUrl, onSelectedChange }: ImageGridProps) {
 // ---------------------------------------------------------------------------
 
 interface UploadTabProps {
+  licenseAgreed: boolean;
+  onLicenseChange: (v: boolean) => void;
   onUploaded: (url: string) => void;
+  triggerRef: React.MutableRefObject<(() => void) | null>;
 }
 
-function UploadTab({ onUploaded }: UploadTabProps) {
+const COPYRIGHT_TEXT =
+  'I understand and confirm that all resources and assets created through the content editor or ' +
+  'uploaded on the platform shall be available for free and public use without limitations on the ' +
+  'platform (web portal, applications and any other end user interface that the platform would ' +
+  'enable) and will be licensed under terms & conditions and policy guidelines of the platform. ' +
+  'In doing so, the copyright and license of the original author is not infringed.';
+
+function UploadTab({ licenseAgreed, onLicenseChange, onUploaded, triggerRef }: UploadTabProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging,  setDragging]  = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error,     setError]     = useState('');
 
+  // Expose trigger to parent for "Upload & Use" footer button
+  useEffect(() => {
+    triggerRef.current = () => fileRef.current?.click();
+  }, [triggerRef]);
+
+  const canUpload = licenseAgreed && !uploading;
+
   const handle = async (file: File | undefined) => {
-    if (!file) return;
+    if (!file || !canUpload) return;
     if (!file.type.startsWith('image/')) { setError('Please select an image file.'); return; }
     if (file.size > 1024 * 1024)         { setError('File exceeds 1 MB limit.'); return; }
     setError('');
@@ -222,17 +239,19 @@ function UploadTab({ onUploaded }: UploadTabProps) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Drop zone */}
       <div
-        onDragOver={e => { e.preventDefault(); setDragging(true); }}
+        onDragOver={e => { e.preventDefault(); if (canUpload) setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={e => { e.preventDefault(); setDragging(false); void handle(e.dataTransfer.files?.[0]); }}
-        onClick={() => !uploading && fileRef.current?.click()}
+        onClick={() => canUpload && fileRef.current?.click()}
         style={{
-          border: `2px dashed ${dragging ? 'var(--accent)' : '#c4c4c4'}`,
-          borderRadius: 12, padding: '60px 40px', textAlign: 'center',
-          cursor: uploading ? 'default' : 'pointer',
-          background: dragging ? 'var(--accent-soft)' : '#fafafa',
+          border: `2px dashed ${dragging ? 'var(--accent)' : canUpload ? '#c4c4c4' : 'var(--sb-border)'}`,
+          borderRadius: 12, padding: '52px 40px', textAlign: 'center',
+          cursor: canUpload ? 'pointer' : 'default',
+          background: dragging ? 'var(--accent-soft)' : canUpload ? '#fafafa' : '#f9f9f9',
+          opacity: licenseAgreed ? 1 : 0.55,
           transition: 'all .15s', userSelect: 'none',
         }}
       >
@@ -251,6 +270,30 @@ function UploadTab({ onUploaded }: UploadTabProps) {
           onChange={e => { void handle(e.target.files?.[0]); e.target.value = ''; }}
         />
       </div>
+
+      {/* Copyright & License */}
+      <div style={{
+        borderTop: '1px solid var(--sb-border)', paddingTop: 16,
+      }}>
+        <label style={{ display: 'flex', gap: 12, cursor: 'pointer', alignItems: 'flex-start' }}>
+          <input
+            type="checkbox"
+            checked={licenseAgreed}
+            onChange={e => onLicenseChange(e.target.checked)}
+            style={{ marginTop: 2, flexShrink: 0, accentColor: 'var(--accent)', width: 15, height: 15 }}
+          />
+          <span>
+            <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--sb-text)' }}>
+              Copyright &amp; License
+              <span style={{ color: 'var(--sb-red)', marginLeft: 2 }}>*</span>
+            </span>
+            <span style={{ display: 'block', fontSize: 13, color: 'var(--sb-text-2)', lineHeight: 1.65, marginTop: 6 }}>
+              {COPYRIGHT_TEXT}
+            </span>
+          </span>
+        </label>
+      </div>
+
       {error && (
         <p style={{ fontSize: 13, color: 'var(--sb-red)', margin: 0 }}>{error}</p>
       )}
@@ -263,13 +306,16 @@ function UploadTab({ onUploaded }: UploadTabProps) {
 // ---------------------------------------------------------------------------
 
 export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModalProps) {
-  const [tab, setTab]               = useState<Tab>('my');
+  const [tab, setTab]                 = useState<Tab>('my');
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+  const [licenseAgreed, setLicenseAgreed] = useState(false);
+  const uploadTriggerRef              = useRef<(() => void) | null>(null);
 
-  // Reset selection when switching tabs
+  // Reset selection / license when switching tabs
   const switchTab = (next: Tab) => {
     setTab(next);
     setSelectedUrl(null);
+    if (next !== 'upload') setLicenseAgreed(false);
   };
 
   // Escape key to close
@@ -360,7 +406,12 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
             />
           )}
           {tab === 'upload' && (
-            <UploadTab onUploaded={url => onSelect(url)} />
+            <UploadTab
+              licenseAgreed={licenseAgreed}
+              onLicenseChange={setLicenseAgreed}
+              onUploaded={url => onSelect(url)}
+              triggerRef={uploadTriggerRef}
+            />
           )}
         </div>
 
@@ -370,7 +421,7 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
           gap: 10, padding: '16px 24px', borderTop: '1px solid var(--sb-border)',
         }}>
           <button type="button" className="ce-btn ghost" onClick={onClose}>Cancel</button>
-          {tab !== 'upload' && (
+          {tab !== 'upload' ? (
             <button
               type="button"
               className="ce-btn primary"
@@ -378,6 +429,16 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
               onClick={() => { if (selectedUrl) onSelect(selectedUrl); }}
             >
               Use Selected
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="ce-btn primary"
+              disabled={!licenseAgreed}
+              onClick={() => uploadTriggerRef.current?.()}
+            >
+              <Icon name="upload" size={15} />
+              Upload &amp; Use
             </button>
           )}
         </div>
