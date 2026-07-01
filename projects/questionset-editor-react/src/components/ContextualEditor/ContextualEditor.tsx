@@ -126,7 +126,9 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
 
   const handleFormChange = useCallback((code: string, value: unknown) => {
     if (!selectedNodeId) return;
-    updateNode(selectedNodeId, { [code]: value, metadata: { [code]: value } });
+    // Pass the field directly — do NOT nest inside metadata:{} which would
+    // produce a "metadata.metadata" property that the backend rejects.
+    updateNode(selectedNodeId, { [code]: value });
     onToolbarEvent({ action: 'onFormValueChange', data: { field: code, value } });
   }, [selectedNodeId, updateNode, onToolbarEvent]);
 

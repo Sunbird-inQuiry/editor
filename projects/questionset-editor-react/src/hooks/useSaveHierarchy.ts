@@ -13,7 +13,9 @@ function buildSavePayload(
   const nodesModified: Record<string, unknown> = {};
   const hierarchy: Record<string, unknown> = {};
 
-  const BASE_STRIP = new Set(['id', 'isFolder', 'isQuestion', 'children', 'parent', 'isNew', 'breadcrumb', 'title']);
+  // 'metadata' is stripped to prevent a nested metadata.metadata property
+  // that the hierarchy update API rejects with CLIENT_ERROR.
+  const BASE_STRIP = new Set(['id', 'isFolder', 'isQuestion', 'children', 'parent', 'isNew', 'breadcrumb', 'title', 'metadata']);
   const ARRAY_FIELDS = new Set(['audience', 'medium', 'gradeLevel', 'subject', 'keywords', 'language', 'topic']);
   const NUMBER_FIELDS = new Set(['copyrightYear', 'maxScore', 'expectedDuration']);
 
