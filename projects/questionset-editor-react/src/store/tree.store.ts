@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type { INode } from '../types/editor';
 import { useEditorStore } from './editor.store';
+import { detectNodeKind } from '../utils/nodeKind';
+import type { QuestionType } from '../types/question';
 
 interface TreeState {
   treeData: INode[];
@@ -120,11 +122,22 @@ export const useTreeStore = create<TreeState>((set, get) => ({
     const breadcrumb = getBreadcrumb(id);
     const activeNodeMeta = { ...(node?.metadata ?? {}), ...(treeCache[id] ?? {}) };
 
+    const kind = node ? detectNodeKind(node) : 'root';
     useEditorStore.getState().setNodeFlags({
-      isFolder: node?.isFolder ?? false,
-      isRoot: !node?.parent,
-      isQuestion: node?.isQuestion ?? false,
+      isFolder: kind === 'section',
+      isRoot:   kind === 'root',
+      isQuestion: kind === 'question',
     });
+
+    // Sync question store when a question node is selected so the editor knows the type
+    if (kind === 'question' && node) {
+      import('./question.store').then(({ useQuestionStore }) => {
+        const qType = (node.questionType ?? node.metadata?.questionType) as QuestionType | undefined;
+        useQuestionStore.getState().setActiveQuestion(
+          qType ? { identifier: node.id, name: node.name, objectType: 'Question', primaryCategory: node.primaryCategory ?? '', mimeType: 'application/vnd.sunbird.question', questionType: qType, body: (node.metadata?.body as string) ?? '', editorState: (node.metadata?.editorState as Record<string, unknown>) ?? {}, options: (node.metadata?.options as []) ?? undefined } : null
+        );
+      });
+    }
 
     set({ selectedNodeId: id, breadcrumb, activeNodeMeta });
   },

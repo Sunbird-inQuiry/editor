@@ -2,7 +2,7 @@ import { apiClient } from './client';
 import type { IQuestion, QuestionType, IOption, IMatchPair } from '../types/question';
 
 function buildInteractions(type: QuestionType, options: IOption[]): Record<string, unknown> {
-  if (type === 'mcq' || type === 'msq') {
+  if (type === 'mcq') {
     return {
       response1: {
         type: { number: { min: 0, max: options.length } },
@@ -31,16 +31,6 @@ function buildResponseDeclaration(
         type: 'integer',
         correctResponse: { value: correctIdx >= 0 ? correctIdx : 0 },
         mapping: options.map((o, i) => ({ response: i, outcomes: { score: o.isCorrect ? 1 : 0 } })),
-      },
-    };
-  }
-  if (type === 'msq') {
-    const correctIdxs = options.reduce<number[]>((acc, o, i) => (o.isCorrect ? [...acc, i] : acc), []);
-    return {
-      response1: {
-        cardinality: 'multiple',
-        type: 'integer',
-        correctResponse: { value: correctIdxs },
       },
     };
   }

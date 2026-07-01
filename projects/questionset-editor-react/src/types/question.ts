@@ -1,4 +1,4 @@
-export type QuestionType = 'mcq' | 'msq' | 'sa' | 'ftb' | 'mtf' | 'seq' | 'reo' | 'slider';
+export type QuestionType = 'mcq' | 'sa' | 'ftb' | 'mtf' | 'seq' | 'reo';
 
 export interface IOption {
   id: string;
@@ -9,13 +9,6 @@ export interface IOption {
   score?: number;
 }
 
-export interface ISliderConfig {
-  min: number;
-  max: number;
-  step: number;
-  minLabel?: string;
-  maxLabel?: string;
-}
 
 export interface IMatchPair {
   id: string;
@@ -93,33 +86,27 @@ export interface IQuestion {
 
 export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   mcq: 'Multiple Choice',
-  msq: 'Multi-Select',
-  sa: 'Subjective Answer',
+  sa:  'Subjective Answer',
   ftb: 'Fill in the Blank',
   mtf: 'Match the Following',
   seq: 'Sequence',
   reo: 'Reorder',
-  slider: 'Slider / Rating',
 };
 
 export const QUESTION_TYPE_ICONS: Record<QuestionType, string> = {
   mcq: 'CircleDot',
-  msq: 'CheckSquare',
-  sa: 'AlignLeft',
+  sa:  'AlignLeft',
   ftb: 'Underline',
   mtf: 'Shuffle',
   seq: 'List',
   reo: 'ArrowUpDown',
-  slider: 'SlidersHorizontal',
 };
 
 export const PRIMARY_CATEGORY_MAP: Record<QuestionType, string> = {
   mcq: 'Multiple Choice Question',
-  msq: 'Multi Select Question',
-  sa: 'Subjective Question',
+  sa:  'Subjective Question',
   ftb: 'Fill in the Blanks',
   mtf: 'Match The Following',
   seq: 'Sequence Question',
   reo: 'Reorder Question',
-  slider: 'Slider Question',
 };

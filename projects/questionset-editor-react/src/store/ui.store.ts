@@ -14,6 +14,9 @@ interface UiState {
   modalData: Record<string, unknown>;
   openModal: (modal: ModalType, data?: Record<string, unknown>) => void;
   closeModal: () => void;
+  /** When set, ContextualEditor auto-opens the inline editor for this node. */
+  pendingEditorOpen: string | null;
+  setPendingEditorOpen: (nodeId: string | null) => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -21,4 +24,6 @@ export const useUiStore = create<UiState>((set) => ({
   modalData: {},
   openModal: (modal, data = {}) => set({ activeModal: modal, modalData: data }),
   closeModal: () => set({ activeModal: null, modalData: {} }),
+  pendingEditorOpen: null,
+  setPendingEditorOpen: (nodeId) => set({ pendingEditorOpen: nodeId }),
 }));
