@@ -4,6 +4,7 @@ import { Icon } from '../shared/Icon';
 import type { ICategoryField } from '../../api/categoryDefinition';
 import styles from './SparkMetaForm.module.scss';
 import ImagePickerModal from '../shared/ImagePickerModal';
+import ContentEditable from '../shared/ContentEditable';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -428,8 +429,22 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
               render={({ field: rhfField }) => {
                 const inputType = field.inputType ?? 'text';
 
+                // ── richtext — renders HTML content via ContentEditable ───
+                if (inputType === 'richtext') {
+                  return (
+                    <ContentEditable
+                      value={String(rhfField.value ?? '')}
+                      onChange={(html) => { rhfField.onChange(html); onChange(field.code, html); }}
+                      placeholder={field.placeholder ?? ''}
+                      disabled={isDisabled}
+                      minHeight={90}
+                      bodyClass="stem-field"
+                    />
+                  );
+                }
+
                 // ── textarea ──────────────────────────────────────────────
-                if (inputType === 'textarea' || inputType === 'richtext') {
+                if (inputType === 'textarea') {
                   return (
                     <textarea
                       id={fieldId}
