@@ -89,45 +89,69 @@ function SolutionBlock() {
   }
 
   return (
-    <div className="ce-sol2">
-      <div className="ce-sol2-head">
-        <span className="ttl"><Icon name="info" size={16} />Solution <em>Optional</em></span>
-        <button type="button" className="ce-sol2-close" onClick={() => setOpen(false)} title="Remove solution">
-          <Icon name="x" size={16} />
+    <div style={{
+      background: 'var(--sb-bg-warm)', border: '1px solid var(--sb-border-soft)',
+      borderRadius: 18, padding: '20px 24px 22px',
+    }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+        <Icon name="info" size={18} style={{ color: 'var(--accent-deep)', flexShrink: 0 }} />
+        <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>Solution</span>
+        <span style={{
+          fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase',
+          border: '1.5px solid var(--sb-border)', borderRadius: 999, padding: '3px 10px',
+          color: 'var(--sb-text-muted)', background: '#fff',
+        }}>Optional</span>
+        <button type="button" onClick={() => setOpen(false)} title="Remove solution"
+          style={{ marginLeft: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--sb-text-faint)', display: 'grid', placeItems: 'center', width: 28, height: 28, borderRadius: 8 }}>
+          <Icon name="x" size={18} />
         </button>
       </div>
-      <div className="ce-sol2-seg">
-        {(['text', 'video', 'audio'] as const).map(k => (
-          <button type="button" key={k} className={kind === k ? 'on' : ''} onClick={() => setKind(k)}>
-            <Icon name={k === 'text' ? 'image' : k === 'video' ? 'video' : 'link'} size={16} />
-            {k === 'text' ? 'Text + Image' : k.charAt(0).toUpperCase() + k.slice(1)}
-          </button>
-        ))}
+
+      {/* Type tabs */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
+        {(['text', 'video', 'audio'] as const).map(k => {
+          const active = kind === k;
+          const label = k === 'text' ? 'Text + Image' : k.charAt(0).toUpperCase() + k.slice(1);
+          const icon  = k === 'text' ? 'image' : k === 'video' ? 'video' : 'link';
+          return (
+            <button key={k} type="button" onClick={() => setKind(k)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '10px 18px', borderRadius: 12, fontFamily: 'inherit',
+                fontSize: 14, fontWeight: 700, cursor: 'pointer', transition: 'all .14s',
+                background: active ? 'var(--accent)' : '#fff',
+                border: `1.5px solid ${active ? 'var(--accent)' : 'var(--sb-border)'}`,
+                color: active ? '#fff' : 'var(--sb-text-2)',
+              }}>
+              <Icon name={icon} size={16} />
+              {label}
+            </button>
+          );
+        })}
       </div>
-      <div className="ce-sol2-body">
-        {kind === 'text' && (
-          <div style={{ border: '1px solid var(--sb-border)', borderRadius: 12, padding: '10px 14px', background: '#fff', minHeight: 96 }}>
-            <ContentEditable
-              placeholder="Explain the answer — add text, images or equations…"
-              minHeight={80}
-              bodyClass="stem-field"
-              disabled={false}
-            />
-          </div>
-        )}
-        {kind === 'video' && (
-          <div className="ce-sol-drop">
-            <Icon name="video" size={26} />
-            <span>Drop a video file or paste a link</span>
-          </div>
-        )}
-        {kind === 'audio' && (
-          <div className="ce-sol-drop">
-            <Icon name="link" size={24} />
-            <span>Drop an audio clip or paste a link</span>
-          </div>
-        )}
-      </div>
+
+      {/* Content */}
+      {kind === 'text' && (
+        <ContentEditable
+          placeholder="Explain the answer — add text, images or equations…"
+          minHeight={90}
+          bodyClass="stem-field"
+          disabled={false}
+        />
+      )}
+      {kind === 'video' && (
+        <div className="ce-sol-drop">
+          <Icon name="video" size={26} />
+          <span>Drop a video file or paste a link</span>
+        </div>
+      )}
+      {kind === 'audio' && (
+        <div className="ce-sol-drop">
+          <Icon name="link" size={24} />
+          <span>Drop an audio clip or paste a link</span>
+        </div>
+      )}
     </div>
   );
 }
