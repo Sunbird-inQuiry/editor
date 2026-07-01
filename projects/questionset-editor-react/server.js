@@ -116,15 +116,19 @@ app.get(['/', '/index.html'], (req, res) => {
   </style>
 </head>
 <body>
-  <sb-questionset-editor id="editor"></sb-questionset-editor>
+  <div id="root" style="width:100%;height:100%;"></div>
 
   <script type="module">
     import { registerQuestionsetEditor } from '/index.js';
     registerQuestionsetEditor();
 
-    const editor = document.getElementById('editor');
+    // Create element and set attributes BEFORE appending to DOM so the
+    // component receives context/config on its very first render.
+    const editor = document.createElement('sb-questionset-editor');
     editor.setAttribute('context', '${context}');
     editor.setAttribute('config',  '${config}');
+    editor.style.cssText = 'display:block;width:100%;height:100%;';
+    document.getElementById('root').appendChild(editor);
   <\/script>
 </body>
 </html>`);
