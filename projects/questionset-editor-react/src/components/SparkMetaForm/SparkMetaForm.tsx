@@ -1,8 +1,9 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Icon } from '../shared/Icon';
 import type { ICategoryField } from '../../api/categoryDefinition';
 import styles from './SparkMetaForm.module.scss';
+import ImagePickerModal from '../shared/ImagePickerModal';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -288,6 +289,50 @@ const KeywordChips: React.FC<KeywordChipsProps> = ({
 };
 
 // ---------------------------------------------------------------------------
+// AppIconPicker — image thumbnail that opens ImagePickerModal on click
+// ---------------------------------------------------------------------------
+
+function AppIconPicker({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: string;
+  disabled: boolean;
+  onChange: (url: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => !disabled && setOpen(true)}
+        title={disabled ? undefined : 'Click to change icon'}
+        style={{
+          width: 72, height: 72, borderRadius: 14, border: '1.5px dashed var(--sb-border)',
+          background: 'var(--sb-bg)', cursor: disabled ? 'default' : 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          overflow: 'hidden', padding: 0, flexShrink: 0,
+          transition: 'border-color .14s',
+        }}
+      >
+        {value ? (
+          <img src={value} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <Icon name="image" size={28} style={{ color: 'var(--sb-text-faint)' }} />
+        )}
+      </button>
+      {open && (
+        <ImagePickerModal
+          onSelect={(url) => { onChange(url); setOpen(false); }}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // SparkMetaForm
 // ---------------------------------------------------------------------------
 
@@ -349,8 +394,8 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
         const isDisabled = readOnly || !field.editable;
         const validator = makeFieldValidator(field);
 
-        // Full-width: textarea, richtext, keywords/chips, multiselect, checkbox, time
-        const isFullWidth = ['textarea', 'richtext', 'keywords', 'checkbox', 'time'].includes(field.inputType ?? '')
+        // Full-width: textarea, richtext, keywords/chips, multiselect, checkbox, time, appIcon
+        const isFullWidth = ['textarea', 'richtext', 'keywords', 'checkbox', 'time', 'appIcon'].includes(field.inputType ?? '')
           || field.span === 'full';
         const fieldClass = [styles.field, isFullWidth ? styles.fieldFull : ''].filter(Boolean).join(' ');
 
@@ -540,6 +585,17 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                       disabled={isDisabled}
                       aria-invalid={!!error}
                       aria-describedby={error ? `${fieldId}-error` : undefined}
+                    />
+                  );
+                }
+
+                // ── appIcon — clickable image thumbnail picker ────────────
+                if (inputType === 'appIcon') {
+                  return (
+                    <AppIconPicker
+                      value={String(rhfField.value ?? '')}
+                      disabled={isDisabled}
+                      onChange={(url) => { rhfField.onChange(url); onChange(field.code, url); }}
                     />
                   );
                 }

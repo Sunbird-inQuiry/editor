@@ -52,11 +52,14 @@ function normalizeField(raw: Record<string, unknown>, section?: string): ICatego
     name: raw.name as string | undefined,
     inputType: raw.inputType as string | undefined,
     dataType: raw.dataType as string | undefined,
+    // appIcon is never mandatory — the old Angular editor didn't enforce it either.
     required:
-      raw.required === true ||
-      (Array.isArray(raw.validations) &&
-        (raw.validations as Array<Record<string, unknown>>).some(v => v.type === 'required')) ||
-      String((raw.renderingHints as Record<string, unknown>)?.class ?? '').includes('required'),
+      raw.inputType !== 'appIcon' && (
+        raw.required === true ||
+        (Array.isArray(raw.validations) &&
+          (raw.validations as Array<Record<string, unknown>>).some(v => v.type === 'required')) ||
+        String((raw.renderingHints as Record<string, unknown>)?.class ?? '').includes('required')
+      ),
     editable: raw.editable !== false,
     visible: raw.visible !== false,
     placeholder: raw.placeholder as string | undefined,
