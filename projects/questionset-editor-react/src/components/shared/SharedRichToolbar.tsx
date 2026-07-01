@@ -10,6 +10,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from './Icon';
 import MathModal from './MathModal';
+import ImagePickerModal from './ImagePickerModal';
 import { SPECIAL_CHAR_GROUPS, ALL_CATEGORIES, type CharCategory } from './specialCharsData';
 
 const FONT_SIZES = [8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 36];
@@ -206,10 +207,10 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
   const [menu, setMenu] = useState<'align' | 'size' | 'chars' | 'table' | null>(null);
   const [mathOpen, setMathOpen] = useState(false);
   const [mathAnchor, setMathAnchor] = useState<DOMRect | null>(null);
+  const [imagePickerOpen, setImagePickerOpen] = useState(false);
   const mathBtnRef = useRef<HTMLButtonElement>(null);
   const charsRef = useRef<HTMLButtonElement>(null);
   const tableRef = useRef<HTMLButtonElement>(null);
-  const fileRef  = useRef<HTMLInputElement>(null);
   const [charsRect, setCharsRect] = useState<DOMRect | null>(null);
   const [tableRect, setTableRect] = useState<DOMRect | null>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -278,17 +279,6 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
     range.insertNode(frag);
     range.collapse(false);
     if (sel) { sel.removeAllRanges(); sel.addRange(range); }
-  };
-
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      insertAtSavedRange(`<img src="${reader.result}" alt="${file.name}" style="max-width:100%;border-radius:6px;margin:4px 0;" />`);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
   };
 
   const toggle = (name: 'align' | 'size' | 'chars' | 'table') =>
@@ -413,11 +403,10 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
 
       {/* Image */}
       <button type="button" className="re-tb" title="Insert image"
-        onMouseDown={e => { e.preventDefault(); saveRange(); fileRef.current?.click(); }}
+        onMouseDown={e => { e.preventDefault(); saveRange(); setImagePickerOpen(true); }}
         disabled={off}>
         <Icon name="image" size={17} />
       </button>
-      <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onFileChange} />
 
       {/* Table */}
       <div className="re-grp">
@@ -441,6 +430,17 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
           anchor={mathAnchor}
           savedRange={savedRange.current}
           onClose={() => { setMathOpen(false); setMathAnchor(null); }}
+        />
+      )}
+
+      {/* Image picker modal */}
+      {imagePickerOpen && (
+        <ImagePickerModal
+          onSelect={url => {
+            insertAtSavedRange(`<img src="${url}" alt="" style="max-width:100%;border-radius:6px;margin:4px 0;" />`);
+            setImagePickerOpen(false);
+          }}
+          onClose={() => setImagePickerOpen(false)}
         />
       )}
     </div>

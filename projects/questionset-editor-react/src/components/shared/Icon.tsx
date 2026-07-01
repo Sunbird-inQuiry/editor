@@ -53,6 +53,7 @@ import table       from '../../assets/icons/table.svg?raw';
 import fontsize    from '../../assets/icons/fontsize.svg?raw';
 import doc         from '../../assets/icons/doc.svg?raw';
 import tmpl        from '../../assets/icons/tmpl.svg?raw';
+import upload      from '../../assets/icons/upload.svg?raw';
 
 // ---------------------------------------------------------------------------
 // Registry
@@ -106,6 +107,7 @@ const ICONS: Record<string, string> = {
   'fontsize':     fontsize,
   'doc':          doc,
   'tmpl':         tmpl,
+  'upload':       upload,
 };
 
 // ---------------------------------------------------------------------------
