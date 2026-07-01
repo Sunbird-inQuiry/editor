@@ -1,70 +1,60 @@
 import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
-import { ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { Icon } from '../shared/Icon';
 import type { EditorMode, ToolbarAction } from '../../types/editor';
+import { QUESTION_TYPE_LABELS, type QuestionType } from '../../types/question';
 import { useEditorStore } from '../../store/editor.store';
 import { useTreeStore } from '../../store/tree.store';
+import { useUiStore } from '../../store/ui.store';
 import { useFramework } from '../../hooks/useFramework';
 import SparkMetaForm from '../SparkMetaForm/SparkMetaForm';
-import styles from './ContextualEditor.module.scss';
-
-// ---------------------------------------------------------------------------
-// Lazy-loaded heavy panels (avoids bundling player/question-editor upfront)
-// ---------------------------------------------------------------------------
+import QuestionDetail from '../QuestionDetail/QuestionDetail';
+import SetBehaviourForm from '../BehaviourForm/SetBehaviourForm';
+import SectionBehaviourForm from '../SectionBehaviourForm/SectionBehaviourForm';
 
 const QuestionEditor = lazy(() => import('../QuestionEditor/QuestionEditor'));
-const QumlPlayer = lazy(() => import('../QumlPlayer/QumlPlayer'));
+const QumlPlayer    = lazy(() => import('../QumlPlayer/QumlPlayer'));
+
+const QUESTION_TYPE_ICON: Record<string, string> = {
+  mcq: 'check',
+  sa:  'doc',
+  ftb: 'edit-sm',
+  mtf: 'link',
+  seq: 'numlist',
+  reo: 'swap',
+};
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export interface ContextualEditorProps {
-  /** Current editor operating mode (from parent / SplitEditorShell). */
   editorMode?: EditorMode;
-  /** Forwarded to child panels that need to emit toolbar actions. */
   onToolbarEvent: (event: { action: ToolbarAction; data?: unknown }) => void;
-  /** Whether the tree has any content yet (used for empty-state guard). */
   hasContent?: boolean;
 }
 
-// ---------------------------------------------------------------------------
-// Tab definitions — shown for root & section (folder) nodes
-// ---------------------------------------------------------------------------
+type TabKey = 'details' | 'audience' | 'behaviour' | 'question' | 'meta';
 
-type TabKey = 'details' | 'audience' | 'licensing';
+interface TabDef { key: TabKey; label: string; section?: string; }
 
-interface Tab {
-  key: TabKey;
-  label: string;
-  /** Optional section filter passed to SparkMetaForm. When undefined all
-   *  fields not explicitly assigned to another tab are included here. */
-  section?: string;
-}
-
-const TABS: Tab[] = [
-  { key: 'details', label: 'Details', section: undefined },
+const SET_TABS: TabDef[] = [
+  { key: 'details', label: 'Details' },
   { key: 'audience', label: 'Audience & Curriculum', section: 'Audience & Curriculum' },
-  { key: 'licensing', label: 'Licensing', section: 'Licensing' },
+  { key: 'behaviour', label: 'Behaviour' },
 ];
-
-// ---------------------------------------------------------------------------
-// Helper — field filtering by tab
-// ---------------------------------------------------------------------------
-
-// Fields that belong to a named section are shown only in that tab.
-// Fields with no section (or an unrecognised section) fall into "Details".
-function tabSection(tabKey: TabKey): string | undefined {
-  return TABS.find((t) => t.key === tabKey)?.section;
-}
-
-// ---------------------------------------------------------------------------
-// Spinner used in Suspense fallbacks
-// ---------------------------------------------------------------------------
+const SECTION_TABS: TabDef[] = [
+  { key: 'details', label: 'Details' },
+  { key: 'behaviour', label: 'Behaviour' },
+];
+const QUESTION_TABS: TabDef[] = [
+  { key: 'question', label: 'Question' },
+  { key: 'meta', label: 'Details' },
+];
 
 function PanelSpinner() {
   return (
-    <div className={styles.spinnerWrapper} aria-label="Loading…" role="status">
-      <span className={styles.spinner} aria-hidden="true" />
+    <div className="ce-spinner-wrap">
+      <span className="ce-spinner" aria-hidden="true" />
     </div>
   );
 }
@@ -78,10 +68,8 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   onToolbarEvent,
   hasContent = true,
 }) => {
-  // ── Framework ───────────────────────────────────────────────────────────────
   const { frameworkTerms } = useFramework();
 
-  // ── Stores ──────────────────────────────────────────────────────────────────
   const storeEditorMode = useEditorStore((s) => s.editorMode);
   const showPreview = useEditorStore((s) => s.showPreview);
   const isCurrentNodeRoot = useEditorStore((s) => s.isCurrentNodeRoot);
@@ -97,32 +85,32 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   const updateNode = useTreeStore((s) => s.updateNode);
   const selectNode = useTreeStore((s) => s.selectNode);
 
-  // Resolved editor mode (prop beats store, for cases where parent overrides)
+  const { openModal, pendingEditorOpen, setPendingEditorOpen } = useUiStore();
+
   const editorMode = editorModeProp ?? storeEditorMode;
   const isReadOnly = editorMode === 'read';
 
-  // ── Local UI state ──────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<TabKey>('details');
-  const [showRelational, setShowRelational] = useState(false);
-
-  // Inline title editing
-  const [titleValue, setTitleValue] = useState<string>('');
+  const [inlineEditorOpen, setInlineEditorOpen] = useState(false);
   const [isTitleEditing, setIsTitleEditing] = useState(false);
+  const [titleValue, setTitleValue] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
 
-  // ── Sync title when selected node changes ───────────────────────────────────
+  // Sync title + reset state on node change
+  // Also auto-open inline editor if this node was just created via type picker
   useEffect(() => {
-    const nodeName = (activeNodeMeta?.name as string) ?? '';
-    setTitleValue(nodeName);
+    setTitleValue((activeNodeMeta?.name as string) ?? '');
     setIsTitleEditing(false);
-  }, [selectedNodeId, activeNodeMeta]);
+    setActiveTab(isCurrentNodeQuestion ? 'question' : 'details');
 
-  // ── Reset to details tab when node selection changes ────────────────────────
-  useEffect(() => {
-    setActiveTab('details');
-  }, [selectedNodeId]);
+    if (selectedNodeId && selectedNodeId === pendingEditorOpen) {
+      setInlineEditorOpen(true);
+      setPendingEditorOpen(null);
+    } else {
+      setInlineEditorOpen(false);
+    }
+  }, [selectedNodeId, isCurrentNodeQuestion]);
 
-  // ── Title commit ────────────────────────────────────────────────────────────
   const commitTitle = useCallback(() => {
     const trimmed = titleValue.trim();
     if (selectedNodeId && trimmed && trimmed !== (activeNodeMeta?.name as string)) {
@@ -131,41 +119,50 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
     setIsTitleEditing(false);
   }, [selectedNodeId, titleValue, activeNodeMeta, updateNode]);
 
-  const handleTitleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        commitTitle();
-      } else if (e.key === 'Escape') {
-        // Revert
-        setTitleValue((activeNodeMeta?.name as string) ?? '');
-        setIsTitleEditing(false);
-      }
-    },
-    [commitTitle, activeNodeMeta],
-  );
+  const handleTitleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') { e.preventDefault(); commitTitle(); }
+    else if (e.key === 'Escape') { setTitleValue((activeNodeMeta?.name as string) ?? ''); setIsTitleEditing(false); }
+  }, [commitTitle, activeNodeMeta]);
 
-  // ── Form field change ───────────────────────────────────────────────────────
-  const handleFormChange = useCallback(
-    (code: string, value: unknown) => {
-      if (!selectedNodeId) return;
-      updateNode(selectedNodeId, { [code]: value, metadata: { [code]: value } });
-      onToolbarEvent({ action: 'onFormValueChange', data: { field: code, value } });
-    },
-    [selectedNodeId, updateNode, onToolbarEvent],
-  );
+  const handleFormChange = useCallback((code: string, value: unknown) => {
+    if (!selectedNodeId) return;
+    updateNode(selectedNodeId, { [code]: value, metadata: { [code]: value } });
+    onToolbarEvent({ action: 'onFormValueChange', data: { field: code, value } });
+  }, [selectedNodeId, updateNode, onToolbarEvent]);
 
-  const handleFormValidityChange = useCallback(
-    (isValid: boolean) => {
-      onToolbarEvent({ action: 'onFormStatusChange', data: { isValid } });
-    },
-    [onToolbarEvent],
-  );
+  const handleFormValidityChange = useCallback((isValid: boolean) => {
+    onToolbarEvent({ action: 'onFormStatusChange', data: { isValid } });
+  }, [onToolbarEvent]);
 
-  // ── Form config for the current node ───────────────────────────────────────
   const formConfig = isCurrentNodeRoot ? rootFormConfig : unitFormConfig;
+  const nodeTabs = isCurrentNodeQuestion ? QUESTION_TABS : isCurrentNodeRoot ? SET_TABS : SECTION_TABS;
 
-  // ── Determine what to render in the main area ───────────────────────────────
+  // Meta subtitle
+  const metaSubtitle = (() => {
+    if (!activeNodeMeta) return '';
+    const m = activeNodeMeta as Record<string, unknown>;
+    if (isCurrentNodeRoot) {
+      const pc = (m.primaryCategory as string) ?? '';
+      const grade = (m.gradeLevel as string[])?.[0] ?? '';
+      const subject = (m.subject as string[])?.[0] ?? '';
+      return [pc, [grade, subject].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
+    }
+    if (isCurrentNodeFolder) {
+      const node = useTreeStore.getState().getNodeById(selectedNodeId ?? '');
+      const count = node?.children?.length ?? 0;
+      return `${count} question${count === 1 ? '' : 's'}`;
+    }
+    if (isCurrentNodeQuestion) {
+      const qType = (m.questionType as string) ?? '';
+      const typeLabel = QUESTION_TYPE_LABELS[qType as QuestionType] ?? qType.toUpperCase();
+      const score = (m.maxScore as number) ?? 1;
+      // Get parent section name from breadcrumb (second-to-last item)
+      const sectionName = breadcrumb.length >= 2 ? breadcrumb[breadcrumb.length - 2]?.name : '';
+      return [typeLabel, sectionName, `${score} mark${score === 1 ? '' : 's'}`].filter(Boolean).join(' · ');
+    }
+    return '';
+  })();
+
   const nothingSelected = !selectedNodeId;
   const noContent = !hasContent;
 
@@ -174,126 +171,121 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   // ---------------------------------------------------------------------------
 
   return (
-    <div className={styles.panel}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}>
 
-      {/* ── Preview overlay — full-panel QuML player ─────────────────────── */}
+      {/* Preview overlay */}
       {showPreview && (
-        <div className={styles.previewOverlay}>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 300, background: '#fff', display: 'flex', flexDirection: 'column' }}>
           <Suspense fallback={<PanelSpinner />}>
             <QumlPlayer questionSetId={selectedNodeId ?? ''} onClose={() => onToolbarEvent({ action: 'preview' })} />
           </Suspense>
         </div>
       )}
 
-      {/* ── Empty / no-selection states ───────────────────────────────────── */}
+      {/* Empty / no-selection state */}
       {(noContent || nothingSelected) && !showPreview && (
-        <div className={styles.emptyState} aria-live="polite">
-          {noContent
-            ? 'Add a section or question to get started.'
-            : 'Select a node from the outline'}
+        <div className="ce-empty" aria-live="polite">
+          {noContent ? 'Add a section or question to get started.' : 'Select a node from the outline'}
         </div>
       )}
 
-      {/* ── Main editing area — only when a node is selected ─────────────── */}
-      {!nothingSelected && !noContent && !showPreview && (
+      {/* Inline question editor — replaces the card entirely */}
+      {!nothingSelected && !noContent && !showPreview && isCurrentNodeQuestion && inlineEditorOpen && (
+        <div className="ce-main-scroll">
+          <Suspense fallback={<PanelSpinner />}>
+            <QuestionEditor
+              editorMode={editorMode}
+              onBack={() => setInlineEditorOpen(false)}
+            />
+          </Suspense>
+        </div>
+      )}
+
+      {/* Main content — card view */}
+      {!nothingSelected && !noContent && !showPreview && !(isCurrentNodeQuestion && inlineEditorOpen) && (
         <>
           {/* Breadcrumb */}
           {breadcrumb.length > 0 && (
-            <nav className={styles.breadcrumb} aria-label="Node breadcrumb">
-              {breadcrumb.map((crumb, index) => {
-                const isLast = index === breadcrumb.length - 1;
+            <nav className="ce-crumb" aria-label="Node path">
+              <button onClick={() => selectNode(breadcrumb[0]?.id ?? '')} title="Home">
+                <Icon name="home" size={15} />
+              </button>
+              {breadcrumb.map((crumb, i) => {
+                const isLast = i === breadcrumb.length - 1;
                 return (
                   <React.Fragment key={crumb.id}>
-                    {index > 0 && (
-                      <ChevronRight
-                        size={12}
-                        className={styles.breadcrumbSep}
-                        aria-hidden="true"
-                      />
-                    )}
-                    {isLast ? (
-                      <span className={`${styles.breadcrumbItem} ${styles.breadcrumbItemActive}`}>
-                        {crumb.name}
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        className={styles.breadcrumbItem}
-                        onClick={() => selectNode(crumb.id)}
-                        title={`Navigate to ${crumb.name}`}
-                      >
-                        {crumb.name}
-                      </button>
-                    )}
+                    <span className="sep"><Icon name="caret-right" size={13} /></span>
+                    {isLast
+                      ? <span className="cur">{crumb.name}</span>
+                      : <button onClick={() => selectNode(crumb.id)}>{crumb.name}</button>}
                   </React.Fragment>
                 );
               })}
             </nav>
           )}
 
-          {/* Editable title row — shown for root/section/question nodes */}
-          <div className={styles.titleRow}>
-            {isTitleEditing && !isReadOnly ? (
-              <input
-                ref={titleInputRef}
-                type="text"
-                className={styles.titleInput}
-                value={titleValue}
-                onChange={(e) => setTitleValue(e.target.value)}
-                onBlur={commitTitle}
-                onKeyDown={handleTitleKeyDown}
-                aria-label="Node title"
-                maxLength={200}
-                autoFocus
-              />
-            ) : (
-              <h2
-                className={styles.titleDisplay}
-                onClick={() => {
-                  if (!isReadOnly) setIsTitleEditing(true);
-                }}
-                title={isReadOnly ? undefined : 'Click to edit title'}
-                tabIndex={isReadOnly ? -1 : 0}
-                onKeyDown={(e) => {
-                  if (!isReadOnly && (e.key === 'Enter' || e.key === ' ')) {
-                    e.preventDefault();
-                    setIsTitleEditing(true);
-                  }
-                }}
-                aria-label={`Title: ${titleValue}`}
-              >
-                {titleValue || 'Untitled'}
-              </h2>
-            )}
-          </div>
+          {/* Card */}
+          <div className="ce-main-scroll">
+            <div className="ce-card">
+              {/* Card header */}
+              <div className="ce-card-head">
+                {isCurrentNodeRoot && (
+                  <div className="ce-thumb">
+                    <Icon name="image" size={28} />
+                  </div>
+                )}
+                {isCurrentNodeFolder && !isCurrentNodeRoot && (
+                  <div className="ce-thumb folder">
+                    <Icon name="folder" size={28} />
+                  </div>
+                )}
+                {isCurrentNodeQuestion && (() => {
+                  const qType = (activeNodeMeta?.questionType as string)
+                    ?? (activeNodeMeta?.metadata as Record<string,unknown>)?.questionType as string
+                    ?? '';
+                  const iconName = QUESTION_TYPE_ICON[qType] ?? 'help';
+                  return (
+                    <div className="ce-thumb question">
+                      <Icon name={iconName} size={26} />
+                    </div>
+                  );
+                })()}
+                <div style={{ minWidth: 0 }}>
+                  {isTitleEditing && !isReadOnly ? (
+                    <input
+                      ref={titleInputRef}
+                      type="text"
+                      className="ce-title-input"
+                      value={titleValue}
+                      onChange={e => setTitleValue(e.target.value)}
+                      onBlur={commitTitle}
+                      onKeyDown={handleTitleKeyDown}
+                      maxLength={200}
+                      autoFocus
+                    />
+                  ) : (
+                    <h1
+                      style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: '-.015em', cursor: isReadOnly ? 'default' : 'text', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      onClick={() => { if (!isReadOnly) setIsTitleEditing(true); }}
+                      title={isReadOnly ? undefined : 'Click to edit'}
+                    >
+                      {titleValue || 'Untitled'}
+                    </h1>
+                  )}
+                  {metaSubtitle && <p className="sub">{metaSubtitle}</p>}
+                </div>
+              </div>
 
-          {/* ── Question node → QuestionEditor ───────────────────────────── */}
-          {isCurrentNodeQuestion && (
-            <div className={styles.tabContent}>
-              <Suspense fallback={<PanelSpinner />}>
-                <QuestionEditor editorMode={editorMode} />
-              </Suspense>
-            </div>
-          )}
-
-          {/* ── Root / Section node → tabs + SparkMetaForm ───────────────── */}
-          {(isCurrentNodeRoot || isCurrentNodeFolder) && !isCurrentNodeQuestion && (
-            <>
               {/* Tab bar */}
-              <div className={styles.tabBar} role="tablist" aria-label="Metadata sections">
-                {TABS.map((tab) => (
+              <div className="ce-tabs" role="tablist">
+                {nodeTabs.map(tab => (
                   <button
                     key={tab.key}
                     role="tab"
                     type="button"
-                    className={[
-                      styles.tab,
-                      activeTab === tab.key ? styles.tabActive : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
+                    className={`ce-tab${activeTab === tab.key ? ' on' : ''}`}
                     aria-selected={activeTab === tab.key}
-                    onClick={() => setActiveTab(tab.key)}
+                    onClick={() => { setActiveTab(tab.key); setInlineEditorOpen(false); }}
                   >
                     {tab.label}
                   </button>
@@ -301,57 +293,103 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
               </div>
 
               {/* Tab content */}
-              <div
-                className={styles.tabContent}
-                role="tabpanel"
-                aria-label={TABS.find((t) => t.key === activeTab)?.label}
-              >
-                {formConfig && formConfig.length > 0 ? (
-                  <SparkMetaForm
-                    fields={formConfig}
-                    values={activeNodeMeta as Record<string, unknown>}
-                    onChange={handleFormChange}
-                    onValidityChange={handleFormValidityChange}
-                    readOnly={isReadOnly}
-                    section={tabSection(activeTab)}
-                    frameworkTerms={frameworkTerms}
-                  />
-                ) : (
-                  <p className={styles.emptyState}>No fields configured for this node type.</p>
-                )}
-              </div>
+              <div role="tabpanel">
 
-              {/* Relational Metadata collapsible section */}
-              {relationalFormConfig && relationalFormConfig.length > 0 && (
-                <div className={styles.relationalSection}>
-                  <button
-                    type="button"
-                    className={styles.relationalToggle}
-                    onClick={() => setShowRelational((prev) => !prev)}
-                    aria-expanded={showRelational}
-                  >
-                    Relational Metadata
-                    {showRelational
-                      ? <ChevronUp size={16} aria-hidden="true" />
-                      : <ChevronDown size={16} aria-hidden="true" />
-                    }
-                  </button>
-                  {showRelational && (
-                    <div className={styles.relationalContent}>
+                {/* ── Question: preview tab ── */}
+                {isCurrentNodeQuestion && activeTab === 'question' && (
+                  <div className="ce-qdetail">
+                    <QuestionDetail
+                      node={useTreeStore.getState().getNodeById(selectedNodeId ?? '') ?? { id: selectedNodeId ?? '', identifier: selectedNodeId ?? '', name: '' }}
+                      onOpenEditor={() => setInlineEditorOpen(true)}
+                      onRemove={() => openModal('confirmDelete', { nodeId: selectedNodeId })}
+                      isEditMode={editorMode === 'edit'}
+                    />
+                  </div>
+                )}
+
+                {/* ── Question: meta/details tab ── */}
+                {isCurrentNodeQuestion && activeTab === 'meta' && (
+                  <div className="ce-tabbody">
+                    <SparkMetaForm
+                      fields={relationalFormConfig ?? []}
+                      values={activeNodeMeta as Record<string, unknown>}
+                      onChange={handleFormChange}
+                      onValidityChange={handleFormValidityChange}
+                      readOnly={isReadOnly}
+                      frameworkTerms={frameworkTerms}
+                    />
+                  </div>
+                )}
+
+                {/* ── Set/Section: details tab ── */}
+                {!isCurrentNodeQuestion && activeTab === 'details' && (
+                  <div className="ce-tabbody">
+                    {isCurrentNodeRoot && (
+                      <>
+                        <h2 className="ce-secttl">Set Details</h2>
+                        <p className="ce-sectsub">Name, description and instructions shown before the set begins.</p>
+                      </>
+                    )}
+                    {isCurrentNodeFolder && !isCurrentNodeRoot && (
+                      <>
+                        <h2 className="ce-secttl">Section Details</h2>
+                        <p className="ce-sectsub">Title and instructions for this section.</p>
+                      </>
+                    )}
+                    {formConfig && formConfig.length > 0 ? (
                       <SparkMetaForm
-                        fields={relationalFormConfig}
-                        values={activeNodeMeta ?? {}}
+                        fields={formConfig}
+                        values={activeNodeMeta as Record<string, unknown>}
                         onChange={handleFormChange}
                         onValidityChange={handleFormValidityChange}
                         readOnly={isReadOnly}
+                        section={undefined}
                         frameworkTerms={frameworkTerms}
                       />
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
+                    ) : (
+                      <p className="ce-empty" style={{ flex: 'none', padding: '16px 0' }}>No fields configured.</p>
+                    )}
+                  </div>
+                )}
+
+                {/* ── Set: audience tab ── */}
+                {isCurrentNodeRoot && activeTab === 'audience' && (
+                  <div className="ce-tabbody">
+                    <h2 className="ce-secttl">Target Audience</h2>
+                    <p className="ce-sectsub">Curriculum alignment for the intended learners.</p>
+                    <SparkMetaForm
+                      fields={formConfig ?? []}
+                      values={activeNodeMeta as Record<string, unknown>}
+                      onChange={handleFormChange}
+                      onValidityChange={handleFormValidityChange}
+                      readOnly={isReadOnly}
+                      section="Audience & Curriculum"
+                      frameworkTerms={frameworkTerms}
+                    />
+                  </div>
+                )}
+
+                {/* ── Set: behaviour tab ── */}
+                {isCurrentNodeRoot && activeTab === 'behaviour' && (
+                  <div className="ce-tabbody">
+                    <h2 className="ce-secttl">Behaviour & Scoring</h2>
+                    <p className="ce-sectsub">How the set is timed, attempted and summarised.</p>
+                    <SetBehaviourForm nodeId={selectedNodeId ?? ''} readOnly={isReadOnly} />
+                  </div>
+                )}
+
+                {/* ── Section: behaviour tab ── */}
+                {isCurrentNodeFolder && !isCurrentNodeRoot && activeTab === 'behaviour' && (
+                  <div className="ce-tabbody">
+                    <h2 className="ce-secttl">Section Behaviour</h2>
+                    <p className="ce-sectsub">Controls applied to this section inside the set.</p>
+                    <SectionBehaviourForm nodeId={selectedNodeId ?? ''} readOnly={isReadOnly} />
+                  </div>
+                )}
+
+              </div>
+            </div>
+          </div>
         </>
       )}
     </div>

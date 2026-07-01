@@ -1,13 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import {
-  ArrowLeft,
-  Send,
-  Check,
-  CheckCircle,
-  XCircle,
-  RotateCcw,
-  Shield,
-} from 'lucide-react';
+import { Icon } from '../shared/Icon';
 import type { EditorMode, ToolbarAction } from '../../types/editor';
 import { useTreeStore } from '../../store/tree.store';
 import { useEditorStore } from '../../store/editor.store';
@@ -89,7 +81,7 @@ const ReviewCommentModal: React.FC<ReviewCommentModalProps> = ({
             aria-label="Close"
             type="button"
           >
-            &times;
+            <Icon name="x" size={16} />
           </button>
         </div>
 
@@ -162,7 +154,7 @@ const ConfirmReviewModal: React.FC<ConfirmReviewModalProps> = ({ onConfirm, onCa
             aria-label="Close"
             type="button"
           >
-            &times;
+            <Icon name="x" size={16} />
           </button>
         </div>
 
@@ -318,84 +310,76 @@ export const Topbar: React.FC<TopbarProps> = ({
                 setDismissedComments((prev) => new Set([...prev, c.id]))
               }
             >
-              &times;
+              <Icon name="x" size={16} />
             </button>
           </div>
         ))}
-        <header className={styles.topbar} role="banner">
+        <header className="ce-top" role="banner">
         {/* ── Left: Back + Title + Status ─────────────────────── */}
-        <div className={styles.left}>
           <button
-            className={styles.backBtn}
+            className="ce-back"
             onClick={() => emit('back')}
             aria-label="Go back"
             type="button"
           >
-            <ArrowLeft size={18} />
+            <Icon name="arrow-left" size={20} />
           </button>
 
-          <h1 className={styles.title} title={title}>
+          <span className="title" title={title}>
             {title}
-          </h1>
+          </span>
 
           <span
-            className={`sbx-chip ${styles.statusChip}`}
+            className="ce-pill"
+            data-status={statusLabel.toLowerCase()}
             aria-label={`Status: ${statusLabel}`}
           >
             {statusLabel}
           </span>
-        </div>
+
+          <span className="spacer" />
 
         {/* ── Right: Save indicator + actions ──────────────────── */}
-        <div className={styles.right}>
           {/* Save / dirty indicator */}
           {isSaving ? (
-            <span className={styles.savedIndicator} aria-live="polite">
+            <span className="ce-saving" aria-live="polite">
               Saving&hellip;
             </span>
           ) : isDirty ? (
-            <span
-              className={`${styles.savedIndicator} ${styles.unsaved}`}
-              aria-live="polite"
-            >
+            <span className="ce-unsaved" aria-live="polite">
               Unsaved
             </span>
           ) : lastSaved ? (
-            <span className={styles.savedIndicator} aria-live="polite">
-              <Check size={14} aria-hidden="true" />
+            <span className="ce-saving" aria-live="polite">
+              <Icon name="check" size={14} />
               Saved {formatLastSaved(lastSaved)}
             </span>
           ) : null}
 
-          {/* Save as Draft — hidden in read / review / sourcingreview modes and when
-              content is already under review. */}
+          {/* Save as Draft */}
           {!isReadOnly && !isReviewMode && !isSourcingReviewMode && statusLabel !== 'Review' && (
-            <span
+            <button
+              className="ce-btn ghost"
+              type="button"
+              onClick={() => emit('saveContent')}
+              disabled={!isFormValid}
               title={!isFormValid ? 'Fill all required fields before saving' : undefined}
             >
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => emit('saveContent')}
-                disabled={!isFormValid}
-              >
-                Save as Draft
-              </Button>
-            </span>
+              Save as Draft
+            </button>
           )}
 
-          {/* ── Edit mode actions ──────────────────────────────── */}
+          {/* Send for Review */}
           {isEditMode && (
-            <Button
-              variant="primary"
-              size="sm"
+            <button
+              className="ce-btn primary"
+              type="button"
               onClick={() => setShowConfirmReview(true)}
               disabled={buttonLoaders.saveContent}
-              isLoading={buttonLoaders.saveContent}
             >
-              <Send size={14} aria-hidden="true" />
-              &nbsp;Send for Review
-            </Button>
+              <Icon name="send" size={15} />
+              Send for Review
+            </button>
           )}
 
           {/* ── Review mode actions ────────────────────────────── */}
@@ -408,7 +392,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 disabled={buttonLoaders.publishContent}
                 isLoading={buttonLoaders.publishContent}
               >
-                <CheckCircle size={14} aria-hidden="true" />
+                <Icon name="check" size={14} />
                 &nbsp;Publish
               </Button>
 
@@ -419,7 +403,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 disabled={buttonLoaders.rejectContent}
                 isLoading={buttonLoaders.rejectContent}
               >
-                <XCircle size={14} aria-hidden="true" />
+                <Icon name="x" size={14} />
                 &nbsp;Reject
               </Button>
 
@@ -430,7 +414,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 disabled={buttonLoaders.sendBackContent}
                 isLoading={buttonLoaders.sendBackContent}
               >
-                <RotateCcw size={14} aria-hidden="true" />
+                <Icon name="swap" size={14} />
                 &nbsp;Send Back
               </Button>
             </div>
@@ -446,7 +430,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 disabled={buttonLoaders.sourcingApproveContent}
                 isLoading={buttonLoaders.sourcingApproveContent}
               >
-                <Shield size={14} aria-hidden="true" />
+                <Icon name="info" size={14} />
                 &nbsp;Approve
               </Button>
 
@@ -457,12 +441,11 @@ export const Topbar: React.FC<TopbarProps> = ({
                 disabled={buttonLoaders.sourcingRejectContent}
                 isLoading={buttonLoaders.sourcingRejectContent}
               >
-                <XCircle size={14} aria-hidden="true" />
+                <Icon name="x" size={14} />
                 &nbsp;Reject
               </Button>
             </div>
           )}
-        </div>
         </header>
       </div>
 

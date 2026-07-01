@@ -65,15 +65,41 @@
 .statusChip {
   font-family: var(--sbx-font, inherit);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 700;
   flex-shrink: 0;
-  padding: 2px 10px;
-  border-radius: var(--sbx-r-xl, 999px);
-  background: var(--sbx-primary-50, #EFF6FF);
-  color: var(--sbx-primary-700, #1D4ED8);
-  border: 1px solid var(--sbx-primary-200, #BFDBFE);
-  line-height: 1.6;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--sbx-color-surface-muted, #F1F3F7);
+  color: var(--sbx-color-text-tertiary, #6B7280);
+  border: 1px solid var(--sbx-color-border-default, #DDE1EA);
+  line-height: 1.5;
   text-transform: capitalize;
+  letter-spacing: 0.01em;
+
+  // Status color variants
+  &[data-status="draft"] {
+    background: #FFFBEB;
+    color: #92400E;
+    border-color: #FDE68A;
+  }
+
+  &[data-status="review"] {
+    background: var(--sbx-color-primary-subtle, #EEF2FF);
+    color: var(--sbx-color-primary, #1B4FD8);
+    border-color: var(--sbx-color-border-focus, #1B4FD8);
+  }
+
+  &[data-status="live"] {
+    background: var(--sbx-color-success-subtle, #F0FDF4);
+    color: var(--sbx-color-success, #059669);
+    border-color: var(--sbx-color-success, #059669);
+  }
+
+  &[data-status="retired"] {
+    background: var(--sbx-color-error-subtle, #FEF2F2);
+    color: var(--sbx-color-error, #DC2626);
+    border-color: var(--sbx-color-error, #DC2626);
+  }
 }
 
 // ── Right: indicators + action buttons ───────────────────────────────────────

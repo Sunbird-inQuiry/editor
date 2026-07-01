@@ -1,124 +1,40 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Tree } from 'react-arborist';
-import type { NodeRendererProps, MoveHandler } from 'react-arborist';
-import {
-  BookOpen,
-  Folder,
-  FolderOpen,
-  ChevronRight,
-  ChevronDown,
-  ChevronsLeft,
-  MoreVertical,
-  Plus,
-  Trash2,
-  CircleDot,
-  CheckSquare,
-  AlignLeft,
-  Underline,
-  Shuffle,
-  List,
-  ArrowUpDown,
-  SlidersHorizontal,
-  GripVertical,
-} from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { Icon } from '../shared/Icon';
 import { useTreeStore } from '../../store/tree.store';
 import { useEditorStore } from '../../store/editor.store';
 import { useUiStore } from '../../store/ui.store';
 import type { INode } from '../../types/editor';
-import { QUESTION_TYPE_ICONS, type QuestionType } from '../../types/question';
-import styles from './OutlineTree.module.scss';
+import { QUESTION_TYPE_LABELS } from '../../types/question';
+import { detectNodeKind } from '../../utils/nodeKind';
 
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
 interface OutlineTreeProps {
-  /** Called when the user clicks the collapse button */
   onCollapse: () => void;
 }
 
 // ---------------------------------------------------------------------------
-// Helpers — lucide icon lookup by name string
+// Helpers
 // ---------------------------------------------------------------------------
 
-const ICON_MAP: Record<string, React.ElementType> = {
-  CircleDot,
-  CheckSquare,
-  AlignLeft,
-  Underline,
-  Shuffle,
-  List,
-  ArrowUpDown,
-  SlidersHorizontal,
-};
 
-function QuestionTypeIcon({
-  questionType,
-  size = 14,
-}: {
-  questionType: string;
-  size?: number;
-}) {
-  const iconName = QUESTION_TYPE_ICONS[questionType as QuestionType] ?? 'CircleDot';
-  const IconComponent = ICON_MAP[iconName] ?? CircleDot;
-  return <IconComponent size={size} />;
+function shortTypeLabel(questionType?: string): string {
+  if (!questionType) return '';
+  const full = QUESTION_TYPE_LABELS[questionType as keyof typeof QUESTION_TYPE_LABELS];
+  if (!full) return questionType.toUpperCase();
+  const map: Record<string, string> = {
+    'Multiple Choice': 'MCQ', 'Multi-Select': 'MSQ', 'Subjective Answer': 'SA',
+    'Fill in the Blank': 'FTB', 'Match the Following': 'MTF',
+    'Sequence': 'SEQ', 'Reorder': 'REO', 'Slider / Rating': 'SLDR',
+  };
+  return map[full] ?? questionType.toUpperCase().slice(0, 3);
 }
 
-// ---------------------------------------------------------------------------
-// Status dot color
-// ---------------------------------------------------------------------------
-
-function getStatusDotColor(status?: string): string {
-  switch ((status ?? '').toLowerCase()) {
-    case 'live':
-      return '#059669'; // green
-    case 'review':
-      return '#D97706'; // amber
-    default:
-      return '#9CA3AF'; // gray (Draft / unknown)
-  }
+function getStatusClass(status?: string): string {
+  return (status ?? '').toLowerCase() === 'live' ? 'ready' : 'draft';
 }
-
-// ---------------------------------------------------------------------------
-// Inline name editor
-// ---------------------------------------------------------------------------
-
-interface InlineNameEditorProps {
-  value: string;
-  onCommit: (name: string) => void;
-  onCancel: () => void;
-}
-
-const InlineNameEditor: React.FC<InlineNameEditorProps> = ({ value, onCommit, onCancel }) => {
-  const [draft, setDraft] = useState(value);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.select();
-  }, []);
-
-  const commit = useCallback(() => {
-    const trimmed = draft.trim();
-    if (trimmed) onCommit(trimmed);
-    else onCancel();
-  }, [draft, onCommit, onCancel]);
-
-  return (
-    <input
-      ref={inputRef}
-      className={styles.nameInput}
-      value={draft}
-      onChange={(e) => setDraft(e.target.value)}
-      onBlur={commit}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') commit();
-        if (e.key === 'Escape') onCancel();
-        e.stopPropagation();
-      }}
-      onClick={(e) => e.stopPropagation()}
-    />
-  );
-};
 
 // ---------------------------------------------------------------------------
 // Context menu
@@ -128,6 +44,7 @@ interface ContextMenuProps {
   isRoot: boolean;
   isFolder: boolean;
   isEditMode: boolean;
+  nodeId: string;
   onClose: () => void;
   onAddSection: () => void;
   onAddQuestion: () => void;
@@ -135,69 +52,54 @@ interface ContextMenuProps {
 }
 
 const ContextMenu: React.FC<ContextMenuProps> = ({
-  isRoot,
-  isFolder,
-  isEditMode,
-  onClose,
-  onAddSection,
-  onAddQuestion,
-  onDelete,
+  isRoot, isFolder, isEditMode, onClose, onAddSection, onAddQuestion, onDelete,
 }) => {
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  // Close on outside click
-  useEffect(() => {
+  React.useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        onClose();
-      }
+      const el = (e.target as HTMLElement).closest('[data-ctxmenu]');
+      if (!el) onClose();
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [onClose]);
 
   return (
-    <div className={styles.contextMenu} ref={menuRef} role="menu">
-      {isRoot && isEditMode && (
+    <div
+      data-ctxmenu="true"
+      style={{
+        position: 'absolute', right: 0, top: '100%', zIndex: 200,
+        background: '#fff', border: '1px solid var(--sb-border)', borderRadius: 12,
+        boxShadow: 'var(--sb-shadow-deep)', padding: 6, minWidth: 160,
+      }}
+    >
+      {isFolder && isEditMode && (
         <button
-          className={styles.contextMenuItem}
-          role="menuitem"
-          onClick={(e) => {
-            e.stopPropagation();
-            onAddSection();
-            onClose();
-          }}
+          style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '9px 11px', border: 'none', background: 'transparent', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, textAlign: 'left', color: 'var(--sb-text-2)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-soft)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          onClick={() => { onAddQuestion(); onClose(); }}
         >
-          <Plus size={13} />
-          Add Section
+          <Icon name="plus" size={13} /> Add Question
         </button>
       )}
-      {(isRoot || isFolder) && isEditMode && (
+      {isRoot && isEditMode && (
         <button
-          className={styles.contextMenuItem}
-          role="menuitem"
-          onClick={(e) => {
-            e.stopPropagation();
-            onAddQuestion();
-            onClose();
-          }}
+          style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '9px 11px', border: 'none', background: 'transparent', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, textAlign: 'left', color: 'var(--sb-text-2)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-soft)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          onClick={() => { onAddSection(); onClose(); }}
         >
-          <Plus size={13} />
-          Add Question
+          <Icon name="plus" size={13} /> Add Section
         </button>
       )}
       {!isRoot && isEditMode && (
         <button
-          className={`${styles.contextMenuItem} ${styles.contextMenuItemDanger}`}
-          role="menuitem"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-            onClose();
-          }}
+          style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '9px 11px', border: 'none', background: 'transparent', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, textAlign: 'left', color: 'var(--sb-red)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--sb-red-soft)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          onClick={() => { onDelete(); onClose(); }}
         >
-          <Trash2 size={13} />
-          Delete
+          <Icon name="trash" size={13} /> Delete
         </button>
       )}
     </div>
@@ -205,176 +107,151 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 };
 
 // ---------------------------------------------------------------------------
-// Per-node renderer — injected extra props via a closure in OutlineTree
+// Recursive node renderer
 // ---------------------------------------------------------------------------
 
-type ExtraNodeProps = {
-  editingNodeId: string | null;
-  contextMenuNodeId: string | null;
-  editorMode: string;
-  onStartEdit: (id: string) => void;
-  onCommitEdit: (id: string, name: string) => void;
-  onCancelEdit: () => void;
-  onOpenContextMenu: (id: string, e: React.MouseEvent) => void;
-  onCloseContextMenu: () => void;
+interface NodeProps {
+  node: INode;
+  selectedId: string | null;
+  openIds: Set<string>;
+  contextMenuId: string | null;
+  isEditMode: boolean;
+  onSelect: (id: string) => void;
+  onToggle: (id: string) => void;
+  onOpenCtx: (id: string) => void;
+  onCloseCtx: () => void;
   onAddSection: (parentId: string) => void;
   onAddQuestion: (parentId: string) => void;
-  onDeleteNode: (id: string) => void;
-  onSelectNode: (id: string) => void;
-};
+  onDelete: (id: string) => void;
+}
 
-function makeNodeRenderer(extra: ExtraNodeProps) {
-  // eslint-disable-next-line react/display-name
-  return function NodeRow({ node, style, dragHandle }: NodeRendererProps<INode>) {
-    const iNode = node.data;
-    const depth = node.level;
-    const isRoot = !iNode.parent;
-    const isFolder = iNode.isFolder ?? false;
-    const isSelected = node.isSelected;
-    const isEditing = extra.editingNodeId === node.id;
-    const isContextOpen = extra.contextMenuNodeId === node.id;
-    const isEditMode = extra.editorMode === 'edit';
-    const status = (iNode.metadata?.status ?? iNode.status) as string | undefined;
+const TreeNode: React.FC<NodeProps> = ({
+  node, selectedId, openIds, contextMenuId, isEditMode,
+  onSelect, onToggle, onOpenCtx, onCloseCtx,
+  onAddSection, onAddQuestion, onDelete,
+}) => {
+  const kind = detectNodeKind(node);
+  const isRoot = kind === 'root';
+  const isSection = kind === 'section';
+  const isQuestion = kind === 'question';
+  const isSelected = node.id === selectedId;
+  const isOpen = openIds.has(node.id);
+  const hasChildren = (node.children?.length ?? 0) > 0;
+  const isCtxOpen = contextMenuId === node.id;
+  const canExpand = (isRoot || isSection) && hasChildren;
 
-    // Choose node icon
-    let nodeIcon: React.ReactNode;
-    if (isRoot) {
-      nodeIcon = <BookOpen size={14} className={styles.nodeIconBlue} />;
-    } else if (isFolder) {
-      nodeIcon = node.isOpen ? (
-        <FolderOpen size={14} className={styles.nodeIconAmber} />
-      ) : (
-        <Folder size={14} className={styles.nodeIconAmber} />
-      );
-    } else {
-      nodeIcon = (
-        <span className={styles.nodeIconQuestion}>
-          <QuestionTypeIcon questionType={iNode.questionType ?? 'mcq'} size={14} />
-        </span>
-      );
-    }
+  const nodeType = isRoot ? 'set' : isSection ? 'section' : 'question';
+  const className = `ce-node ${nodeType}${isSelected ? ' active' : ''}`;
 
-    const isExpandable = (iNode.children?.length ?? 0) > 0 || isFolder;
-
-    return (
+  return (
+    <>
+      {/* div instead of button to allow nested buttons (context menu) */}
       <div
-        style={style}
-        className={[
-          styles.nodeRow,
-          isSelected ? styles.nodeRowSelected : '',
-          isEditMode ? styles.nodeRowEditable : '',
-        ].join(' ')}
-        onClick={(e) => {
-          e.stopPropagation();
-          extra.onSelectNode(node.id);
-          node.select();
-        }}
-        onDoubleClick={(e) => {
-          if (!isEditMode) return;
-          e.stopPropagation();
-          extra.onStartEdit(node.id);
-        }}
+        className={className}
+        onClick={() => { onSelect(node.id); if (canExpand) onToggle(node.id); }}
         aria-selected={isSelected}
         role="treeitem"
-        aria-expanded={isExpandable ? node.isOpen : undefined}
+        tabIndex={0}
+        aria-expanded={canExpand ? isOpen : undefined}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(node.id); if (canExpand) onToggle(node.id); } }}
       >
-        {/* Drag handle — edit mode only */}
-        {isEditMode && (
-          <div
-            ref={dragHandle}
-            className={styles.dragHandle}
-            title="Drag to reorder"
-            aria-hidden="true"
-          >
-            <GripVertical size={12} />
-          </div>
+        {/* Expand / collapse twist */}
+        <span
+          className={`twist${canExpand ? (isOpen ? ' open' : ' closed') : ' leaf'}`}
+          onClick={e => { e.stopPropagation(); if (canExpand) onToggle(node.id); }}
+        >
+          <Icon name="caret" size={13} />
+        </span>
+
+        {/* Icon — only for root and section, NOT for questions */}
+        {isRoot && (
+          <span className="ico">
+            <Icon name="book" size={15} />
+          </span>
+        )}
+        {isSection && (
+          <span className="ico">
+            <Icon name="folder" size={14} />
+          </span>
         )}
 
-        {/* Indentation */}
-        <span
-          className={styles.nodeIndent}
-          style={{ width: depth * 16 }}
-          aria-hidden="true"
-        />
+        {/* Question type label (questions only) */}
+        {isQuestion && (
+          <span className="type">{shortTypeLabel(node.questionType ?? (node.metadata?.questionType as string))}</span>
+        )}
 
-        {/* Expand / collapse chevron */}
-        <button
-          className={styles.expandBtn}
-          onClick={(e) => {
-            e.stopPropagation();
-            node.toggle();
-          }}
-          tabIndex={isExpandable ? 0 : -1}
-          style={{ visibility: isExpandable ? 'visible' : 'hidden' }}
-          aria-label={node.isOpen ? 'Collapse' : 'Expand'}
-        >
-          {node.isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-        </button>
+        {/* Name */}
+        <span className="nm">{node.name}</span>
 
-        {/* Node type icon */}
-        <span className={styles.nodeIcon} aria-hidden="true">
-          {nodeIcon}
-        </span>
+        {/* Question count badge (sections only, not root) */}
+        {isSection && (
+          <span className="qbadge">{node.children?.length ?? 0}</span>
+        )}
 
-        {/* Name — inline editor or label */}
-        <span className={styles.nodeName}>
-          {isEditing ? (
-            <InlineNameEditor
-              value={iNode.name}
-              onCommit={(name) => extra.onCommitEdit(node.id, name)}
-              onCancel={extra.onCancelEdit}
-            />
-          ) : (
-            <span className={styles.nodeNameText} title={iNode.name}>
-              {iNode.name}
-            </span>
-          )}
-        </span>
+        {/* Status dot (questions only) */}
+        {isQuestion && (
+          <span className={`stat ${getStatusClass(node.status ?? (node.metadata?.status as string))}`} />
+        )}
 
-        {/* Status dot */}
-        <span
-          className={styles.statusDot}
-          style={{ backgroundColor: getStatusDotColor(status) }}
-          title={status ?? 'Draft'}
-          aria-label={`Status: ${status ?? 'Draft'}`}
-        />
-
-        {/* Context menu button — shown on hover in edit mode */}
-        {isEditMode && !isEditing && (
-          <div className={styles.contextMenuWrapper}>
+        {/* Context menu */}
+        {isEditMode && (
+          <div style={{ position: 'relative', marginLeft: isQuestion ? undefined : '2px', flexShrink: 0 }} onClick={e => e.stopPropagation()}>
             <button
-              className={styles.contextMenuBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                extra.onOpenContextMenu(node.id, e);
+              style={{
+                width: 26, height: 26, borderRadius: 7, border: 'none', background: 'transparent',
+                cursor: 'pointer', display: 'grid', placeItems: 'center',
+                color: 'var(--sb-text-faint)', opacity: isCtxOpen ? 1 : undefined,
               }}
+              className="ce-ctx-btn"
+              onClick={e => { e.stopPropagation(); isCtxOpen ? onCloseCtx() : onOpenCtx(node.id); }}
               aria-label="Node options"
-              aria-haspopup="menu"
-              aria-expanded={isContextOpen}
             >
-              <MoreVertical size={14} />
+              <Icon name="more" size={14} />
             </button>
-
-            {isContextOpen && (
+            {isCtxOpen && (
               <ContextMenu
                 isRoot={isRoot}
-                isFolder={isFolder}
+                isFolder={isSection}
                 isEditMode={isEditMode}
-                onClose={extra.onCloseContextMenu}
-                onAddSection={() => extra.onAddSection(node.id)}
-                onAddQuestion={() => extra.onAddQuestion(node.id)}
-                onDelete={() => extra.onDeleteNode(node.id)}
+                nodeId={node.id}
+                onClose={onCloseCtx}
+                onAddSection={() => onAddSection(node.id)}
+                onAddQuestion={() => onAddQuestion(node.id)}
+                onDelete={() => onDelete(node.id)}
               />
             )}
           </div>
         )}
       </div>
-    );
-  };
-}
+
+      {/* Children */}
+      {canExpand && isOpen && (
+        <div className="ce-children" role="group">
+          {node.children!.map(child => (
+            <TreeNode
+              key={child.id}
+              node={child}
+              selectedId={selectedId}
+              openIds={openIds}
+              contextMenuId={contextMenuId}
+              isEditMode={isEditMode}
+              onSelect={onSelect}
+              onToggle={onToggle}
+              onOpenCtx={onOpenCtx}
+              onCloseCtx={onCloseCtx}
+              onAddSection={onAddSection}
+              onAddQuestion={onAddQuestion}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      )}
+    </>
+  );
+};
 
 // ---------------------------------------------------------------------------
-// OutlineTree — main component
+// OutlineTree
 // ---------------------------------------------------------------------------
 
 const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
@@ -383,208 +260,119 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
   const selectNode = useTreeStore((s) => s.selectNode);
   const addNode = useTreeStore((s) => s.addNode);
   const deleteNode = useTreeStore((s) => s.deleteNode);
-  const updateNode = useTreeStore((s) => s.updateNode);
-  const reorderChildren = useTreeStore((s) => s.reorderChildren);
-
   const editorMode = useEditorStore((s) => s.editorMode);
   const { openModal } = useUiStore();
 
   const isEditMode = editorMode === 'edit';
 
-  // ── Local UI state ──────────────────────────────────────────────────────────
-  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
-  const [contextMenuNodeId, setContextMenuNodeId] = useState<string | null>(null);
-
-  // ── Container height tracking via ResizeObserver ────────────────────────────
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [treeHeight, setTreeHeight] = useState(400);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (entry) setTreeHeight(entry.contentRect.height);
-    });
-    ro.observe(el);
-    setTreeHeight(el.clientHeight);
-    return () => ro.disconnect();
-  }, []);
-
-  // ── Handlers ────────────────────────────────────────────────────────────────
-
-  const handleSelect = useCallback(
-    (nodes: Array<{ id: string }>) => {
-      const first = nodes[0];
-      if (first && first.id !== selectedNodeId) {
-        selectNode(first.id);
-      }
-    },
-    [selectedNodeId, selectNode],
-  );
-
-  const handleMove: MoveHandler<INode> = useCallback(
-    ({ parentId, parentNode, index, dragIds }) => {
-      if (!parentId) return;
-      // Find the current children of the parent node
-      const parentData = parentNode?.data;
-      const children = parentData?.children ?? [];
-      dragIds.forEach((dragId) => {
-        const fromIndex = children.findIndex((c) => c.id === dragId);
-        if (fromIndex !== -1) {
-          reorderChildren(parentId, fromIndex, index);
-        }
+  // Open root + all sections by default
+  const [openIds, setOpenIds] = useState<Set<string>>(() => {
+    const ids = new Set<string>();
+    function collect(nodes: typeof treeData) {
+      nodes.forEach(n => {
+        const kind = detectNodeKind(n);
+        if (kind === 'root' || kind === 'section') ids.add(n.id);
+        if (n.children) collect(n.children);
       });
-    },
-    [reorderChildren],
-  );
+    }
+    collect(treeData);
+    return ids;
+  });
+  const [contextMenuId, setContextMenuId] = useState<string | null>(null);
 
-  const handleStartEdit = useCallback((id: string) => {
-    setEditingNodeId(id);
-    setContextMenuNodeId(null);
+  const handleToggle = useCallback((id: string) => {
+    setOpenIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
   }, []);
 
-  const handleCommitEdit = useCallback(
-    (id: string, name: string) => {
-      updateNode(id, { name });
-      setEditingNodeId(null);
-    },
-    [updateNode],
-  );
+  const handleSelect = useCallback((id: string) => {
+    selectNode(id);
+  }, [selectNode]);
 
-  const handleCancelEdit = useCallback(() => {
-    setEditingNodeId(null);
-  }, []);
+  const handleAddSection = useCallback((parentId: string) => {
+    addNode(parentId, 'section');
+  }, [addNode]);
 
-  const handleOpenContextMenu = useCallback((id: string, _e: React.MouseEvent) => {
-    setContextMenuNodeId((prev) => (prev === id ? null : id));
-  }, []);
+  const handleAddQuestion = useCallback((parentId: string) => {
+    openModal('questionTypeSelector', { parentId });
+  }, [openModal]);
 
-  const handleCloseContextMenu = useCallback(() => {
-    setContextMenuNodeId(null);
-  }, []);
+  const handleDelete = useCallback((id: string) => {
+    openModal('confirmDelete', { nodeId: id });
+  }, [openModal]);
 
-  const handleAddSection = useCallback(
-    (parentId: string) => {
-      addNode(parentId, 'section');
-    },
-    [addNode],
-  );
-
-  const handleAddQuestion = useCallback(
-    (parentId: string) => {
-      openModal('questionTypeSelector', { parentId });
-    },
-    [openModal],
-  );
-
-  const handleDeleteNode = useCallback(
-    (id: string) => {
-      openModal('confirmDelete', { nodeId: id });
-    },
-    [openModal],
-  );
-
-  const handleSelectNode = useCallback(
-    (id: string) => {
-      selectNode(id);
-    },
-    [selectNode],
-  );
-
-  // ── Node renderer — rebuilt only when shared state changes ──────────────────
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const NodeRow = React.useMemo(
-    () =>
-      makeNodeRenderer({
-        editingNodeId,
-        contextMenuNodeId,
-        editorMode,
-        onStartEdit: handleStartEdit,
-        onCommitEdit: handleCommitEdit,
-        onCancelEdit: handleCancelEdit,
-        onOpenContextMenu: handleOpenContextMenu,
-        onCloseContextMenu: handleCloseContextMenu,
-        onAddSection: handleAddSection,
-        onAddQuestion: handleAddQuestion,
-        onDeleteNode: handleDeleteNode,
-        onSelectNode: handleSelectNode,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      editingNodeId,
-      contextMenuNodeId,
-      editorMode,
-      handleStartEdit,
-      handleCommitEdit,
-      handleCancelEdit,
-      handleOpenContextMenu,
-      handleCloseContextMenu,
-      handleAddSection,
-      handleAddQuestion,
-      handleDeleteNode,
-      handleSelectNode,
-    ],
-  );
-
-  // ── Root node id for "Add Section" bottom button ────────────────────────────
   const rootId = treeData[0]?.id;
-  const isEmpty = treeData.length === 0;
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // Determine selected node kind to conditionally disable footer buttons
+  const selectedNode = selectedNodeId
+    ? useTreeStore.getState().getNodeById(selectedNodeId)
+    : null;
+  const selectedKind = selectedNode ? detectNodeKind(selectedNode) : null;
+  const addSectionDisabled  = selectedKind === 'section' || selectedKind === 'question';
+  const addQuestionDisabled = selectedKind === 'root'    || selectedKind === 'question';
+
+  // Resolve parent for "Add Question" (only used when not disabled)
+  const questionParentId = selectedKind === 'section'
+    ? (selectedNodeId ?? rootId)
+    : rootId;
+
   return (
-    <div className={styles.panel} role="navigation" aria-label="Question set outline">
-      {/* Header */}
-      <div className={styles.header}>
-        <span className={styles.headerTitle}>Outline</span>
-        <button
-          className={styles.collapseBtn}
-          onClick={onCollapse}
-          title="Collapse outline"
-          aria-label="Collapse outline panel"
-        >
-          <ChevronsLeft size={16} />
+    <>
+      <div className="ce-tree-head">
+        <span className="lbl">Hierarchy</span>
+        <button title="Collapse" onClick={onCollapse} aria-label="Collapse outline">
+          <Icon name="panel-left" size={17} />
         </button>
       </div>
 
-      {/* Tree area */}
-      <div className={styles.tree} ref={containerRef}>
-        {isEmpty ? (
-          <p className={styles.emptyState}>
-            No questions yet. Add a section to get started.
+      <div className="ce-tree-scroll" role="tree" aria-label="Question set outline">
+        {treeData.length === 0 ? (
+          <p style={{ padding: '16px 12px', fontSize: 13, color: 'var(--sb-text-faint)', fontStyle: 'italic' }}>
+            No content yet.
           </p>
         ) : (
-          <Tree<INode>
-            data={treeData}
-            selection={selectedNodeId ?? undefined}
-            onSelect={handleSelect}
-            onMove={handleMove}
-            height={treeHeight}
-            rowHeight={36}
-            indent={0}
-            disableDrag={!isEditMode}
-            disableDrop={!isEditMode}
-            openByDefault={true}
-          >
-            {NodeRow}
-          </Tree>
+          treeData.map(node => (
+            <TreeNode
+              key={node.id}
+              node={node}
+              selectedId={selectedNodeId}
+              openIds={openIds}
+              contextMenuId={contextMenuId}
+              isEditMode={isEditMode}
+              onSelect={handleSelect}
+              onToggle={handleToggle}
+              onOpenCtx={setContextMenuId}
+              onCloseCtx={() => setContextMenuId(null)}
+              onAddSection={handleAddSection}
+              onAddQuestion={handleAddQuestion}
+              onDelete={handleDelete}
+            />
+          ))
         )}
       </div>
 
-      {/* Add Section button — bottom bar, edit mode only */}
       {isEditMode && rootId && (
-        <div className={styles.addBar}>
+        <div className="ce-tree-foot">
           <button
-            className={styles.addBtn}
             onClick={() => handleAddSection(rootId)}
-            aria-label="Add a new section"
+            disabled={addSectionDisabled}
+            style={addSectionDisabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
           >
-            <Plus size={14} />
-            Add Section
+            <Icon name="plus" size={15} />Add Section
+          </button>
+          <button
+            onClick={() => handleAddQuestion(questionParentId ?? rootId)}
+            disabled={addQuestionDisabled}
+            style={addQuestionDisabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+          >
+            <Icon name="plus" size={15} />Add Question
           </button>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
