@@ -129,11 +129,12 @@ app.get([
     import { registerQuestionsetEditor } from '/index.js';
     registerQuestionsetEditor();
 
-    // Create element and set attributes BEFORE appending to DOM so the
-    // component receives context/config on its very first render.
+    // Set props as element PROPERTIES (not string attributes) so React
+    // receives parsed objects on the very first render.
+    // JSON is valid JS object-literal syntax, so this works without JSON.parse.
     const editor = document.createElement('sb-questionset-editor');
-    editor.setAttribute('context', '${context}');
-    editor.setAttribute('config',  '${config}');
+    editor.context = ${context};
+    editor.config  = ${config};
     editor.style.cssText = 'display:block;width:100%;height:100%;';
     document.getElementById('root').appendChild(editor);
   <\/script>
