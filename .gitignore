@@ -54,3 +54,9 @@ project-sunbird-sunbird-questionset-editor-web-component-*
 .env.env.local
 
 /projects/questionset-editor-react/node_modules
+/projects/questionset-editor-react/dist
+/projects/questionset-editor-react/tsconfig.tsbuildinfo
+/projects/questionset-editor-react/.env
+/projects/questionset-editor-react/.env.local
+/projects/questionset-editor-react/.env.*.local
+/projects/questionset-editor-react/node_modules/.vite
