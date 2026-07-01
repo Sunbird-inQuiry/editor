@@ -243,7 +243,7 @@ function UploadTab({ onUploaded, triggerRef }: UploadTabProps) {
         onClick={() => !uploading && fileRef.current?.click()}
         style={{
           border: `2px dashed ${dragging ? 'var(--accent)' : '#c4c4c4'}`,
-          borderRadius: 12, padding: '52px 40px', textAlign: 'center',
+          borderRadius: 12, padding: '36px 40px', textAlign: 'center',
           cursor: uploading ? 'default' : 'pointer',
           background: dragging ? 'var(--accent-soft)' : '#fafafa',
           transition: 'all .15s', userSelect: 'none',
@@ -304,6 +304,9 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
     return () => document.removeEventListener('keydown', h);
   }, [onClose]);
 
+  // Portal into .ce so CSS variables (--accent etc.) are inherited
+  const portalTarget = document.querySelector('.ce') ?? document.body;
+
   const TABS: { key: Tab; label: string; icon?: string }[] = [
     { key: 'my',     label: 'My Images' },
     { key: 'all',    label: 'All Images' },
@@ -317,12 +320,13 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
         background: 'rgba(0,0,0,0.45)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 16,
+        fontFamily: 'var(--sb-font)',
       }}
       onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
         style={{
-          background: '#fff', borderRadius: 18,
+          background: 'var(--sb-card)', borderRadius: 18,
           width: 680, maxWidth: '100%', maxHeight: 'calc(100vh - 48px)',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
           boxShadow: 'var(--sb-shadow-deep)',
@@ -396,9 +400,21 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
           gap: 10, padding: '16px 24px', borderTop: '1px solid var(--sb-border)',
+          flexShrink: 0,
         }}>
-          <button type="button" className="ce-btn ghost" onClick={onClose}>Cancel</button>
-          {tab !== 'upload' ? (
+          {tab === 'upload' ? (
+            <>
+              <button type="button" className="ce-btn ghost" onClick={onClose}>Cancel</button>
+              <button
+                type="button"
+                className="ce-btn primary"
+                onClick={() => uploadTriggerRef.current?.()}
+              >
+                <Icon name="upload" size={15} />
+                Upload &amp; Use
+              </button>
+            </>
+          ) : (
             <button
               type="button"
               className="ce-btn primary"
@@ -407,19 +423,10 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
             >
               Use Selected
             </button>
-          ) : (
-            <button
-              type="button"
-              className="ce-btn primary"
-              onClick={() => uploadTriggerRef.current?.()}
-            >
-              <Icon name="upload" size={15} />
-              Upload &amp; Use
-            </button>
           )}
         </div>
       </div>
     </div>,
-    document.body,
+    portalTarget,
   );
 }
