@@ -92,10 +92,10 @@ app.get(['/', '/index.html'], (req, res) => {
   <script type="importmap">
   {
     "imports": {
-      "react":             "https://esm.sh/react@19",
-      "react/jsx-runtime": "https://esm.sh/react@19/jsx-runtime",
-      "react-dom":         "https://esm.sh/react-dom@19",
-      "react-dom/client":  "https://esm.sh/react-dom@19/client"
+      "react":             "https://esm.sh/react@19.2.7",
+      "react/jsx-runtime": "https://esm.sh/react@19.2.7/jsx-runtime",
+      "react-dom":         "https://esm.sh/react-dom@19.2.7",
+      "react-dom/client":  "https://esm.sh/react-dom@19.2.7/client"
     }
   }
   <\/script>
