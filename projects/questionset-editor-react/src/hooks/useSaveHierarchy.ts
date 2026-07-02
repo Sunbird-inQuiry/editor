@@ -133,6 +133,31 @@ function buildSavePayload(
   }
 
   nodes.forEach((node, i) => walk(node, i === 0));
+
+  // Old editor computes the root outcomeDeclaration.maxScore before every
+  // hierarchy save (getMaxScore). Scores live in the tree metadata (hydrated
+  // from question reads / built by useSaveQuestion), so sum locally.
+  const rootId = nodes[0]?.identifier;
+  const rootEntry = rootId ? (nodesModified[rootId] as { metadata?: Record<string, unknown> } | undefined) : undefined;
+  if (rootEntry?.metadata) {
+    let total = 0;
+    const sumScores = (node: INode) => {
+      if (node.isQuestion && !node.identifier.startsWith('temp-')) {
+        const meta = { ...(node.metadata ?? {}), ...(treeCache[node.identifier] ?? {}) };
+        const od = meta.outcomeDeclaration as Record<string, Record<string, unknown>> | undefined;
+        const score = Number(od?.maxScore?.defaultValue ?? meta.maxScore ?? 1);
+        total += Number.isFinite(score) && score > 0 ? score : 1;
+      }
+      (node.children ?? []).forEach(sumScores);
+    };
+    nodes.forEach(sumScores);
+    if (total > 0) {
+      rootEntry.metadata.outcomeDeclaration = {
+        ...((rootEntry.metadata.outcomeDeclaration as Record<string, unknown>) ?? {}),
+        maxScore: { cardinality: 'single', type: 'integer', defaultValue: total },
+      };
+    }
+  }
   return { nodesModified, hierarchy };
 }
 
@@ -180,6 +205,7 @@ export function useSaveHierarchy() {
       useTreeStore.setState({ treeCache: clearedCache });
       setLastSaved(new Date().toISOString());
       setIsDirty(false);
+      useEditorStore.getState().eventHandlers.onHierarchySaved?.({ identifiers });
       return true;
     } catch (e) {
       console.error('[useSaveHierarchy] save failed:', e);

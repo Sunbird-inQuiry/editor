@@ -17,7 +17,7 @@ export function useEditorInit({ config, onError }: UseEditorInitOptions) {
   const [error, setError] = useState<Error | null>(null);
   const [isReady, setIsReady] = useState(false);
 
-  const { setEditorConfig, setEditorMode, setCategoryDefinition, setReviewComments } = useEditorStore();
+  const { setEditorConfig, setEditorMode, setCategoryDefinition, setReviewComments, setLicenses, setChannelData } = useEditorStore();
   const { setTreeData, selectNode, mergeNodeMeta } = useTreeStore();
 
   useEffect(() => {
@@ -84,6 +84,25 @@ export function useEditorInit({ config, onError }: UseEditorInitOptions) {
             } catch { /* silent */ }
           }
         }
+
+        // Old helper.service.initialize(channel): channel read + licenses —
+        // non-blocking, feeds license options and channel defaults.
+        void (async () => {
+          try {
+            const { getLicenses } = await import('../api/license');
+            const licenses = await getLicenses();
+            if (!cancelled) setLicenses(licenses);
+          } catch { /* license field falls back to free text */ }
+        })();
+        void (async () => {
+          try {
+            if (config.context.channel) {
+              const { getChannelData } = await import('../api/channel');
+              const channel = await getChannelData(config.context.channel);
+              if (!cancelled) setChannelData(channel as unknown as Record<string, unknown>);
+            }
+          } catch { /* non-fatal */ }
+        })();
 
         if (!cancelled) setIsReady(true);
       } catch (err) {

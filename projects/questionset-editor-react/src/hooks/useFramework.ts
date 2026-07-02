@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import { useEditorStore } from '../store/editor.store';
 import { getFramework } from '../api/framework';
 import type { IFramework, ITerm } from '../types/framework';
@@ -18,24 +18,36 @@ export function useFramework() {
     staleTime: 10 * 60 * 1000,
   });
 
-  const targetQueries = targetFWIds.map((fwId) => ({
-    queryKey: ['framework', fwId],
-    queryFn: () => getFramework(fwId as string),
-    staleTime: 10 * 60 * 1000,
-  }));
+  // Old editor reads every target framework too (setTargetFrameworkData).
+  const targetResults = useQueries({
+    queries: targetFWIds.map((fwId) => ({
+      queryKey: ['framework', fwId],
+      queryFn: () => getFramework(fwId as string),
+      enabled: !!fwId,
+      staleTime: 10 * 60 * 1000,
+    })),
+  });
+  const targetData = targetResults.map((q) => q.data).filter(Boolean) as IFramework[];
 
   const frameworkTerms = useMemo<Map<string, Array<ITerm>>>(() => {
     const map = new Map<string, Array<ITerm>>();
-    if (orgQuery.data?.categories) {
-      for (const cat of orgQuery.data.categories) {
-        map.set(cat.code, cat.terms ?? []);
+    const addCategories = (fw?: IFramework) => {
+      for (const cat of fw?.categories ?? []) {
+        const existing = map.get(cat.code) ?? [];
+        const seen = new Set(existing.map((t) => t.identifier));
+        const merged = [...existing, ...(cat.terms ?? []).filter((t) => !seen.has(t.identifier))];
+        map.set(cat.code, merged);
       }
-    }
+    };
+    addCategories(orgQuery.data);
+    targetData.forEach(addCategories);
     return map;
-  }, [orgQuery.data]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgQuery.data, ...targetData]);
 
   return {
     orgFramework: orgQuery.data,
+    targetFrameworks: targetData,
     isLoading: orgQuery.isLoading,
     targetFrameworkIds: targetFWIds as string[],
     frameworkTerms,

@@ -8,6 +8,7 @@ import { createPortal } from 'react-dom';
 import { X, Search, Upload as UploadIcon, Image as ImageIcon } from 'lucide-react';
 import { apiClient } from '../../api/client';
 import { URLS } from '../../api/urls';
+import { useEditorStore } from '../../store/editor.store';
 import { uploadAsset } from '../../api/asset';
 import styles from './AssetBrowser.module.scss';
 
@@ -207,7 +208,9 @@ const AssetBrowser: React.FC<AssetBrowserProps> = ({
     setIsUploading(true);
     setUploadError(null);
     try {
-      const url = await uploadAsset(selectedFile, channel, userId);
+      const presignedHeaders =
+        useEditorStore.getState().editorConfig?.context?.cloudStorage?.presigned_headers ?? {};
+      const url = await uploadAsset(selectedFile, channel, userId, presignedHeaders);
       onSelect({ url, name: assetName.trim(), id: url.match(/(do_[A-Za-z0-9]+)/)?.[1] ?? '' });
       onClose();
     } catch {

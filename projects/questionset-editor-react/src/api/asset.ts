@@ -86,7 +86,12 @@ export async function createMediaAsset(
       },
     },
   });
-  return response.data?.result as IAssetCreateResult;
+  // Real KP returns node_id (old editor consumed it); accept both spellings.
+  const result = (response.data?.result ?? {}) as Record<string, string>;
+  return {
+    identifier: result.identifier ?? result.node_id ?? '',
+    versionKey: result.versionKey ?? '',
+  };
 }
 
 // Step 2
@@ -98,7 +103,13 @@ export async function getPreSignedUrl(
     `${URLS.content.uploadUrl}/${assetId}`,
     { request: { content: { fileName } } },
   );
-  return response.data?.result as { preSignedUrl: string; url: string };
+  // Real KP returns pre_signed_url (old editor consumed it); accept both.
+  const result = (response.data?.result ?? {}) as Record<string, string>;
+  const preSignedUrl = result.pre_signed_url ?? result.preSignedUrl ?? '';
+  return {
+    preSignedUrl,
+    url: result.url ?? preSignedUrl.split('?')[0] ?? '',
+  };
 }
 
 // Step 3 — direct PUT to blob storage (external URL, not through apiClient)
@@ -148,9 +159,11 @@ export async function uploadAsset(
   createdBy: string,
   presignedHeaders: Record<string, string> = {},
 ): Promise<string> {
-  const { identifier }        = await createMediaAsset(file, channel, createdBy);
-  const { preSignedUrl, url } = await getPreSignedUrl(identifier, file.name);
+  const { identifier }   = await createMediaAsset(file, channel, createdBy);
+  const { preSignedUrl } = await getPreSignedUrl(identifier, file.name);
   await uploadToBlob(preSignedUrl, file, presignedHeaders);
+  // Old editor registers the blob URL as signedURL minus the query string.
+  const url = preSignedUrl.split('?')[0]!;
   await finalizeAssetUpload(identifier, url, file.type);
   const asset = await readAsset(identifier);
   return asset.downloadUrl ?? url;

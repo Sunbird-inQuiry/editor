@@ -153,6 +153,15 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
     onToolbarEvent({ action: 'onFormStatusChange', data: { isValid } });
   }, [onToolbarEvent]);
 
+  const licenses = useEditorStore((s) => s.licenses);
+  // Old meta-form fills the license field's options from getLicenses().
+  const withLicenseOptions = useCallback(
+    (fields: typeof rootFormConfig) =>
+      (fields ?? []).map((f) =>
+        f.code === 'license' && !f.range && licenses.length ? { ...f, range: licenses } : f),
+    [licenses],
+  );
+
   const formConfig = isCurrentNodeRoot ? rootFormConfig : unitFormConfig;
   const nodeTabs = isCurrentNodeQuestion ? QUESTION_TABS : isCurrentNodeRoot ? SET_TABS : SECTION_TABS;
 
@@ -351,7 +360,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                 {isCurrentNodeQuestion && activeTab === 'meta' && (
                   <div className="ce-tabbody">
                     <SparkMetaForm
-                      fields={questionFormConfig ?? relationalFormConfig ?? []}
+                      fields={withLicenseOptions(questionFormConfig ?? relationalFormConfig)}
                       values={activeNodeMeta as Record<string, unknown>}
                       onChange={handleFormChange}
                       onValidityChange={handleFormValidityChange}
@@ -378,7 +387,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                     )}
                     {formConfig && formConfig.length > 0 ? (
                       <SparkMetaForm
-                        fields={formConfig}
+                        fields={withLicenseOptions(formConfig)}
                         values={activeNodeMeta as Record<string, unknown>}
                         onChange={handleFormChange}
                         onValidityChange={handleFormValidityChange}
@@ -398,7 +407,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                     <h2 className="ce-secttl">Target Audience</h2>
                     <p className="ce-sectsub">Curriculum alignment for the intended learners.</p>
                     <SparkMetaForm
-                      fields={formConfig ?? []}
+                      fields={withLicenseOptions(formConfig)}
                       values={activeNodeMeta as Record<string, unknown>}
                       onChange={handleFormChange}
                       onValidityChange={handleFormValidityChange}
@@ -425,7 +434,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                       </>
                     )}
                     <SparkMetaForm
-                      fields={formConfig ?? []}
+                      fields={withLicenseOptions(formConfig)}
                       values={activeNodeMeta as Record<string, unknown>}
                       onChange={handleFormChange}
                       onValidityChange={handleFormValidityChange}

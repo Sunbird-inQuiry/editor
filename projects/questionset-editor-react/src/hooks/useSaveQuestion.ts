@@ -419,6 +419,11 @@ export function useSaveQuestion() {
     const taxonomy: Record<string, unknown> = {};
     (['audience', 'board', 'medium', 'gradeLevel', 'subject', 'license'] as const)
       .forEach(k => { if (rootMeta[k]) taxonomy[k] = rootMeta[k]; });
+    // Old editor: channel read supplies the default license when unset.
+    if (!taxonomy.license) {
+      const defaultLicense = useEditorStore.getState().channelData?.defaultLicense;
+      if (typeof defaultLicense === 'string' && defaultLicense) taxonomy.license = defaultLicense;
+    }
 
     setIsSaving(true);
     try {
@@ -495,7 +500,10 @@ export function useSaveQuestion() {
         };
 
         updateNode(selectedNodeId, { name: questionName, ...questionMeta });
-        if (await saveHierarchy()) notifySuccess('Question saved');
+        if (await saveHierarchy()) {
+          notifySuccess('Question saved');
+          useEditorStore.getState().eventHandlers.onQuestionSaved?.({ identifier: selectedNodeId, ...questionMeta });
+        }
       } else {
         // ── New question — build UUID + full metadata, create via hierarchy ──
         const questionUuid = genUuid();
@@ -569,7 +577,10 @@ export function useSaveQuestion() {
         // Replace temp- node with UUID, store full metadata, trigger hierarchy save
         replaceNodeId(selectedNodeId, questionUuid);
         updateNode(questionUuid, { name: questionName, ...questionMeta });
-        if (await saveHierarchy()) notifySuccess('Question created');
+        if (await saveHierarchy()) {
+          notifySuccess('Question created');
+          useEditorStore.getState().eventHandlers.onQuestionSaved?.({ identifier: questionUuid, ...questionMeta });
+        }
       }
     } catch (e) {
       console.error('[useSaveQuestion] save failed:', e);

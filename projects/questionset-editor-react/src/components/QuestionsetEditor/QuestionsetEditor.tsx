@@ -1,6 +1,8 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
+import { useEditorStore } from '../../store/editor.store';
+import { useTelemetry } from '../../hooks/useTelemetry';
 import type { IEditorConfig, IEditorEvents } from '../../types/editor';
 import { useEditorInit } from '../../hooks/useEditorInit';
 import SplitEditorShell from '../SplitEditorShell/SplitEditorShell';
@@ -83,6 +85,17 @@ interface InnerEditorProps {
 }
 
 function InnerEditor({ config, events }: InnerEditorProps) {
+  // Host event callbacks (onQuestionSaved/onHierarchySaved) + telemetry START/END.
+  const setEventHandlers = useEditorStore((s) => s.setEventHandlers);
+  useEffect(() => {
+    setEventHandlers({
+      onQuestionSaved: events.onQuestionSaved,
+      onHierarchySaved: events.onHierarchySaved,
+    });
+    return () => setEventHandlers({});
+  }, [events.onQuestionSaved, events.onHierarchySaved, setEventHandlers]);
+  useTelemetry();
+
   const { isLoading, error, isReady } = useEditorInit({
     config,
     onError: events.onError,

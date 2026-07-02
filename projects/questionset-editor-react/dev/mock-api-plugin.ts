@@ -53,13 +53,13 @@ export function mockApiPlugin(): Plugin {
           return json(MOCK_CATEGORY_DEFINITION);
 
         if (url.includes('/asset/v1/create') && method === 'POST')
-          return json({ responseCode: 'OK', result: { identifier: `asset-${Date.now()}`, versionKey: '1' } });
+          return json({ responseCode: 'OK', result: { node_id: `asset-${Date.now()}`, identifier: `asset-${Date.now()}`, versionKey: '1' } });
 
         if (url.includes('/asset/v1/upload/'))
           return json({ responseCode: 'OK', result: { content_url: 'https://via.placeholder.com/400x300.png?text=Uploaded' } });
 
         if (url.includes('/content/v3/upload/url/'))
-          return json({ responseCode: 'OK', result: { preSignedUrl: 'https://mock-storage.example.com/upload', url: 'https://mock-storage.example.com/asset' } });
+          return json({ responseCode: 'OK', result: { pre_signed_url: 'https://mock-storage.example.com/upload?sig=abc' } });
 
         if (url.includes('/composite/v3/search') && method === 'POST')
           return json({ responseCode: 'OK', result: { count: 0, content: [], Question: [] } });
@@ -83,7 +83,7 @@ export function mockApiPlugin(): Plugin {
 
         if (url.match(/\/questionset\/v[12]\/comment/))
           return method === 'GET'
-            ? json({ responseCode: 'OK', result: { content: [] } })
+            ? json({ responseCode: 'OK', result: { comments: [] } })
             : ok();
 
         if (url.includes('/questionset/v2/review/') || url.includes('/questionset/v2/publish/') || url.includes('/questionset/v2/reject/'))

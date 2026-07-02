@@ -24,6 +24,18 @@ interface EditorState {
   rfcChecklist: ICategoryField[] | null;
   reviewComments: IComment[];
   setReviewComments: (comments: IComment[]) => void;
+  /** License names from composite search (old helper.service.getLicenses). */
+  licenses: string[];
+  setLicenses: (licenses: string[]) => void;
+  /** Channel read data (defaultLicense, frameworks, primaryCategories). */
+  channelData: Record<string, unknown> | null;
+  setChannelData: (data: Record<string, unknown> | null) => void;
+  /** Host event callbacks (IEditorEvents) registered by QuestionsetEditor. */
+  eventHandlers: {
+    onQuestionSaved?: (question: unknown) => void;
+    onHierarchySaved?: (hierarchy: unknown) => void;
+  };
+  setEventHandlers: (handlers: EditorState['eventHandlers']) => void;
   categoryMeta: {
     schemaDefaults: Record<string, unknown>;
     frameworkMetadata: { orgFWType?: string[]; targetFWType?: string[] };
@@ -67,6 +79,12 @@ export const useEditorStore = create<EditorState>((set) => ({
   reviewChecklist: null,
   rfcChecklist: null,
   reviewComments: [],
+  licenses: [],
+  setLicenses: (licenses) => set({ licenses }),
+  channelData: null,
+  setChannelData: (data) => set({ channelData: data }),
+  eventHandlers: {},
+  setEventHandlers: (handlers) => set({ eventHandlers: handlers }),
   categoryMeta: null,
 
   setEditorConfig: (config) => set({ editorConfig: config }),
