@@ -52,9 +52,9 @@ function normalizeField(raw: Record<string, unknown>, section?: string): ICatego
     name: raw.name as string | undefined,
     inputType: raw.inputType as string | undefined,
     dataType: raw.dataType as string | undefined,
-    // appIcon is never mandatory — the old Angular editor didn't enforce it either.
+    // appIcon and maxTime (Set Maximum Time) are never mandatory.
     required:
-      raw.inputType !== 'appIcon' && (
+      raw.inputType !== 'appIcon' && raw.code !== 'maxTime' && (
         raw.required === true ||
         (Array.isArray(raw.validations) &&
           (raw.validations as Array<Record<string, unknown>>).some(v => v.type === 'required')) ||

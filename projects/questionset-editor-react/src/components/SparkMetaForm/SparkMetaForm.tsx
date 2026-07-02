@@ -695,6 +695,7 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                     rhfField.onChange(secs);
                     onChange(field.code, secs);
                   };
+                  const reset = () => { rhfField.onChange(0); onChange(field.code, 0); };
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <input
@@ -716,6 +717,16 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                         onBlur={rhfField.onBlur}
                         disabled={isDisabled}
                       />
+                      {!isDisabled && (
+                        <button
+                          type="button"
+                          onClick={reset}
+                          className="ce-btn ghost"
+                          style={{ height: 38, padding: '0 14px', fontSize: 13 }}
+                        >
+                          Reset
+                        </button>
+                      )}
                     </div>
                   );
                 }
