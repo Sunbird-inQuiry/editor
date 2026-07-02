@@ -23,6 +23,8 @@ interface TreeState {
   /** Merge extra fields into a node's metadata WITHOUT marking the set dirty.
    *  Used to hydrate fields (e.g. instructions) from a secondary API response. */
   mergeNodeMeta: (id: string, patch: Record<string, unknown>) => void;
+  /** Replace a temp- identifier with the real one returned by hierarchy update. */
+  replaceNodeId: (tempId: string, realId: string) => void;
 }
 
 function bfsFind(nodes: INode[], id: string): INode | undefined {
@@ -241,4 +243,28 @@ export const useTreeStore = create<TreeState>((set, get) => ({
   },
 
   getBreadcrumb: (id) => buildBreadcrumb(get().treeData, id),
+
+  replaceNodeId: (tempId, realId) => {
+    set((state) => {
+      // Replace the temp identifier with the real one throughout the tree,
+      // cache, and active selection.
+      function replaceInTree(nodes: INode[]): INode[] {
+        return nodes.map(n => {
+          const updated = n.id === tempId || n.identifier === tempId
+            ? { ...n, id: realId, identifier: realId }
+            : n;
+          return { ...updated, children: replaceInTree(updated.children ?? []) };
+        });
+      }
+      const { [tempId]: cached, ...restCache } = state.treeCache;
+      return {
+        treeData: replaceInTree(state.treeData),
+        treeCache: cached ? { ...restCache, [realId]: cached } : restCache,
+        selectedNodeId: state.selectedNodeId === tempId ? realId : state.selectedNodeId,
+        activeNodeMeta: state.selectedNodeId === tempId
+          ? { ...state.activeNodeMeta, id: realId, identifier: realId }
+          : state.activeNodeMeta,
+      };
+    });
+  },
 }));

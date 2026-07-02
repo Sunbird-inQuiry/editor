@@ -88,8 +88,8 @@ export async function updateHierarchy(
   nodesModified: Record<string, unknown>,
   hierarchy: Record<string, unknown>,
   lastUpdatedBy?: string,
-): Promise<void> {
-  await apiClient.patch('/action/questionset/v2/hierarchy/update', {
+): Promise<{ identifiers: Record<string, string> }> {
+  const response = await apiClient.patch('/action/questionset/v2/hierarchy/update', {
     request: {
       data: {
         nodesModified,
@@ -98,6 +98,9 @@ export async function updateHierarchy(
       },
     },
   });
+  return {
+    identifiers: (response.data?.result?.identifiers ?? {}) as Record<string, string>,
+  };
 }
 
 export async function publishContent(contentId: string, lastPublishedBy = ''): Promise<void> {

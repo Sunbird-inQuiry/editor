@@ -106,6 +106,7 @@ export function useSaveHierarchy() {
   const isDirty = useEditorStore((s) => s.isDirty);
   const { setIsDirty, setLastSaved } = useEditorStore();
   const config = useEditorStore((s) => s.editorConfig);
+  const replaceNodeId = useTreeStore((s) => s.replaceNodeId);
 
   const save = useCallback(async () => {
     if (!config || isSaving) return;
@@ -119,7 +120,11 @@ export function useSaveHierarchy() {
     try {
       const rootPrimaryCategory = config.config.primaryCategory ?? 'Practice Question Set';
       const { nodesModified, hierarchy } = buildSavePayload(treeData, treeCache, channel, rootPrimaryCategory);
-      await updateHierarchy(contentId, nodesModified, hierarchy, lastUpdatedBy);
+      const { identifiers } = await updateHierarchy(contentId, nodesModified, hierarchy, lastUpdatedBy);
+      // Swap temp- IDs with the real identifiers returned by the backend
+      for (const [tempId, realId] of Object.entries(identifiers)) {
+        replaceNodeId(tempId, realId);
+      }
       setLastSaved(new Date().toISOString());
       setIsDirty(false);
     } catch (e) {
