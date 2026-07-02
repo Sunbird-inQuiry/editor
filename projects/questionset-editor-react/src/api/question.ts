@@ -77,35 +77,38 @@ export async function createQuestion(payload: CreateQuestionPayload): Promise<IQ
   const responseDeclaration = buildResponseDeclaration(payload.type, payload.options, payload.matchPairs);
   const outcomeDeclaration = buildOutcomeDeclaration(payload.maxScore ?? 1);
 
-  const response = await apiClient.post('/action/question/v2/create', {
-    request: {
-      question: {
-        name: 'Question',
-        mimeType: 'application/vnd.sunbird.question',
-        objectType: 'Question',
-        primaryCategory: payload.primaryCategory,
-        questionType: payload.type,
-        body: payload.questionBody,
-        editorState: {
-          question: payload.questionBody,
-          options: payload.options,
-          matchPairs: payload.matchPairs,
-          sequence: payload.sequence,
-        },
-        interactions,
-        responseDeclaration,
-        outcomeDeclaration,
-        solutions: payload.solutionText
-          ? [{ id: Math.random().toString(36).slice(2), type: 'html', value: payload.solutionText }]
-          : [],
-        hints: payload.hints,
-        channel: payload.channel,
-        framework: payload.framework,
-        createdBy: payload.createdBy,
-        difficultyLevel: payload.difficultyLevel,
-        bloomsLevel: payload.bloomsLevel,
-      },
+  // Build only fields with valid values — the v5 schema validator rejects
+  // undefined / null / empty-array entries for optional properties.
+  const question: Record<string, unknown> = {
+    name: 'Question',
+    mimeType: 'application/vnd.sunbird.question',
+    objectType: 'Question',
+    primaryCategory: payload.primaryCategory,
+    questionType: payload.type,
+    body: payload.questionBody,
+    editorState: {
+      question:   payload.questionBody,
+      options:    payload.options,
+      matchPairs: payload.matchPairs,
+      sequence:   payload.sequence,
     },
+    interactions,
+    responseDeclaration,
+    outcomeDeclaration,
+  };
+
+  if (payload.channel)    question.channel   = payload.channel;
+  if (payload.framework)  question.framework  = payload.framework;
+  if (payload.createdBy)  question.createdBy  = payload.createdBy;
+  if (payload.difficultyLevel) question.difficultyLevel = payload.difficultyLevel;
+  if (payload.bloomsLevel)     question.bloomsLevel     = payload.bloomsLevel;
+  if (payload.solutionText) {
+    question.solutions = [{ id: Math.random().toString(36).slice(2), type: 'html', value: payload.solutionText }];
+  }
+  if (payload.hints?.length) question.hints = payload.hints;
+
+  const response = await apiClient.post('/action/question/v2/create', {
+    request: { question },
   });
 
   return response.data?.result?.question ?? response.data?.result as IQuestion;
