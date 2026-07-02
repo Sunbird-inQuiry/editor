@@ -56,6 +56,10 @@ app.post('/latex/convert', bodyParser.json({ limit: '1mb' }), convert);
 app.use(express.static(join(__dirname, 'dist')));
 app.use(express.static(join(__dirname, 'public')));
 
+// Return 204 for font requests that have no local copy rather than proxying
+// them to BASE_URL (which returns an HTML error page that OTS rejects).
+app.use('/assets/fonts/', (req, res) => res.status(204).end());
+
 // ── Test-harness page ─────────────────────────────────────────────────────────
 // Dynamically rendered so env vars (CONTENT_ID, CHANNEL, …) are injected at
 // request time — same idea as Vite's __EDITOR_ENV__ injection at dev-start.
@@ -71,10 +75,11 @@ app.get([
   const channel   = process.env.CHANNEL    || '';
   const framework = process.env.FRAMEWORK  || 'NCF';
   const mode      = process.env.MODE       || 'edit';
+  const userId    = process.env.USER_ID    || 'user-001';
 
   const context = JSON.stringify({
     authToken:  '',
-    userId:     'user-001',
+    userId,
     channel,
     pdata:      { id: 'sunbird.portal', ver: '1.0' },
     env:        'questionset_editor',
@@ -173,12 +178,18 @@ app.post(['/action/asset/v1/upload/*'], proxy(BASE_URL, {
   proxyReqOptDecorator: decorateHeaders,
 }));
 
-// Framework + channel reads (no path rewrite)
-app.get([
-  '/api/framework/v1/read/*',
-  '/learner/framework/v1/read/*',
-  '/api/channel/v1/read/*',
-], proxy(BASE_URL, {
+// Framework reads — public API, proxy to BASE_URL (no auth required)
+app.get(['/api/framework/v1/read/*', '/learner/framework/v1/read/*'], proxy(BASE_URL, {
+  https: true,
+  proxyReqPathResolver(req) {
+    console.log('[proxy]', req.method, req.url);
+    return parsePath(req.url);
+  },
+  proxyReqOptDecorator: decorateHeaders,
+}));
+
+// Channel reads (no path rewrite)
+app.get(['/api/channel/v1/read/*'], proxy(BASE_URL, {
   https: true,
   proxyReqPathResolver(req) {
     console.log('[proxy]', req.method, req.url);
@@ -188,16 +199,21 @@ app.get([
 }));
 
 // QuestionSet + Question (v2) + category definition
+// Local: questionset/v2 → questionset/v5 (KP service on localhost:9000)
 app.use([
   '/action/questionset/v2/*',
   '/action/question/v2/*',
   '/action/object/category/definition/v1/*',
   '/api/question/v2/*',
-], proxy(BASE_URL, {
-  https: true,
+], proxy('localhost:9000', {
+  https: false,
   limit: '30mb',
   proxyReqPathResolver(req) {
-    const url = req.originalUrl.replace('/action/', '/api/');
+    const url = req.originalUrl
+      .replace('/action/questionset/v2/', '/questionset/v5/')
+      .replace('/action/question/v2/', '/question/v5/')
+      .replace('/action/object/category/definition/v1/', '/object/category/definition/v4/')
+      .replace('/action/', '/');
     console.log('[proxy]', req.method, req.originalUrl, '→', url);
     return parsePath(url);
   },

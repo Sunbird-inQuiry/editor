@@ -72,8 +72,11 @@ function buildSavePayload(
           ...cleanMetadata(node.metadata ?? {}),
         };
       } else if (isRoot) {
+        // Send only explicitly-edited fields (treeCache), not all server-side
+        // metadata. The old Angular editor does the same — it never sends
+        // system fields like channel, mimeType, language, childNodes, etc.
         const { isNew: _, ...cacheEdits } = cached ?? {};
-        metadata = { ...cleanMetadata(node.metadata ?? {}), ...cleanMetadata(cacheEdits), name: node.name };
+        metadata = { name: node.name, ...cleanMetadata(cacheEdits) };
       } else {
         const { isNew: _, ...cacheEdits } = cached ?? {};
         metadata = { name: node.name, visibility: 'Parent', ...cleanMetadata(cacheEdits) };
@@ -87,11 +90,15 @@ function buildSavePayload(
       };
     }
 
-    hierarchy[identifier] = {
-      name: node.name,
-      children: (node.children ?? []).map((c) => c.identifier),
-      root: isRoot,
-    };
+    // Questions must NOT appear as keys in hierarchy — only sections/root go here.
+    // Questions are listed as children of their parent section but have no own entry.
+    if (!isLeaf) {
+      hierarchy[identifier] = {
+        name: node.name,
+        children: (node.children ?? []).map((c) => c.identifier),
+        root: isRoot,
+      };
+    }
 
     (node.children ?? []).forEach((child) => walk(child, false));
   }
