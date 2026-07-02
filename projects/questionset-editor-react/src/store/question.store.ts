@@ -19,6 +19,9 @@ interface QuestionState {
   matchPairs: IMatchPair[];
   sequence: string[];
   hints: IHint[];
+  /** Question-level hint text — old editor stores it as hints[uuid] = {en} with
+   *  the uuid referenced from outcomeDeclaration.hint.defaultValue. */
+  hintText: string;
   /** Solution — old editor supports html (text+image), video and audio. */
   solutionType: SolutionType;
   solutionUUID: string;
@@ -53,6 +56,7 @@ interface QuestionState {
   updateMatchPair: (id: string, patch: Partial<IMatchPair>) => void;
   setSequence: (seq: string[]) => void;
   setHints: (hints: IHint[]) => void;
+  setHintText: (text: string) => void;
   addHint: () => void;
   removeHint: (id: string) => void;
   updateHint: (id: string, body: string) => void;
@@ -107,6 +111,7 @@ export const useQuestionStore = create<QuestionState>((set) => ({
   matchPairs: [],
   sequence: [],
   hints: [],
+  hintText: '',
   solutionType: '' as SolutionType,
   solutionUUID: '',
   solutionAsset: null,
@@ -139,6 +144,13 @@ export const useQuestionStore = create<QuestionState>((set) => ({
       matchPairs: question.editorState?.matchPairs ?? [],
       sequence: question.editorState?.sequence ?? [],
       hints: question.hints ?? [],
+      // Question-level hint: entry referenced by outcomeDeclaration.hint uuid.
+      hintText: (() => {
+        const hintId = (question.outcomeDeclaration as Record<string, Record<string, unknown>> | undefined)
+          ?.hint?.defaultValue;
+        const hint = question.hints?.find((h) => h.id === hintId) ?? question.hints?.[0];
+        return hint?.body ?? '';
+      })(),
       // Solution: html keeps the text; video/audio keep the asset id in
       // value — resolve name/src/thumbnail from the question's media[].
       ...(() => {
@@ -213,6 +225,7 @@ export const useQuestionStore = create<QuestionState>((set) => ({
   setSequence: (seq) => set({ sequence: seq, isDirty: true }),
 
   setHints: (hints) => set({ hints, isDirty: true }),
+  setHintText: (text) => set({ hintText: text, isDirty: true }),
   addHint: () =>
     set((s) => ({ hints: [...s.hints, { id: makeId(), body: '' }], isDirty: true })),
   removeHint: (id) =>
@@ -252,6 +265,7 @@ export const useQuestionStore = create<QuestionState>((set) => ({
       matchPairs: [],
       sequence: [],
       hints: [],
+      hintText: '',
       solutionType: '' as SolutionType,
       solutionUUID: '',
       solutionAsset: null,

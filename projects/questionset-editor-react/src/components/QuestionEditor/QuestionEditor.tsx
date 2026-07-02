@@ -74,6 +74,57 @@ function ConfigBlock({ type }: { type: QuestionType | null }) {
 }
 
 // ---------------------------------------------------------------------------
+// HintBlock — optional question-level hint (old editor: hints[uuid] = {en})
+// ---------------------------------------------------------------------------
+
+function HintBlock() {
+  const hintText = useQuestionStore((st) => st.hintText);
+  const setHintText = useQuestionStore((st) => st.setHintText);
+  const [open, setOpen] = useState(false);
+
+  if (!open && !hintText) {
+    return (
+      <button type="button" className="ce-sol-add" onClick={() => setOpen(true)}>
+        <span className="ic"><Icon name="plus" size={17} /></span>
+        <span className="tx">
+          <b>Add a hint</b>
+          <em>Optional — a nudge shown to learners on request</em>
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <div style={{
+      background: 'var(--sb-bg-warm)', border: '1px solid var(--sb-border-soft)',
+      borderRadius: 18, padding: '20px 24px 22px',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <Icon name="info" size={18} style={{ color: 'var(--accent-deep)', flexShrink: 0 }} />
+        <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>Hint</span>
+        <span style={{
+          fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase',
+          border: '1.5px solid var(--sb-border)', borderRadius: 999, padding: '3px 10px',
+          color: 'var(--sb-text-muted)', background: '#fff',
+        }}>Optional</span>
+        <button type="button" onClick={() => { setHintText(''); setOpen(false); }} title="Remove hint"
+          style={{ marginLeft: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--sb-text-faint)', display: 'grid', placeItems: 'center', width: 28, height: 28, borderRadius: 8 }}>
+          <Icon name="x" size={18} />
+        </button>
+      </div>
+      <ContentEditable
+        value={hintText}
+        onChange={setHintText}
+        placeholder="Write a hint that points learners toward the answer…"
+        minHeight={60}
+        bodyClass="stem-field"
+        disabled={false}
+      />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // SolutionBlock — optional solution with Text/Video/Audio
 // ---------------------------------------------------------------------------
 
@@ -308,6 +359,9 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
 
           {/* Config */}
           <ConfigBlock type={type} />
+
+          {/* Hint */}
+          {!isReadOnly && <HintBlock />}
 
           {/* Solution */}
           {!isReadOnly && <SolutionBlock />}

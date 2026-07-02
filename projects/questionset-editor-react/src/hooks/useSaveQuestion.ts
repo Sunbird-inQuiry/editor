@@ -325,7 +325,7 @@ function buildAnswerHtml(type: QuestionType, options: IOption[], answerText: str
 export function useSaveQuestion() {
   const {
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
-    hints, solutionText, solutionType, solutionAsset, solutionUUID,
+    hints, hintText, solutionText, solutionType, solutionAsset, solutionUUID,
     answerText, sentence, difficultyLevel, bloomsLevel, maxScore,
     isPartialScore, evalUnordered,
     setIsDirty, setIsSaving,
@@ -406,7 +406,13 @@ export function useSaveQuestion() {
     // Old editor reuses the hint uuid from the read response when present.
     const existingHint = (activeQuestion?.outcomeDeclaration as
       Record<string, Record<string, unknown>> | undefined)?.hint?.defaultValue;
-    const hintUuid = typeof existingHint === 'string' ? existingHint : genUuid();
+    const hintUuid = (typeof existingHint === 'string' && existingHint) || genUuid();
+
+    // Question-level hint — old editor: hints[uuid] = {en: text}, uuid
+    // referenced from outcomeDeclaration.hint.defaultValue.
+    const metadataHints: Record<string, unknown> = hintText.trim()
+      ? { [hintUuid]: { en: hintText } }
+      : {};
 
     // Taxonomy copied from root questionset — old editor includes these on every question
     const rootMeta = (treeData[0]?.metadata ?? {}) as Record<string, unknown>;
@@ -466,9 +472,10 @@ export function useSaveQuestion() {
           ...(hasInteractions ? {
             interactionTypes: [INTERACTION_TYPE[questionType] ?? 'text'],
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
-            // Old MTF/SEQ payloads carry no hints key.
-            ...(questionType === 'mcq' || questionType === 'ftb' ? { hints: {} } : {}),
           } : {}),
+          // Old MTF/SEQ payloads carry no hints key unless a hint is set.
+          ...(questionType === 'mcq' || questionType === 'ftb' || Object.keys(metadataHints).length
+            ? { hints: metadataHints } : {}),
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
@@ -538,9 +545,10 @@ export function useSaveQuestion() {
           ...(hasInteractions ? {
             interactionTypes: [INTERACTION_TYPE[questionType] ?? 'text'],
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
-            // Old MTF/SEQ payloads carry no hints key.
-            ...(questionType === 'mcq' || questionType === 'ftb' ? { hints: {} } : {}),
           } : {}),
+          // Old MTF/SEQ payloads carry no hints key unless a hint is set.
+          ...(questionType === 'mcq' || questionType === 'ftb' || Object.keys(metadataHints).length
+            ? { hints: metadataHints } : {}),
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
@@ -574,7 +582,7 @@ export function useSaveQuestion() {
   }, [
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
     solutionText, solutionType, solutionAsset, solutionUUID,
-    answerText, sentence, hints, difficultyLevel, bloomsLevel, maxScore,
+    answerText, sentence, hints, hintText, difficultyLevel, bloomsLevel, maxScore,
     isPartialScore, evalUnordered,
     config, selectedNodeId, updateNode, replaceNodeId, treeData, saveHierarchy,
     setIsDirty, setIsSaving,

@@ -138,11 +138,14 @@ function normalizeHints(rawHints: unknown): IHint[] {
       return { id: (r['id'] as string) ?? makeId(), body: (r['body'] as string) ?? (r['value'] as string) ?? '' };
     });
   }
-  // old editor stores hints as a uuid-keyed map
+  // old editor stores hints as a uuid-keyed map with i18n values: {uuid: {en: text}}
   const map = asRecord(rawHints);
   return Object.entries(map).map(([id, v]) => ({
     id,
-    body: typeof v === 'string' ? v : ((asRecord(v)['body'] as string) ?? (asRecord(v)['value'] as string) ?? ''),
+    body:
+      typeof v === 'string'
+        ? v
+        : ((asRecord(v)['en'] as string) ?? (asRecord(v)['body'] as string) ?? (asRecord(v)['value'] as string) ?? ''),
   }));
 }
 
