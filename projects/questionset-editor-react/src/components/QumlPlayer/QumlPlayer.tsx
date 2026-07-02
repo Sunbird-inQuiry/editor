@@ -27,6 +27,8 @@ interface QumlPlayerProps {
   questionSetId: string;
   /** When set, previews just this question (old editor question preview). */
   singleQuestionId?: string;
+  /** Render embedded in the page instead of a full-screen overlay. */
+  inline?: boolean;
   onClose?: () => void;
 }
 
@@ -71,7 +73,7 @@ function bfsFind(nodes: INode[], id: string): INode | undefined {
   return undefined;
 }
 
-const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId, onClose }) => {
+const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId, inline = false, onClose }) => {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const rootName = useTreeStore((s) => s.treeData[0]?.name);
@@ -160,6 +162,31 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
+  // Status messages live OUTSIDE the manually-managed host div — the player
+  // is appended imperatively and must not fight React's children.
+  const statusEl = (
+    <>
+      {status === 'loading' && (
+        <p style={{ textAlign: 'center', color: '#888', padding: 40, margin: 0 }}>Loading preview…</p>
+      )}
+      {status === 'error' && (
+        <p style={{ textAlign: 'center', color: '#c33', padding: 40, margin: 0 }}>
+          Could not load the QuML player. Ensure the player script is available
+          (config.playerScriptUrl or /assets/sunbird-quml-player.js).
+        </p>
+      )}
+    </>
+  );
+
+  if (inline) {
+    return (
+      <div style={{ minHeight: status === 'ready' ? 420 : undefined }}>
+        {statusEl}
+        <div ref={hostRef} />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Preview">
       <div className={styles.header}>
@@ -176,16 +203,9 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
         </button>
       </div>
 
-      <div className={styles.playerContainer} ref={hostRef}>
-        {status === 'loading' && (
-          <p style={{ textAlign: 'center', color: '#888', padding: 40 }}>Loading preview…</p>
-        )}
-        {status === 'error' && (
-          <p style={{ textAlign: 'center', color: '#c33', padding: 40 }}>
-            Could not load the QuML player. Ensure the player script is available
-            (config.playerScriptUrl or /assets/sunbird-quml-player.js).
-          </p>
-        )}
+      <div className={styles.playerContainer}>
+        {statusEl}
+        <div ref={hostRef} style={{ height: '100%' }} />
       </div>
     </div>
   );
