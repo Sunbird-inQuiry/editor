@@ -31,6 +31,14 @@ interface QumlPlayerProps {
 }
 
 function loadPlayerScript(src: string): Promise<void> {
+  // Player styles ship separately (old Angular app included them globally).
+  const cssHref = src.replace(/\.js$/, '-styles.css');
+  if (!document.querySelector(`link[href="${cssHref}"]`)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = cssHref;
+    document.head.appendChild(link);
+  }
   return new Promise((resolve, reject) => {
     if (customElements.get(PLAYER_TAG)) return resolve();
     const onDefined = () => customElements.whenDefined(PLAYER_TAG).then(() => resolve(), reject);

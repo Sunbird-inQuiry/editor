@@ -8,13 +8,28 @@ const publicAssets = resolve(root, 'public', 'assets');
 
 mkdirSync(publicAssets, { recursive: true });
 
-// QUML player assets
-const playerPkg = resolve(root, 'node_modules', '@project-sunbird', 'sunbird-quml-player-web-component', 'assets');
+// QUML player — the package ships everything under assets/quml-player/:
+//   sunbird-quml-player.js  → served at /assets/sunbird-quml-player.js
+//                             (the loader's default path, old editor parity)
+//   styles.css              → /assets/sunbird-quml-player-styles.css
+//   assets/*                → /assets/ (icons/fonts the player fetches)
+const playerPkg = resolve(root, 'node_modules', '@project-sunbird', 'sunbird-quml-player-web-component', 'assets', 'quml-player');
 if (existsSync(playerPkg)) {
-  cpSync(playerPkg, resolve(publicAssets, 'quml-player'), { recursive: true });
-  console.log('[copy-player-assets] Copied QUML player assets');
+  const playerJs = resolve(playerPkg, 'sunbird-quml-player.js');
+  if (existsSync(playerJs)) {
+    cpSync(playerJs, resolve(publicAssets, 'sunbird-quml-player.js'));
+  }
+  const playerCss = resolve(playerPkg, 'styles.css');
+  if (existsSync(playerCss)) {
+    cpSync(playerCss, resolve(publicAssets, 'sunbird-quml-player-styles.css'));
+  }
+  const playerAssets = resolve(playerPkg, 'assets');
+  if (existsSync(playerAssets)) {
+    cpSync(playerAssets, publicAssets, { recursive: true });
+  }
+  console.log('[copy-player-assets] Copied QUML player bundle + assets');
 } else {
-  console.warn('[copy-player-assets] QUML player package not found – skipping asset copy');
+  console.warn('[copy-player-assets] QUML player package not found – run npm install');
 }
 
 // MathEquation modal (MathQuill UI used by the equation editor)
