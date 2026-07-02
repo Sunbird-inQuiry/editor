@@ -7,6 +7,11 @@ import { useSaveQuestion } from '../../hooks/useSaveQuestion';
 import { useEditorStore } from '../../store/editor.store';
 import { getUserId, isEditingAllowed } from '../../utils/context';
 import ImagePickerModal from '../shared/ImagePickerModal';
+import { lazy, Suspense } from 'react';
+import { useTreeStore } from '../../store/tree.store';
+import { getContentId } from '../../utils/context';
+
+const QumlPlayer = lazy(() => import('../QumlPlayer/QumlPlayer'));
 import { createPortal } from 'react-dom';
 import type { EditorMode } from '../../types/editor';
 import { QUESTION_TYPE_LABELS, type QuestionType } from '../../types/question';
@@ -307,6 +312,8 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   const isDirty = useQuestionStore((st) => st.isDirty);
   const activeQuestion = useQuestionStore((st) => st.activeQuestion);
   const [confirmBackOpen, setConfirmBackOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const selectedNodeId = useTreeStore((st) => st.selectedNodeId);
 
   // Old editor shows a confirmation before leaving an unsaved question.
   const handleBack = () => {
@@ -382,6 +389,15 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
         {/* Footer */}
         <div className="ce-ed-foot">
           <div className="grow" />
+          <button
+            type="button"
+            className="ce-btn ghost"
+            onClick={() => setPreviewOpen(true)}
+            disabled={!!invalidReason}
+            title={invalidReason ?? 'Preview this question'}
+          >
+            Preview
+          </button>
           <button type="button" className="ce-btn ghost" onClick={handleBack}>Cancel</button>
           {!isReadOnly && (
             <button
@@ -397,6 +413,17 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
           )}
         </div>
       </div>
+
+      {/* Single-question preview (old editor question.component.previewContent) */}
+      {previewOpen && (
+        <Suspense fallback={null}>
+          <QumlPlayer
+            questionSetId={getContentId(editorConfigCtx)}
+            singleQuestionId={selectedNodeId ?? undefined}
+            onClose={() => setPreviewOpen(false)}
+          />
+        </Suspense>
+      )}
 
       {/* Back confirmation — old editor's confirmQuestionNotSaved; same
           portal/card pattern as ConfirmDialog so popups look identical */}

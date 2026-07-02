@@ -53,6 +53,14 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
           if (isDirty) { setPendingBack(true); setShowUnsavedPrompt(true); }
           break;
         }
+        case 'preview': {
+          const { showPreview, setShowPreview } = useEditorStore.getState();
+          if (showPreview) { setShowPreview(false); break; }
+          // Old editor saves before previewing in edit mode.
+          if (editorMode === 'edit' && (await save()) === false) break;
+          setShowPreview(true);
+          break;
+        }
         case 'saveContent': {
           if (await save()) notifySuccess('Question set saved as draft');
           break;
@@ -67,7 +75,7 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
           break;
       }
     },
-    [events, isDirty, save, runAction],
+    [events, isDirty, save, runAction, editorMode],
   );
 
   const handleDiscardAndProceed = useCallback(() => {

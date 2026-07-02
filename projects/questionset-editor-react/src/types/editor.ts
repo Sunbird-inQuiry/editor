@@ -67,6 +67,8 @@ export interface IConfig {
   mode: EditorMode;
   objectType: string;
   hideSubmitForReviewBtn?: boolean;
+  /** URL of the QuML player script (old editor loads /assets/sunbird-quml-player.js). */
+  playerScriptUrl?: string;
   /** Path prefix for all API calls (old editor contract). Default '/api'; the portal passes '/portal'. */
   apiSlug?: string;
   questionSet?: { maxQuestionsLimit?: number };

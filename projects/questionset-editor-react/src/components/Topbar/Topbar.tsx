@@ -375,6 +375,17 @@ export const Topbar: React.FC<TopbarProps> = ({
             </span>
           ) : null}
 
+          {/* Preview — old editor shows it in every mode for QuestionSets */}
+          <button
+            className="ce-btn ghost"
+            type="button"
+            onClick={() => emit('preview')}
+            title="Preview question set"
+          >
+            <Icon name="play" size={15} />
+            Preview
+          </button>
+
           {/* Save as Draft */}
           {((isEditMode && statusLabel !== 'Review') || reviewerEditAllowed) && (
             <button
