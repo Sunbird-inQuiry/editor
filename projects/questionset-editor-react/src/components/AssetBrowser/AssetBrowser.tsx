@@ -18,7 +18,7 @@ import styles from './AssetBrowser.module.scss';
 export interface AssetBrowserProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (asset: { url: string; name: string; id: string }) => void;
+  onSelect: (asset: { url: string; name: string; id: string; thumbnail?: string }) => void;
   mediaType?: 'image' | 'audio' | 'video';
   channel: string;
   userId: string;
@@ -28,7 +28,7 @@ interface IAssetItem {
   identifier: string;
   name: string;
   downloadUrl?: string;
-  thumbnail?: string;
+  thumbnail?: string;  appIcon?: string;
 }
 
 type Tab = 'my-assets' | 'upload';
@@ -167,7 +167,7 @@ const AssetBrowser: React.FC<AssetBrowserProps> = ({
   // ---- Asset selection ------------------------------------------------------
   const handleAssetSelect = (asset: IAssetItem) => {
     const url = asset.downloadUrl ?? asset.thumbnail ?? '';
-    onSelect({ url, name: asset.name, id: asset.identifier });
+    onSelect({ url, name: asset.name, id: asset.identifier, thumbnail: asset.thumbnail ?? asset.appIcon });
     onClose();
   };
 
@@ -208,7 +208,7 @@ const AssetBrowser: React.FC<AssetBrowserProps> = ({
     setUploadError(null);
     try {
       const url = await uploadAsset(selectedFile, channel, userId);
-      onSelect({ url, name: assetName.trim(), id: '' });
+      onSelect({ url, name: assetName.trim(), id: url.match(/(do_[A-Za-z0-9]+)/)?.[1] ?? '' });
       onClose();
     } catch {
       setUploadError('Upload failed. Please try again.');

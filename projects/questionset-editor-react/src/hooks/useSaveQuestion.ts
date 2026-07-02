@@ -96,6 +96,18 @@ function reoOptions(sentence: string) {
 }
 
 /**
+ * Player-facing solution HTML for video/audio — old editor's
+ * getAssetSolutionHtml template (data-asset-variable + poster + sources).
+ */
+function assetSolutionHtml(type: 'video' | 'audio', asset: { id: string; src: string; thumbnail?: string }): string {
+  const poster = asset.thumbnail ?? '';
+  if (type === 'video') {
+    return `<video data-asset-variable='${asset.id}' width='400' controls='' poster='${poster}'><source type='video/mp4' src='${asset.src}'><source type='video/webm' src='${asset.src}'></video>`;
+  }
+  return `<audio data-asset-variable='${asset.id}' width='400' controls='' poster='${poster}'><source type='audio/mp3' src='${asset.src}'><source type='audio/wav' src='${asset.src}'></audio>`;
+}
+
+/**
  * media[] — one entry per asset referenced in the question content, like the
  * old editor's mediaArr: {id, type, src, baseUrl}. Assets are identified by
  * data-asset-variable or the do_ id embedded in the src path.
@@ -313,7 +325,8 @@ function buildAnswerHtml(type: QuestionType, options: IOption[], answerText: str
 export function useSaveQuestion() {
   const {
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
-    hints, solutionText, answerText, sentence, difficultyLevel, bloomsLevel, maxScore,
+    hints, solutionText, solutionType, solutionAsset, solutionUUID,
+    answerText, sentence, difficultyLevel, bloomsLevel, maxScore,
     isPartialScore, evalUnordered,
     setIsDirty, setIsSaving,
   } = useQuestionStore();
@@ -354,7 +367,7 @@ export function useSaveQuestion() {
     const hasInteractions = ['mcq', 'ftb', 'mtf', 'seq', 'reo'].includes(questionType);
 
     const mediaBaseUrl = config?.context?.host || window.location.origin;
-    const questionMedia = collectMedia(
+    const questionMedia: Array<Record<string, unknown>> = collectMedia(
       [
         questionBody, answerText, solutionText, sentence,
         ...options.map((o) => o.body),
@@ -363,6 +376,33 @@ export function useSaveQuestion() {
       ],
       mediaBaseUrl,
     );
+
+    // Solution — old editor shape: editorState.solutions keeps {type, value}
+    // per lang (value = asset id for video/audio); metadata.solutions maps
+    // {uuid: rendered html}. Asset + thumbnail entries join media[].
+    const solutionId = solutionUUID || genUuid();
+    let editorStateSolutions: Array<Record<string, unknown>> | undefined;
+    let metadataSolutions: Record<string, unknown> = {};
+    if (solutionType === 'html' && solutionText.trim()) {
+      editorStateSolutions = [{ id: solutionId, value: { en: { type: 'html', value: solutionText } } }];
+      metadataSolutions = { [solutionId]: solutionText };
+    } else if ((solutionType === 'video' || solutionType === 'audio') && solutionAsset) {
+      editorStateSolutions = [{ id: solutionId, value: { en: { type: solutionType, value: solutionAsset.id } } }];
+      metadataSolutions = { [solutionId]: assetSolutionHtml(solutionType, solutionAsset) };
+      if (!questionMedia.some((m) => m.id === solutionAsset.id)) {
+        questionMedia.push({
+          id: solutionAsset.id, src: solutionAsset.src, type: solutionType,
+          assetId: solutionAsset.id, name: solutionAsset.name, baseUrl: mediaBaseUrl,
+          ...(solutionAsset.thumbnail ? { thumbnail: solutionAsset.thumbnail } : {}),
+        });
+      }
+      if (solutionAsset.thumbnail) {
+        const thumbId = `${solutionType}_${solutionAsset.id}`;
+        if (!questionMedia.some((m) => m.id === thumbId)) {
+          questionMedia.push({ id: thumbId, src: solutionAsset.thumbnail, type: 'image', baseUrl: mediaBaseUrl });
+        }
+      }
+    }
     // Old editor reuses the hint uuid from the read response when present.
     const existingHint = (activeQuestion?.outcomeDeclaration as
       Record<string, Record<string, unknown>> | undefined)?.hint?.defaultValue;
@@ -385,7 +425,10 @@ export function useSaveQuestion() {
         const questionMeta: Record<string, unknown> = {
           mimeType:    'application/vnd.sunbird.question',
           media:       questionMedia,
-          editorState: buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
+          editorState: {
+            ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
+            ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
+          },
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
           ...(questionType === 'mcq' ? { templateId: 'mcq-vertical' } : {}),
@@ -435,7 +478,7 @@ export function useSaveQuestion() {
             },
             hint: { cardinality: 'single', type: 'string', defaultValue: hintUuid },
           },
-          solutions: {},
+          solutions: metadataSolutions,
           createdBy,
           channel,
           framework,
@@ -454,7 +497,10 @@ export function useSaveQuestion() {
         const questionMeta: Record<string, unknown> = {
           mimeType:    'application/vnd.sunbird.question',
           media:       questionMedia,
-          editorState: buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
+          editorState: {
+            ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
+            ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
+          },
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
           ...(questionType === 'mcq' ? { templateId: 'mcq-vertical' } : {}),
@@ -504,7 +550,7 @@ export function useSaveQuestion() {
             },
             hint: { cardinality: 'single', type: 'string', defaultValue: hintUuid },
           },
-          solutions: {},
+          solutions: metadataSolutions,
           createdBy,
           channel,
           framework,
@@ -527,7 +573,8 @@ export function useSaveQuestion() {
     }
   }, [
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
-    solutionText, answerText, sentence, hints, difficultyLevel, bloomsLevel, maxScore,
+    solutionText, solutionType, solutionAsset, solutionUUID,
+    answerText, sentence, hints, difficultyLevel, bloomsLevel, maxScore,
     isPartialScore, evalUnordered,
     config, selectedNodeId, updateNode, replaceNodeId, treeData, saveHierarchy,
     setIsDirty, setIsSaving,

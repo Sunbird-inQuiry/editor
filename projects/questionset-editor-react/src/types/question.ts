@@ -21,9 +21,19 @@ export interface IHint {
   body: string;
 }
 
+export interface IMediaEntry {
+  id: string;
+  type: string;
+  src: string;
+  baseUrl?: string;
+  assetId?: string;
+  name?: string;
+  thumbnail?: string;
+}
+
 export interface IQuestionBody {
   text?: string;
-  media?: Array<{ id: string; type: string; src: string; baseUrl?: string }>;
+  media?: IMediaEntry[];
 }
 
 export interface IBranchingRule {

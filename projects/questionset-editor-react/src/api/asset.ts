@@ -30,21 +30,21 @@ export async function searchAssets(params: {
   offset?: number;
   createdBy?: string;
 }): Promise<{ items: IAssetItem[]; count: number }> {
+  // Old editor's questionService.getAssetMedia request shape.
   const filters: Record<string, unknown> = {
-    contentType: ['Asset'],
-    mediaType: [params.mediaType],
+    contentType: 'Asset',
+    compatibilityLevel: { min: 1, max: 2 },
     status: ['Live'],
+    mediaType: [params.mediaType],
   };
-  if (params.query)     filters['name']      = params.query;
   if (params.createdBy) filters['createdBy'] = params.createdBy;
 
   const response = await apiClient.post(URLS.composite.search, {
     request: {
       filters,
-      limit:   params.limit  ?? 24,
-      offset:  params.offset ?? 0,
-      sort_by: { lastUpdatedOn: 'desc' },
-      fields: ['identifier', 'name', 'downloadUrl', 'appIcon', 'thumbnail', 'mimeType'],
+      limit:  params.limit  ?? 50,
+      offset: params.offset ?? 0,
+      ...(params.query ? { query: params.query } : {}),
     },
   });
 

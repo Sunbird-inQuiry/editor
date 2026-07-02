@@ -21,9 +21,37 @@ import { getUserId } from '../../utils/context';
 
 type Tab = 'my' | 'all' | 'upload';
 
+export type PickerMediaType = 'image' | 'video' | 'audio';
+
+export interface PickedAsset {
+  id: string;
+  name: string;
+  thumbnail?: string;
+}
+
 export interface ImagePickerModalProps {
-  onSelect: (url: string) => void;
+  onSelect: (url: string, asset?: PickedAsset) => void;
   onClose: () => void;
+  /** Asset type to browse/upload — labels and search filters follow. */
+  mediaType?: PickerMediaType;
+}
+
+const MEDIA_LABEL: Record<PickerMediaType, string> = { image: 'Image', video: 'Video', audio: 'Audio' };
+const MEDIA_PLURAL: Record<PickerMediaType, string> = { image: 'Images', video: 'Videos', audio: 'Audio' };
+const MEDIA_ICON: Record<PickerMediaType, string> = { image: 'image', video: 'video', audio: 'link' };
+const UPLOAD_HINT: Record<PickerMediaType, string> = {
+  image: 'PNG, JPEG · max 1 MB',
+  video: 'MP4, WEBM · max 50 MB',
+  audio: 'MP3, WAV · max 50 MB',
+};
+const MAX_SIZE: Record<PickerMediaType, number> = {
+  image: 1024 * 1024,
+  video: 50 * 1024 * 1024,
+  audio: 50 * 1024 * 1024,
+};
+
+function toPickedAsset(img: IAssetItem): PickedAsset {
+  return { id: img.identifier, name: img.name, thumbnail: img.thumbnail ?? img.appIcon };
 }
 
 // ---------------------------------------------------------------------------
@@ -42,13 +70,14 @@ function resolveUrl(img: IAssetItem): string {
 
 interface ImageGridProps {
   tab: 'my' | 'all';
+  mediaType: PickerMediaType;
   createdBy: string;
   cloudStorageUrls: string[];
   selectedUrl: string | null;
-  onSelectedChange: (url: string | null) => void;
+  onSelectedChange: (url: string | null, asset?: PickedAsset) => void;
 }
 
-function ImageGrid({ tab, createdBy, cloudStorageUrls, selectedUrl, onSelectedChange }: ImageGridProps) {
+function ImageGrid({ tab, mediaType, createdBy, cloudStorageUrls, selectedUrl, onSelectedChange }: ImageGridProps) {
   const [images, setImages]   = useState<IAssetItem[]>([]);
   const [count, setCount]     = useState(0);
   const [offset, setOffset]   = useState(0);
@@ -59,7 +88,7 @@ function ImageGrid({ tab, createdBy, cloudStorageUrls, selectedUrl, onSelectedCh
     setLoading(true);
     try {
       const { items, count: total } = await searchAssets({
-        mediaType: 'image',
+        mediaType,
         query:     nextQuery || undefined,
         limit:     LIMIT,
         offset:    nextOffset,
@@ -71,7 +100,7 @@ function ImageGrid({ tab, createdBy, cloudStorageUrls, selectedUrl, onSelectedCh
     } finally {
       setLoading(false);
     }
-  }, [tab, createdBy]);
+  }, [tab, createdBy, mediaType]);
 
   useEffect(() => {
     onSelectedChange(null);
@@ -93,7 +122,7 @@ function ImageGrid({ tab, createdBy, cloudStorageUrls, selectedUrl, onSelectedCh
         </span>
         <input
           type="text"
-          placeholder="Search images…"
+          placeholder={`Search ${MEDIA_PLURAL[mediaType].toLowerCase()}…`}
           value={query}
           onChange={e => setQuery(e.target.value)}
           style={{
@@ -108,7 +137,7 @@ function ImageGrid({ tab, createdBy, cloudStorageUrls, selectedUrl, onSelectedCh
       {loading && images.length === 0 ? (
         <p style={{ textAlign: 'center', color: 'var(--sb-text-faint)', padding: '40px 0', fontSize: 14, margin: 0 }}>Loading…</p>
       ) : images.length === 0 ? (
-        <p style={{ textAlign: 'center', color: 'var(--sb-text-faint)', padding: '40px 0', fontSize: 14, margin: 0 }}>No images found</p>
+        <p style={{ textAlign: 'center', color: 'var(--sb-text-faint)', padding: '40px 0', fontSize: 14, margin: 0 }}>No {MEDIA_PLURAL[mediaType].toLowerCase()} found</p>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8 }}>
           {images.map(img => {
@@ -117,7 +146,7 @@ function ImageGrid({ tab, createdBy, cloudStorageUrls, selectedUrl, onSelectedCh
             return (
               <div
                 key={img.identifier}
-                onClick={() => onSelectedChange(isSel ? null : (url || null))}
+                onClick={() => onSelectedChange(isSel ? null : (url || null), isSel ? undefined : toPickedAsset(img))}
                 title={img.name}
                 style={{
                   aspectRatio: '1', borderRadius: 12, overflow: 'hidden', cursor: 'pointer',
@@ -126,11 +155,19 @@ function ImageGrid({ tab, createdBy, cloudStorageUrls, selectedUrl, onSelectedCh
                   background: 'var(--sb-bg)',
                 }}
               >
-                {url ? (
+                {mediaType === 'image' && url ? (
                   <img src={url} alt={img.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                ) : (img.thumbnail ?? img.appIcon) ? (
+                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                    <img src={rewriteAssetUrl((img.thumbnail ?? img.appIcon)!, cloudStorageUrls)} alt={img.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    <span style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: '#fff', background: 'rgba(0,0,0,.25)' }}>
+                      <Icon name={MEDIA_ICON[mediaType]} size={22} />
+                    </span>
+                  </div>
                 ) : (
-                  <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', color: 'var(--sb-text-faint)' }}>
-                    <Icon name="image" size={28} />
+                  <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, color: 'var(--sb-text-faint)', padding: 8 }}>
+                    <Icon name={MEDIA_ICON[mediaType]} size={26} />
+                    <span style={{ fontSize: 11, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', whiteSpace: 'nowrap' }}>{img.name}</span>
                   </div>
                 )}
               </div>
@@ -162,11 +199,12 @@ function ImageGrid({ tab, createdBy, cloudStorageUrls, selectedUrl, onSelectedCh
 // ---------------------------------------------------------------------------
 
 interface UploadTabProps {
+  mediaType: PickerMediaType;
   channel: string;
   createdBy: string;
   presignedHeaders: Record<string, string>;
   cloudStorageUrls: string[];
-  onUploaded: (url: string) => void;
+  onUploaded: (url: string, asset?: PickedAsset) => void;
   triggerRef: React.MutableRefObject<(() => void) | null>;
 }
 
@@ -177,7 +215,7 @@ const COPYRIGHT_TEXT =
   'enable) and will be licensed under terms & conditions and policy guidelines of the platform. ' +
   'In doing so, the copyright and license of the original author is not infringed.';
 
-function UploadTab({ channel, createdBy, presignedHeaders, cloudStorageUrls, onUploaded, triggerRef }: UploadTabProps) {
+function UploadTab({ mediaType, channel, createdBy, presignedHeaders, cloudStorageUrls, onUploaded, triggerRef }: UploadTabProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging,  setDragging]  = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -189,13 +227,15 @@ function UploadTab({ channel, createdBy, presignedHeaders, cloudStorageUrls, onU
 
   const handle = async (file: File | undefined) => {
     if (!file || uploading) return;
-    if (!file.type.startsWith('image/')) { setError('Please select an image file.'); return; }
-    if (file.size > 1024 * 1024)         { setError('File exceeds 1 MB limit.'); return; }
+    if (!file.type.startsWith(`${mediaType}/`)) { setError(`Please select a${mediaType === 'image' ? 'n image' : ` ${mediaType}`} file.`); return; }
+    if (file.size > MAX_SIZE[mediaType]) { setError(`File exceeds ${UPLOAD_HINT[mediaType].split('max ')[1]} limit.`); return; }
     setError('');
     setUploading(true);
     try {
       const rawUrl = await uploadAsset(file, channel, createdBy, presignedHeaders);
-      onUploaded(rewriteAssetUrl(rawUrl, cloudStorageUrls));
+      const url = rewriteAssetUrl(rawUrl, cloudStorageUrls);
+      const id = url.match(/(do_[A-Za-z0-9]+)/)?.[1] ?? '';
+      onUploaded(url, { id, name: file.name.replace(/\.[^.]+$/, '') });
     } catch {
       setError('Upload failed. Please try again.');
     } finally {
@@ -225,11 +265,11 @@ function UploadTab({ channel, createdBy, presignedHeaders, cloudStorageUrls, onU
         <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 6px', color: 'var(--sb-text-2)' }}>
           {uploading ? 'Uploading…' : 'Drag & drop or click to browse'}
         </p>
-        <p style={{ fontSize: 13, color: 'var(--sb-text-muted)', margin: 0 }}>PNG, JPEG · max 1 MB</p>
+        <p style={{ fontSize: 13, color: 'var(--sb-text-muted)', margin: 0 }}>{UPLOAD_HINT[mediaType]}</p>
         <input
           ref={fileRef}
           type="file"
-          accept="image/*"
+          accept={`${mediaType}/*`}
           style={{ display: 'none' }}
           onChange={e => { void handle(e.target.files?.[0]); e.target.value = ''; }}
         />
@@ -260,9 +300,10 @@ function UploadTab({ channel, createdBy, presignedHeaders, cloudStorageUrls, onU
 // ImagePickerModal
 // ---------------------------------------------------------------------------
 
-export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModalProps) {
+export default function ImagePickerModal({ onSelect, onClose, mediaType = 'image' }: ImagePickerModalProps) {
   const [tab, setTab]                 = useState<Tab>('my');
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<PickedAsset | undefined>(undefined);
   const uploadTriggerRef              = useRef<(() => void) | null>(null);
 
   // Read context values from editor store
@@ -275,6 +316,12 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
   const switchTab = (next: Tab) => {
     setTab(next);
     setSelectedUrl(null);
+    setSelectedAsset(undefined);
+  };
+
+  const handleSelectedChange = (url: string | null, asset?: PickedAsset) => {
+    setSelectedUrl(url);
+    setSelectedAsset(asset);
   };
 
   // Escape key to close
@@ -288,8 +335,8 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
   const portalTarget = document.querySelector('.ce') ?? document.body;
 
   const TABS: { key: Tab; label: string; icon?: string }[] = [
-    { key: 'my',     label: 'My Images' },
-    { key: 'all',    label: 'All Images' },
+    { key: 'my',     label: `My ${MEDIA_PLURAL[mediaType]}` },
+    { key: 'all',    label: `All ${MEDIA_PLURAL[mediaType]}` },
     { key: 'upload', label: 'Upload', icon: 'upload' },
   ];
 
@@ -316,7 +363,7 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
         {/* ── Header ──────────────────────────────── */}
         <div style={{ display: 'flex', alignItems: 'center', padding: '20px 24px 0' }}>
           <span style={{ fontWeight: 800, fontSize: 18, flex: 1, color: 'var(--sb-text)' }}>
-            Select Image
+            Select {MEDIA_LABEL[mediaType]}
           </span>
           <button
             type="button"
@@ -359,28 +406,31 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
           {tab === 'my'  && (
             <ImageGrid
               tab="my"
+              mediaType={mediaType}
               createdBy={createdBy}
               cloudStorageUrls={cloudStorageUrls}
               selectedUrl={selectedUrl}
-              onSelectedChange={setSelectedUrl}
+              onSelectedChange={handleSelectedChange}
             />
           )}
           {tab === 'all' && (
             <ImageGrid
               tab="all"
+              mediaType={mediaType}
               createdBy={createdBy}
               cloudStorageUrls={cloudStorageUrls}
               selectedUrl={selectedUrl}
-              onSelectedChange={setSelectedUrl}
+              onSelectedChange={handleSelectedChange}
             />
           )}
           {tab === 'upload' && (
             <UploadTab
+              mediaType={mediaType}
               channel={channel}
               createdBy={createdBy}
               presignedHeaders={presignedHeaders}
               cloudStorageUrls={cloudStorageUrls}
-              onUploaded={url => onSelect(url)}
+              onUploaded={(url, asset) => onSelect(url, asset)}
               triggerRef={uploadTriggerRef}
             />
           )}
@@ -409,7 +459,7 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
               type="button"
               className="ce-btn primary"
               disabled={!selectedUrl}
-              onClick={() => { if (selectedUrl) onSelect(selectedUrl); }}
+              onClick={() => { if (selectedUrl) onSelect(selectedUrl, selectedAsset); }}
             >
               Use Selected
             </button>

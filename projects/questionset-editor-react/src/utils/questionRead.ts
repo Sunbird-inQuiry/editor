@@ -154,10 +154,21 @@ function normalizeSolutions(raw: Record<string, unknown>): IQuestion['solutions'
   if (!Array.isArray(source)) return [];
   return source.map((s) => {
     const r = asRecord(s);
+    // Newer old-editor format: value is a lang map {en: {type, value}} —
+    // flatten to the en slot (multi-language authoring is a planned item).
+    const valueMap = asRecord(r['value']);
+    const en = asRecord(valueMap['en']);
+    if (typeof en['type'] === 'string') {
+      return {
+        id: (r['id'] as string) ?? makeId(),
+        type: en['type'] as string,
+        value: (en['value'] as string) ?? '',
+      };
+    }
     return {
       id: (r['id'] as string) ?? makeId(),
       type: (r['type'] as string) ?? 'html',
-      value: (r['value'] as string) ?? '',
+      value: typeof r['value'] === 'string' ? r['value'] : '',
     };
   });
 }

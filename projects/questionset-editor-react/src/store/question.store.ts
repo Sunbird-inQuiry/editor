@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 import type { IQuestion, QuestionType, IOption, IMatchPair, IHint } from '../types/question';
 
+export type SolutionType = '' | 'html' | 'video' | 'audio';
+
+export interface ISolutionAsset {
+  id: string;
+  src: string;
+  name: string;
+  thumbnail?: string;
+}
+
 interface QuestionState {
   activeQuestion: IQuestion | null;
   questionType: QuestionType | null;
@@ -10,6 +19,10 @@ interface QuestionState {
   matchPairs: IMatchPair[];
   sequence: string[];
   hints: IHint[];
+  /** Solution — old editor supports html (text+image), video and audio. */
+  solutionType: SolutionType;
+  solutionUUID: string;
+  solutionAsset: ISolutionAsset | null;
   solutionText: string;
   /** Model answer for non-interactive questions (SA etc.) — old editorState.answer */
   answerText: string;
@@ -44,6 +57,9 @@ interface QuestionState {
   removeHint: (id: string) => void;
   updateHint: (id: string, body: string) => void;
   setSolutionText: (text: string) => void;
+  setSolutionType: (type: SolutionType) => void;
+  setSolutionAsset: (asset: ISolutionAsset | null) => void;
+  clearSolution: () => void;
   setAnswerText: (text: string) => void;
   setSentence: (text: string) => void;
   setDifficultyLevel: (v: string) => void;
@@ -91,6 +107,9 @@ export const useQuestionStore = create<QuestionState>((set) => ({
   matchPairs: [],
   sequence: [],
   hints: [],
+  solutionType: '' as SolutionType,
+  solutionUUID: '',
+  solutionAsset: null,
   solutionText: '',
   answerText: '',
   sentence: '',
@@ -120,7 +139,29 @@ export const useQuestionStore = create<QuestionState>((set) => ({
       matchPairs: question.editorState?.matchPairs ?? [],
       sequence: question.editorState?.sequence ?? [],
       hints: question.hints ?? [],
-      solutionText: question.solutions?.[0]?.value ?? '',
+      // Solution: html keeps the text; video/audio keep the asset id in
+      // value — resolve name/src/thumbnail from the question's media[].
+      ...(() => {
+        const sol = question.solutions?.[0];
+        const solType = (sol?.type ?? '') as SolutionType;
+        if (solType === 'video' || solType === 'audio') {
+          const media = question.media?.find((m) => m.id === sol?.value);
+          return {
+            solutionType: solType,
+            solutionUUID: sol?.id ?? '',
+            solutionText: '',
+            solutionAsset: media
+              ? { id: media.id, src: media.src, name: media.name ?? media.id, thumbnail: media.thumbnail }
+              : (sol?.value ? { id: sol.value, src: '', name: sol.value } : null),
+          };
+        }
+        return {
+          solutionType: (sol?.value ? 'html' : '') as SolutionType,
+          solutionUUID: sol?.id ?? '',
+          solutionText: sol?.value ?? '',
+          solutionAsset: null,
+        };
+      })(),
       answerText: question.editorState?.answer ?? '',
       sentence: question.editorState?.sentence ?? '',
       questionBody: question.editorState?.question ?? question.body ?? '',
@@ -183,6 +224,10 @@ export const useQuestionStore = create<QuestionState>((set) => ({
     })),
 
   setSolutionText: (text) => set({ solutionText: text, isDirty: true }),
+  setSolutionType: (type) => set({ solutionType: type, solutionAsset: null, isDirty: true }),
+  setSolutionAsset: (asset) => set({ solutionAsset: asset, isDirty: true }),
+  clearSolution: () =>
+    set({ solutionType: '', solutionAsset: null, solutionText: '', isDirty: true }),
   setAnswerText: (text) => set({ answerText: text, isDirty: true }),
   setSentence: (text) => set({ sentence: text, isDirty: true }),
 
@@ -207,6 +252,9 @@ export const useQuestionStore = create<QuestionState>((set) => ({
       matchPairs: [],
       sequence: [],
       hints: [],
+      solutionType: '' as SolutionType,
+      solutionUUID: '',
+      solutionAsset: null,
       solutionText: '',
       answerText: '',
       sentence: '',

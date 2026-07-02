@@ -4,6 +4,9 @@ import SharedRichToolbar from '../shared/SharedRichToolbar';
 import ContentEditable from '../shared/ContentEditable';
 import { useQuestionStore } from '../../store/question.store';
 import { useSaveQuestion } from '../../hooks/useSaveQuestion';
+import { useEditorStore } from '../../store/editor.store';
+import { getUserId } from '../../utils/context';
+import ImagePickerModal from '../shared/ImagePickerModal';
 import type { EditorMode } from '../../types/editor';
 import { QUESTION_TYPE_LABELS, type QuestionType } from '../../types/question';
 import McqEditor from './McqEditor/McqEditor';
@@ -75,12 +78,25 @@ function ConfigBlock({ type }: { type: QuestionType | null }) {
 // ---------------------------------------------------------------------------
 
 function SolutionBlock() {
-  const [open, setOpen] = useState(false);
-  const [kind, setKind] = useState<'text' | 'video' | 'audio'>('text');
+  const solutionType    = useQuestionStore((st) => st.solutionType);
+  const solutionText    = useQuestionStore((st) => st.solutionText);
+  const solutionAsset   = useQuestionStore((st) => st.solutionAsset);
+  const setSolutionType = useQuestionStore((st) => st.setSolutionType);
+  const setSolutionText = useQuestionStore((st) => st.setSolutionText);
+  const setSolutionAsset = useQuestionStore((st) => st.setSolutionAsset);
+  const clearSolution   = useQuestionStore((st) => st.clearSolution);
 
-  if (!open) {
+  const editorConfig = useEditorStore((st) => st.editorConfig);
+  const channel = editorConfig?.context?.channel ?? '';
+  const userId = getUserId(editorConfig?.context);
+
+  const [browserOpen, setBrowserOpen] = useState(false);
+
+  const kind = solutionType === '' ? null : solutionType;
+
+  if (!kind) {
     return (
-      <button type="button" className="ce-sol-add" onClick={() => setOpen(true)}>
+      <button type="button" className="ce-sol-add" onClick={() => setSolutionType('html')}>
         <span className="ic"><Icon name="plus" size={17} /></span>
         <span className="tx">
           <b>Add a solution</b>
@@ -104,20 +120,18 @@ function SolutionBlock() {
           border: '1.5px solid var(--sb-border)', borderRadius: 999, padding: '3px 10px',
           color: 'var(--sb-text-muted)', background: '#fff',
         }}>Optional</span>
-        <button type="button" onClick={() => setOpen(false)} title="Remove solution"
+        <button type="button" onClick={clearSolution} title="Remove solution"
           style={{ marginLeft: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--sb-text-faint)', display: 'grid', placeItems: 'center', width: 28, height: 28, borderRadius: 8 }}>
           <Icon name="x" size={18} />
         </button>
       </div>
 
-      {/* Type tabs */}
+      {/* Type tabs — html (Text+Image) / video / audio, like the old editor */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
-        {(['text', 'video', 'audio'] as const).map(k => {
+        {([['html', 'Text + Image', 'image'], ['video', 'Video', 'video'], ['audio', 'Audio', 'link']] as const).map(([k, label, icon]) => {
           const active = kind === k;
-          const label = k === 'text' ? 'Text + Image' : k.charAt(0).toUpperCase() + k.slice(1);
-          const icon  = k === 'text' ? 'image' : k === 'video' ? 'video' : 'link';
           return (
-            <button key={k} type="button" onClick={() => setKind(k)}
+            <button key={k} type="button" onClick={() => { if (!active) setSolutionType(k); }}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 padding: '10px 18px', borderRadius: 12, fontFamily: 'inherit',
@@ -134,25 +148,50 @@ function SolutionBlock() {
       </div>
 
       {/* Content */}
-      {kind === 'text' && (
+      {kind === 'html' && (
         <ContentEditable
+          value={solutionText}
+          onChange={setSolutionText}
           placeholder="Explain the answer — add text, images or equations…"
           minHeight={90}
           bodyClass="stem-field"
           disabled={false}
         />
       )}
-      {kind === 'video' && (
-        <div className="ce-sol-drop">
-          <Icon name="video" size={26} />
-          <span>Drop a video file or paste a link</span>
-        </div>
+      {(kind === 'video' || kind === 'audio') && (
+        solutionAsset ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', border: '1px solid var(--sb-border)', borderRadius: 12, padding: '12px 16px' }}>
+            {solutionAsset.thumbnail
+              ? <img src={solutionAsset.thumbnail} alt="" style={{ width: 56, height: 40, objectFit: 'cover', borderRadius: 8 }} />
+              : <Icon name={kind === 'video' ? 'video' : 'link'} size={22} style={{ color: 'var(--sb-text-muted)' }} />}
+            <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {solutionAsset.name}
+            </span>
+            <button type="button" className="ce-btn ghost" onClick={() => setBrowserOpen(true)}>Change</button>
+            <button type="button" className="ce-btn ghost" onClick={() => setSolutionAsset(null)} title="Remove">
+              <Icon name="trash" size={15} />
+            </button>
+          </div>
+        ) : (
+          <button type="button" className="ce-sol-drop" onClick={() => setBrowserOpen(true)}
+            style={{ cursor: 'pointer', width: '100%', fontFamily: 'inherit' }}>
+            <Icon name={kind === 'video' ? 'video' : 'link'} size={26} />
+            <span>Choose a {kind} from the library or upload one</span>
+          </button>
+        )
       )}
-      {kind === 'audio' && (
-        <div className="ce-sol-drop">
-          <Icon name="link" size={24} />
-          <span>Drop an audio clip or paste a link</span>
-        </div>
+
+      {browserOpen && (kind === 'video' || kind === 'audio') && (
+        <ImagePickerModal
+          mediaType={kind}
+          onClose={() => setBrowserOpen(false)}
+          onSelect={(url, asset) => {
+            const id = asset?.id || url.match(/(do_[A-Za-z0-9]+)/)?.[1] || '';
+            const name = asset?.name || url.split('/').pop() || id;
+            setSolutionAsset({ id, src: url, name, thumbnail: asset?.thumbnail });
+            setBrowserOpen(false);
+          }}
+        />
       )}
     </div>
   );
