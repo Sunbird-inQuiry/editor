@@ -4,7 +4,7 @@ import { useEditorStore } from '../store/editor.store';
 import { updateHierarchy } from '../api/hierarchy';
 import type { INode } from '../types/editor';
 import { getContentId, getUserId } from '../utils/context';
-import toast from 'react-hot-toast';
+import { notifyError, apiErrorMessage } from '../utils/notify';
 
 function buildSavePayload(
   nodes: INode[],
@@ -143,10 +143,10 @@ export function useSaveHierarchy() {
   const { setIsDirty, setLastSaved } = useEditorStore();
   const config = useEditorStore((s) => s.editorConfig);
 
-  const save = useCallback(async () => {
-    if (!config || isSaving) return;
+  const save = useCallback(async (): Promise<boolean> => {
+    if (!config || isSaving) return false;
     const contentId = getContentId(config.context);
-    if (!contentId) return;
+    if (!contentId) return false;
 
     const channel = config.context.channel ?? '';
     const lastUpdatedBy = getUserId(config.context);
@@ -180,9 +180,11 @@ export function useSaveHierarchy() {
       useTreeStore.setState({ treeCache: clearedCache });
       setLastSaved(new Date().toISOString());
       setIsDirty(false);
+      return true;
     } catch (e) {
       console.error('[useSaveHierarchy] save failed:', e);
-      toast.error('Failed to save. Please try again.');
+      notifyError(apiErrorMessage(e, 'Failed to save. Please try again.'));
+      return false;
     } finally {
       setIsSaving(false);
     }

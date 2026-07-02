@@ -6,6 +6,8 @@ import { useSaveHierarchy } from '../../hooks/useSaveHierarchy';
 import { useToolbarActions } from '../../hooks/useToolbarActions';
 import { Topbar } from '../Topbar/Topbar';
 import OutlineTree from '../OutlineTree/OutlineTree';
+import { useUiStore } from '../../store/ui.store';
+import { notifySuccess } from '../../utils/notify';
 import ContextualEditor from '../ContextualEditor/ContextualEditor';
 import UnsavedChangesModal from '../modals/UnsavedChangesModal';
 import { QuestionTypeSelectorModal } from '../modals/QuestionTypeSelectorModal';
@@ -52,7 +54,7 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
           break;
         }
         case 'saveContent': {
-          await save();
+          if (await save()) notifySuccess('Question set saved as draft');
           break;
         }
         case 'sendForReview':
@@ -84,10 +86,13 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
     setPendingBack(false);
   }, []);
 
+  const questionEditorOpen = useUiStore((s) => s.questionEditorOpen);
+
   return (
     <div className="ce">
       {/* Top bar */}
       <Topbar
+        disabled={questionEditorOpen}
         editorMode={editorMode}
         isSaving={isSaving}
         isDirty={isDirty}
@@ -99,7 +104,7 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
       {/* Three-pane body */}
       <div className="ce-body">
         {/* Reopen tab when tree is collapsed */}
-        {sidebarCollapsed && (
+        {sidebarCollapsed && !questionEditorOpen && (
           <button
             className="ce-reopen left"
             onClick={() => setSidebarCollapsed(false)}
@@ -111,7 +116,12 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
         )}
 
         {/* Left — Outline tree */}
-        <aside className={`ce-tree${sidebarCollapsed ? ' collapsed' : ''}`}>
+        {/* Hierarchy is closed + locked while a question is being edited */}
+        <aside
+          className={`ce-tree${sidebarCollapsed || questionEditorOpen ? ' collapsed' : ''}`}
+          style={questionEditorOpen ? { pointerEvents: 'none' } : undefined}
+          aria-disabled={questionEditorOpen || undefined}
+        >
           <OutlineTree onCollapse={() => setSidebarCollapsed(true)} />
         </aside>
 

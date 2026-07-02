@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
-import toast from 'react-hot-toast';
+import { notifySuccess, notifyError, apiErrorMessage } from '../utils/notify';
 import type { ToolbarAction } from '../types/editor';
 import { useEditorStore } from '../store/editor.store';
 import { sendForReview, rejectContent, publishContent } from '../api/hierarchy';
 import { getContentId, getUserId } from '../utils/context';
 
-export function useToolbarActions(save: () => Promise<void>) {
+export function useToolbarActions(save: () => Promise<boolean | void>) {
   const config = useEditorStore((s) => s.editorConfig);
   const setButtonLoader = useEditorStore((s) => s.setButtonLoader);
 
@@ -13,7 +13,7 @@ export function useToolbarActions(save: () => Promise<void>) {
     async (action: ToolbarAction, data?: unknown): Promise<boolean> => {
       const contentId = getContentId(config?.context);
       if (!contentId) {
-        toast.error('No content identifier found.');
+        notifyError('No content identifier found.');
         return false;
       }
       const lastUpdatedBy = getUserId(config?.context);
@@ -22,24 +22,24 @@ export function useToolbarActions(save: () => Promise<void>) {
         switch (action) {
           case 'sendForReview':
             setButtonLoader('saveContent', true);
-            await save();
+            if ((await save()) === false) return false;
             await sendForReview(contentId);
-            toast.success('Question set sent for review');
+            notifySuccess('Question set sent for review');
             return true;
 
           case 'reject': {
             setButtonLoader('rejectContent', true);
             const comment = (data as { comment?: string } | undefined)?.comment ?? '';
             await rejectContent(contentId, comment);
-            toast.success('Content rejected');
+            notifySuccess('Content rejected');
             return true;
           }
 
           case 'publish':
             setButtonLoader('publishContent', true);
-            await save();
+            if ((await save()) === false) return false;
             await publishContent(contentId, lastUpdatedBy);
-            toast.success('Question set published successfully');
+            notifySuccess('Question set published successfully');
             return true;
 
           default:
@@ -48,7 +48,7 @@ export function useToolbarActions(save: () => Promise<void>) {
       } catch (err) {
         console.error(`[useToolbarActions] ${action} failed`, err);
         const verb = action === 'sendForReview' ? 'send for review' : action === 'reject' ? 'reject' : 'publish';
-        toast.error(`Failed to ${verb}. Please try again.`);
+        notifyError(apiErrorMessage(err, `Failed to ${verb}. Please try again.`));
         return false;
       } finally {
         setButtonLoader('saveContent', false);

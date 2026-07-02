@@ -13,6 +13,8 @@ import styles from './Topbar.module.scss';
 // Props
 // ---------------------------------------------------------------------------
 interface TopbarProps {
+  /** Locks all topbar actions while the inline question editor is open. */
+  disabled?: boolean;
   editorMode: EditorMode;
   isSaving: boolean;
   isDirty: boolean;
@@ -209,6 +211,7 @@ const ConfirmReviewModal: React.FC<ConfirmReviewModalProps> = ({ onConfirm, onCa
 // Topbar component
 // ---------------------------------------------------------------------------
 export const Topbar: React.FC<TopbarProps> = ({
+  disabled = false,
   editorMode,
   isSaving,
   isDirty,
@@ -314,7 +317,12 @@ export const Topbar: React.FC<TopbarProps> = ({
             </button>
           </div>
         ))}
-        <header className="ce-top" role="banner">
+        <header
+          className="ce-top"
+          role="banner"
+          style={disabled ? { pointerEvents: 'none', opacity: 0.55 } : undefined}
+          aria-disabled={disabled || undefined}
+        >
         {/* ── Left: Back + Title + Status ─────────────────────── */}
           <button
             className="ce-back"
@@ -350,9 +358,13 @@ export const Topbar: React.FC<TopbarProps> = ({
               Unsaved
             </span>
           ) : lastSaved ? (
-            <span className="ce-saving" aria-live="polite">
+            <span
+              className="ce-saving"
+              aria-live="polite"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}
+            >
               <Icon name="check" size={14} />
-              Saved {formatLastSaved(lastSaved)}
+              Saved
             </span>
           ) : null}
 

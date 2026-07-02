@@ -96,6 +96,14 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
 
   const [activeTab, setActiveTab] = useState<TabKey>('details');
   const [inlineEditorOpen, setInlineEditorOpen] = useState(false);
+  const setQuestionEditorOpen = useUiStore((st) => st.setQuestionEditorOpen);
+
+  // Lock hierarchy + topbar while the inline question editor is open.
+  useEffect(() => {
+    setQuestionEditorOpen(isCurrentNodeQuestion && inlineEditorOpen);
+    return () => setQuestionEditorOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCurrentNodeQuestion, inlineEditorOpen]);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [isTitleEditing, setIsTitleEditing] = useState(false);
   const [titleValue, setTitleValue] = useState('');

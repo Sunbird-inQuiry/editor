@@ -7,6 +7,7 @@ import { useSaveQuestion } from '../../hooks/useSaveQuestion';
 import { useEditorStore } from '../../store/editor.store';
 import { getUserId } from '../../utils/context';
 import ImagePickerModal from '../shared/ImagePickerModal';
+import { createPortal } from 'react-dom';
 import type { EditorMode } from '../../types/editor';
 import { QUESTION_TYPE_LABELS, type QuestionType } from '../../types/question';
 import McqEditor from './McqEditor/McqEditor';
@@ -302,7 +303,16 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
     }
   })();
 
-  const handleBack = () => onBack?.();
+  const isDirty = useQuestionStore((st) => st.isDirty);
+  const activeQuestion = useQuestionStore((st) => st.activeQuestion);
+  const [confirmBackOpen, setConfirmBackOpen] = useState(false);
+
+  // Old editor shows a confirmation before leaving an unsaved question.
+  const handleBack = () => {
+    const isUnsavedNew = !!activeQuestion?.identifier?.startsWith('temp-');
+    if (!isReadOnly && (isDirty || isUnsavedNew)) setConfirmBackOpen(true);
+    else onBack?.();
+  };
   const handleSave = async () => { await save(); onBack?.(); };
 
   return (
@@ -386,6 +396,62 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
           )}
         </div>
       </div>
+
+      {/* Back confirmation — old editor's confirmQuestionNotSaved; same
+          portal/card pattern as ConfirmDialog so popups look identical */}
+      {confirmBackOpen && createPortal(
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 16, fontFamily: 'var(--sb-font)',
+          }}
+          onMouseDown={e => { if (e.target === e.currentTarget) setConfirmBackOpen(false); }}
+        >
+          <div
+            style={{
+              background: 'var(--sb-card)', borderRadius: 18,
+              width: 480, maxWidth: '100%',
+              display: 'flex', flexDirection: 'column',
+              boxShadow: 'var(--sb-shadow-deep)', overflow: 'hidden',
+            }}
+            onMouseDown={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', padding: '20px 24px 16px' }}>
+              <span style={{ fontWeight: 800, fontSize: 18, flex: 1, color: 'var(--sb-text)' }}>
+                Unsaved question
+              </span>
+              <button
+                type="button"
+                onClick={() => setConfirmBackOpen(false)}
+                style={{
+                  border: 'none', background: 'transparent', cursor: 'pointer',
+                  padding: 4, borderRadius: 6, color: 'var(--sb-text-muted)',
+                  display: 'grid', placeItems: 'center',
+                }}
+              >
+                <Icon name="x" size={20} />
+              </button>
+            </div>
+            <div style={{ padding: '0 24px 24px' }}>
+              <p style={{ fontSize: 15, color: 'var(--sb-text-2)', lineHeight: 1.6, margin: 0 }}>
+                This question will not be saved, are you sure you want to go back to questionset?
+              </p>
+            </div>
+            <div style={{
+              display: 'flex', justifyContent: 'flex-end', gap: 10,
+              padding: '16px 24px', borderTop: '1px solid var(--sb-border)',
+            }}>
+              <button type="button" className="ce-btn ghost" onClick={() => setConfirmBackOpen(false)}>No, stay</button>
+              <button type="button" className="ce-btn danger" onClick={() => { setConfirmBackOpen(false); onBack?.(); }}>
+                Yes, go back
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.querySelector('.ce') ?? document.body,
+      )}
     </div>
   );
 }

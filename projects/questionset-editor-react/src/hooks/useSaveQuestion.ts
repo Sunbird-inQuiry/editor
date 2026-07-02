@@ -10,7 +10,7 @@
  * Existing questions: PATCH /question/v2/update/{id}
  */
 import { useCallback } from 'react';
-import toast from 'react-hot-toast';
+import { notifySuccess, notifyError, apiErrorMessage } from '../utils/notify';
 import { useQuestionStore } from '../store/question.store';
 import { useEditorStore } from '../store/editor.store';
 import { useTreeStore } from '../store/tree.store';
@@ -495,8 +495,7 @@ export function useSaveQuestion() {
         };
 
         updateNode(selectedNodeId, { name: questionName, ...questionMeta });
-        await saveHierarchy();
-        toast.success('Question saved');
+        if (await saveHierarchy()) notifySuccess('Question saved');
       } else {
         // ── New question — build UUID + full metadata, create via hierarchy ──
         const questionUuid = genUuid();
@@ -570,12 +569,11 @@ export function useSaveQuestion() {
         // Replace temp- node with UUID, store full metadata, trigger hierarchy save
         replaceNodeId(selectedNodeId, questionUuid);
         updateNode(questionUuid, { name: questionName, ...questionMeta });
-        await saveHierarchy();
-        toast.success('Question created');
+        if (await saveHierarchy()) notifySuccess('Question created');
       }
     } catch (e) {
       console.error('[useSaveQuestion] save failed:', e);
-      toast.error('Failed to save question. Please try again.');
+      notifyError(apiErrorMessage(e, 'Failed to save question. Please try again.'));
     } finally {
       setIsSaving(false);
     }
