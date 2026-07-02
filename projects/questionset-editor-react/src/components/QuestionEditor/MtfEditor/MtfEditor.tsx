@@ -1,22 +1,34 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Icon } from '../../shared/Icon';
 import ContentEditable from '../../shared/ContentEditable';
+import { useQuestionStore } from '../../../store/question.store';
 
 interface MtfEditorProps { readOnly?: boolean; }
-interface Pair { id: string; left: string; right: string; }
 
 export default function MtfEditor({ readOnly = false }: MtfEditorProps) {
-  const [pairs, setPairs] = useState<Pair[]>([
-    { id: 'p1', left: '', right: '' },
-    { id: 'p2', left: '', right: '' },
-    { id: 'p3', left: '', right: '' },
-  ]);
-  const nextId = useRef(4);
+  // Pairs live in the question store so useSaveQuestion can serialize them.
+  const pairs = useQuestionStore((s) => s.matchPairs);
+  const setMatchPairs = useQuestionStore((s) => s.setMatchPairs);
+  const setIsDirty = useQuestionStore((s) => s.setIsDirty);
+  const addPair = useQuestionStore((s) => s.addMatchPair);
+  const removePair = useQuestionStore((s) => s.removeMatchPair);
+  const updatePair = useQuestionStore((s) => s.updateMatchPair);
 
-  const addPair   = () => setPairs(p => [...p, { id: `p${nextId.current++}`, left: '', right: '' }]);
-  const removePair = (id: string) => setPairs(p => p.filter(x => x.id !== id));
-  const update    = (id: string, k: 'left' | 'right', v: string) =>
-    setPairs(p => p.map(x => x.id === id ? { ...x, [k]: v } : x));
+  // Seed starter rows for a fresh question without marking the store dirty
+  // (a dirty store would block hydration from question/v2/read).
+  useEffect(() => {
+    if (pairs.length === 0 && !readOnly) {
+      setMatchPairs([
+        { id: 'p1', left: '', right: '' },
+        { id: 'p2', left: '', right: '' },
+        { id: 'p3', left: '', right: '' },
+      ]);
+      setIsDirty(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pairs.length, readOnly]);
+
+  const update = (id: string, k: 'left' | 'right', v: string) => updatePair(id, { [k]: v });
 
   const fieldStyle = { border: '1px solid var(--sb-border)', borderRadius: 12, padding: '11px 13px', background: '#fff', minHeight: 20 };
 

@@ -17,7 +17,12 @@ function buildSavePayload(
 
   // Fields stripped from all node metadata before the hierarchy save.
   // 'questionType' is rejected by the v5 schema as an unknown property.
-  const BASE_STRIP = new Set(['id', 'isFolder', 'isQuestion', 'children', 'parent', 'isNew', 'breadcrumb', 'title', 'metadata', 'questionType', 'objectType']);
+  const BASE_STRIP = new Set([
+    'id', 'isFolder', 'isQuestion', 'children', 'parent', 'isNew', 'breadcrumb', 'title', 'metadata', 'questionType', 'objectType',
+    // System/read-only fields hydrated from question/v2/read — the backend
+    // rejects index/depth and manages the rest itself; old editor never sends them.
+    'index', 'depth', 'status', 'versionKey', 'createdOn', 'lastUpdatedOn', 'lastStatusChangedOn',
+  ]);
   const ARRAY_FIELDS  = new Set(['audience', 'medium', 'gradeLevel', 'subject', 'keywords', 'language', 'topic']);
   const NUMBER_FIELDS = new Set(['copyrightYear', 'maxScore', 'expectedDuration', 'maxAttempts']);
   // maxTime is a form-only field (seconds integer). The backend stores it
@@ -67,8 +72,10 @@ function buildSavePayload(
       let metadata: Record<string, unknown>;
       if (isNew) {
         if (isLeaf) {
-          // New question — full metadata built by useSaveQuestion, stored in node.
-          metadata = { ...cleanMetadata(node.metadata ?? {}) };
+          // New question — full metadata built by useSaveQuestion lives in
+          // treeCache (updateNode does not merge patches into node.metadata).
+          const { isNew: _, ...cacheEdits } = cached ?? {};
+          metadata = { ...cleanMetadata({ ...(node.metadata ?? {}), ...cacheEdits }) };
         } else {
           // New section
           metadata = {
@@ -91,6 +98,15 @@ function buildSavePayload(
       } else {
         const { isNew: _, ...cacheEdits } = cached ?? {};
         metadata = { name: node.name, visibility: 'Parent', ...cleanMetadata(cacheEdits) };
+      }
+
+      // Old editor never sends code/visibility/identifier for questions in
+      // nodesModified (a stale identifier makes the backend treat the node
+      // inconsistently).
+      if (isLeaf) {
+        delete metadata['code'];
+        delete metadata['visibility'];
+        delete metadata['identifier'];
       }
 
       nodesModified[identifier] = {
@@ -148,6 +164,20 @@ export function useSaveHierarchy() {
       for (const [tempId, realId] of Object.entries(identifiers)) {
         replaceNodeId(tempId, realId);
       }
+      // Everything sent is now persisted — clear isNew flags, otherwise the
+      // next save re-sends these nodes as new and the backend creates
+      // DUPLICATE questions under fresh do_ ids.
+      const cacheAfter = useTreeStore.getState().treeCache;
+      const clearedCache: Record<string, Record<string, unknown>> = {};
+      for (const [id, entry] of Object.entries(cacheAfter)) {
+        if (entry?.isNew) {
+          const { isNew: _cleared, ...rest } = entry;
+          clearedCache[id] = rest;
+        } else {
+          clearedCache[id] = entry;
+        }
+      }
+      useTreeStore.setState({ treeCache: clearedCache });
       setLastSaved(new Date().toISOString());
       setIsDirty(false);
     } catch (e) {

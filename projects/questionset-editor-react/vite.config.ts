@@ -43,6 +43,10 @@ export default defineConfig(({ mode }) => {
       },
       rollupOptions: {
         external: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'],
+        // Single-file bundle: hosts copy only index.js + style.css. Without
+        // this, React.lazy components become separate chunks that 404 when
+        // the host doesn't copy them (QuestionEditor-*.js etc.).
+        output: { inlineDynamicImports: true },
       },
     },
 

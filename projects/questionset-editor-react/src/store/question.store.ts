@@ -11,6 +11,10 @@ interface QuestionState {
   sequence: string[];
   hints: IHint[];
   solutionText: string;
+  /** Model answer for non-interactive questions (SA etc.) — old editorState.answer */
+  answerText: string;
+  /** REO: the correct sentence — old editorState.sentence */
+  sentence: string;
   questionBody: string;
   // Question-level metadata (persisted on save)
   difficultyLevel: string;
@@ -20,6 +24,8 @@ interface QuestionState {
   expectedDuration: number;
   showHints: boolean;
   showSolutions: boolean;
+  isPartialScore: boolean;
+  evalUnordered: boolean;
   // Actions
   setActiveQuestion: (question: IQuestion | null) => void;
   setQuestionType: (type: QuestionType) => void;
@@ -38,6 +44,8 @@ interface QuestionState {
   removeHint: (id: string) => void;
   updateHint: (id: string, body: string) => void;
   setSolutionText: (text: string) => void;
+  setAnswerText: (text: string) => void;
+  setSentence: (text: string) => void;
   setDifficultyLevel: (v: string) => void;
   setBloomsLevel: (v: string) => void;
   setPurpose: (v: string) => void;
@@ -45,6 +53,8 @@ interface QuestionState {
   setExpectedDuration: (v: number) => void;
   setShowHints: (v: boolean) => void;
   setShowSolutions: (v: boolean) => void;
+  setIsPartialScore: (v: boolean) => void;
+  setEvalUnordered: (v: boolean) => void;
   setIsDirty: (dirty: boolean) => void;
   setIsSaving: (saving: boolean) => void;
   resetQuestion: () => void;
@@ -57,8 +67,6 @@ function makeId() {
 const DEFAULT_OPTIONS: IOption[] = [
   { id: makeId(), body: '', isCorrect: false },
   { id: makeId(), body: '', isCorrect: false },
-  { id: makeId(), body: '', isCorrect: false },
-  { id: makeId(), body: '', isCorrect: false },
 ];
 
 const DEFAULT_META = {
@@ -69,6 +77,9 @@ const DEFAULT_META = {
   expectedDuration: 60,
   showHints: true,
   showSolutions: true,
+  // Old editor defaults for FTB scoring config
+  isPartialScore: true,
+  evalUnordered: true,
 };
 
 export const useQuestionStore = create<QuestionState>((set) => ({
@@ -81,6 +92,8 @@ export const useQuestionStore = create<QuestionState>((set) => ({
   sequence: [],
   hints: [],
   solutionText: '',
+  answerText: '',
+  sentence: '',
   questionBody: '',
   ...DEFAULT_META,
 
@@ -108,6 +121,8 @@ export const useQuestionStore = create<QuestionState>((set) => ({
       sequence: question.editorState?.sequence ?? [],
       hints: question.hints ?? [],
       solutionText: question.solutions?.[0]?.value ?? '',
+      answerText: question.editorState?.answer ?? '',
+      sentence: question.editorState?.sentence ?? '',
       questionBody: question.editorState?.question ?? question.body ?? '',
       isDirty: false,
       // Metadata from the question object, fall back to defaults
@@ -118,6 +133,8 @@ export const useQuestionStore = create<QuestionState>((set) => ({
       expectedDuration: question.expectedDuration ?? DEFAULT_META.expectedDuration,
       showHints: question.showHints ?? DEFAULT_META.showHints,
       showSolutions: question.showSolutions ?? DEFAULT_META.showSolutions,
+      isPartialScore: question.isPartialScore ?? DEFAULT_META.isPartialScore,
+      evalUnordered: question.evalUnordered ?? DEFAULT_META.evalUnordered,
     });
   },
 
@@ -166,6 +183,8 @@ export const useQuestionStore = create<QuestionState>((set) => ({
     })),
 
   setSolutionText: (text) => set({ solutionText: text, isDirty: true }),
+  setAnswerText: (text) => set({ answerText: text, isDirty: true }),
+  setSentence: (text) => set({ sentence: text, isDirty: true }),
 
   setDifficultyLevel: (v) => set({ difficultyLevel: v, isDirty: true }),
   setBloomsLevel: (v) => set({ bloomsLevel: v, isDirty: true }),
@@ -174,6 +193,8 @@ export const useQuestionStore = create<QuestionState>((set) => ({
   setExpectedDuration: (v) => set({ expectedDuration: Math.max(0, v), isDirty: true }),
   setShowHints: (v) => set({ showHints: v, isDirty: true }),
   setShowSolutions: (v) => set({ showSolutions: v, isDirty: true }),
+  setIsPartialScore: (v) => set({ isPartialScore: v, isDirty: true }),
+  setEvalUnordered: (v) => set({ evalUnordered: v, isDirty: true }),
 
   setIsDirty: (dirty) => set({ isDirty: dirty }),
   setIsSaving: (saving) => set({ isSaving: saving }),
@@ -187,6 +208,8 @@ export const useQuestionStore = create<QuestionState>((set) => ({
       sequence: [],
       hints: [],
       solutionText: '',
+      answerText: '',
+      sentence: '',
       questionBody: '',
       isDirty: false,
       isSaving: false,

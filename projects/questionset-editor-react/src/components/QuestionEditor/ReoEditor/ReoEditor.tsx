@@ -1,10 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import ContentEditable from '../../shared/ContentEditable';
+import { useQuestionStore } from '../../../store/question.store';
 
 interface ReoEditorProps { readOnly?: boolean; }
 
 export default function ReoEditor({ readOnly = false }: ReoEditorProps) {
-  const [sentence, setSentence] = useState('');
+  // Sentence lives in the question store so useSaveQuestion can serialize it.
+  const sentence = useQuestionStore((s) => s.sentence);
+  const setSentence = useQuestionStore((s) => s.setSentence);
 
   // Strip HTML tags to get plain text for word chips
   const plainText = sentence.replace(/<[^>]+>/g, '').trim();

@@ -1,5 +1,5 @@
 import type { IQuestion, QuestionType, IOption, IMatchPair, IHint } from '../types/question';
-import { PRIMARY_CATEGORY_MAP } from '../types/question';
+import { PRIMARY_CATEGORY_MAP, LEGACY_CATEGORY_MAP } from '../types/question';
 
 /**
  * Normalizes a raw `question/v2/read` response into the shape the question
@@ -26,9 +26,12 @@ const QTYPE_REVERSE: Record<string, QuestionType> = {
   REO: 'reo',
 };
 
-const CATEGORY_REVERSE: Record<string, QuestionType> = Object.fromEntries(
-  Object.entries(PRIMARY_CATEGORY_MAP).map(([k, v]) => [v, k as QuestionType]),
-) as Record<string, QuestionType>;
+const CATEGORY_REVERSE: Record<string, QuestionType> = {
+  ...(Object.fromEntries(
+    Object.entries(PRIMARY_CATEGORY_MAP).map(([k, v]) => [v, k as QuestionType]),
+  ) as Record<string, QuestionType>),
+  ...LEGACY_CATEGORY_MAP,
+};
 
 function makeId(): string {
   return Math.random().toString(36).slice(2, 9);
@@ -102,6 +105,32 @@ export function normalizeOptions(
   });
 }
 
+/** Old MTF editorState.pairs: [{left:{en}, right:{en}}] → store IMatchPair shape. */
+function normalizePairs(rawPairs: unknown): IMatchPair[] | undefined {
+  if (!Array.isArray(rawPairs) || rawPairs.length === 0) return undefined;
+  return rawPairs.map((p, i) => {
+    const r = asRecord(p);
+    const side = (v: unknown) =>
+      typeof v === 'string' ? v : ((asRecord(v)['en'] as string) ?? '');
+    return { id: `pair-${i}-${makeId()}`, left: side(r['left']), right: side(r['right']) };
+  });
+}
+
+/** Old SEQ editorState: {options:[{value:'A',label}], correctOrder:['A','B']} → labels in correct order. */
+function normalizeSequence(editorState: Record<string, unknown>): string[] | undefined {
+  const options = editorState['options'];
+  const correctOrder = editorState['correctOrder'];
+  if (!Array.isArray(options) || !Array.isArray(correctOrder) || correctOrder.length === 0) return undefined;
+  const byValue = new Map(
+    options.map((o) => {
+      const r = asRecord(o);
+      const label = r['label'];
+      return [String(r['value']), typeof label === 'string' ? label : ((asRecord(label)['en'] as string) ?? '')];
+    }),
+  );
+  return correctOrder.map((v) => byValue.get(String(v)) ?? '');
+}
+
 function normalizeHints(rawHints: unknown): IHint[] {
   if (Array.isArray(rawHints)) {
     return rawHints.map((h) => {
@@ -163,8 +192,14 @@ export function normalizeQuestionRead(raw: Record<string, unknown>): IQuestion {
     editorState: {
       ...editorState,
       question: (editorState['question'] as string) ?? (raw['body'] as string) ?? '',
-      matchPairs: (editorState['matchPairs'] as IMatchPair[]) ?? undefined,
-      sequence: (editorState['sequence'] as string[]) ?? undefined,
+      matchPairs:
+        (editorState['matchPairs'] as IMatchPair[]) ??
+        normalizePairs(editorState['pairs']) ??
+        undefined,
+      sequence:
+        (editorState['sequence'] as string[]) ??
+        normalizeSequence(editorState) ??
+        undefined,
     },
     options,
     hints: normalizeHints(raw['hints']),

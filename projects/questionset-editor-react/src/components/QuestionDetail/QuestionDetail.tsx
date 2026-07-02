@@ -3,6 +3,7 @@ import { Icon } from '../shared/Icon';
 import type { INode } from '../../types/editor';
 import type { QuestionType } from '../../types/question';
 import { QUESTION_TYPE_LABELS } from '../../types/question';
+import { normalizeOptions } from '../../utils/questionRead';
 
 interface QuestionDetailProps {
   node: INode;
@@ -15,7 +16,12 @@ function getEditorState(node: INode): Record<string, unknown> {
   return (node.metadata?.editorState as Record<string, unknown>) ?? {};
 }
 function getOptions(node: INode) {
-  return ((node.metadata?.options ?? getEditorState(node).options) as Array<{ id: string; body: string; isCorrect?: boolean }>) ?? [];
+  const raw = node.metadata?.options ?? getEditorState(node).options;
+  // Old-editor persisted shape is {answer, value:{body,value}} — normalize it.
+  const rd = (node.metadata?.responseDeclaration as Record<string, Record<string, unknown>>) ?? {};
+  const correct = (rd.response1?.correctResponse as Record<string, unknown>)?.value;
+  const correctIdx = typeof correct === 'number' ? correct : Number.isFinite(Number(correct)) && correct !== '' && correct != null ? Number(correct) : undefined;
+  return normalizeOptions(raw, correctIdx) ?? [];
 }
 function getQuestion(node: INode): string {
   return (node.metadata?.body as string) ?? (getEditorState(node).question as string) ?? '';
@@ -26,8 +32,8 @@ function getMatchPairs(node: INode) {
 function getSequence(node: INode): string[] {
   return ((node.metadata?.sequence ?? getEditorState(node).sequence) as string[]) ?? [];
 }
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, '').trim();
+function stripHtml(html?: string): string {
+  return (html ?? '').replace(/<[^>]+>/g, '').trim();
 }
 function parseFtbBlanks(text: string): string[] {
   return [...text.matchAll(/\[\[(.+?)\]\]/g)].map(m => m[1]);

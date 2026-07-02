@@ -29,7 +29,7 @@ function getCategoryBadge(primaryCategory?: string): string {
   if (cat.includes('multiple choice')) return 'MCQ';
   if (cat.includes('multi select')) return 'MSQ';
   if (cat.includes('subjective')) return 'SA';
-  if (cat.includes('fill in')) return 'FTB';
+  if (cat.includes('fill in') || cat.includes('ftb')) return 'FTB';
   if (cat.includes('match')) return 'MTF';
   if (cat.includes('sequence')) return 'SEQ';
   if (cat.includes('reorder')) return 'REO';
@@ -45,7 +45,7 @@ function getBadgeVariant(primaryCategory?: string): string {
   if (cat.includes('multiple choice')) return 'mcq';
   if (cat.includes('multi select')) return 'msq';
   if (cat.includes('subjective')) return 'sa';
-  if (cat.includes('fill in')) return 'ftb';
+  if (cat.includes('fill in') || cat.includes('ftb')) return 'ftb';
   if (cat.includes('match')) return 'mtf';
   if (cat.includes('sequence')) return 'seq';
   if (cat.includes('reorder')) return 'reo';

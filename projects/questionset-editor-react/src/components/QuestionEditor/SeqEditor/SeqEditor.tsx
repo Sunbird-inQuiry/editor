@@ -1,20 +1,33 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Icon } from '../../shared/Icon';
 import ContentEditable from '../../shared/ContentEditable';
+import { useQuestionStore } from '../../../store/question.store';
 
 interface SeqEditorProps { readOnly?: boolean; }
 interface Item { id: string; value: string; }
 
 export default function SeqEditor({ readOnly = false }: SeqEditorProps) {
-  const [items, setItems] = useState<Item[]>([
-    { id: 'i1', value: '' }, { id: 'i2', value: '' },
-  ]);
+  // Items live in the question store (sequence: string[]) so useSaveQuestion
+  // can serialize them; ids are positional for React keys.
+  const sequence = useQuestionStore((s) => s.sequence);
+  const setSequence = useQuestionStore((s) => s.setSequence);
+  const setIsDirty = useQuestionStore((s) => s.setIsDirty);
   const [layout, setLayout] = useState<'vertical' | 'horizontal'>('vertical');
-  const nextId = useRef(3);
 
-  const addItem    = () => setItems(it => [...it, { id: `i${nextId.current++}`, value: '' }]);
-  const removeItem = (id: string) => setItems(it => it.filter(x => x.id !== id));
-  const update     = (id: string, v: string) => setItems(it => it.map(x => x.id === id ? { ...x, value: v } : x));
+  // Seed starter rows without dirtying the store (dirty blocks read hydration).
+  useEffect(() => {
+    if (sequence.length === 0 && !readOnly) {
+      setSequence(['', '']);
+      setIsDirty(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sequence.length, readOnly]);
+
+  const items: Item[] = sequence.map((value, i) => ({ id: `i${i}`, value }));
+
+  const addItem    = () => setSequence([...sequence, '']);
+  const removeItem = (id: string) => setSequence(sequence.filter((_, i) => `i${i}` !== id));
+  const update     = (id: string, v: string) => setSequence(sequence.map((s, i) => (`i${i}` === id ? v : s)));
 
   const glyph = (k: string) =>
     k === 'vertical' ? <span className="g-v"><i /><i /></span>

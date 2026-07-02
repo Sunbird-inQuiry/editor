@@ -24,6 +24,6 @@ export const QUESTION_FILTERS: ReadonlyArray<{ label: string; value: string }> =
   { label: 'Multiple Choice', value: 'Multiple Choice Question' },
   { label: 'Multi-Select', value: 'Multi Select Question' },
   { label: 'Subjective', value: 'Subjective Question' },
-  { label: 'Fill in Blank', value: 'Fill in the Blanks' },
-  { label: 'Match Following', value: 'Match The Following' },
+  { label: 'Fill in Blank', value: 'FTB Question' },
+  { label: 'Match Following', value: 'Match The Following Question' },
 ];

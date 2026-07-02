@@ -49,6 +49,8 @@ export interface IQuestion {
     answer?: string;
     matchPairs?: IMatchPair[];
     sequence?: string[];
+    /** REO: the correct sentence (old editor round-trips it verbatim). */
+    sentence?: string;
   };
   answer?: string;
   options?: IOption[];
@@ -112,11 +114,19 @@ export const QUESTION_TYPE_ICONS: Record<QuestionType, string> = {
   reo: 'ArrowUpDown',
 };
 
+// Registered object-category names (verified against the KP:
+// obj-cat:<slug>_question_all must exist or hierarchy update fails).
 export const PRIMARY_CATEGORY_MAP: Record<QuestionType, string> = {
   mcq: 'Multiple Choice Question',
   sa:  'Subjective Question',
-  ftb: 'Fill in the Blanks',
-  mtf: 'Match The Following',
+  ftb: 'FTB Question',
+  mtf: 'Match The Following Question',
   seq: 'Sequence Question',
   reo: 'Reorder Question',
+};
+
+/** Older category names still found on persisted questions. */
+export const LEGACY_CATEGORY_MAP: Record<string, QuestionType> = {
+  'Fill in the Blanks': 'ftb',
+  'Match The Following': 'mtf',
 };

@@ -81,6 +81,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   const rootFormConfig = useEditorStore((s) => s.rootFormConfig);
   const unitFormConfig = useEditorStore((s) => s.unitFormConfig);
   const relationalFormConfig = useEditorStore((s) => s.relationalFormConfig);
+  const questionFormConfig = useEditorStore((s) => s.questionFormConfig);
 
   const selectedNodeId = useTreeStore((s) => s.selectedNodeId);
   const activeNodeMeta = useTreeStore((s) => s.activeNodeMeta);
@@ -338,7 +339,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                 {isCurrentNodeQuestion && activeTab === 'meta' && (
                   <div className="ce-tabbody">
                     <SparkMetaForm
-                      fields={relationalFormConfig ?? []}
+                      fields={questionFormConfig ?? relationalFormConfig ?? []}
                       values={activeNodeMeta as Record<string, unknown>}
                       onChange={handleFormChange}
                       onValidityChange={handleFormValidityChange}

@@ -37,8 +37,10 @@ const STEM_HINT: Record<QuestionType, string> = {
 // ---------------------------------------------------------------------------
 
 function ConfigBlock({ type }: { type: QuestionType | null }) {
-  const [partial,   setPartial]   = useState(false);
-  const [anyOrder,  setAnyOrder]  = useState(false);
+  const partial     = useQuestionStore((s) => s.isPartialScore);
+  const anyOrder    = useQuestionStore((s) => s.evalUnordered);
+  const setPartial  = useQuestionStore((s) => s.setIsPartialScore);
+  const setAnyOrder = useQuestionStore((s) => s.setEvalUnordered);
   const hasPartial  = type === 'seq' || type === 'ftb' || type === 'mtf';
   const hasAnyOrder = type === 'ftb';
   if (!hasPartial && !hasAnyOrder) return null;
@@ -47,7 +49,7 @@ function ConfigBlock({ type }: { type: QuestionType | null }) {
     <div className="ce-cfg">
       <div className="ce-cfg-ttl">Configuration</div>
       {hasPartial && (
-        <label className="ce-cfg-row" onClick={() => setPartial(p => !p)}>
+        <label className="ce-cfg-row" onClick={() => setPartial(!partial)}>
           <input type="checkbox" className="sb-check" checked={partial} readOnly />
           <span className="t">
             Partial scoring
@@ -56,7 +58,7 @@ function ConfigBlock({ type }: { type: QuestionType | null }) {
         </label>
       )}
       {hasAnyOrder && (
-        <label className="ce-cfg-row" onClick={() => setAnyOrder(a => !a)}>
+        <label className="ce-cfg-row" onClick={() => setAnyOrder(!anyOrder)}>
           <input type="checkbox" className="sb-check" checked={anyOrder} readOnly />
           <span className="t">
             Allow answers in any order
@@ -162,7 +164,7 @@ function SolutionBlock() {
 
 
 export default function QuestionEditor({ editorMode, onBack }: QuestionEditorProps) {
-  const { questionType, questionBody, setQuestionBody, isSaving } = useQuestionStore();
+  const { questionType, questionBody, setQuestionBody, isSaving, options } = useQuestionStore();
   const { save } = useSaveQuestion();
 
   const isReadOnly = editorMode === 'read' || editorMode === 'sourcingreview';
@@ -170,6 +172,9 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   const typeLabel = type ? (QUESTION_TYPE_LABELS[type] ?? type) : 'Question';
   const typeIcon  = type ? (TYPE_ICON[type] ?? 'help') : 'help';
   const stemHint  = type ? (STEM_HINT[type] ?? '') : '';
+
+  // MCQ needs a chosen correct option before it can be saved.
+  const missingCorrectOption = type === 'mcq' && !options.some((o) => o.isCorrect);
 
   const handleBack = () => onBack?.();
   const handleSave = async () => { await save(); onBack?.(); };
@@ -239,7 +244,13 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
           <div className="grow" />
           <button type="button" className="ce-btn ghost" onClick={handleBack}>Cancel</button>
           {!isReadOnly && (
-            <button type="button" className="ce-btn primary" onClick={handleSave} disabled={isSaving}>
+            <button
+              type="button"
+              className="ce-btn primary"
+              onClick={handleSave}
+              disabled={isSaving || missingCorrectOption}
+              title={missingCorrectOption ? 'Mark one option as the correct answer first' : undefined}
+            >
               <Icon name="check" size={16} />
               {isSaving ? 'Saving…' : 'Save question'}
             </button>
