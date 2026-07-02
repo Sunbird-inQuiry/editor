@@ -14,9 +14,9 @@ function buildSavePayload(
   const nodesModified: Record<string, unknown> = {};
   const hierarchy: Record<string, unknown> = {};
 
-  // 'metadata' is stripped to prevent a nested metadata.metadata property
-  // that the hierarchy update API rejects with CLIENT_ERROR.
-  const BASE_STRIP = new Set(['id', 'isFolder', 'isQuestion', 'children', 'parent', 'isNew', 'breadcrumb', 'title', 'metadata']);
+  // Fields stripped from all node metadata before the hierarchy save.
+  // 'questionType' is rejected by the v5 schema as an unknown property.
+  const BASE_STRIP = new Set(['id', 'isFolder', 'isQuestion', 'children', 'parent', 'isNew', 'breadcrumb', 'title', 'metadata', 'questionType']);
   const ARRAY_FIELDS  = new Set(['audience', 'medium', 'gradeLevel', 'subject', 'keywords', 'language', 'topic']);
   const NUMBER_FIELDS = new Set(['copyrightYear', 'maxScore', 'expectedDuration', 'maxAttempts']);
   // maxTime is a form-only field (seconds integer). The backend stores it
