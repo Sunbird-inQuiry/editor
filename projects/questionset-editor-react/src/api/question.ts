@@ -104,7 +104,6 @@ export async function createQuestion(payload: CreateQuestionPayload): Promise<IQ
         createdBy: payload.createdBy,
         difficultyLevel: payload.difficultyLevel,
         bloomsLevel: payload.bloomsLevel,
-        visibility: 'Parent',
       },
     },
   });
