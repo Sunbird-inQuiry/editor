@@ -62,7 +62,9 @@ function buildSavePayload(
           objectType: node.isQuestion ? 'Question' : 'QuestionSet',
           // Sections inherit the root's primaryCategory so the backend can
           // resolve obj-cat:practice-question-set_questionset_all correctly.
-          primaryCategory: node.isQuestion ? 'Multiple Choice Question' : rootPrimaryCategory,
+          primaryCategory: node.isQuestion
+            ? ((node.metadata?.primaryCategory as string) ?? 'Multiple Choice Question')
+            : rootPrimaryCategory,
           code: identifier,
           name: node.name,
           visibility: 'Parent',
