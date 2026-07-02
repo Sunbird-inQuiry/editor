@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { URLS } from './urls';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -37,7 +38,7 @@ export async function searchAssets(params: {
   if (params.query)     filters['name']      = params.query;
   if (params.createdBy) filters['createdBy'] = params.createdBy;
 
-  const response = await apiClient.post('/action/composite/v3/search', {
+  const response = await apiClient.post(URLS.composite.search, {
     request: {
       filters,
       limit:   params.limit  ?? 24,
@@ -70,7 +71,7 @@ export async function createMediaAsset(
   channel: string,
   createdBy: string,
 ): Promise<IAssetCreateResult> {
-  const response = await apiClient.post('/action/asset/v1/create', {
+  const response = await apiClient.post(URLS.asset.create, {
     request: {
       asset: {
         name: file.name,
@@ -94,7 +95,7 @@ export async function getPreSignedUrl(
   fileName: string,
 ): Promise<{ preSignedUrl: string; url: string }> {
   const response = await apiClient.post(
-    `/action/content/v3/upload/url/${assetId}`,
+    `${URLS.content.uploadUrl}/${assetId}`,
     { request: { content: { fileName } } },
   );
   return response.data?.result as { preSignedUrl: string; url: string };
@@ -126,14 +127,14 @@ export async function finalizeAssetUpload(
   const fd = new FormData();
   fd.append('fileUrl', blobUrl);
   fd.append('mimeType', mimeType);
-  await apiClient.post(`/action/asset/v1/upload/${assetId}`, fd, {
+  await apiClient.post(`${URLS.asset.upload}/${assetId}`, fd, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 }
 
 // Step 5
 export async function readAsset(assetId: string): Promise<IAssetItem> {
-  const response = await apiClient.get(`/action/asset/v1/read/${assetId}`);
+  const response = await apiClient.get(`${URLS.asset.read}/${assetId}`);
   return response.data?.result?.content as IAssetItem;
 }
 

@@ -3,6 +3,7 @@ import { useTreeStore } from '../store/tree.store';
 import { useEditorStore } from '../store/editor.store';
 import { updateHierarchy } from '../api/hierarchy';
 import type { INode } from '../types/editor';
+import { getContentId, getUserId } from '../utils/context';
 import toast from 'react-hot-toast';
 
 function buildSavePayload(
@@ -52,6 +53,14 @@ function buildSavePayload(
     const isNew = identifier.startsWith('temp-') || !!(cached?.isNew);
     const isLeaf = node.isQuestion ?? false;
 
+    // A question node that still has a temp- identifier has NOT been through
+    // "Save question" yet (useSaveQuestion replaces temp- with a UUID before
+    // saving). Exclude it from nodesModified and from hierarchy children so the
+    // hierarchy API only receives fully-formed question metadata.
+    if (isLeaf && identifier.startsWith('temp-')) {
+      return;
+    }
+
     // Include: root, new nodes, any cached node (including existing questions).
     // Old editor always sends full question metadata for both new + modified questions.
     if (isRoot || isNew || cached) {
@@ -93,11 +102,13 @@ function buildSavePayload(
     }
 
     // Questions must NOT appear as keys in hierarchy — only sections/root go here.
-    // Questions are listed as children of their parent section but have no own entry.
+    // Exclude temp- question identifiers from children (unsaved questions).
     if (!isLeaf) {
       hierarchy[identifier] = {
         name: node.name,
-        children: (node.children ?? []).map((c) => c.identifier),
+        children: (node.children ?? [])
+          .filter(c => !(c.isQuestion && c.identifier.startsWith('temp-')))
+          .map(c => c.identifier),
         root: isRoot,
       };
     }
@@ -112,24 +123,25 @@ function buildSavePayload(
 export function useSaveHierarchy() {
   const [isSaving, setIsSaving] = useState(false);
 
-  const treeCache = useTreeStore((s) => s.treeCache);
-  const treeData = useTreeStore((s) => s.treeData);
   const isDirty = useEditorStore((s) => s.isDirty);
   const { setIsDirty, setLastSaved } = useEditorStore();
   const config = useEditorStore((s) => s.editorConfig);
-  const replaceNodeId = useTreeStore((s) => s.replaceNodeId);
 
   const save = useCallback(async () => {
     if (!config || isSaving) return;
-    const contentId = config.context.contentId ?? config.context.identifier ?? '';
+    const contentId = getContentId(config.context);
     if (!contentId) return;
 
     const channel = config.context.channel ?? '';
-    const lastUpdatedBy = config.context.userId ?? config.context.uid ?? '';
+    const lastUpdatedBy = getUserId(config.context);
 
     setIsSaving(true);
     try {
       const rootPrimaryCategory = config.config.primaryCategory ?? 'Practice Question Set';
+      // Read treeData + treeCache from the store at call-time, not from the
+      // React closure — prevents stale data when saveHierarchy() is called
+      // immediately after replaceNodeId() + updateNode() in useSaveQuestion.
+      const { treeData, treeCache, replaceNodeId } = useTreeStore.getState();
       const { nodesModified, hierarchy } = buildSavePayload(treeData, treeCache, channel, rootPrimaryCategory);
       const { identifiers } = await updateHierarchy(contentId, nodesModified, hierarchy, lastUpdatedBy);
       // Swap temp- IDs with the real identifiers returned by the backend
@@ -144,7 +156,7 @@ export function useSaveHierarchy() {
     } finally {
       setIsSaving(false);
     }
-  }, [config, isSaving, treeData, treeCache, setIsDirty, setLastSaved]);
+  }, [config, isSaving, setIsDirty, setLastSaved]);
 
   return { save, isSaving, isDirty, lastSaved: useEditorStore.getState().lastSaved };
 }

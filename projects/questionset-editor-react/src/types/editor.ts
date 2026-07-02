@@ -18,25 +18,42 @@ export type ToolbarAction =
 
 export interface IUser {
   id: string;
-  fullName: string;
-  orgIds: string[];
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  orgIds?: string[];
 }
 
+/**
+ * Editor context. Accepts BOTH the old Angular editor contract
+ * (identifier, user.id, host, endpoint — what the sunbird portal host
+ * sends) and the flat fields used by standalone hosts (contentId, userId).
+ * Use utils/context.ts (getUserId/getContentId) to read the normalized value.
+ */
 export interface IContext {
-  authToken: string;
-  userId: string;
+  authToken?: string;
+  userId?: string;
+  user?: IUser;
   sid: string;
   did: string;
   uid?: string;
   channel: string;
   pdata: { id: string; ver: string; pid?: string };
-  env: string;
+  env?: string;
   contentId?: string;
   identifier?: string;
   framework?: string;
   targetFWIds?: string[];
   rollup?: Record<string, string>;
+  contextRollup?: Record<string, string>;
+  objectRollup?: Record<string, string>;
+  cdata?: Array<Record<string, unknown>>;
   tags?: string[];
+  /** Telemetry host/endpoint, as in the old contract. */
+  host?: string;
+  endpoint?: string;
+  timeDiff?: number;
+  defaultLicense?: string;
   cloudStorage?: {
     provider?: string;
     presigned_headers?: Record<string, string>;
@@ -47,6 +64,10 @@ export interface IContext {
 export interface IConfig {
   mode: EditorMode;
   objectType: string;
+  /** Path prefix for all API calls (old editor contract). Default '/api'; the portal passes '/portal'. */
+  apiSlug?: string;
+  questionSet?: { maxQuestionsLimit?: number };
+  showAddCollaborator?: boolean;
   primaryCategory?: string;
   framework?: string[];
   targetFWIds?: string[];

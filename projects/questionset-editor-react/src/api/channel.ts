@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { URLS } from './urls';
 
 export interface IChannelData {
   identifier: string;
@@ -10,6 +11,6 @@ export interface IChannelData {
 }
 
 export async function getChannelData(channelId: string): Promise<IChannelData> {
-  const response = await apiClient.get(`/api/channel/v1/read/${channelId}`);
+  const response = await apiClient.get(`${URLS.channel.read}/${channelId}`);
   return response.data?.result?.channel as IChannelData;
 }

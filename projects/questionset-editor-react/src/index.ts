@@ -32,7 +32,7 @@ export { useUiStore } from './store/ui.store';
 // API utilities
 // ---------------------------------------------------------------------------
 
-export { setApiBaseUrl } from './api/client';
+export { setApiBaseUrl, setApiSlug } from './api/client';
 
 // ---------------------------------------------------------------------------
 // Types

@@ -7,6 +7,7 @@ import React, {
 import { createPortal } from 'react-dom';
 import { X, Search, Upload as UploadIcon, Image as ImageIcon } from 'lucide-react';
 import { apiClient } from '../../api/client';
+import { URLS } from '../../api/urls';
 import { uploadAsset } from '../../api/asset';
 import styles from './AssetBrowser.module.scss';
 
@@ -125,7 +126,7 @@ const AssetBrowser: React.FC<AssetBrowserProps> = ({
       setIsSearching(true);
       setSearchError(null);
       try {
-        const response = await apiClient.post('/api/composite/v3/search', {
+        const response = await apiClient.post(URLS.composite.search, {
           request: {
             filters: {
               mediaType,

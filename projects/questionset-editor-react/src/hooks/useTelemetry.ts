@@ -12,6 +12,7 @@ declare global {
 
 import { useEffect } from 'react';
 import { useEditorStore } from '../store/editor.store';
+import { getContentId, getUserId } from '../utils/context';
 
 interface TelemetryEvent {
   eid: string;
@@ -38,7 +39,7 @@ export function useTelemetry() {
       ets: Date.now(),
       ver: '3.0',
       mid: makeMid(),
-      actor: { id: config.context.userId, type: 'User' },
+      actor: { id: getUserId(config.context), type: 'User' },
       context: {
         channel: config.context.channel,
         pdata: config.context.pdata,
@@ -46,8 +47,8 @@ export function useTelemetry() {
         sid: config.context.sid,
         did: config.context.did,
       },
-      object: config.context.contentId
-        ? { id: config.context.contentId, type: config.config.objectType }
+      object: getContentId(config.context)
+        ? { id: getContentId(config.context), type: config.config.objectType }
         : undefined,
       edata: { type: 'editor', pageid: 'questionset_editor', uaspec: {} },
     };

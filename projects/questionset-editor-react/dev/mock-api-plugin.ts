@@ -22,6 +22,8 @@ async function getConvertLatex(): Promise<ConvertLatexFn> {
 
 // Vite plugin that intercepts API calls in dev and returns mock responses.
 // Skipped entirely when VITE_BASE_URL is set (real backend mode).
+// Matchers are apiSlug-agnostic (paths are matched without the '/action' or
+// '/api' prefix) — the editor prefixes requests with config.apiSlug.
 export function mockApiPlugin(): Plugin {
   return {
     name: 'mock-api',
@@ -40,48 +42,48 @@ export function mockApiPlugin(): Plugin {
 
         function ok() { return json({ responseCode: 'OK', result: {} }); }
 
-        if (url.includes('/action/questionset/v2/hierarchy/update') && method === 'PATCH')
+        if (url.includes('/questionset/v2/hierarchy/update') && method === 'PATCH')
           return ok();
 
-        if (url.includes('/action/questionset/v2/hierarchy/'))
+        if (url.includes('/questionset/v2/hierarchy/'))
           return json(MOCK_HIERARCHY);
 
-        if (url.includes('/action/object/category/definition') || url.includes('/object/category/definition'))
+        if (url.includes('/object/category/definition'))
           return json(MOCK_CATEGORY_DEFINITION);
 
-        if (url.includes('/action/asset/v1/create') && method === 'POST')
+        if (url.includes('/asset/v1/create') && method === 'POST')
           return json({ responseCode: 'OK', result: { identifier: `asset-${Date.now()}`, versionKey: '1' } });
 
-        if (url.includes('/action/asset/v1/upload/'))
+        if (url.includes('/asset/v1/upload/'))
           return json({ responseCode: 'OK', result: { content_url: 'https://via.placeholder.com/400x300.png?text=Uploaded' } });
 
-        if (url.includes('/action/content/v3/upload/url/'))
+        if (url.includes('/content/v3/upload/url/'))
           return json({ responseCode: 'OK', result: { preSignedUrl: 'https://mock-storage.example.com/upload', url: 'https://mock-storage.example.com/asset' } });
 
-        if (url.includes('/action/composite/v3/search') && method === 'POST')
+        if (url.includes('/composite/v3/search') && method === 'POST')
           return json({ responseCode: 'OK', result: { count: 0, content: [], Question: [] } });
 
-        if (url.includes('/action/question/v2/list'))
+        if (url.includes('/question/v2/list'))
           return json(MOCK_QUESTION_LIST);
 
-        if (url.includes('/action/question/v2/create') && method === 'POST')
+        if (url.includes('/question/v2/create') && method === 'POST')
           return json({ responseCode: 'OK', result: { question: { identifier: `question-new-${Date.now()}`, name: 'New Question' } } });
 
-        if (url.match(/\/action\/question\/v2\/update\//) && method === 'PATCH')
+        if (url.match(/\/question\/v2\/update\//) && method === 'PATCH')
           return ok();
 
-        if (url.includes('/action/questionset/v2/comment/'))
+        if (url.match(/\/questionset\/v[12]\/comment/))
           return method === 'GET'
             ? json({ responseCode: 'OK', result: { content: [] } })
             : ok();
 
-        if (url.includes('/action/questionset/v2/review/') || url.includes('/action/questionset/v2/publish/') || url.includes('/action/questionset/v2/reject/'))
+        if (url.includes('/questionset/v2/review/') || url.includes('/questionset/v2/publish/') || url.includes('/questionset/v2/reject/'))
           return json({ responseCode: 'OK', result: { identifier: MOCK_QUESTIONSET_ID } });
 
-        if (url.includes('/api/framework/v1/read/'))
+        if (url.includes('/framework/v1/read/'))
           return json(MOCK_FRAMEWORK);
 
-        if (url.includes('/api/channel/v1/read/'))
+        if (url.includes('/channel/v1/read/'))
           return json(MOCK_CHANNEL);
 
         // LaTeX → PNG — same as editor/latexService.js (MathJax + svg2img)

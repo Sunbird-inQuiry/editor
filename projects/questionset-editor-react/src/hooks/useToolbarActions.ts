@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import type { ToolbarAction } from '../types/editor';
 import { useEditorStore } from '../store/editor.store';
 import { sendForReview, rejectContent, publishContent } from '../api/hierarchy';
+import { getContentId, getUserId } from '../utils/context';
 
 export function useToolbarActions(save: () => Promise<void>) {
   const config = useEditorStore((s) => s.editorConfig);
@@ -10,12 +11,12 @@ export function useToolbarActions(save: () => Promise<void>) {
 
   const runAction = useCallback(
     async (action: ToolbarAction, data?: unknown): Promise<boolean> => {
-      const contentId = config?.context?.contentId ?? config?.context?.identifier ?? '';
+      const contentId = getContentId(config?.context);
       if (!contentId) {
         toast.error('No content identifier found.');
         return false;
       }
-      const lastUpdatedBy = config?.context?.userId ?? config?.context?.uid ?? '';
+      const lastUpdatedBy = getUserId(config?.context);
 
       try {
         switch (action) {

@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { URLS } from './urls';
 import type { IQuestion, QuestionType, IOption, IMatchPair } from '../types/question';
 
 // interactions — old editor format (type:'choice', options with label:{en})
@@ -107,7 +108,7 @@ export async function createQuestion(payload: CreateQuestionPayload): Promise<IQ
   }
   if (payload.hints?.length) question.hints = payload.hints;
 
-  const response = await apiClient.post('/action/question/v2/create', {
+  const response = await apiClient.post(URLS.question.create, {
     request: { question },
   });
 
@@ -115,7 +116,7 @@ export async function createQuestion(payload: CreateQuestionPayload): Promise<IQ
 }
 
 export async function readQuestion(questionId: string): Promise<IQuestion> {
-  const response = await apiClient.get(`/action/question/v2/read/${questionId}`);
+  const response = await apiClient.get(`${URLS.question.read}/${questionId}`);
   return response.data?.result?.question as IQuestion;
 }
 
@@ -146,7 +147,7 @@ export async function updateQuestion(
     updates['interactions'] = buildInteractions(payload.type, payload.options);
   }
 
-  await apiClient.patch(`/action/question/v2/update/${questionId}`, {
+  await apiClient.patch(`${URLS.question.update}/${questionId}`, {
     request: { question: updates },
   });
 }
@@ -155,12 +156,12 @@ export async function listQuestions(
   questionIds: string[],
 ): Promise<IQuestion[]> {
   if (questionIds.length === 0) return [];
-  const response = await apiClient.post('/action/question/v2/list', {
+  const response = await apiClient.post(URLS.question.list, {
     request: { search: { identifier: questionIds } },
   });
   return (response.data?.result?.questions ?? []) as IQuestion[];
 }
 
 export async function deleteQuestion(questionId: string): Promise<void> {
-  await apiClient.delete(`/action/question/v2/retire/${questionId}`);
+  await apiClient.delete(`${URLS.question.retire}/${questionId}`);
 }

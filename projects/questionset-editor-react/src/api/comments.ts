@@ -9,7 +9,7 @@ export interface IComment {
 
 export async function readComments(contentId: string): Promise<IComment[]> {
   try {
-    const response = await apiClient.get(`/action/questionset/v1/comment/${contentId}`);
+    const response = await apiClient.get(`questionset/v1/comment/${contentId}`);
     const comments = response.data?.result?.content ?? [];
     return comments as IComment[];
   } catch {
@@ -19,7 +19,7 @@ export async function readComments(contentId: string): Promise<IComment[]> {
 
 export async function saveComment(contentId: string, comment: string): Promise<void> {
   // Old editor format: request.comments is an array of comment objects
-  await apiClient.patch(`/action/questionset/v1/comment/${contentId}`, {
+  await apiClient.patch(`questionset/v1/comment/${contentId}`, {
     request: { comments: [{ comment }] },
   });
 }

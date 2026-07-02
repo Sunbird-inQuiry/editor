@@ -13,6 +13,7 @@ import { Icon } from './Icon';
 import { searchAssets, uploadAsset, type IAssetItem } from '../../api/asset';
 import { useEditorStore } from '../../store/editor.store';
 import { rewriteAssetUrl } from '../../utils/assetUrl';
+import { getUserId } from '../../utils/context';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -267,7 +268,7 @@ export default function ImagePickerModal({ onSelect, onClose }: ImagePickerModal
   // Read context values from editor store
   const editorConfig     = useEditorStore(s => s.editorConfig);
   const channel          = editorConfig?.context.channel          ?? '';
-  const createdBy        = editorConfig?.context.userId           ?? '';
+  const createdBy        = getUserId(editorConfig?.context);
   const cloudStorageUrls = editorConfig?.context.cloudStorageUrls ?? [];
   const presignedHeaders = editorConfig?.context.cloudStorage?.presigned_headers ?? {};
 

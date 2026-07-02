@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { URLS } from './urls';
 import type { INode } from '../types/editor';
 
 function mapToINode(raw: unknown, parentId?: string): INode {
@@ -46,13 +47,13 @@ function mapToINode(raw: unknown, parentId?: string): INode {
 }
 
 // Fields not present in the hierarchy response that are needed for the form.
-const EXTRA_FIELDS = 'instructions,outcomeDeclaration';
+const EXTRA_FIELDS = URLS.questionSet.defaultFields;
 
 export async function readQuestionSet(
   contentId: string,
 ): Promise<Record<string, unknown>> {
   const response = await apiClient.get(
-    `/action/questionset/v2/read/${contentId}`,
+    `${URLS.questionSet.read}/${contentId}`,
     { params: { mode: 'edit', fields: EXTRA_FIELDS } },
   );
   return (
@@ -66,7 +67,7 @@ export async function readHierarchy(
   contentId: string,
 ): Promise<{ content: Record<string, unknown>; rootNode: INode }> {
   const response = await apiClient.get(
-    `/action/questionset/v2/hierarchy/${contentId}`,
+    `${URLS.questionSet.hierarchyRead}/${contentId}`,
     { params: { mode: 'edit' } },
   );
   const content = response.data?.result?.questionSet as Record<string, unknown> | undefined
@@ -89,7 +90,7 @@ export async function updateHierarchy(
   hierarchy: Record<string, unknown>,
   lastUpdatedBy?: string,
 ): Promise<{ identifiers: Record<string, string> }> {
-  const response = await apiClient.patch('/action/questionset/v2/hierarchy/update', {
+  const response = await apiClient.patch(URLS.questionSet.hierarchyUpdate, {
     request: {
       data: {
         nodesModified,
@@ -104,19 +105,19 @@ export async function updateHierarchy(
 }
 
 export async function publishContent(contentId: string, lastPublishedBy = ''): Promise<void> {
-  await apiClient.post(`/action/questionset/v2/publish/${contentId}`, {
+  await apiClient.post(`${URLS.questionSet.publish}/${contentId}`, {
     request: { questionset: { lastPublishedBy } },
   });
 }
 
 export async function sendForReview(contentId: string): Promise<void> {
-  await apiClient.post(`/action/questionset/v2/review/${contentId}`, {
+  await apiClient.post(`${URLS.questionSet.review}/${contentId}`, {
     request: { questionset: {} },
   });
 }
 
 export async function rejectContent(contentId: string, comment: string): Promise<void> {
-  await apiClient.post(`/action/questionset/v2/reject/${contentId}`, {
+  await apiClient.post(`${URLS.questionSet.reject}/${contentId}`, {
     request: { questionset: { rejectComment: comment } },
   });
 }

@@ -4,7 +4,8 @@ import { useEditorStore } from '../store/editor.store';
 import { useTreeStore } from '../store/tree.store';
 import { readHierarchy, readQuestionSet } from '../api/hierarchy';
 import { getCategoryDefinition } from '../api/categoryDefinition';
-import { setApiBaseUrl } from '../api/client';
+import { setApiBaseUrl, setApiSlug } from '../api/client';
+import { getContentId } from '../utils/context';
 
 interface UseEditorInitOptions {
   config: IEditorConfig;
@@ -28,11 +29,12 @@ export function useEditorInit({ config, onError }: UseEditorInitOptions) {
         setError(null);
 
         if (config.apiBaseUrl) setApiBaseUrl(config.apiBaseUrl);
+        if (config.config.apiSlug) setApiSlug(config.config.apiSlug);
 
         setEditorConfig(config);
         setEditorMode(config.config.mode);
 
-        const contentId = config.context.contentId ?? config.context.identifier ?? '';
+        const contentId = getContentId(config.context);
 
         if (contentId) {
           const { rootNode } = await readHierarchy(contentId);

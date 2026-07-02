@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { URLS } from './urls';
 import type { IContent } from '../types/content';
 
 export async function compositeSearch(params: {
@@ -17,7 +18,7 @@ export async function compositeSearch(params: {
   };
   if (params.channel) baseFilters['channel'] = params.channel;
 
-  const response = await apiClient.post('/action/composite/v3/search', {
+  const response = await apiClient.post(URLS.composite.search, {
     request: {
       filters: baseFilters,
       query: params.query ?? '',
@@ -29,8 +30,6 @@ export async function compositeSearch(params: {
         'appIcon', 'channel', 'questionType', 'difficultyLevel', 'bloomsLevel',
       ],
     },
-  }, {
-    headers: { 'X-Source': 'web', 'X-msgid': Math.random().toString(36).slice(2) },
   });
 
   const result = response.data?.result ?? {};

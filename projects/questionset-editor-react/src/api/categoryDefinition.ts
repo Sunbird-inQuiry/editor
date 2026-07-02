@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { URLS } from './urls';
 
 export interface ICategoryField {
   code: string;
@@ -128,7 +129,7 @@ export async function getCategoryDefinition(
   version: 'v1' | 'v4' = 'v1',
 ): Promise<IParsedCategoryDefinition> {
   const response = await apiClient.post(
-    `/action/object/category/definition/${version}/read?fields=objectMetadata,forms,name,label`,
+    `${URLS.categoryDefinition}/${version}/read?fields=objectMetadata,forms,name,label`,
     {
       request: {
         objectCategoryDefinition: {

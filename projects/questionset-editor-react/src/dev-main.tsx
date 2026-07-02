@@ -46,6 +46,9 @@ const CONFIG = {
     objectType:      'QuestionSet',
     primaryCategory: 'Practice Question Set',
     maxDepth:        3,
+    // Path prefix for all API calls (old editor contract). The dev proxy and
+    // mock plugin both handle '/action/*'; hosts like the portal pass '/portal'.
+    apiSlug:         '/action',
   },
 };
 

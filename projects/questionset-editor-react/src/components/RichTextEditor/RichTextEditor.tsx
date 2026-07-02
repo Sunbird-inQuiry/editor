@@ -15,6 +15,7 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
+import { getUserId } from '../../utils/context';
 import {
   Bold,
   Italic,
@@ -465,7 +466,7 @@ export default function RichTextEditor({
 
   const actualMinHeight = minHeight ?? (compact ? 48 : 120);
   const channel  = editorConfig?.context?.channel  ?? '';
-  const userId   = editorConfig?.context?.userId   ?? '';
+  const userId   = getUserId(editorConfig?.context);
 
   const editor = useEditor({
     extensions: [
