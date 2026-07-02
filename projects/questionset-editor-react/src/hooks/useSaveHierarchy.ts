@@ -16,7 +16,7 @@ function buildSavePayload(
 
   // Fields stripped from all node metadata before the hierarchy save.
   // 'questionType' is rejected by the v5 schema as an unknown property.
-  const BASE_STRIP = new Set(['id', 'isFolder', 'isQuestion', 'children', 'parent', 'isNew', 'breadcrumb', 'title', 'metadata', 'questionType']);
+  const BASE_STRIP = new Set(['id', 'isFolder', 'isQuestion', 'children', 'parent', 'isNew', 'breadcrumb', 'title', 'metadata', 'questionType', 'objectType']);
   const ARRAY_FIELDS  = new Set(['audience', 'medium', 'gradeLevel', 'subject', 'keywords', 'language', 'topic']);
   const NUMBER_FIELDS = new Set(['copyrightYear', 'maxScore', 'expectedDuration', 'maxAttempts']);
   // maxTime is a form-only field (seconds integer). The backend stores it
@@ -55,22 +55,23 @@ function buildSavePayload(
     if (isRoot || isNew || (cached && !isLeaf)) {
       let metadata: Record<string, unknown>;
       if (isNew) {
-        metadata = {
-          mimeType: node.isQuestion
-            ? 'application/vnd.sunbird.question'
-            : 'application/vnd.sunbird.questionset',
-          objectType: node.isQuestion ? 'Question' : 'QuestionSet',
-          // Sections inherit the root's primaryCategory so the backend can
-          // resolve obj-cat:practice-question-set_questionset_all correctly.
-          primaryCategory: node.isQuestion
-            ? ((node.metadata?.primaryCategory as string) ?? 'Multiple Choice Question')
-            : rootPrimaryCategory,
-          code: identifier,
-          name: node.name,
-          visibility: 'Parent',
-          channel,
-          ...cleanMetadata(node.metadata ?? {}),
-        };
+        if (isLeaf) {
+          // New question — metadata already built in full by useSaveQuestion.
+          // Do NOT add objectType/visibility/code/channel here; the old editor
+          // only sends the question content fields in nodesModified.metadata.
+          metadata = { ...cleanMetadata(node.metadata ?? {}) };
+        } else {
+          // New section
+          metadata = {
+            mimeType: 'application/vnd.sunbird.questionset',
+            primaryCategory: rootPrimaryCategory,
+            code: identifier,
+            name: node.name,
+            visibility: 'Parent',
+            channel,
+            ...cleanMetadata(node.metadata ?? {}),
+          };
+        }
       } else if (isRoot) {
         // Send only explicitly-edited fields (treeCache), not all server-side
         // metadata. The old Angular editor does the same — it never sends
