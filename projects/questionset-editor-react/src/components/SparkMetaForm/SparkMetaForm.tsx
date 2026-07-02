@@ -188,6 +188,7 @@ function buildCascadedOptions(
   frameworkTerms: Map<string, FrameworkTerm[]> | undefined,
   formValues: Record<string, unknown>,
 ): SelectOption[] {
+  // No dependency declared — show all terms for this category
   if (!field.depends?.length || !frameworkTerms) {
     return buildOptions(field, frameworkTerms);
   }
@@ -195,22 +196,24 @@ function buildCascadedOptions(
   // Use the most specific parent (last entry in depends[])
   const parentCode = field.depends[field.depends.length - 1];
   const parentValue = String(formValues[parentCode] ?? '');
+
+  // No parent selected yet → child list is empty
   if (!parentValue) return [];
 
   // Find the selected parent term
   const parentTerms = frameworkTerms.get(parentCode) ?? [];
-  const parentTerm = parentTerms.find(t => t.name === parentValue) as (ITerm) | undefined;
+  const parentTerm = parentTerms.find(t => t.name === parentValue) as ITerm | undefined;
 
-  if (!parentTerm?.associations?.length) {
-    // No associations defined — show all terms for this category
-    return buildOptions(field, frameworkTerms);
-  }
+  // Parent term not found in framework data
+  if (!parentTerm) return [];
 
-  // Filter parent's associations to only those matching this field's category
-  const filtered = parentTerm.associations.filter(a => a.category === field.code);
-  if (filtered.length === 0) return buildOptions(field, frameworkTerms);
+  // Parent has no associations (e.g. "State (Maharashtra)" has no mediums) → empty
+  if (!parentTerm.associations?.length) return [];
 
-  return filtered.map(a => ({ value: a.name, label: a.name }));
+  // Return only the associations that belong to this child category
+  return parentTerm.associations
+    .filter(a => a.category === field.code)
+    .map(a => ({ value: a.name, label: a.name }));
 }
 
 // ---------------------------------------------------------------------------
