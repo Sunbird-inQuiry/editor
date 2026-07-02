@@ -279,6 +279,9 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
     range.insertNode(frag);
     range.collapse(false);
     if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+    // Range-API insertion does NOT fire input events — dispatch one so the
+    // React ContentEditable onChange runs and the store receives the HTML.
+    host?.dispatchEvent(new Event('input', { bubbles: true }));
   };
 
   const toggle = (name: 'align' | 'size' | 'chars' | 'table') =>
@@ -437,7 +440,13 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
       {imagePickerOpen && (
         <ImagePickerModal
           onSelect={url => {
-            insertAtSavedRange(`<img src="${url}" alt="" style="max-width:100%;border-radius:6px;margin:4px 0;" />`);
+            // Old-editor markup: figure.image wrapper + data-asset-variable
+            // (asset do_ id, extractable from the /assets/public content path).
+            const assetId = url.match(/(do_[A-Za-z0-9]+)/)?.[1];
+            const alt = url.split('/').pop()?.split('?')[0] ?? '';
+            insertAtSavedRange(
+              `<figure class="image"><img src="${url}" alt="${alt}"${assetId ? ` data-asset-variable="${assetId}"` : ''}></figure>`,
+            );
             setImagePickerOpen(false);
           }}
           onClose={() => setImagePickerOpen(false)}

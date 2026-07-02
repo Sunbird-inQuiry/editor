@@ -164,7 +164,10 @@ function SolutionBlock() {
 
 
 export default function QuestionEditor({ editorMode, onBack }: QuestionEditorProps) {
-  const { questionType, questionBody, setQuestionBody, isSaving, options } = useQuestionStore();
+  const {
+    questionType, questionBody, setQuestionBody, isSaving,
+    options, matchPairs, sequence, answerText, sentence,
+  } = useQuestionStore();
   const { save } = useSaveQuestion();
 
   const isReadOnly = editorMode === 'read' || editorMode === 'sourcingreview';
@@ -173,8 +176,41 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   const typeIcon  = type ? (TYPE_ICON[type] ?? 'help') : 'help';
   const stemHint  = type ? (STEM_HINT[type] ?? '') : '';
 
-  // MCQ needs a chosen correct option before it can be saved.
-  const missingCorrectOption = type === 'mcq' && !options.some((o) => o.isCorrect);
+  // Required-field validation per type — Save is disabled until the question
+  // stem and all answer inputs are filled (config toggles/solution excluded).
+  // An image counts as content (image-only stems/options are valid).
+  const plain = (html?: string) => {
+    const text = (html ?? '').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+    return text || (/<(img|figure)\b/i.test(html ?? '') ? '[image]' : '');
+  };
+  const invalidReason = (() => {
+    if (!plain(questionBody)) return 'Enter the question first';
+    switch (type) {
+      case 'mcq':
+        if (options.some((o) => !plain(o.body))) return 'Fill in all options';
+        if (!options.some((o) => o.isCorrect)) return 'Mark one option as the correct answer';
+        return null;
+      case 'ftb':
+        if (!/\[\[.+?\]\]/.test(questionBody)) return 'Add at least one [[blank]] with its answer';
+        return null;
+      case 'sa':
+        if (!plain(answerText)) return 'Enter the answer';
+        return null;
+      case 'mtf':
+        if (matchPairs.length < 2 || matchPairs.some((p) => !plain(p.left) || !plain(p.right))) {
+          return 'Fill in all matching pairs';
+        }
+        return null;
+      case 'seq':
+        if (sequence.length < 2 || sequence.some((s) => !plain(s))) return 'Fill in all sequence items';
+        return null;
+      case 'reo':
+        if (plain(sentence).split(/\s+/).filter(Boolean).length < 2) return 'Enter a sentence with at least two words';
+        return null;
+      default:
+        return null;
+    }
+  })();
 
   const handleBack = () => onBack?.();
   const handleSave = async () => { await save(); onBack?.(); };
@@ -248,8 +284,8 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
               type="button"
               className="ce-btn primary"
               onClick={handleSave}
-              disabled={isSaving || missingCorrectOption}
-              title={missingCorrectOption ? 'Mark one option as the correct answer first' : undefined}
+              disabled={isSaving || !!invalidReason}
+              title={invalidReason ?? undefined}
             >
               <Icon name="check" size={16} />
               {isSaving ? 'Saving…' : 'Save question'}

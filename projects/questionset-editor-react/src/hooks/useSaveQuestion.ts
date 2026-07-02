@@ -95,6 +95,31 @@ function reoOptions(sentence: string) {
   return seqOptions(reoWords(sentence));
 }
 
+/**
+ * media[] — one entry per asset referenced in the question content, like the
+ * old editor's mediaArr: {id, type, src, baseUrl}. Assets are identified by
+ * data-asset-variable or the do_ id embedded in the src path.
+ */
+function collectMedia(htmls: Array<string | undefined>, baseUrl: string) {
+  const media: Array<{ id: string; type: string; src: string; baseUrl: string }> = [];
+  const seen = new Set<string>();
+  for (const html of htmls) {
+    if (!html) continue;
+    for (const tag of html.matchAll(/<img[^>]*>/gi)) {
+      const img = tag[0];
+      const src = img.match(/src=["']([^"']+)["']/i)?.[1];
+      if (!src) continue;
+      const id =
+        img.match(/data-asset-variable=["']([^"']+)["']/i)?.[1] ??
+        src.match(/(do_[A-Za-z0-9]+)/)?.[1];
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      media.push({ id, type: 'image', src, baseUrl });
+    }
+  }
+  return media;
+}
+
 // ---------------------------------------------------------------------------
 // interactions — old editor format
 // ---------------------------------------------------------------------------
@@ -327,6 +352,17 @@ export function useSaveQuestion() {
       (Number.isFinite(formMarks) && formMarks > 0 ? formMarks : (maxScore ?? 1));
 
     const hasInteractions = ['mcq', 'ftb', 'mtf', 'seq', 'reo'].includes(questionType);
+
+    const mediaBaseUrl = config?.context?.host || window.location.origin;
+    const questionMedia = collectMedia(
+      [
+        questionBody, answerText, solutionText, sentence,
+        ...options.map((o) => o.body),
+        ...matchPairs.flatMap((p) => [p.left, p.right]),
+        ...sequence,
+      ],
+      mediaBaseUrl,
+    );
     // Old editor reuses the hint uuid from the read response when present.
     const existingHint = (activeQuestion?.outcomeDeclaration as
       Record<string, Record<string, unknown>> | undefined)?.hint?.defaultValue;
@@ -348,7 +384,7 @@ export function useSaveQuestion() {
         // and modified questions — same field set, isNew:false for existing.
         const questionMeta: Record<string, unknown> = {
           mimeType:    'application/vnd.sunbird.question',
-          media:       [],
+          media:       questionMedia,
           editorState: buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
@@ -417,7 +453,7 @@ export function useSaveQuestion() {
 
         const questionMeta: Record<string, unknown> = {
           mimeType:    'application/vnd.sunbird.question',
-          media:       [],
+          media:       questionMedia,
           editorState: buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
