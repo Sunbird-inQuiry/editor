@@ -9,6 +9,7 @@ function buildSavePayload(
   nodes: INode[],
   treeCache: Record<string, Record<string, unknown>>,
   channel: string,
+  rootPrimaryCategory: string,
 ): { nodesModified: Record<string, unknown>; hierarchy: Record<string, unknown> } {
   const nodesModified: Record<string, unknown> = {};
   const hierarchy: Record<string, unknown> = {};
@@ -57,9 +58,11 @@ function buildSavePayload(
         metadata = {
           mimeType: node.isQuestion
             ? 'application/vnd.sunbird.question'
-            : 'application/vnd.ekstep.content-collection',
+            : 'application/vnd.sunbird.questionset',
           objectType: node.isQuestion ? 'Question' : 'QuestionSet',
-          primaryCategory: node.isQuestion ? 'Multiple Choice Question' : 'Question Set',
+          // Sections inherit the root's primaryCategory so the backend can
+          // resolve obj-cat:practice-question-set_questionset_all correctly.
+          primaryCategory: node.isQuestion ? 'Multiple Choice Question' : rootPrimaryCategory,
           code: identifier,
           name: node.name,
           visibility: 'Parent',
@@ -114,7 +117,8 @@ export function useSaveHierarchy() {
 
     setIsSaving(true);
     try {
-      const { nodesModified, hierarchy } = buildSavePayload(treeData, treeCache, channel);
+      const rootPrimaryCategory = config.config.primaryCategory ?? 'Practice Question Set';
+      const { nodesModified, hierarchy } = buildSavePayload(treeData, treeCache, channel, rootPrimaryCategory);
       await updateHierarchy(contentId, nodesModified, hierarchy, lastUpdatedBy);
       setLastSaved(new Date().toISOString());
       setIsDirty(false);
