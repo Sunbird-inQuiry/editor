@@ -1,4 +1,4 @@
-export type EditorMode = 'edit' | 'review' | 'read' | 'sourcingreview';
+export type EditorMode = 'edit' | 'review' | 'read' | 'orgreview' | 'sourcingreview';
 
 export type ToolbarAction =
   | 'back'
@@ -54,6 +54,8 @@ export interface IContext {
   endpoint?: string;
   timeDiff?: number;
   defaultLicense?: string;
+  /** Allows reviewer edits in orgreview/sourcingreview (old contract). */
+  enableReviewEdit?: boolean;
   cloudStorage?: {
     provider?: string;
     presigned_headers?: Record<string, string>;
@@ -64,6 +66,7 @@ export interface IContext {
 export interface IConfig {
   mode: EditorMode;
   objectType: string;
+  hideSubmitForReviewBtn?: boolean;
   /** Path prefix for all API calls (old editor contract). Default '/api'; the portal passes '/portal'. */
   apiSlug?: string;
   questionSet?: { maxQuestionsLimit?: number };

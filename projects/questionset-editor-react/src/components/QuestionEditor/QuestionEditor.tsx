@@ -5,7 +5,7 @@ import ContentEditable from '../shared/ContentEditable';
 import { useQuestionStore } from '../../store/question.store';
 import { useSaveQuestion } from '../../hooks/useSaveQuestion';
 import { useEditorStore } from '../../store/editor.store';
-import { getUserId } from '../../utils/context';
+import { getUserId, isEditingAllowed } from '../../utils/context';
 import ImagePickerModal from '../shared/ImagePickerModal';
 import { createPortal } from 'react-dom';
 import type { EditorMode } from '../../types/editor';
@@ -261,7 +261,8 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   } = useQuestionStore();
   const { save } = useSaveQuestion();
 
-  const isReadOnly = editorMode === 'read' || editorMode === 'sourcingreview';
+  const editorConfigCtx = useEditorStore.getState().editorConfig?.context;
+  const isReadOnly = !isEditingAllowed(editorMode, editorConfigCtx);
   const type = questionType as QuestionType | null;
   const typeLabel = type ? (QUESTION_TYPE_LABELS[type] ?? type) : 'Question';
   const typeIcon  = type ? (TYPE_ICON[type] ?? 'help') : 'help';

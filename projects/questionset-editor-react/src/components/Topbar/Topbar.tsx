@@ -239,11 +239,18 @@ export const Topbar: React.FC<TopbarProps> = ({
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showSendBack, setShowSendBack] = useState(false);
 
-  // ── Mode booleans ─────────────────────────────────────────────────────────
+  // ── Mode booleans — old header.component handleActionButtons() matrix ────
+  const editorConfig = useEditorStore((s) => s.editorConfig);
   const isEditMode = editorMode === 'edit';
-  const isReviewMode = editorMode === 'review';
+  // Old editor: reject/publish for review OR orgreview.
+  const isReviewMode = editorMode === 'review' || editorMode === 'orgreview';
   const isSourcingReviewMode = editorMode === 'sourcingreview';
   const isReadOnly = editorMode === 'read';
+  // Reviewer edits during org/sourcing review (context.enableReviewEdit).
+  const reviewerEditAllowed =
+    (editorMode === 'orgreview' || editorMode === 'sourcingreview') &&
+    !!editorConfig?.context?.enableReviewEdit;
+  const hideSubmitForReview = !!editorConfig?.config?.hideSubmitForReviewBtn;
 
   // ── Dismissed comment banner indices ──────────────────────────────────────
   const [dismissedComments, setDismissedComments] = useState<Set<string>>(new Set());
@@ -369,7 +376,7 @@ export const Topbar: React.FC<TopbarProps> = ({
           ) : null}
 
           {/* Save as Draft */}
-          {!isReadOnly && !isReviewMode && !isSourcingReviewMode && statusLabel !== 'Review' && (
+          {((isEditMode && statusLabel !== 'Review') || reviewerEditAllowed) && (
             <button
               className="ce-btn ghost"
               type="button"
@@ -382,7 +389,7 @@ export const Topbar: React.FC<TopbarProps> = ({
           )}
 
           {/* Send for Review */}
-          {isEditMode && (
+          {isEditMode && !hideSubmitForReview && (
             <button
               className="ce-btn primary"
               type="button"
@@ -419,16 +426,6 @@ export const Topbar: React.FC<TopbarProps> = ({
                 &nbsp;Reject
               </Button>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSendBack(true)}
-                disabled={buttonLoaders.sendBackContent}
-                isLoading={buttonLoaders.sendBackContent}
-              >
-                <Icon name="swap" size={14} />
-                &nbsp;Send Back
-              </Button>
             </div>
           )}
 

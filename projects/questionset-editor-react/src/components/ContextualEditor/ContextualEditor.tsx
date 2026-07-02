@@ -6,6 +6,7 @@ import { QUESTION_TYPE_LABELS, type QuestionType } from '../../types/question';
 import { useEditorStore } from '../../store/editor.store';
 import { useTreeStore } from '../../store/tree.store';
 import { useUiStore } from '../../store/ui.store';
+import { isEditingAllowed } from '../../utils/context';
 import { useFramework } from '../../hooks/useFramework';
 import { useQuestionRead } from '../../hooks/useQuestionRead';
 import SparkMetaForm from '../SparkMetaForm/SparkMetaForm';
@@ -92,7 +93,10 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   const { openModal, pendingEditorOpen, setPendingEditorOpen } = useUiStore();
 
   const editorMode = editorModeProp ?? storeEditorMode;
-  const isReadOnly = editorMode === 'read';
+  // Old editor: forms editable only in edit mode, or during org/sourcing
+  // review when the host allows reviewer modifications.
+  const editorConfigCtx = useEditorStore.getState().editorConfig?.context;
+  const isReadOnly = !isEditingAllowed(editorMode, editorConfigCtx);
 
   const [activeTab, setActiveTab] = useState<TabKey>('details');
   const [inlineEditorOpen, setInlineEditorOpen] = useState(false);
