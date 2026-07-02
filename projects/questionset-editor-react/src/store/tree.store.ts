@@ -23,6 +23,10 @@ interface TreeState {
   /** Merge extra fields into a node's metadata WITHOUT marking the set dirty.
    *  Used to hydrate fields (e.g. instructions) from a secondary API response. */
   mergeNodeMeta: (id: string, patch: Record<string, unknown>) => void;
+  /** Merge server data into a node's metadata ONLY (no treeCache entry, no
+   *  dirty flag) — hydrated nodes must not be re-sent in the next hierarchy
+   *  save. User edits in treeCache always win over hydrated values. */
+  hydrateNodeMeta: (id: string, patch: Record<string, unknown>) => void;
   /** Replace a temp- identifier with the real one returned by hierarchy update. */
   replaceNodeId: (tempId: string, realId: string) => void;
 }
@@ -172,6 +176,18 @@ export const useTreeStore = create<TreeState>((set, get) => ({
       return { treeData: nextTree, treeCache: nextCache, activeNodeMeta: nextMeta };
     });
     // Does NOT call setIsDirty — this is a read-only hydration, not a user edit.
+  },
+
+  hydrateNodeMeta: (id, patch) => {
+    set((state) => {
+      const nextTree = deepMergeNode(state.treeData, id, { metadata: patch });
+      // treeCache holds unsaved user edits — they take precedence over the
+      // freshly-read server values in the active form.
+      const nextMeta = state.selectedNodeId === id
+        ? { ...state.activeNodeMeta, ...patch, ...(state.treeCache[id] ?? {}) }
+        : state.activeNodeMeta;
+      return { treeData: nextTree, activeNodeMeta: nextMeta };
+    });
   },
 
   addNode: (parentId, type, questionType) => {

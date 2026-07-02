@@ -68,6 +68,16 @@ export interface IQuestion {
   showSolutions?: boolean;
   showHints?: boolean;
   branchingLogic?: Record<string, IBranchingRule>;
+  // Fields round-tripped from question/v2/read (old editor's readQuestionFields)
+  qType?: string;
+  templateId?: string;
+  interactionTypes?: string[];
+  isPartialScore?: boolean;
+  evalUnordered?: boolean;
+  remarks?: unknown;
+  evidence?: unknown;
+  instructions?: Record<string, unknown>;
+  isReviewModificationAllowed?: boolean;
   createdBy?: string;
   lastUpdatedBy?: string;
   createdOn?: string;

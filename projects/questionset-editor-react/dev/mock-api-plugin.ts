@@ -5,6 +5,7 @@ import {
   MOCK_HIERARCHY,
   MOCK_CATEGORY_DEFINITION,
   MOCK_QUESTION_LIST,
+  MOCK_QUESTION_READ,
   MOCK_FRAMEWORK,
   MOCK_CHANNEL,
 } from './mock-data';
@@ -62,6 +63,14 @@ export function mockApiPlugin(): Plugin {
 
         if (url.includes('/composite/v3/search') && method === 'POST')
           return json({ responseCode: 'OK', result: { count: 0, content: [], Question: [] } });
+
+        if (url.includes('/question/v2/read/')) {
+          const qid = url.split('/question/v2/read/')[1]?.split('?')[0] ?? '';
+          const question = MOCK_QUESTION_READ[qid];
+          return question
+            ? json({ responseCode: 'OK', result: { question } })
+            : json({ responseCode: 'RESOURCE_NOT_FOUND', params: { errmsg: `Question ${qid} not found` }, result: {} }, 404);
+        }
 
         if (url.includes('/question/v2/list'))
           return json(MOCK_QUESTION_LIST);

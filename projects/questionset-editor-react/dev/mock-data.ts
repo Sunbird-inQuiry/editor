@@ -178,6 +178,80 @@ export const MOCK_QUESTION_LIST = {
   },
 };
 
+// question/v2/read responses in the OLD editor's persisted shape —
+// editorState options as {answer, value:{body,value}}, responseDeclaration
+// with correctResponse, solutions array, outcomeDeclaration maxScore.
+export const MOCK_QUESTION_READ: Record<string, Record<string, unknown>> = {
+  'question-mcq-001': {
+    identifier: 'question-mcq-001',
+    name: 'What is 2 + 2?',
+    primaryCategory: 'Multiple Choice Question',
+    mimeType: 'application/vnd.sunbird.question',
+    qType: 'MCQ',
+    interactionTypes: ['choice'],
+    body: "<div class='question-body'><div class='mcq-title'><p>What is 2 + 2?</p></div><div data-choice-interaction='response1' class='mcq-vertical'></div></div>",
+    editorState: {
+      question: '<p>What is 2 + 2?</p>',
+      options: [
+        { answer: false, value: { body: '<p>3</p>', value: 0 } },
+        { answer: true,  value: { body: '<p>4</p>', value: 1 } },
+        { answer: false, value: { body: '<p>5</p>', value: 2 } },
+        { answer: false, value: { body: '<p>22</p>', value: 3 } },
+      ],
+    },
+    interactions: {
+      response1: {
+        type: 'choice',
+        options: [
+          { label: { en: '<p>3</p>' }, value: 0, hint: '' },
+          { label: { en: '<p>4</p>' }, value: 1, hint: '' },
+          { label: { en: '<p>5</p>' }, value: 2, hint: '' },
+          { label: { en: '<p>22</p>' }, value: 3, hint: '' },
+        ],
+        validation: { required: 'Yes' },
+      },
+    },
+    responseDeclaration: {
+      response1: {
+        cardinality: 'single', type: 'integer',
+        correctResponse: { value: 1 },
+        mapping: [{ value: 1, score: 1 }],
+      },
+    },
+    outcomeDeclaration: { maxScore: { cardinality: 'single', type: 'integer', defaultValue: 1 } },
+    solutions: [{ id: 'sol-1', type: 'html', value: '<p>2 + 2 = 4</p>' }],
+    media: [],
+    isPartialScore: false,
+    evalUnordered: false,
+  },
+  'question-ftb-001': {
+    identifier: 'question-ftb-001',
+    name: 'Fill in the blank: The capital of France is ___.',
+    primaryCategory: 'Fill in the Blanks',
+    mimeType: 'application/vnd.sunbird.question',
+    qType: 'FTB',
+    interactionTypes: ['text'],
+    body: '<p>The capital of France is [[Paris]].</p>',
+    editorState: { question: '<p>The capital of France is [[Paris]].</p>' },
+    outcomeDeclaration: { maxScore: { cardinality: 'single', type: 'integer', defaultValue: 1 } },
+    solutions: [],
+    media: [],
+  },
+  'question-sa-001': {
+    identifier: 'question-sa-001',
+    name: 'Explain photosynthesis in your own words.',
+    primaryCategory: 'Subjective Question',
+    mimeType: 'application/vnd.sunbird.question',
+    qType: 'SA',
+    interactionTypes: [],
+    body: '<p>Explain photosynthesis in your own words.</p>',
+    editorState: { question: '<p>Explain photosynthesis in your own words.</p>' },
+    outcomeDeclaration: { maxScore: { cardinality: 'single', type: 'integer', defaultValue: 5 } },
+    solutions: [{ id: 'sol-2', type: 'html', value: '<p>Plants convert light into chemical energy.</p>' }],
+    media: [],
+  },
+};
+
 export const MOCK_FRAMEWORK = {
   responseCode: 'OK',
   result: {

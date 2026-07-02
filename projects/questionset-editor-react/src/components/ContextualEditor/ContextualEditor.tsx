@@ -7,6 +7,7 @@ import { useEditorStore } from '../../store/editor.store';
 import { useTreeStore } from '../../store/tree.store';
 import { useUiStore } from '../../store/ui.store';
 import { useFramework } from '../../hooks/useFramework';
+import { useQuestionRead } from '../../hooks/useQuestionRead';
 import SparkMetaForm from '../SparkMetaForm/SparkMetaForm';
 import QuestionDetail from '../QuestionDetail/QuestionDetail';
 
@@ -68,6 +69,9 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   hasContent = true,
 }) => {
   const { frameworkTerms } = useFramework();
+  // Hydrate the selected question from question/v2/read (old-editor parity —
+  // hierarchy responses don't embed editorState/options/solutions).
+  useQuestionRead();
 
   const storeEditorMode = useEditorStore((s) => s.editorMode);
   const showPreview = useEditorStore((s) => s.showPreview);
