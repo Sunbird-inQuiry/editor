@@ -14,7 +14,8 @@ import toast from 'react-hot-toast';
 import { useQuestionStore } from '../store/question.store';
 import { useEditorStore } from '../store/editor.store';
 import { useTreeStore } from '../store/tree.store';
-import { updateQuestion } from '../api/question';
+// updateQuestion (direct PATCH) no longer used — old editor creates/updates
+// via hierarchy update for consistent full-metadata delivery.
 import { useSaveHierarchy } from './useSaveHierarchy';
 import { PRIMARY_CATEGORY_MAP } from '../types/question';
 import type { QuestionType, IOption } from '../types/question';
@@ -142,15 +143,37 @@ export function useSaveQuestion() {
       const isExisting = activeQuestion?.identifier && !activeQuestion.identifier.startsWith('temp-');
 
       if (isExisting) {
-        // ── Update existing question ────────────────────────────────────────
-        await updateQuestion(activeQuestion!.identifier!, {
-          type: questionType, questionBody, options, matchPairs, sequence,
-          solutionText, hints, primaryCategory, channel, framework, createdBy,
-          difficultyLevel, bloomsLevel, maxScore,
-        });
-        updateNode(selectedNodeId, { name: questionName });
+        // ── Update existing question via hierarchy update ───────────────────
+        // Old editor always sends full metadata in nodesModified for both new
+        // and modified questions — same field set, isNew:false for existing.
+        const questionMeta: Record<string, unknown> = {
+          mimeType:    'application/vnd.sunbird.question',
+          media:       [],
+          editorState: buildEditorState(questionType, questionBody, options),
+          body:        buildBodyHtml(questionType, questionBody),
+          answer:      buildAnswerHtml(questionType, options),
+          name:        questionName,
+          qType:       Q_TYPE[questionType] ?? 'MCQ',
+          primaryCategory,
+          interactionTypes: questionType === 'mcq' ? ['choice'] : [],
+          interactions:     buildInteractions(questionType, options),
+          responseDeclaration: buildResponseDeclaration(questionType, options),
+          outcomeDeclaration: {
+            maxScore: { cardinality: 'single', type: 'integer', defaultValue: maxScore ?? 1 },
+          },
+          hints:     {},
+          solutions: {},
+          createdBy,
+          channel,
+          framework,
+          ...taxonomy,
+          ...(difficultyLevel ? { difficultyLevel } : {}),
+          ...(bloomsLevel     ? { bloomsLevel }     : {}),
+        };
+
+        updateNode(selectedNodeId, { name: questionName, ...questionMeta });
+        await saveHierarchy();
         toast.success('Question saved');
-        setIsDirty(false);
       } else {
         // ── New question — build UUID + full metadata, create via hierarchy ──
         const questionUuid = genUuid();

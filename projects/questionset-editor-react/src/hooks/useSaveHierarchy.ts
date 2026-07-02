@@ -52,13 +52,13 @@ function buildSavePayload(
     const isNew = identifier.startsWith('temp-') || !!(cached?.isNew);
     const isLeaf = node.isQuestion ?? false;
 
-    if (isRoot || isNew || (cached && !isLeaf)) {
+    // Include: root, new nodes, any cached node (including existing questions).
+    // Old editor always sends full question metadata for both new + modified questions.
+    if (isRoot || isNew || cached) {
       let metadata: Record<string, unknown>;
       if (isNew) {
         if (isLeaf) {
-          // New question — metadata already built in full by useSaveQuestion.
-          // Do NOT add objectType/visibility/code/channel here; the old editor
-          // only sends the question content fields in nodesModified.metadata.
+          // New question — full metadata built by useSaveQuestion, stored in node.
           metadata = { ...cleanMetadata(node.metadata ?? {}) };
         } else {
           // New section
@@ -72,10 +72,11 @@ function buildSavePayload(
             ...cleanMetadata(node.metadata ?? {}),
           };
         }
+      } else if (isLeaf) {
+        // Existing modified question — send full metadata stored by useSaveQuestion.
+        const { isNew: _, ...cacheEdits } = cached ?? {};
+        metadata = { ...cleanMetadata({ ...(node.metadata ?? {}), ...cacheEdits }) };
       } else if (isRoot) {
-        // Send only explicitly-edited fields (treeCache), not all server-side
-        // metadata. The old Angular editor does the same — it never sends
-        // system fields like channel, mimeType, language, childNodes, etc.
         const { isNew: _, ...cacheEdits } = cached ?? {};
         metadata = { name: node.name, ...cleanMetadata(cacheEdits) };
       } else {
