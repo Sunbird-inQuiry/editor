@@ -1,23 +1,24 @@
 import { apiClient } from './client';
 import type { IQuestion, QuestionType, IOption, IMatchPair } from '../types/question';
 
+// interactions — old editor format (type:'choice', options with label:{en})
 function buildInteractions(type: QuestionType, options: IOption[]): Record<string, unknown> {
   if (type === 'mcq') {
     return {
       response1: {
-        type: { number: { min: 0, max: options.length } },
-        validation: { required: true },
+        type: 'choice',
+        options: options.map((o, i) => ({ label: { en: o.body }, value: i, hint: '' })),
+        validation: { required: 'Yes' },
       },
     };
   }
   if (type === 'ftb') {
-    return {
-      response1: { type: 'string', validation: { required: true } },
-    };
+    return { response1: { type: 'text', validation: { required: 'Yes' } } };
   }
   return {};
 }
 
+// responseDeclaration — old editor format (mapping:[{value, score:null}])
 function buildResponseDeclaration(
   type: QuestionType,
   options: IOption[],
@@ -25,12 +26,13 @@ function buildResponseDeclaration(
 ): Record<string, unknown> {
   if (type === 'mcq') {
     const correctIdx = options.findIndex((o) => o.isCorrect);
+    const idx = correctIdx >= 0 ? correctIdx : 0;
     return {
       response1: {
         cardinality: 'single',
         type: 'integer',
-        correctResponse: { value: correctIdx >= 0 ? correctIdx : 0 },
-        mapping: options.map((o, i) => ({ response: i, outcomes: { score: o.isCorrect ? 1 : 0 } })),
+        correctResponse: { value: idx },
+        mapping: [{ value: idx, score: null }],
       },
     };
   }
@@ -39,9 +41,7 @@ function buildResponseDeclaration(
       response1: {
         cardinality: 'multiple',
         type: 'map',
-        correctResponse: {
-          value: matchPairs.map((_, i) => `${i}`),
-        },
+        correctResponse: { value: matchPairs.map((_, i) => `${i}`) },
       },
     };
   }
@@ -131,13 +131,15 @@ export async function updateQuestion(
       matchPairs: payload.matchPairs,
       sequence: payload.sequence,
     },
+    // Old editor sends {} for empty solutions/hints, not undefined/array
     solutions: payload.solutionText
-      ? [{ id: Math.random().toString(36).slice(2), type: 'html', value: payload.solutionText }]
-      : undefined,
-    hints: payload.hints,
-    difficultyLevel: payload.difficultyLevel,
-    bloomsLevel: payload.bloomsLevel,
+      ? { id: Math.random().toString(36).slice(2), type: 'html', value: payload.solutionText }
+      : {},
+    hints: {},
   };
+
+  if (payload.difficultyLevel) updates.difficultyLevel = payload.difficultyLevel;
+  if (payload.bloomsLevel)     updates.bloomsLevel     = payload.bloomsLevel;
 
   if (payload.options && payload.type) {
     updates['responseDeclaration'] = buildResponseDeclaration(payload.type, payload.options, payload.matchPairs ?? []);

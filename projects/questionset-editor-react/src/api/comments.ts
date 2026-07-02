@@ -18,7 +18,8 @@ export async function readComments(contentId: string): Promise<IComment[]> {
 }
 
 export async function saveComment(contentId: string, comment: string): Promise<void> {
+  // Old editor format: request.comments is an array of comment objects
   await apiClient.patch(`/action/questionset/v1/comment/${contentId}`, {
-    request: { content: { comment } },
+    request: { comments: [{ comment }] },
   });
 }
