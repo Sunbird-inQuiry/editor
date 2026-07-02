@@ -184,6 +184,9 @@ export const useTreeStore = create<TreeState>((set, get) => ({
 
     const newId = 'temp-' + Math.random().toString(36).slice(2);
     const isSection = type === 'section';
+    const rootPrimaryCategory =
+      useEditorStore.getState().editorConfig?.config?.primaryCategory ?? 'Practice Question Set';
+
     const newNode: INode = {
       id: newId,
       identifier: newId,
@@ -195,10 +198,10 @@ export const useTreeStore = create<TreeState>((set, get) => ({
       parent: parentId,
       metadata: {
         mimeType: isSection
-          ? 'application/vnd.ekstep.content-collection'
+          ? 'application/vnd.sunbird.questionset'
           : 'application/vnd.sunbird.question',
         objectType: isSection ? 'QuestionSet' : 'Question',
-        primaryCategory: isSection ? 'Question Set' : 'Multiple Choice Question',
+        primaryCategory: isSection ? rootPrimaryCategory : 'Multiple Choice Question',
         questionType,
         code: newId,
         name: isSection ? 'Untitled Section' : 'Untitled Question',
