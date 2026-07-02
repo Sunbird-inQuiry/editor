@@ -16,13 +16,17 @@ function buildSavePayload(
   // 'metadata' is stripped to prevent a nested metadata.metadata property
   // that the hierarchy update API rejects with CLIENT_ERROR.
   const BASE_STRIP = new Set(['id', 'isFolder', 'isQuestion', 'children', 'parent', 'isNew', 'breadcrumb', 'title', 'metadata']);
-  const ARRAY_FIELDS = new Set(['audience', 'medium', 'gradeLevel', 'subject', 'keywords', 'language', 'topic']);
-  const NUMBER_FIELDS = new Set(['copyrightYear', 'maxScore', 'expectedDuration']);
+  const ARRAY_FIELDS  = new Set(['audience', 'medium', 'gradeLevel', 'subject', 'keywords', 'language', 'topic']);
+  const NUMBER_FIELDS = new Set(['copyrightYear', 'maxScore', 'expectedDuration', 'maxAttempts']);
+  // maxTime is a form-only field (seconds integer). The backend stores it
+  // inside timeLimits.questionSet.max — it is NOT a direct schema property.
+  const MAX_TIME_FIELDS = new Set(['maxTime']);
 
   function cleanMetadata(raw: Record<string, unknown>): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(raw)) {
       if (BASE_STRIP.has(k)) continue;
+      if (MAX_TIME_FIELDS.has(k)) continue;   // handled after the loop
       if (ARRAY_FIELDS.has(k)) {
         out[k] = Array.isArray(v) ? v : (v != null && v !== '' ? [v] : []);
       } else if (NUMBER_FIELDS.has(k)) {
@@ -31,6 +35,12 @@ function buildSavePayload(
       } else {
         out[k] = v;
       }
+    }
+    // Convert maxTime (seconds) → timeLimits.questionSet.max
+    if (raw.maxTime !== undefined) {
+      const secs = Number(raw.maxTime) || 0;
+      const existing = (out.timeLimits as Record<string, unknown> | undefined) ?? {};
+      out.timeLimits = { ...existing, questionSet: { max: secs, min: 0 } };
     }
     return out;
   }
