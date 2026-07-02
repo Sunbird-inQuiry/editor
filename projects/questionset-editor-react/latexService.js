@@ -67,6 +67,23 @@ function svgToPngBuffer(svgString) {
 }
 
 // ---------------------------------------------------------------------------
+// Programmatic API (used by mock-api-plugin in Vite dev server)
+// ---------------------------------------------------------------------------
+
+export async function convertLatex(equation) {
+  const isPNG       = /\.png$/.test(equation);
+  const normalizedEq = equation.replace(/\.(svg|png)$/, '');
+  const svgString   = tex2svg(normalizedEq);
+
+  if (isPNG) {
+    const buf    = await svgToPngBuffer(svgString);
+    const base64 = buf.toString('base64');
+    return { data: `data:image/png;base64,${base64}` };
+  }
+  return { data: svgString };
+}
+
+// ---------------------------------------------------------------------------
 // Express route handler
 // ---------------------------------------------------------------------------
 

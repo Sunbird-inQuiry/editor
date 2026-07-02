@@ -8,7 +8,17 @@ import {
   MOCK_FRAMEWORK,
   MOCK_CHANNEL,
 } from './mock-data';
-import { convertLatex } from './latex-service';
+// convertLatex is dynamically imported inside the handler so the top-level
+// module load doesn't trigger @jimp/core → file-type (ESM-only) during build.
+type ConvertLatexFn = (eq: string) => Promise<{ data: string }>;
+let _convertLatex: ConvertLatexFn | null = null;
+async function getConvertLatex(): Promise<ConvertLatexFn> {
+  if (!_convertLatex) {
+    const mod = await import('../latexService.js') as { convertLatex: ConvertLatexFn };
+    _convertLatex = mod.convertLatex;
+  }
+  return _convertLatex;
+}
 
 // Vite plugin that intercepts API calls in dev and returns mock responses.
 // Skipped entirely when VITE_BASE_URL is set (real backend mode).
@@ -82,7 +92,8 @@ export function mockApiPlugin(): Plugin {
 
           const finish = () => {
             if (!equation) { res.writeHead(400); res.end('Bad Request'); return; }
-            convertLatex(equation)
+            getConvertLatex()
+              .then(fn => fn(equation))
               .then(result => json(result))
               .catch(() => json({ data: '' }));
           };
