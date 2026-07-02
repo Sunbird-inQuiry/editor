@@ -146,10 +146,15 @@ export const useTreeStore = create<TreeState>((set, get) => ({
   },
 
   updateNode: (id, patch) => {
-    set((state) => ({
-      treeData: deepMergeNode(state.treeData, id, patch),
-      treeCache: { ...state.treeCache, [id]: { ...(state.treeCache[id] ?? {}), ...patch } },
-    }));
+    set((state) => {
+      const nextCache = { ...state.treeCache, [id]: { ...(state.treeCache[id] ?? {}), ...patch } };
+      const nextTree  = deepMergeNode(state.treeData, id, patch);
+      // Keep activeNodeMeta in sync so tab-switches don't reset unsaved edits.
+      const nextMeta  = state.selectedNodeId === id
+        ? { ...state.activeNodeMeta, ...patch }
+        : state.activeNodeMeta;
+      return { treeData: nextTree, treeCache: nextCache, activeNodeMeta: nextMeta };
+    });
     useEditorStore.getState().setIsDirty(true);
   },
 
