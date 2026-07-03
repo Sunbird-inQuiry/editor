@@ -252,10 +252,10 @@ export const Topbar: React.FC<TopbarProps> = ({
     !!editorConfig?.context?.enableReviewEdit;
   const hideSubmitForReview = !!editorConfig?.config?.hideSubmitForReviewBtn;
 
-  // ── Dismissed comment banner indices ──────────────────────────────────────
-  const [dismissedComments, setDismissedComments] = useState<Set<string>>(new Set());
+  // ── Reviewer feedback (shown via topbar button → popup) ───────────────────
+  const [showFeedback, setShowFeedback] = useState(false);
   const visibleComments = isEditMode
-    ? reviewComments.filter((c) => !dismissedComments.has(c.id))
+    ? reviewComments.filter((c) => c.text.trim())
     : [];
 
   // ── Emit helper ───────────────────────────────────────────────────────────
@@ -297,33 +297,6 @@ export const Topbar: React.FC<TopbarProps> = ({
   return (
     <>
       <div className={styles.topbarWrapper}>
-        {visibleComments.map((c) => (
-          <div key={c.id} className={styles.commentBanner} role="alert">
-            <span className={styles.commentBannerIcon} aria-hidden="true">⚠</span>
-            <div className={styles.commentBannerBody}>
-              <div className={styles.commentBannerText}>
-                Reviewer feedback: &ldquo;{c.text}&rdquo;
-              </div>
-              {c.createdOn && (
-                <div className={styles.commentBannerMeta}>
-                  {new Date(c.createdOn).toLocaleDateString([], {
-                    day: 'numeric', month: 'short', year: 'numeric',
-                  })}
-                </div>
-              )}
-            </div>
-            <button
-              className={styles.commentBannerDismiss}
-              aria-label="Dismiss reviewer feedback"
-              type="button"
-              onClick={() =>
-                setDismissedComments((prev) => new Set([...prev, c.id]))
-              }
-            >
-              <Icon name="x" size={16} />
-            </button>
-          </div>
-        ))}
         <header
           className="ce-top"
           role="banner"
@@ -374,6 +347,19 @@ export const Topbar: React.FC<TopbarProps> = ({
               Saved
             </span>
           ) : null}
+
+          {/* Reviewer feedback — only when the reviewer left a comment */}
+          {visibleComments.length > 0 && (
+            <button
+              className="ce-btn ghost"
+              type="button"
+              onClick={() => setShowFeedback(true)}
+              title="View reviewer feedback"
+            >
+              <Icon name="info" size={15} />
+              Reviewer feedback
+            </button>
+          )}
 
           {/* Preview — old editor shows it in every mode for QuestionSets */}
           <button
@@ -468,6 +454,60 @@ export const Topbar: React.FC<TopbarProps> = ({
           )}
         </header>
       </div>
+
+      {/* Reviewer feedback popup — same card pattern as ConfirmDialog */}
+      {showFeedback && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 16, fontFamily: 'var(--sb-font)',
+          }}
+          onMouseDown={(e) => { if (e.target === e.currentTarget) setShowFeedback(false); }}
+        >
+          <div
+            style={{
+              background: 'var(--sb-card)', borderRadius: 18,
+              width: 520, maxWidth: '100%', maxHeight: '80vh',
+              display: 'flex', flexDirection: 'column',
+              boxShadow: 'var(--sb-shadow-deep)', overflow: 'hidden',
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', padding: '20px 24px 16px' }}>
+              <span style={{ fontWeight: 800, fontSize: 18, flex: 1, color: 'var(--sb-text)' }}>
+                Reviewer feedback
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowFeedback(false)}
+                style={{
+                  border: 'none', background: 'transparent', cursor: 'pointer',
+                  padding: 4, borderRadius: 6, color: 'var(--sb-text-muted)',
+                  display: 'grid', placeItems: 'center',
+                }}
+              >
+                <Icon name="x" size={20} />
+              </button>
+            </div>
+            <div style={{ padding: '0 24px 24px', overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {visibleComments.map((c) => (
+                <div key={c.id} style={{ background: 'var(--sb-bg-warm)', border: '1px solid var(--sb-border-soft)', borderRadius: 12, padding: '12px 16px' }}>
+                  <p style={{ fontSize: 14.5, color: 'var(--sb-text-2)', lineHeight: 1.6, margin: 0 }}>
+                    &ldquo;{c.text}&rdquo;
+                  </p>
+                  {c.createdOn && (
+                    <p style={{ fontSize: 12, color: 'var(--sb-text-faint)', margin: '6px 0 0' }}>
+                      {new Date(c.createdOn).toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Modals ─────────────────────────────────────────────── */}
 

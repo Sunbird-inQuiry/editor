@@ -248,7 +248,7 @@
 /* ── "Create new" question type picker modal ─────────────────── */
 .ce-modal-scrim { position: fixed; inset: 0; z-index: 1000; background: rgba(20,14,8,.42); display: flex; align-items: center; justify-content: center; padding: 28px; animation: ce-fade .14s ease-out; }
 @keyframes ce-fade { from { opacity: 0; } }
-.qp { position: relative; width: 100%; max-width: 460px; background: #fff; border-radius: 22px; box-shadow: var(--sb-shadow-deep); overflow: hidden; max-height: 88vh; display: flex; flex-direction: column; animation: ce-pop .17s cubic-bezier(.2,.9,.3,1.2); }
+.qp { position: relative; width: 100%; min-width: 500px; max-width: 560px; background: #fff; border-radius: 22px; box-shadow: var(--sb-shadow-deep); overflow: hidden; max-height: 88vh; display: flex; flex-direction: column; animation: ce-pop .17s cubic-bezier(.2,.9,.3,1.2); }
 @keyframes ce-pop { from { opacity: 0; transform: translateY(12px) scale(.97); } }
 .qp-x { position: absolute; top: 16px; right: 16px; z-index: 2; width: 34px; height: 34px; border-radius: 10px; border: none; background: transparent; color: var(--sb-text-muted); cursor: pointer; display: grid; place-items: center; }
 .qp-x:hover { background: var(--sb-bg-warm); color: var(--ink); }

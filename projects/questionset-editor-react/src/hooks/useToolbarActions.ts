@@ -4,6 +4,13 @@ import type { ToolbarAction } from '../types/editor';
 import { useEditorStore } from '../store/editor.store';
 import { sendForReview, rejectContent, publishContent } from '../api/hierarchy';
 import { getContentId, getUserId } from '../utils/context';
+import { useTreeStore } from '../store/tree.store';
+
+/** Reflect the workflow result on the root node so the status chip is live. */
+function setRootStatus(status: string): void {
+  const rootId = useTreeStore.getState().treeData[0]?.identifier;
+  if (rootId) useTreeStore.getState().hydrateNodeMeta(rootId, { status });
+}
 
 export function useToolbarActions(save: () => Promise<boolean | void>) {
   const config = useEditorStore((s) => s.editorConfig);
@@ -24,6 +31,7 @@ export function useToolbarActions(save: () => Promise<boolean | void>) {
             setButtonLoader('saveContent', true);
             if ((await save()) === false) return false;
             await sendForReview(contentId);
+            setRootStatus('Review');
             notifySuccess('Question set sent for review');
             return true;
 
@@ -31,6 +39,7 @@ export function useToolbarActions(save: () => Promise<boolean | void>) {
             setButtonLoader('rejectContent', true);
             const comment = (data as { comment?: string } | undefined)?.comment ?? '';
             await rejectContent(contentId, comment);
+            setRootStatus('Draft');
             notifySuccess('Content rejected');
             return true;
           }
@@ -39,6 +48,7 @@ export function useToolbarActions(save: () => Promise<boolean | void>) {
             setButtonLoader('publishContent', true);
             if ((await save()) === false) return false;
             await publishContent(contentId, lastUpdatedBy);
+            setRootStatus('Live');
             notifySuccess('Question set published successfully');
             return true;
 
