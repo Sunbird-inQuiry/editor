@@ -205,7 +205,8 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
 
       <div className={styles.playerContainer}>
         {statusEl}
-        <div ref={hostRef} style={{ height: '100%' }} />
+        {/* Full width/height so the player lays out in desktop mode */}
+        <div ref={hostRef} style={{ width: '100%', height: '100%' }} />
       </div>
     </div>
   );
