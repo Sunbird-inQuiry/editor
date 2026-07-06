@@ -36,11 +36,11 @@ function genUuid(): string {
 // qType map  (old editor uses qType, not questionType)
 // ---------------------------------------------------------------------------
 const Q_TYPE: Record<QuestionType, string> = {
-  mcq: 'MCQ', sa: 'SA', ftb: 'FTB', mtf: 'MTF', seq: 'SEQ', reo: 'REO',
+  mcq: 'MCQ', sa: 'SA', ftb: 'FTB', mtf: 'MTF', seq: 'SEQ', reo: 'REO', boolean: 'BOOL',
 };
 
 const INTERACTION_TYPE: Partial<Record<QuestionType, string>> = {
-  mcq: 'choice', ftb: 'text', mtf: 'match', seq: 'order', reo: 'order',
+  mcq: 'choice', ftb: 'text', mtf: 'match', seq: 'order', reo: 'order', boolean: 'choice',
 };
 
 // ---------------------------------------------------------------------------
@@ -51,8 +51,8 @@ function parseBlanks(questionHtml: string): string[] {
 }
 
 function buildBodyHtml(type: QuestionType, questionHtml: string): string {
-  if (type === 'mcq') {
-    return `<div class='question-body' tabindex='-1'><div class='mcq-title' tabindex='0'>${questionHtml}</div><div data-choice-interaction='response1' class='mcq-vertical'></div></div>`;
+  if (type === 'mcq' || type === 'boolean') {
+    return `<div class='question-body' tabindex='-1'><div class='mcq-title' tabindex='0'>${questionHtml}</div><div data-choice-interaction='response1' class='${type === 'boolean' ? 'boolean' : 'mcq-vertical'}'></div></div>`;
   }
   if (type === 'ftb') {
     // Old editor replaces each [[answer]] blank with [[responseN]] in body.
@@ -169,7 +169,7 @@ function buildInteractions(type: QuestionType, options: IOption[], questionBody 
       },
     };
   }
-  if (type === 'mcq') {
+  if (type === 'mcq' || type === 'boolean') {
     return {
       response1: {
         type: 'choice',
@@ -249,7 +249,7 @@ function buildResponseDeclaration(
     });
     if (blanks.length) return rd;
   }
-  if (type === 'mcq') {
+  if (type === 'mcq' || type === 'boolean') {
     const correctIdx = options.findIndex(o => o.isCorrect);
     const idx = correctIdx >= 0 ? correctIdx : 0;
     return {
@@ -273,7 +273,7 @@ function buildEditorState(
   sequence: string[] = [],
   sentence = '',
 ) {
-  if (type === 'mcq') {
+  if (type === 'mcq' || type === 'boolean') {
     return {
       options: options.map((o, i) => ({ answer: !!o.isCorrect, value: { body: o.body, value: i } })),
       question: questionBody,
@@ -311,7 +311,7 @@ function buildEditorState(
 // answer HTML — correct option in old editor's answer container
 // ---------------------------------------------------------------------------
 function buildAnswerHtml(type: QuestionType, options: IOption[], answerText: string): string {
-  if (type === 'mcq') {
+  if (type === 'mcq' || type === 'boolean') {
     const correct = options.find(o => o.isCorrect);
     return `<div class='answer-container'><div class='answer-body'>${correct?.body ?? ''}</div></div>`;
   }
@@ -364,7 +364,7 @@ export function useSaveQuestion() {
       questionType === 'reo' ? 1 :
       (Number.isFinite(formMarks) && formMarks > 0 ? formMarks : (maxScore ?? 1));
 
-    const hasInteractions = ['mcq', 'ftb', 'mtf', 'seq', 'reo'].includes(questionType);
+    const hasInteractions = ['mcq', 'ftb', 'mtf', 'seq', 'reo', 'boolean'].includes(questionType);
 
     const mediaBaseUrl = config?.context?.host || window.location.origin;
     const questionMedia: Array<Record<string, unknown>> = collectMedia(
@@ -443,6 +443,7 @@ export function useSaveQuestion() {
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
           ...(questionType === 'mcq' ? { templateId: 'mcq-vertical' } : {}),
+          ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
           ...(questionType === 'ftb' ? {
             isPartialScore,
             evalUnordered,
@@ -479,7 +480,7 @@ export function useSaveQuestion() {
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
-          ...(questionType === 'mcq' || questionType === 'ftb' || Object.keys(metadataHints).length
+          ...(questionType === 'mcq' || questionType === 'boolean' || questionType === 'ftb' || Object.keys(metadataHints).length
             ? { hints: metadataHints } : {}),
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
@@ -518,6 +519,7 @@ export function useSaveQuestion() {
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
           ...(questionType === 'mcq' ? { templateId: 'mcq-vertical' } : {}),
+          ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
           ...(questionType === 'ftb' ? {
             isPartialScore,
             evalUnordered,
@@ -554,7 +556,7 @@ export function useSaveQuestion() {
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
-          ...(questionType === 'mcq' || questionType === 'ftb' || Object.keys(metadataHints).length
+          ...(questionType === 'mcq' || questionType === 'boolean' || questionType === 'ftb' || Object.keys(metadataHints).length
             ? { hints: metadataHints } : {}),
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {

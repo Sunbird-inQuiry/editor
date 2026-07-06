@@ -15,6 +15,7 @@ const TYPES: { type: QuestionType; label: string; desc: string; icon: string }[]
   { type: 'mtf', label: 'Match the Following',desc: 'Pair items across two columns',               icon: 'link'    },
   { type: 'seq', label: 'Sequence',           desc: 'Arrange items in the correct order',          icon: 'numlist' },
   { type: 'reo', label: 'Reorder',            desc: 'Rearrange shuffled words into a sentence',    icon: 'swap'    },
+  { type: 'boolean', label: 'True / False',   desc: 'Pick between true or false choices',          icon: 'check'   },
 ];
 
 // ---------------------------------------------------------------------------

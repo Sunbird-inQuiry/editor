@@ -46,6 +46,7 @@ import { LanguageSelectorComponent } from './components/language-selector/langua
 import { ReorderComponent } from './components/reorder/reorder.component';
 import { ActiveLanguageService } from './services/language/active-language.service';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { BooleanComponent } from './components/boolean/boolean.component';
 @NgModule({
   declarations: [
     QuestionsetEditorLibraryComponent,
@@ -82,6 +83,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     OrderComponent,
     LanguageSelectorComponent,
     ReorderComponent,
+    BooleanComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule.withConfig({callSetDisabledState: 'whenDisabledForLegacyCode'}), RouterModule.forChild([]), SuiModule,
   CommonFormElementsModule, InfiniteScrollModule, HttpClientModule, ResourceLibraryModule, A11yModule, DragDropModule],
@@ -94,6 +96,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'match the following question', interactionType: 'match', qType: 'MTF', component: MtfComponent }, multi: true },
     { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'sequence question', interactionType: 'order', qType: 'SEQ', component: OrderComponent }, multi: true },
     { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'reorder question', interactionType: 'order', qType: 'REO', component: ReorderComponent }, multi: true },
+    { provide: EDITOR_QUESTION_TYPE_REGISTRY, useValue: { primaryCategory: 'boolean question', interactionType: 'choice', qType: 'BOOL', component: BooleanComponent }, multi: true },
   ],
   exports: [EditorComponent],
 })

@@ -1,4 +1,4 @@
-export type QuestionType = 'mcq' | 'sa' | 'ftb' | 'mtf' | 'seq' | 'reo';
+export type QuestionType = 'mcq' | 'sa' | 'ftb' | 'mtf' | 'seq' | 'reo' | 'boolean';
 
 export interface IOption {
   id: string;
@@ -113,6 +113,7 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   mtf: 'Match the Following',
   seq: 'Sequence',
   reo: 'Reorder',
+  boolean: 'Boolean',
 };
 
 export const QUESTION_TYPE_ICONS: Record<QuestionType, string> = {
@@ -122,6 +123,7 @@ export const QUESTION_TYPE_ICONS: Record<QuestionType, string> = {
   mtf: 'Shuffle',
   seq: 'List',
   reo: 'ArrowUpDown',
+  boolean: 'CircleDot',
 };
 
 // Registered object-category names (verified against the KP:
@@ -133,6 +135,7 @@ export const PRIMARY_CATEGORY_MAP: Record<QuestionType, string> = {
   mtf: 'Match The Following Question',
   seq: 'Sequence Question',
   reo: 'Reorder Question',
+  boolean: 'Boolean Question',
 };
 
 /** Older category names still found on persisted questions. */
