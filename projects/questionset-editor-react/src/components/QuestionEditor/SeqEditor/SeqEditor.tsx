@@ -55,9 +55,6 @@ export default function SeqEditor({ readOnly = false }: SeqEditorProps) {
       <div className={`ce-seq lay-${layout}`}>
         {items.map((it, i) => (
           <div key={it.id} className="ce-seqitem">
-            <button type="button" className="grip" tabIndex={-1} title="Drag to reorder">
-              <Icon name="drag" size={16} />
-            </button>
             <span className="ord">{i + 1}</span>
             <div style={fieldStyle}>
               <ContentEditable value={it.value} onChange={v => update(it.id, v)}
