@@ -5,6 +5,7 @@ import type { EditorMode, ToolbarAction } from '../../types/editor';
 import { QUESTION_TYPE_LABELS, type QuestionType } from '../../types/question';
 import { useEditorStore } from '../../store/editor.store';
 import { useTreeStore } from '../../store/tree.store';
+import { useQuestionStore } from '../../store/question.store';
 import { useUiStore } from '../../store/ui.store';
 import { isEditingAllowed } from '../../utils/context';
 import { useFramework } from '../../hooks/useFramework';
@@ -116,6 +117,10 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   // Sync title + reset state on node change
   // Also auto-open inline editor if this node was just created via type picker
   useEffect(() => {
+    // A question save swaps node ids (temp → uuid → do_), which changes
+    // selectedNodeId mid-save — keep the editor open until save completes.
+    if (useQuestionStore.getState().isSaving) return;
+
     setTitleValue((activeNodeMeta?.name as string) ?? '');
     setIsTitleEditing(false);
     setActiveTab(isCurrentNodeQuestion ? 'question' : 'details');
