@@ -132,7 +132,9 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
           },
           config: {
             ...(editorConfig?.config ?? {}),
-            sideMenu: { showShare: false, showDownload: false, showExit: false },
+            // Disable the player's hamburger side menu in editor previews —
+            // it renders viewport-fixed and escapes the preview container.
+            sideMenu: { enable: false, showShare: false, showDownload: false, showExit: false },
             ...(singleQuestionId ? { showLegend: false } : {}),
           },
           metadata,
