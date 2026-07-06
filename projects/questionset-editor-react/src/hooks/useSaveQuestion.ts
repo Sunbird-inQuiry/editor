@@ -439,6 +439,7 @@ export function useSaveQuestion() {
           editorState: {
             ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
             ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
+            ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           },
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
@@ -479,8 +480,9 @@ export function useSaveQuestion() {
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
-          ...(questionType === 'mcq' || questionType === 'ftb' || Object.keys(metadataHints).length
-            ? { hints: metadataHints } : {}),
+          // hints key only when a hint actually exists — no empty {} with a
+          // dangling outcomeDeclaration.hint reference.
+          ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
@@ -488,7 +490,11 @@ export function useSaveQuestion() {
               type: 'integer',
               defaultValue: effectiveMaxScore,
             },
-            hint: { cardinality: 'single', type: 'string', defaultValue: hintUuid },
+            hint: {
+              cardinality: 'single',
+              type: 'string',
+              defaultValue: Object.keys(metadataHints).length ? hintUuid : '',
+            },
           },
           solutions: metadataSolutions,
           createdBy,
@@ -516,6 +522,7 @@ export function useSaveQuestion() {
           editorState: {
             ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
             ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
+            ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           },
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
@@ -556,8 +563,9 @@ export function useSaveQuestion() {
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
-          ...(questionType === 'mcq' || questionType === 'ftb' || Object.keys(metadataHints).length
-            ? { hints: metadataHints } : {}),
+          // hints key only when a hint actually exists — no empty {} with a
+          // dangling outcomeDeclaration.hint reference.
+          ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
@@ -565,7 +573,11 @@ export function useSaveQuestion() {
               type: 'integer',
               defaultValue: effectiveMaxScore,
             },
-            hint: { cardinality: 'single', type: 'string', defaultValue: hintUuid },
+            hint: {
+              cardinality: 'single',
+              type: 'string',
+              defaultValue: Object.keys(metadataHints).length ? hintUuid : '',
+            },
           },
           solutions: metadataSolutions,
           createdBy,
