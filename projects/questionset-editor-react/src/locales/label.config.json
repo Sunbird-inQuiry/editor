@@ -357,6 +357,16 @@
     "ftbDetected": "Detected blanks",
     "ftbDetectedHint": "Parsed from the [[ ]] markers in your question",
     "ftbNone": "No blanks yet — wrap an answer in [[ ]] in the question above.",
-    "blank": "Blank"
+    "blank": "Blank",
+    "setDetails": "Set Details",
+    "setDetailsSub": "Name, description and instructions shown before the set begins.",
+    "sectionDetails": "Section Details",
+    "sectionDetailsSub": "Title and instructions for this section.",
+    "targetAudience": "Target Audience",
+    "targetAudienceSub": "Curriculum alignment for the intended learners.",
+    "behaviourScoring": "Behaviour & Scoring",
+    "behaviourScoringSub": "How the set is timed, attempted and summarised.",
+    "sectionBehaviour": "Section Behaviour",
+    "sectionBehaviourSub": "Controls applied to this section inside the set."
   }
 }

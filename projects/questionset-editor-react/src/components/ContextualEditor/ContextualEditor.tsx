@@ -350,14 +350,14 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   <div className="ce-tabbody">
                     {isCurrentNodeRoot && (
                       <>
-                        <h2 className="ce-secttl">Set Details</h2>
-                        <p className="ce-sectsub">Name, description and instructions shown before the set begins.</p>
+                        <h2 className="ce-secttl">{L('ui.setDetails', 'Set Details')}</h2>
+                        <p className="ce-sectsub">{L('ui.setDetailsSub', 'Name, description and instructions shown before the set begins.')}</p>
                       </>
                     )}
                     {isCurrentNodeFolder && !isCurrentNodeRoot && (
                       <>
-                        <h2 className="ce-secttl">Section Details</h2>
-                        <p className="ce-sectsub">Title and instructions for this section.</p>
+                        <h2 className="ce-secttl">{L('ui.sectionDetails', 'Section Details')}</h2>
+                        <p className="ce-sectsub">{L('ui.sectionDetailsSub', 'Title and instructions for this section.')}</p>
                       </>
                     )}
                     {formConfig && formConfig.length > 0 ? (
@@ -379,8 +379,8 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                 {/* ── Set: audience & curriculum tab ── */}
                 {isCurrentNodeRoot && activeTab === 'audience' && (
                   <div className="ce-tabbody">
-                    <h2 className="ce-secttl">Target Audience</h2>
-                    <p className="ce-sectsub">Curriculum alignment for the intended learners.</p>
+                    <h2 className="ce-secttl">{L('ui.targetAudience', 'Target Audience')}</h2>
+                    <p className="ce-sectsub">{L('ui.targetAudienceSub', 'Curriculum alignment for the intended learners.')}</p>
                     <SparkMetaForm
                       fields={withLicenseOptions(formConfig)}
                       values={activeNodeMeta as Record<string, unknown>}
@@ -398,14 +398,14 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   <div className="ce-tabbody">
                     {isCurrentNodeRoot && (
                       <>
-                        <h2 className="ce-secttl">Behaviour & Scoring</h2>
-                        <p className="ce-sectsub">How the set is timed, attempted and summarised.</p>
+                        <h2 className="ce-secttl">{L('ui.behaviourScoring', 'Behaviour & Scoring')}</h2>
+                        <p className="ce-sectsub">{L('ui.behaviourScoringSub', 'How the set is timed, attempted and summarised.')}</p>
                       </>
                     )}
                     {isCurrentNodeFolder && !isCurrentNodeRoot && (
                       <>
-                        <h2 className="ce-secttl">Section Behaviour</h2>
-                        <p className="ce-sectsub">Controls applied to this section inside the set.</p>
+                        <h2 className="ce-secttl">{L('ui.sectionBehaviour', 'Section Behaviour')}</h2>
+                        <p className="ce-sectsub">{L('ui.sectionBehaviourSub', 'Controls applied to this section inside the set.')}</p>
                       </>
                     )}
                     <SparkMetaForm

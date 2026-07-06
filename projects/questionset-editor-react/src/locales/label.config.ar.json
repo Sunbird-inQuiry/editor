@@ -322,6 +322,16 @@
     "ftbDetected": "الفراغات المكتشفة",
     "ftbDetectedHint": "مستخرجة من علامات [[ ]] في سؤالك",
     "ftbNone": "لا توجد فراغات بعد — ضع الإجابة داخل [[ ]] في السؤال أعلاه.",
-    "blank": "الفراغ"
+    "blank": "الفراغ",
+    "setDetails": "تفاصيل المجموعة",
+    "setDetailsSub": "الاسم والوصف والتعليمات المعروضة قبل بدء المجموعة.",
+    "sectionDetails": "تفاصيل القسم",
+    "sectionDetailsSub": "عنوان هذا القسم وتعليماته.",
+    "targetAudience": "الفئة المستهدفة",
+    "targetAudienceSub": "مواءمة المنهج للمتعلمين المستهدفين.",
+    "behaviourScoring": "السلوك والتقييم",
+    "behaviourScoringSub": "كيفية توقيت المجموعة ومحاولاتها وتلخيصها.",
+    "sectionBehaviour": "سلوك القسم",
+    "sectionBehaviourSub": "الضوابط المطبقة على هذا القسم داخل المجموعة."
   }
 }
