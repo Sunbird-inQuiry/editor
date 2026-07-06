@@ -72,7 +72,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   const { frameworkTerms } = useFramework();
   // Hydrate the selected question from question/v2/read (old-editor parity —
   // hierarchy responses don't embed editorState/options/solutions).
-  useQuestionRead();
+  const { isFetching: isQuestionLoading } = useQuestionRead();
 
   const storeEditorMode = useEditorStore((s) => s.editorMode);
   const showPreview = useEditorStore((s) => s.showPreview);
@@ -348,6 +348,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                 {isCurrentNodeQuestion && activeTab === 'question' && (
                   <div className="ce-qdetail">
                     <QuestionDetail
+                      isLoading={isQuestionLoading}
                       node={useTreeStore.getState().getNodeById(selectedNodeId ?? '') ?? { id: selectedNodeId ?? '', identifier: selectedNodeId ?? '', name: '' }}
                       onOpenEditor={() => setInlineEditorOpen(true)}
                       onRemove={() => openModal('confirmDelete', { nodeId: selectedNodeId })}

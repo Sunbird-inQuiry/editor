@@ -132,7 +132,9 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
           },
           config: {
             ...(editorConfig?.config ?? {}),
-            sideMenu: { showShare: false, showDownload: false, showExit: false },
+            // Disable the player's hamburger side menu in editor previews —
+            // it renders viewport-fixed and escapes the preview container.
+            sideMenu: { enable: false, showShare: false, showDownload: false, showExit: false },
             ...(singleQuestionId ? { showLegend: false } : {}),
           },
           metadata,
@@ -205,7 +207,8 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
 
       <div className={styles.playerContainer}>
         {statusEl}
-        <div ref={hostRef} style={{ height: '100%' }} />
+        {/* Full width/height so the player lays out in desktop mode */}
+        <div ref={hostRef} style={{ width: '100%', height: '100%' }} />
       </div>
     </div>
   );

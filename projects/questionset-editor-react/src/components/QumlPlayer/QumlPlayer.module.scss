@@ -61,11 +61,28 @@
 
 .playerContainer {
   flex: 1 1 0;
-  padding: 16px;
+  padding: 20px;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   overflow: auto;
+
+  // Centered desktop-width card — wide enough for the player's landscape
+  // layout, but bounded so options/nav controls stay inside the preview.
+  > div {
+    width: 100%;
+    max-width: 1000px;
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  :global(sunbird-quml-player) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .playerPreview {
