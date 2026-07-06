@@ -175,7 +175,7 @@ export function LibraryDock({ onCollapse }: LibraryDockProps) {
 
   // ── Store: selected node for adding questions ─────────────────────────────
   const selectedNodeId = useTreeStore((s) => s.selectedNodeId);
-  const addNode = useTreeStore((s) => s.addNode);
+  const addExistingQuestion = useTreeStore((s) => s.addExistingQuestion);
   const getNodeById = useTreeStore((s) => s.getNodeById);
   const editorMode = useEditorStore((s) => s.editorMode);
 
@@ -259,14 +259,18 @@ export function LibraryDock({ onCollapse }: LibraryDockProps) {
         return;
       }
 
-      const newId = addNode(targetId, 'question', item.primaryCategory);
-      if (!newId) {
+      // Link the existing question into the section (old-editor semantics) —
+      // its do_ id joins the hierarchy children; nothing new is created.
+      const result = addExistingQuestion(targetId, item as unknown as { identifier: string } & Record<string, unknown>);
+      if (result === 'exists') {
+        showToast('This question is already in the set', 'error');
+      } else if (!result) {
         showToast('Cannot add here — maximum depth reached', 'error');
       } else {
         showToast(`"${(item.name ?? 'Question').slice(0, 40)}" added`, 'success');
       }
     },
-    [selectedNodeId, getNodeById, addNode, showToast],
+    [selectedNodeId, getNodeById, addExistingQuestion, showToast],
   );
 
   // ── Render ────────────────────────────────────────────────────────────────

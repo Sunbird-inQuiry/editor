@@ -8,6 +8,7 @@ import { Topbar } from '../Topbar/Topbar';
 import OutlineTree from '../OutlineTree/OutlineTree';
 import { useUiStore } from '../../store/ui.store';
 import { notifySuccess } from '../../utils/notify';
+import { telemetryInteract } from '../../utils/telemetry';
 import ContextualEditor from '../ContextualEditor/ContextualEditor';
 import UnsavedChangesModal from '../modals/UnsavedChangesModal';
 import { QuestionTypeSelectorModal } from '../modals/QuestionTypeSelectorModal';
@@ -42,6 +43,10 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
     async (event: { action: ToolbarAction; data?: unknown }) => {
       const { action, data } = event;
       events.onToolbarEvent?.(event);
+      // Old editor logs an INTERACT per toolbar action.
+      if (!['onFormValueChange', 'onFormStatusChange'].includes(action)) {
+        telemetryInteract(action);
+      }
 
       switch (action) {
         case 'onFormStatusChange': {

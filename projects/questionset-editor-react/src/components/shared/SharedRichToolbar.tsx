@@ -12,6 +12,7 @@ import { Icon } from './Icon';
 import MathModal from './MathModal';
 import ImagePickerModal from './ImagePickerModal';
 import { SPECIAL_CHAR_GROUPS, ALL_CATEGORIES, type CharCategory } from './specialCharsData';
+import { useQuestionStore } from '../../store/question.store';
 
 const FONT_SIZES = [8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 36];
 
@@ -203,7 +204,9 @@ const LANGUAGES = [
 ] as const;
 
 export default function SharedRichToolbar({ disabled = false }: { disabled?: boolean }) {
-  const [lang, setLang] = useState<'EN' | 'AR' | 'FR' | 'PT'>('EN');
+  // Content language is store-driven so it resets per question (default EN).
+  const contentLang = useQuestionStore((s) => s.contentLang);
+  const lang = contentLang.toUpperCase() as 'EN' | 'AR' | 'FR' | 'PT';
   const [menu, setMenu] = useState<'align' | 'size' | 'chars' | 'table' | null>(null);
   const [mathOpen, setMathOpen] = useState(false);
   const [mathAnchor, setMathAnchor] = useState<DOMRect | null>(null);
@@ -310,9 +313,11 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
           onMouseDown={e => { e.stopPropagation(); saveRange(); }}
           onChange={e => {
             const selected = e.target.value as typeof lang;
-            setLang(selected);
             const dir = LANGUAGES.find(l => l.code === selected)?.dir ?? 'ltr';
             document.dispatchEvent(new CustomEvent('ce-lang-changed', { detail: { lang: selected, dir } }));
+            // Switch the authored content language (old editor multilingual
+            // authoring) — snapshots current text, loads the selected lang.
+            useQuestionStore.getState().switchContentLang(selected.toLowerCase());
             // Restore focus + selection to the editor after select closes
             const range = savedRange.current;
             if (range) {

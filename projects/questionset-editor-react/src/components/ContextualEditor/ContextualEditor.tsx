@@ -7,6 +7,7 @@ import { useEditorStore } from '../../store/editor.store';
 import { useTreeStore } from '../../store/tree.store';
 import { useUiStore } from '../../store/ui.store';
 import { isEditingAllowed } from '../../utils/context';
+import { telemetryImpression } from '../../utils/telemetry';
 import { useFramework } from '../../hooks/useFramework';
 import { useQuestionRead } from '../../hooks/useQuestionRead';
 import SparkMetaForm from '../SparkMetaForm/SparkMetaForm';
@@ -105,6 +106,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   // Lock hierarchy + topbar while the inline question editor is open.
   useEffect(() => {
     setQuestionEditorOpen(isCurrentNodeQuestion && inlineEditorOpen);
+    if (isCurrentNodeQuestion && inlineEditorOpen) telemetryImpression('question_editor');
     return () => setQuestionEditorOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCurrentNodeQuestion, inlineEditorOpen]);

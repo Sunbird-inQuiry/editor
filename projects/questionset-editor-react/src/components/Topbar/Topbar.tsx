@@ -8,6 +8,7 @@ import { Button } from '../shared/Button';
 import { PublishChecklist } from '../modals/PublishChecklist';
 import { QualityParamsModal } from '../modals/QualityParamsModal';
 import styles from './Topbar.module.scss';
+import { labelFrom } from '../../utils/labels';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -221,6 +222,8 @@ export const Topbar: React.FC<TopbarProps> = ({
 }) => {
   // ── Store selectors ──────────────────────────────────────────────────────
   const reviewComments = useEditorStore((s) => s.reviewComments);
+  const uiLabels = useEditorStore((s) => s.labels);
+  const L = (path: string, fallback: string) => labelFrom(uiLabels, path, fallback);
   const treeData = useTreeStore((s) => s.treeData);
   const rootNode = treeData[0];
   const title = rootNode?.name ?? 'Untitled';
@@ -369,7 +372,7 @@ export const Topbar: React.FC<TopbarProps> = ({
             title="Preview question set"
           >
             <Icon name="play" size={15} />
-            Preview
+            {L('button_labels.preview_collection_btn_label', 'Preview')}
           </button>
 
           {/* Save as Draft */}
@@ -381,7 +384,7 @@ export const Topbar: React.FC<TopbarProps> = ({
               disabled={!isFormValid}
               title={!isFormValid ? 'Fill all required fields before saving' : undefined}
             >
-              Save as Draft
+              {L('button_labels.save_collection_btn_label', 'Save as Draft')}
             </button>
           )}
 
@@ -394,7 +397,7 @@ export const Topbar: React.FC<TopbarProps> = ({
               disabled={buttonLoaders.saveContent}
             >
               <Icon name="send" size={15} />
-              Send for Review
+              {L('button_labels.submit_collection_btn_label', 'Send for Review')}
             </button>
           )}
 
@@ -409,7 +412,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 isLoading={buttonLoaders.publishContent}
               >
                 <Icon name="check" size={14} />
-                &nbsp;Publish
+                &nbsp;{L('button_labels.publish_collection_btn_label', 'Publish')}
               </Button>
 
               <Button
@@ -420,7 +423,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 isLoading={buttonLoaders.rejectContent}
               >
                 <Icon name="x" size={14} />
-                &nbsp;Reject
+                &nbsp;{L('button_labels.reject_collection_btn_label', 'Reject')}
               </Button>
 
             </div>

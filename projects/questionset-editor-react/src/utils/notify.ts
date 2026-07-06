@@ -28,6 +28,8 @@ export function notifyError(message: string): void {
     duration: 5000,
     iconTheme: { primary: 'var(--sb-red, #dc2626)', secondary: '#fff' },
   });
+  // Old editor logs an ERROR telemetry event for surfaced failures.
+  void import('./telemetry').then(({ telemetryError }) => telemetryError(message));
 }
 
 /** Prefer the server's errmsg (surfaced by the api client) over a generic fallback. */

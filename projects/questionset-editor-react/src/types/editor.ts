@@ -56,6 +56,11 @@ export interface IContext {
   defaultLicense?: string;
   /** Allows reviewer edits in orgreview/sourcingreview (old contract). */
   enableReviewEdit?: boolean;
+  /** UI language for editor labels (en/ar/fr/hi/pt); falls back to the
+   *  portal-set localStorage 'app-language' like the old editor. */
+  uiLanguage?: string;
+  /** Host label overrides merged over button_labels (old contract). */
+  labels?: Record<string, string>;
   cloudStorage?: {
     provider?: string;
     presigned_headers?: Record<string, string>;

@@ -1,84 +1,133 @@
 /**
- * telemetry.ts — lightweight telemetry utility.
- *
- * All functions currently emit console.debug messages prefixed with [telemetry].
- * Replace the bodies with real Sunbird Telemetry SDK calls once integrated.
+ * Telemetry emitter — parity with the old editor's telemetry.service.ts:
+ * START / END / IMPRESSION / INTERACT / ERROR events with the standard
+ * Sunbird envelope, batched (size 20 like the old CsTelemetryModule config)
+ * and POSTed to `${context.host}${context.endpoint || '/data/v3/telemetry'}`.
+ * When the host page provides window.EkTelemetry, events are handed to it
+ * instead of the internal batcher.
  */
+import type { IContext } from '../types/editor';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export interface TelemetryConfig {
-  /** Sunbird environment (e.g. "staging", "production"). */
-  env: string;
-  /** Channel ID. */
-  channel: string;
-  /** Producer data — id, version, pid. */
-  pdata: { id: string; ver: string; pid?: string };
-  /** User ID. */
-  uid?: string;
-  /** Device ID. */
-  did?: string;
-  /** Session ID. */
-  sid?: string;
-  /** Rollup object. */
-  rollup?: Record<string, string>;
-  /** Optional tags. */
-  tags?: string[];
+declare global {
+  interface Window {
+    EkTelemetry?: Record<string, (data: Record<string, unknown>) => void>;
+  }
 }
 
-// ---------------------------------------------------------------------------
-// Module-level state
-// ---------------------------------------------------------------------------
+const BATCH_SIZE = 20;
+const VER = '3.0';
 
-let _config: TelemetryConfig | null = null;
-let _initialised = false;
+let ctx: IContext | null = null;
+let objectId = '';
+let pageId = 'questionset_editor';
+let buffer: Array<Record<string, unknown>> = [];
 
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
-
-/**
- * Initialise the telemetry module with the given config.
- * Must be called before any other telemetry functions are used.
- */
-export function initTelemetry(config: Record<string, unknown>): void {
-  _config = config as unknown as TelemetryConfig;
-  _initialised = true;
-  console.debug('[telemetry] initialised', _config);
+function mid(): string {
+  return `QS:${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/**
- * Log a generic telemetry event.
- *
- * @param eid   - Event ID (e.g. "INTERACT", "IMPRESSION", "START", "END").
- * @param edata - Event-specific payload.
- */
-export function logEvent(eid: string, edata: Record<string, unknown>): void {
-  if (!_initialised) {
-    console.debug('[telemetry] not initialised — skipping event', eid, edata);
+function endpointUrl(): string {
+  const host = ctx?.host ?? '';
+  const endpoint = ctx?.endpoint || '/data/v3/telemetry';
+  return `${host}${endpoint}`;
+}
+
+function buildEvent(eid: string, edata: Record<string, unknown>): Record<string, unknown> {
+  return {
+    eid,
+    ets: Date.now(),
+    ver: VER,
+    mid: mid(),
+    actor: { id: ctx?.user?.id ?? ctx?.userId ?? ctx?.uid ?? 'anonymous', type: 'User' },
+    context: {
+      channel: ctx?.channel ?? '',
+      pdata: ctx?.pdata ?? { id: 'sunbird-questionset-editor', ver: '1.0' },
+      env: ctx?.env ?? 'questionset_editor',
+      sid: ctx?.sid ?? '',
+      did: ctx?.did ?? '',
+      cdata: ctx?.cdata ?? [],
+      rollup: ctx?.contextRollup ?? ctx?.rollup ?? {},
+    },
+    object: objectId
+      ? { id: objectId, type: 'QuestionSet', ver: '1.0', rollup: ctx?.objectRollup ?? {} }
+      : undefined,
+    edata,
+  };
+}
+
+function flush(useBeacon = false): void {
+  if (!buffer.length || !ctx) return;
+  const events = buffer;
+  buffer = [];
+  const payload = JSON.stringify({
+    id: 'api.sunbird.telemetry',
+    ver: VER,
+    params: { msgid: mid() },
+    ets: Date.now(),
+    events,
+  });
+  const url = endpointUrl();
+  try {
+    if (useBeacon && navigator.sendBeacon) {
+      navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
+      return;
+    }
+    void fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(ctx.authToken ? { Authorization: `Bearer ${ctx.authToken}` } : {}),
+      },
+      body: payload,
+      keepalive: true,
+    }).catch(() => { /* telemetry must never break the editor */ });
+  } catch { /* ignore */ }
+}
+
+function dispatch(eid: string, edata: Record<string, unknown>): void {
+  if (!ctx) return;
+  const method = eid.toLowerCase();
+  const ek = window.EkTelemetry;
+  if (ek && typeof ek[method] === 'function') {
+    ek[method]!(buildEvent(eid, edata));
     return;
   }
-  console.debug('[telemetry] event', { eid, edata, ts: Date.now() });
+  buffer.push(buildEvent(eid, edata));
+  if (buffer.length >= BATCH_SIZE) flush();
 }
 
-/**
- * Log an INTERACT telemetry event.
- *
- * @param id   - Element/action ID being interacted with.
- * @param type - Interaction type (e.g. "click", "touch"). Defaults to "click".
- */
-export function logInteract(id: string, type = 'click'): void {
-  logEvent('INTERACT', { type, id });
+// ── Public API (old telemetry.service parity) ───────────────────────────────
+
+export function initTelemetry(context: IContext, contentId: string): void {
+  ctx = context;
+  objectId = contentId;
 }
 
-/**
- * Log an IMPRESSION telemetry event.
- *
- * @param type    - Impression type (e.g. "view", "detail").
- * @param subtype - Optional subtype (e.g. "paginate").
- */
-export function logImpression(type: string, subtype?: string): void {
-  logEvent('IMPRESSION', { type, ...(subtype ? { subtype } : {}) });
+export function setTelemetryPageId(id: string): void {
+  pageId = id;
+}
+
+export function telemetryStart(): void {
+  dispatch('START', { type: 'editor', pageid: pageId, mode: 'edit', uaspec: {} });
+}
+
+export function telemetryEnd(): void {
+  dispatch('END', { type: 'editor', pageid: pageId });
+  flush(true);
+}
+
+export function telemetryImpression(pageid = pageId): void {
+  dispatch('IMPRESSION', { type: 'edit', pageid, uri: '' });
+}
+
+export function telemetryInteract(id: string, pageid = pageId): void {
+  dispatch('INTERACT', { type: 'click', id, pageid });
+}
+
+export function telemetryError(err: string, errtype = 'SYSTEM'): void {
+  dispatch('ERROR', { err, errtype, stacktrace: '' });
+}
+
+export function flushTelemetry(): void {
+  flush(true);
 }

@@ -6,6 +6,7 @@ import { useQuestionStore } from '../../store/question.store';
 import { useSaveQuestion } from '../../hooks/useSaveQuestion';
 import { useEditorStore } from '../../store/editor.store';
 import { getUserId, isEditingAllowed } from '../../utils/context';
+import { labelFrom } from '../../utils/labels';
 import ImagePickerModal from '../shared/ImagePickerModal';
 import { lazy, Suspense } from 'react';
 import { useTreeStore } from '../../store/tree.store';
@@ -266,6 +267,9 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   } = useQuestionStore();
   const { save } = useSaveQuestion();
 
+  const uiLabels = useEditorStore((st) => st.labels);
+  const L = (path: string, fallback: string) => labelFrom(uiLabels, path, fallback);
+
   const editorConfigCtx = useEditorStore.getState().editorConfig?.context;
   const isReadOnly = !isEditingAllowed(editorMode, editorConfigCtx);
   const type = questionType as QuestionType | null;
@@ -280,29 +284,44 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
     const text = (html ?? '').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
     return text || (/<(img|figure)\b/i.test(html ?? '') ? '[image]' : '');
   };
+  // Validation runs against the PRIMARY language (en) — other languages are
+  // optional translations (old editor semantics). When editing a non-en
+  // language, the en text lives in the i18n maps.
+  const contentLang = useQuestionStore((st) => st.contentLang);
+  const i18nText = useQuestionStore((st) => st.i18nText);
+  const enOf = (map: Record<string, string> | undefined, current: string) =>
+    contentLang === 'en' ? current : (map?.en ?? '');
   const invalidReason = (() => {
-    if (!plain(questionBody)) return 'Enter the question first';
+    const qBody = enOf(i18nText.questionBody, questionBody);
+    if (!plain(qBody)) return 'Enter the question first (in EN)';
     switch (type) {
       case 'mcq':
-        if (options.some((o) => !plain(o.body))) return 'Fill in all options';
+        if (options.some((o) => !plain(enOf(i18nText.options[o.id], o.body)))) return 'Fill in all options (in EN)';
         if (!options.some((o) => o.isCorrect)) return 'Mark one option as the correct answer';
         return null;
       case 'ftb':
-        if (!/\[\[.+?\]\]/.test(questionBody)) return 'Add at least one [[blank]] with its answer';
+        if (!/\[\[.+?\]\]/.test(qBody)) return 'Add at least one [[blank]] with its answer';
         return null;
       case 'sa':
-        if (!plain(answerText)) return 'Enter the answer';
+        if (!plain(enOf(i18nText.answerText, answerText))) return 'Enter the answer (in EN)';
         return null;
       case 'mtf':
-        if (matchPairs.length < 2 || matchPairs.some((p) => !plain(p.left) || !plain(p.right))) {
-          return 'Fill in all matching pairs';
+        if (
+          matchPairs.length < 2 ||
+          matchPairs.some((p) => !plain(enOf(i18nText.pairsLeft[p.id], p.left)) || !plain(enOf(i18nText.pairsRight[p.id], p.right)))
+        ) {
+          return 'Fill in all matching pairs (in EN)';
         }
         return null;
       case 'seq':
-        if (sequence.length < 2 || sequence.some((s) => !plain(s))) return 'Fill in all sequence items';
+        if (sequence.length < 2 || sequence.some((s, i) => !plain(enOf(i18nText.sequence[i], s)))) {
+          return 'Fill in all sequence items (in EN)';
+        }
         return null;
       case 'reo':
-        if (plain(sentence).split(/\s+/).filter(Boolean).length < 2) return 'Enter a sentence with at least two words';
+        if (plain(enOf(i18nText.sentence, sentence)).split(/\s+/).filter(Boolean).length < 2) {
+          return 'Enter a sentence with at least two words (in EN)';
+        }
         return null;
       default:
         return null;
@@ -396,9 +415,11 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
             disabled={!!invalidReason}
             title={invalidReason ?? 'Preview this question'}
           >
-            Preview
+            {L('button_labels.preview_question_btn_label', 'Preview')}
           </button>
-          <button type="button" className="ce-btn ghost" onClick={handleBack}>Cancel</button>
+          <button type="button" className="ce-btn ghost" onClick={handleBack}>
+            {L('button_labels.cancel_question_btn_label', 'Cancel')}
+          </button>
           {!isReadOnly && (
             <button
               type="button"
@@ -408,7 +429,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
               title={invalidReason ?? undefined}
             >
               <Icon name="check" size={16} />
-              {isSaving ? 'Saving…' : 'Save question'}
+              {isSaving ? 'Saving…' : L('button_labels.save_question_btn_label', 'Save question')}
             </button>
           )}
         </div>
@@ -464,16 +485,18 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
             </div>
             <div style={{ padding: '0 24px 24px' }}>
               <p style={{ fontSize: 15, color: 'var(--sb-text-2)', lineHeight: 1.6, margin: 0 }}>
-                This question will not be saved, are you sure you want to go back to questionset?
+                {L('lbl.confirmQuestionNotSaved', 'This question will not be saved, are you sure you want to go back to questionset?')}
               </p>
             </div>
             <div style={{
               display: 'flex', justifyContent: 'flex-end', gap: 10,
               padding: '16px 24px', borderTop: '1px solid var(--sb-border)',
             }}>
-              <button type="button" className="ce-btn ghost" onClick={() => setConfirmBackOpen(false)}>No, stay</button>
+              <button type="button" className="ce-btn ghost" onClick={() => setConfirmBackOpen(false)}>
+                {L('button_labels.no_btn_label', 'No')}
+              </button>
               <button type="button" className="ce-btn danger" onClick={() => { setConfirmBackOpen(false); onBack?.(); }}>
-                Yes, go back
+                {L('button_labels.yes_btn_label', 'Yes, go back')}
               </button>
             </div>
           </div>
