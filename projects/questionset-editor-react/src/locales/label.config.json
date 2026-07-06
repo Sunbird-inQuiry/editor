@@ -311,6 +311,24 @@
     "typeSeq": "Sequence",
     "typeSeqDesc": "Arrange items in the correct order",
     "typeReo": "Reorder",
-    "typeReoDesc": "Rearrange shuffled words into a sentence"
+    "typeReoDesc": "Rearrange shuffled words into a sentence",
+    "statusDraft": "Draft",
+    "statusReview": "Review",
+    "statusLive": "Live",
+    "statusRetired": "Retired",
+    "richTextHint": "Rich text, images & equations supported",
+    "ftbHint": "Wrap the answer in [[ ]] to mark a blank",
+    "questionPh": "Type the question here…",
+    "ftbPh": "e.g. The capital of France is [[Paris]]",
+    "options": "Options",
+    "optionsHint": "Select the radio to mark the correct answer",
+    "selectLayout": "Select layout",
+    "horizontal": "Horizontal",
+    "grid": "Grid",
+    "vertical": "Vertical",
+    "optionPh": "Option text…",
+    "addOption": "Add option",
+    "language": "Language",
+    "correct": "Correct"
   }
 }

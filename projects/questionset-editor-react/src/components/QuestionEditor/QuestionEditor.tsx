@@ -283,9 +283,16 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   const editorConfigCtx = useEditorStore.getState().editorConfig?.context;
   const isReadOnly = !isEditingAllowed(editorMode, editorConfigCtx);
   const type = questionType as QuestionType | null;
-  const typeLabel = type ? (QUESTION_TYPE_LABELS[type] ?? type) : 'Question';
+  const TYPE_KEY: Record<QuestionType, string> = { mcq: 'Mcq', sa: 'Sa', ftb: 'Ftb', mtf: 'Mtf', seq: 'Seq', reo: 'Reo' };
+  const typeLabel = type
+    ? L(`ui.type${TYPE_KEY[type]}`, QUESTION_TYPE_LABELS[type] ?? type)
+    : L('ui.question', 'Question');
   const typeIcon  = type ? (TYPE_ICON[type] ?? 'help') : 'help';
-  const stemHint  = type ? (STEM_HINT[type] ?? '') : '';
+  const stemHint = type
+    ? (type === 'ftb'
+        ? L('ui.ftbHint', STEM_HINT.ftb)
+        : L('ui.richTextHint', STEM_HINT[type] ?? ''))
+    : '';
 
   // Required-field validation per type — Save is disabled until the question
   // stem and all answer inputs are filled (config toggles/solution excluded).
@@ -410,13 +417,15 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
           {/* Question stem */}
           <div className="ce-ed-sec ce-ed-stem">
             <div className="ce-ed-lbl">
-              Question
+              {L('ui.question', 'Question')}
               <span className="hint">{stemHint}</span>
             </div>
             <ContentEditable
               value={questionBody}
               onChange={setQuestionBody}
-              placeholder={type === 'ftb' ? 'e.g. The capital of France is [[Paris]]' : 'Type the question here…'}
+              placeholder={type === 'ftb'
+                ? L('ui.ftbPh', 'e.g. The capital of France is [[Paris]]')
+                : L('ui.questionPh', 'Type the question here…')}
               minHeight={70}
               disabled={isReadOnly}
               bodyClass="stem-field"

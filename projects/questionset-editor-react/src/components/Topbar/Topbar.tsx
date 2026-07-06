@@ -325,7 +325,7 @@ export const Topbar: React.FC<TopbarProps> = ({
             data-status={statusLabel.toLowerCase()}
             aria-label={`Status: ${statusLabel}`}
           >
-            {statusLabel}
+            {L(`ui.status${statusLabel}`, statusLabel)}
           </span>
 
           <span className="spacer" />

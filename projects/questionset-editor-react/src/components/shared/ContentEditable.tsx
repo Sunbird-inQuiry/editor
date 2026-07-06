@@ -7,6 +7,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from './Icon';
 import { useQuestionStore } from '../../store/question.store';
+import { useEditorStore } from '../../store/editor.store';
 
 export interface ContentEditableProps {
   value?: string;
@@ -101,10 +102,12 @@ export default function ContentEditable({
 
   const [floatTarget, setFloatTarget] = useState<HTMLElement | null>(null);
 
-  // Text direction follows the active content language (ar = rtl,
-  // en/fr/pt = ltr) — applied to ALL content fields, not just the focused one.
+  // Text direction: rtl when either the content language or the UI language
+  // is Arabic — the editor mirrors fully in an Arabic UI.
   const contentLang = useQuestionStore((s) => s.contentLang);
-  const contentDir: 'ltr' | 'rtl' = contentLang === 'ar' ? 'rtl' : 'ltr';
+  const uiLanguage = useEditorStore((s) => s.uiLanguage);
+  const contentDir: 'ltr' | 'rtl' =
+    contentLang === 'ar' || uiLanguage === 'ar' ? 'rtl' : 'ltr';
 
   // Seed content once on mount
   useEffect(() => {

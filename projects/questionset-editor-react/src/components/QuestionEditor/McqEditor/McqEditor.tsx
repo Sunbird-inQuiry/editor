@@ -2,11 +2,13 @@ import React, { useRef, useState } from 'react';
 import { Icon } from '../../shared/Icon';
 import ContentEditable from '../../shared/ContentEditable';
 import { useQuestionStore } from '../../../store/question.store';
+import { useLabels } from '../../../hooks/useLabels';
 
 interface McqEditorProps { readOnly?: boolean; }
 
 export default function McqEditor({ readOnly = false }: McqEditorProps) {
   const { options, setOptions } = useQuestionStore();
+  const L = useLabels();
   const [layout, setLayout] = useState<'vertical' | 'grid' | 'horizontal'>('vertical');
   const nextId = useRef(Date.now());
 
@@ -27,15 +29,15 @@ export default function McqEditor({ readOnly = false }: McqEditorProps) {
   return (
     <div className="ce-ed-sec">
       <div className="ce-ed-lbl">
-        Options <span className="hint">Select the radio to mark the correct answer</span>
+        {L('ui.options', 'Options')} <span className="hint">{L('ui.optionsHint', 'Select the radio to mark the correct answer')}</span>
       </div>
 
       <div className="ce-layout">
-        <span className="lbl">Select layout <Icon name="info" size={14} /></span>
+        <span className="lbl">{L('ui.selectLayout', 'Select layout')} <Icon name="info" size={14} /></span>
         <div className="seg">
           {(['vertical', 'grid', 'horizontal'] as const).map(k => (
             <button key={k} type="button" className={layout === k ? 'on' : ''} onClick={() => setLayout(k)}>
-              {glyph(k)}{k.charAt(0).toUpperCase() + k.slice(1)}
+              {glyph(k)}{L(`ui.${k}`, k.charAt(0).toUpperCase() + k.slice(1))}
             </button>
           ))}
         </div>
@@ -51,13 +53,13 @@ export default function McqEditor({ readOnly = false }: McqEditorProps) {
               <ContentEditable
                 value={o.body}
                 onChange={html => updateBody(o.id, html)}
-                placeholder="Option text…"
+                placeholder={L('ui.optionPh', 'Option text…')}
                 inline
                 disabled={readOnly}
                 bodyClass="opt"
               />
             </div>
-            {o.isCorrect && <span className="badge-correct">Correct</span>}
+            {o.isCorrect && <span className="badge-correct">{L('ui.correct', 'Correct')}</span>}
             <button type="button" className="del" title="Remove option"
               disabled={options.length <= 2 || readOnly}
               onClick={() => removeOption(o.id)}>
@@ -69,7 +71,7 @@ export default function McqEditor({ readOnly = false }: McqEditorProps) {
 
       {!readOnly && (
         <button type="button" className="ce-addrow" onClick={addOption}>
-          <Icon name="plus" size={15} />Add option
+          <Icon name="plus" size={15} />{L('ui.addOption', 'Add option')}
         </button>
       )}
     </div>
