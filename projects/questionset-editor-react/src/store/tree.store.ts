@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { INode } from '../types/editor';
 import { useEditorStore } from './editor.store';
 import { detectNodeKind } from '../utils/nodeKind';
+import { useQuestionStore } from './question.store';
 import type { QuestionType } from '../types/question';
 
 interface TreeState {
@@ -144,14 +145,27 @@ export const useTreeStore = create<TreeState>((set, get) => ({
       isQuestion: kind === 'question',
     });
 
-    // Sync question store when a question node is selected so the editor knows the type
+    // Sync question store when a question node is selected so the editor
+    // knows the type. MUST be synchronous — the previous dynamic import
+    // resolved after the question/v2/read hydration and clobbered the fully
+    // hydrated store with this partial snapshot.
     if (kind === 'question' && node) {
-      import('./question.store').then(({ useQuestionStore }) => {
-        const qType = (node.questionType ?? node.metadata?.questionType) as QuestionType | undefined;
-        useQuestionStore.getState().setActiveQuestion(
-          qType ? { identifier: node.id, name: node.name, objectType: 'Question', primaryCategory: node.primaryCategory ?? '', mimeType: 'application/vnd.sunbird.question', questionType: qType, body: (node.metadata?.body as string) ?? '', editorState: (node.metadata?.editorState as Record<string, unknown>) ?? {}, options: (node.metadata?.options as []) ?? undefined } : null
-        );
-      });
+      const qType = (node.questionType ?? node.metadata?.questionType) as QuestionType | undefined;
+      useQuestionStore.getState().setActiveQuestion(
+        qType
+          ? {
+              identifier: node.id,
+              name: node.name,
+              objectType: 'Question',
+              primaryCategory: node.primaryCategory ?? '',
+              mimeType: 'application/vnd.sunbird.question',
+              questionType: qType,
+              body: (node.metadata?.body as string) ?? '',
+              editorState: (node.metadata?.editorState as Record<string, unknown>) ?? {},
+              options: (node.metadata?.options as []) ?? undefined,
+            }
+          : null,
+      );
     }
 
     set({ selectedNodeId: id, breadcrumb, activeNodeMeta });
@@ -228,7 +242,8 @@ export const useTreeStore = create<TreeState>((set, get) => ({
         primaryCategory: isSection ? rootPrimaryCategory : 'Multiple Choice Question',
         questionType,
         code: newId,
-        name: isSection ? 'Untitled Section' : 'Untitled Question',
+        // Questions get NO default title — it must be authored in Details.
+        ...(isSection ? { name: 'Untitled Section' } : {}),
         visibility: 'Parent',
       },
     };

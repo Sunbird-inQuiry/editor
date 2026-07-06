@@ -5,6 +5,7 @@ import type { EditorMode, ToolbarAction } from '../../types/editor';
 import { QUESTION_TYPE_LABELS, type QuestionType } from '../../types/question';
 import { useEditorStore } from '../../store/editor.store';
 import { useTreeStore } from '../../store/tree.store';
+import { useQuestionStore } from '../../store/question.store';
 import { useUiStore } from '../../store/ui.store';
 import { isEditingAllowed } from '../../utils/context';
 import { telemetryImpression } from '../../utils/telemetry';
@@ -73,7 +74,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   const { frameworkTerms } = useFramework();
   // Hydrate the selected question from question/v2/read (old-editor parity —
   // hierarchy responses don't embed editorState/options/solutions).
-  useQuestionRead();
+  const { isFetching: isQuestionLoading } = useQuestionRead();
 
   const storeEditorMode = useEditorStore((s) => s.editorMode);
   const showPreview = useEditorStore((s) => s.showPreview);
@@ -118,6 +119,10 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   // Sync title + reset state on node change
   // Also auto-open inline editor if this node was just created via type picker
   useEffect(() => {
+    // A question save swaps node ids (temp → uuid → do_), which changes
+    // selectedNodeId mid-save — keep the editor open until save completes.
+    if (useQuestionStore.getState().isSaving) return;
+
     setTitleValue((activeNodeMeta?.name as string) ?? '');
     setIsTitleEditing(false);
     setActiveTab(isCurrentNodeQuestion ? 'question' : 'details');
@@ -350,6 +355,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                 {isCurrentNodeQuestion && activeTab === 'question' && (
                   <div className="ce-qdetail">
                     <QuestionDetail
+                      isLoading={isQuestionLoading}
                       node={useTreeStore.getState().getNodeById(selectedNodeId ?? '') ?? { id: selectedNodeId ?? '', identifier: selectedNodeId ?? '', name: '' }}
                       onOpenEditor={() => setInlineEditorOpen(true)}
                       onRemove={() => openModal('confirmDelete', { nodeId: selectedNodeId })}
@@ -358,7 +364,8 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   </div>
                 )}
 
-                {/* ── Question: meta/details tab ── */}
+                {/* ── Question: meta/details tab — read-only view; details are
+                     authored inside the question editor's Details section ── */}
                 {isCurrentNodeQuestion && activeTab === 'meta' && (
                   <div className="ce-tabbody">
                     <SparkMetaForm
@@ -366,7 +373,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                       values={activeNodeMeta as Record<string, unknown>}
                       onChange={handleFormChange}
                       onValidityChange={handleFormValidityChange}
-                      readOnly={isReadOnly}
+                      readOnly
                       frameworkTerms={frameworkTerms}
                     />
                   </div>

@@ -336,8 +336,8 @@ export function useSaveQuestion() {
   const { selectedNodeId, updateNode, replaceNodeId, treeData } = useTreeStore();
   const { save: saveHierarchy }                         = useSaveHierarchy();
 
-  const save = useCallback(async () => {
-    if (!questionType || !selectedNodeId) return;
+  const save = useCallback(async (): Promise<boolean> => {
+    if (!questionType || !selectedNodeId) return false;
 
     const channel         = config?.context?.channel   ?? '';
     const createdBy       = getUserId(config?.context);
@@ -445,6 +445,7 @@ export function useSaveQuestion() {
           editorState: {
             ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
             ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
+            ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           },
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
@@ -485,8 +486,9 @@ export function useSaveQuestion() {
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
-          ...(questionType === 'mcq' || questionType === 'ftb' || Object.keys(metadataHints).length
-            ? { hints: metadataHints } : {}),
+          // hints key only when a hint actually exists — no empty {} with a
+          // dangling outcomeDeclaration.hint reference.
+          ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
@@ -494,7 +496,11 @@ export function useSaveQuestion() {
               type: 'integer',
               defaultValue: effectiveMaxScore,
             },
-            hint: { cardinality: 'single', type: 'string', defaultValue: hintUuid },
+            hint: {
+              cardinality: 'single',
+              type: 'string',
+              defaultValue: Object.keys(metadataHints).length ? hintUuid : '',
+            },
           },
           solutions: metadataSolutions,
           createdBy,
@@ -521,7 +527,9 @@ export function useSaveQuestion() {
         if (await saveHierarchy()) {
           notifySuccess('Question saved');
           useEditorStore.getState().eventHandlers.onQuestionSaved?.({ identifier: selectedNodeId, ...questionMeta });
+          return true;
         }
+        return false;
       } else {
         // ── New question — build UUID + full metadata, create via hierarchy ──
         const questionUuid = genUuid();
@@ -532,6 +540,7 @@ export function useSaveQuestion() {
           editorState: {
             ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
             ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
+            ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           },
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
@@ -572,8 +581,9 @@ export function useSaveQuestion() {
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
-          ...(questionType === 'mcq' || questionType === 'ftb' || Object.keys(metadataHints).length
-            ? { hints: metadataHints } : {}),
+          // hints key only when a hint actually exists — no empty {} with a
+          // dangling outcomeDeclaration.hint reference.
+          ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
@@ -581,7 +591,11 @@ export function useSaveQuestion() {
               type: 'integer',
               defaultValue: effectiveMaxScore,
             },
-            hint: { cardinality: 'single', type: 'string', defaultValue: hintUuid },
+            hint: {
+              cardinality: 'single',
+              type: 'string',
+              defaultValue: Object.keys(metadataHints).length ? hintUuid : '',
+            },
           },
           solutions: metadataSolutions,
           createdBy,
@@ -610,11 +624,14 @@ export function useSaveQuestion() {
         if (await saveHierarchy()) {
           notifySuccess('Question created');
           useEditorStore.getState().eventHandlers.onQuestionSaved?.({ identifier: questionUuid, ...questionMeta });
+          return true;
         }
+        return false;
       }
     } catch (e) {
       console.error('[useSaveQuestion] save failed:', e);
       notifyError(apiErrorMessage(e, 'Failed to save question. Please try again.'));
+      return false;
     } finally {
       setIsSaving(false);
     }

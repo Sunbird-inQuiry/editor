@@ -369,6 +369,7 @@ export const Topbar: React.FC<TopbarProps> = ({
             className="ce-btn ghost"
             type="button"
             onClick={() => emit('preview')}
+            disabled={isSaving}
             title="Preview question set"
           >
             <Icon name="play" size={15} />
@@ -394,7 +395,7 @@ export const Topbar: React.FC<TopbarProps> = ({
               className="ce-btn primary"
               type="button"
               onClick={() => setShowConfirmReview(true)}
-              disabled={buttonLoaders.saveContent}
+              disabled={buttonLoaders.saveContent || isSaving}
             >
               <Icon name="send" size={15} />
               {L('button_labels.submit_collection_btn_label', 'Send for Review')}

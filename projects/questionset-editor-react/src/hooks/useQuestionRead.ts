@@ -5,6 +5,7 @@ import { useEditorStore } from '../store/editor.store';
 import { useTreeStore } from '../store/tree.store';
 import { useQuestionStore } from '../store/question.store';
 import { normalizeQuestionRead } from '../utils/questionRead';
+import { notifyError, apiErrorMessage } from '../utils/notify';
 
 /**
  * Reads the selected question individually from `question/v2/read`, the way
@@ -30,14 +31,24 @@ export function useQuestionRead() {
     [questionFormConfig],
   );
 
-  // temp- questions only exist client-side; nothing to read yet.
-  const enabled = !!selectedNodeId && isQuestion && !selectedNodeId.startsWith('temp-');
+  // A question is readable only once the backend has assigned its do_ id —
+  // temp-/client-uuid ids exist purely client-side during creation.
+  const enabled = !!selectedNodeId && isQuestion && selectedNodeId.startsWith('do_');
 
   const query = useQuery({
     queryKey: ['question-read', selectedNodeId, editorMode],
     queryFn: () => readQuestion(selectedNodeId!, extraFields),
     enabled,
+    retry: 1,
   });
+
+  // Read failed — surface the server error and fall back to the root node.
+  useEffect(() => {
+    if (!query.error || !enabled) return;
+    notifyError(apiErrorMessage(query.error, 'Failed to load the question.'));
+    const rootId = useTreeStore.getState().treeData[0]?.id;
+    if (rootId) useTreeStore.getState().selectNode(rootId);
+  }, [query.error, enabled]);
 
   useEffect(() => {
     const raw = query.data;
