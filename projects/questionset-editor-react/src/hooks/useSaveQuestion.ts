@@ -331,16 +331,16 @@ export function useSaveQuestion() {
     setIsDirty, setIsSaving,
   } = useQuestionStore();
 
-  const config                                          = useEditorStore((s) => s.editorConfig);
+  const config = useEditorStore((s) => s.editorConfig);
   const { selectedNodeId, updateNode, replaceNodeId, treeData } = useTreeStore();
-  const { save: saveHierarchy }                         = useSaveHierarchy();
+  const { save: saveHierarchy } = useSaveHierarchy();
 
   const save = useCallback(async (): Promise<boolean> => {
     if (!questionType || !selectedNodeId) return false;
 
-    const channel         = config?.context?.channel   ?? '';
-    const createdBy       = getUserId(config?.context);
-    const framework       = config?.context?.framework ?? '';
+    const channel = config?.context?.channel ?? '';
+    const createdBy = getUserId(config?.context);
+    const framework = config?.context?.framework ?? '';
     const primaryCategory = PRIMARY_CATEGORY_MAP[questionType] ?? 'Multiple Choice Question';
 
     // Details-form values (childMetadata: name/Marks/…) live in treeCache —
@@ -356,13 +356,13 @@ export function useSaveQuestion() {
     // from the details form.
     const blankCount =
       questionType === 'ftb' ? parseBlanks(questionBody).length :
-      questionType === 'mtf' ? matchPairs.length : 0;
+        questionType === 'mtf' ? matchPairs.length : 0;
     const effectiveMaxScore =
       questionType === 'ftb' && blankCount > 0 ? blankCount :
-      questionType === 'mtf' ? (isPartialScore && blankCount > 0 ? blankCount : 1) :
-      questionType === 'seq' ? (isPartialScore && sequence.length > 0 ? sequence.length : 1) :
-      questionType === 'reo' ? 1 :
-      (Number.isFinite(formMarks) && formMarks > 0 ? formMarks : (maxScore ?? 1));
+        questionType === 'mtf' ? (isPartialScore && blankCount > 0 ? blankCount : 1) :
+          questionType === 'seq' ? (isPartialScore && sequence.length > 0 ? sequence.length : 1) :
+            questionType === 'reo' ? 1 :
+              (Number.isFinite(formMarks) && formMarks > 0 ? formMarks : (maxScore ?? 1));
 
     const hasInteractions = ['mcq', 'ftb', 'mtf', 'seq', 'reo', 'boolean'].includes(questionType);
 
@@ -434,14 +434,15 @@ export function useSaveQuestion() {
         // Old editor always sends full metadata in nodesModified for both new
         // and modified questions — same field set, isNew:false for existing.
         const questionMeta: Record<string, unknown> = {
-          mimeType:    'application/vnd.sunbird.question',
-          media:       questionMedia,
+          mimeType: 'application/vnd.sunbird.question',
+          media: questionMedia,
           editorState: {
             ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
             ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
+            ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           },
-          body:        buildBodyHtml(questionType, questionBody),
-          answer:      buildAnswerHtml(questionType, options, answerText),
+          body: buildBodyHtml(questionType, questionBody),
+          answer: buildAnswerHtml(questionType, options, answerText),
           ...(questionType === 'mcq' ? { templateId: 'mcq-vertical' } : {}),
           ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
           ...(questionType === 'ftb' ? {
@@ -468,9 +469,9 @@ export function useSaveQuestion() {
             scoringMode: 'responseProcessing',
             responseProcessing: { template: 'MATCH_CORRECT' },
           } : {}),
-          maxScore:    effectiveMaxScore,
-          name:        questionName,
-          qType:       Q_TYPE[questionType] ?? 'MCQ',
+          maxScore: effectiveMaxScore,
+          name: questionName,
+          qType: Q_TYPE[questionType] ?? 'MCQ',
           primaryCategory,
           // Old editor sends interaction fields only for interactive types —
           // SA payloads carry just interactions:{} (no interactionTypes/
@@ -480,8 +481,9 @@ export function useSaveQuestion() {
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
-          ...(questionType === 'mcq' || questionType === 'boolean' || questionType === 'ftb' || Object.keys(metadataHints).length
-            ? { hints: metadataHints } : {}),
+          // hints key only when a hint actually exists — no empty {} with a
+          // dangling outcomeDeclaration.hint reference.
+          ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
@@ -489,7 +491,11 @@ export function useSaveQuestion() {
               type: 'integer',
               defaultValue: effectiveMaxScore,
             },
-            hint: { cardinality: 'single', type: 'string', defaultValue: hintUuid },
+            hint: {
+              cardinality: 'single',
+              type: 'string',
+              defaultValue: Object.keys(metadataHints).length ? hintUuid : '',
+            },
           },
           solutions: metadataSolutions,
           createdBy,
@@ -512,14 +518,15 @@ export function useSaveQuestion() {
         const questionUuid = genUuid();
 
         const questionMeta: Record<string, unknown> = {
-          mimeType:    'application/vnd.sunbird.question',
-          media:       questionMedia,
+          mimeType: 'application/vnd.sunbird.question',
+          media: questionMedia,
           editorState: {
             ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
             ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
+            ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           },
-          body:        buildBodyHtml(questionType, questionBody),
-          answer:      buildAnswerHtml(questionType, options, answerText),
+          body: buildBodyHtml(questionType, questionBody),
+          answer: buildAnswerHtml(questionType, options, answerText),
           ...(questionType === 'mcq' ? { templateId: 'mcq-vertical' } : {}),
           ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
           ...(questionType === 'ftb' ? {
@@ -546,9 +553,9 @@ export function useSaveQuestion() {
             scoringMode: 'responseProcessing',
             responseProcessing: { template: 'MATCH_CORRECT' },
           } : {}),
-          maxScore:    effectiveMaxScore,
-          name:        questionName,
-          qType:       Q_TYPE[questionType] ?? 'MCQ',
+          maxScore: effectiveMaxScore,
+          name: questionName,
+          qType: Q_TYPE[questionType] ?? 'MCQ',
           primaryCategory,
           // Old editor sends interaction fields only for interactive types —
           // SA payloads carry just interactions:{} (no interactionTypes/
@@ -558,8 +565,9 @@ export function useSaveQuestion() {
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
-          ...(questionType === 'mcq' || questionType === 'boolean' || questionType === 'ftb' || Object.keys(metadataHints).length
-            ? { hints: metadataHints } : {}),
+          // hints key only when a hint actually exists — no empty {} with a
+          // dangling outcomeDeclaration.hint reference.
+          ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
@@ -567,7 +575,11 @@ export function useSaveQuestion() {
               type: 'integer',
               defaultValue: effectiveMaxScore,
             },
-            hint: { cardinality: 'single', type: 'string', defaultValue: hintUuid },
+            hint: {
+              cardinality: 'single',
+              type: 'string',
+              defaultValue: Object.keys(metadataHints).length ? hintUuid : '',
+            },
           },
           solutions: metadataSolutions,
           createdBy,
