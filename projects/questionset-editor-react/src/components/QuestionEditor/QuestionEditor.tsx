@@ -127,7 +127,7 @@ function HintBlock() {
       <ContentEditable
         value={hintText}
         onChange={setHintText}
-        placeholder="Write a hint that points learners toward the answer…"
+        placeholder={L('ui.hintPh', 'Write a hint that points learners toward the answer…')}
         minHeight={60}
         bodyClass="stem-field"
         disabled={false}
@@ -220,7 +220,7 @@ function SolutionBlock() {
         <ContentEditable
           value={solutionText}
           onChange={setSolutionText}
-          placeholder="Explain the answer — add text, images or equations…"
+          placeholder={L('ui.solutionPh', 'Explain the answer — add text, images or equations…')}
           minHeight={90}
           bodyClass="stem-field"
           disabled={false}
@@ -235,7 +235,7 @@ function SolutionBlock() {
             <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {solutionAsset.name}
             </span>
-            <button type="button" className="ce-btn ghost" onClick={() => setBrowserOpen(true)}>Change</button>
+            <button type="button" className="ce-btn ghost" onClick={() => setBrowserOpen(true)}>{L('ui.change', 'Change')}</button>
             <button type="button" className="ce-btn ghost" onClick={() => setSolutionAsset(null)} title="Remove">
               <Icon name="trash" size={15} />
             </button>
@@ -244,7 +244,9 @@ function SolutionBlock() {
           <button type="button" className="ce-sol-drop" onClick={() => setBrowserOpen(true)}
             style={{ cursor: 'pointer', width: '100%', fontFamily: 'inherit' }}>
             <Icon name={kind === 'video' ? 'video' : 'link'} size={26} />
-            <span>Choose a {kind} from the library or upload one</span>
+            <span>{kind === 'video'
+              ? L('ui.chooseVideo', 'Choose a video from the library or upload one')
+              : L('ui.chooseAudio', 'Choose an audio from the library or upload one')}</span>
           </button>
         )
       )}
@@ -432,7 +434,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
             />
             {type === 'ftb' && (
               <p className="ce-ftb-help">
-                Use square brackets <code>[[ ]]</code> to indicate blanks. The text inside becomes the correct answer.
+                {L('ui.ftbHelp', 'Use square brackets [[ ]] to indicate blanks. The text inside becomes the correct answer.')}
               </p>
             )}
           </div>

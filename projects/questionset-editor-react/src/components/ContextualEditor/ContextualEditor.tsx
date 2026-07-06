@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect, lazy, Suspense, Fragment } from 'react';
+import React, { useState, useCallback, useEffect, lazy, Suspense, Fragment } from 'react';
 import ImagePickerModal from '../shared/ImagePickerModal';
 import { Icon } from '../shared/Icon';
 import type { EditorMode, ToolbarAction } from '../../types/editor';
@@ -114,19 +114,14 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCurrentNodeQuestion, inlineEditorOpen]);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
-  const [isTitleEditing, setIsTitleEditing] = useState(false);
-  const [titleValue, setTitleValue] = useState('');
-  const titleInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync title + reset state on node change
+  // Reset state on node change
   // Also auto-open inline editor if this node was just created via type picker
   useEffect(() => {
     // A question save swaps node ids (temp → uuid → do_), which changes
     // selectedNodeId mid-save — keep the editor open until save completes.
     if (useQuestionStore.getState().isSaving) return;
 
-    setTitleValue((activeNodeMeta?.name as string) ?? '');
-    setIsTitleEditing(false);
     setActiveTab(isCurrentNodeQuestion ? 'question' : 'details');
 
     if (selectedNodeId && selectedNodeId === pendingEditorOpen) {
@@ -136,23 +131,6 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
       setInlineEditorOpen(false);
     }
   }, [selectedNodeId, isCurrentNodeQuestion]);
-
-  // Questionset and section names are renamed via the outline tree / details
-  // form, not the card header — only question titles are editable inline.
-  const titleEditable = !isReadOnly && isCurrentNodeQuestion;
-
-  const commitTitle = useCallback(() => {
-    const trimmed = titleValue.trim();
-    if (selectedNodeId && trimmed && trimmed !== (activeNodeMeta?.name as string)) {
-      updateNode(selectedNodeId, { name: trimmed });
-    }
-    setIsTitleEditing(false);
-  }, [selectedNodeId, titleValue, activeNodeMeta, updateNode]);
-
-  const handleTitleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') { e.preventDefault(); commitTitle(); }
-    else if (e.key === 'Escape') { setTitleValue((activeNodeMeta?.name as string) ?? ''); setIsTitleEditing(false); }
-  }, [commitTitle, activeNodeMeta]);
 
   const handleFormChange = useCallback((code: string, value: unknown) => {
     if (!selectedNodeId) return;
@@ -313,27 +291,9 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   );
                 })()}
                 <div style={{ minWidth: 0 }}>
-                  {isTitleEditing && titleEditable ? (
-                    <input
-                      ref={titleInputRef}
-                      type="text"
-                      className="ce-title-input"
-                      value={titleValue}
-                      onChange={e => setTitleValue(e.target.value)}
-                      onBlur={commitTitle}
-                      onKeyDown={handleTitleKeyDown}
-                      maxLength={200}
-                      autoFocus
-                    />
-                  ) : (
-                    <h1
-                      style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: '-.015em', cursor: titleEditable ? 'text' : 'default', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                      onClick={() => { if (titleEditable) setIsTitleEditing(true); }}
-                      title={titleEditable ? 'Click to edit' : undefined}
-                    >
-                      {titleValue || 'Untitled'}
-                    </h1>
-                  )}
+                  <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: '-.015em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {(activeNodeMeta?.name as string) || 'Untitled'}
+                  </h1>
                   {metaSubtitle && <p className="sub">{metaSubtitle}</p>}
                 </div>
               </div>

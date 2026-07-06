@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Icon } from '../../shared/Icon';
 import ContentEditable from '../../shared/ContentEditable';
 import { useQuestionStore } from '../../../store/question.store';
+import { useLabels } from '../../../hooks/useLabels';
 
 interface SeqEditorProps { readOnly?: boolean; }
 interface Item { id: string; value: string; }
 
 export default function SeqEditor({ readOnly = false }: SeqEditorProps) {
+  const L = useLabels();
   // Items live in the question store (sequence: string[]) so useSaveQuestion
   // can serialize them; ids are positional for React keys.
   const sequence = useQuestionStore((s) => s.sequence);
@@ -38,15 +40,15 @@ export default function SeqEditor({ readOnly = false }: SeqEditorProps) {
   return (
     <div className="ce-ed-sec">
       <div className="ce-ed-lbl">
-        Items in correct order <span className="hint">Order here is the answer; learners see them shuffled</span>
+        {L('ui.seqLabel', 'Items in correct order')} <span className="hint">{L('ui.seqHint', 'Order here is the answer; learners see them shuffled')}</span>
       </div>
 
       <div className="ce-layout">
-        <span className="lbl">Select layout <Icon name="info" size={14} /></span>
+        <span className="lbl">{L('ui.selectLayout', 'Select layout')} <Icon name="info" size={14} /></span>
         <div className="seg">
           {(['vertical', 'horizontal'] as const).map(k => (
             <button key={k} type="button" className={layout === k ? 'on' : ''} onClick={() => setLayout(k)}>
-              {glyph(k)}{k.charAt(0).toUpperCase() + k.slice(1)}
+              {glyph(k)}{L(`ui.${k}`, k.charAt(0).toUpperCase() + k.slice(1))}
             </button>
           ))}
         </div>
@@ -58,7 +60,7 @@ export default function SeqEditor({ readOnly = false }: SeqEditorProps) {
             <span className="ord">{i + 1}</span>
             <div style={fieldStyle}>
               <ContentEditable value={it.value} onChange={v => update(it.id, v)}
-                placeholder={`Step ${i + 1}`} inline disabled={readOnly} bodyClass="seqline" />
+                placeholder={`${L('ui.stepPh', 'Step')} ${i + 1}`} inline disabled={readOnly} bodyClass="seqline" />
             </div>
             <button type="button" className="del" title="Remove"
               disabled={items.length <= 2 || readOnly} onClick={() => removeItem(it.id)}>
@@ -71,7 +73,7 @@ export default function SeqEditor({ readOnly = false }: SeqEditorProps) {
       {!readOnly && (
         <div style={{ marginTop: 12 }}>
           <button type="button" className="ce-addrow" onClick={addItem}>
-            <Icon name="plus" size={15} />Add item
+            <Icon name="plus" size={15} />{L('ui.addItem', 'Add item')}
           </button>
         </div>
       )}

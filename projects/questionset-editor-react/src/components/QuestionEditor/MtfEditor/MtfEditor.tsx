@@ -2,10 +2,12 @@ import React, { useEffect } from 'react';
 import { Icon } from '../../shared/Icon';
 import ContentEditable from '../../shared/ContentEditable';
 import { useQuestionStore } from '../../../store/question.store';
+import { useLabels } from '../../../hooks/useLabels';
 
 interface MtfEditorProps { readOnly?: boolean; }
 
 export default function MtfEditor({ readOnly = false }: MtfEditorProps) {
+  const L = useLabels();
   // Pairs live in the question store so useSaveQuestion can serialize them.
   const pairs = useQuestionStore((s) => s.matchPairs);
   const setMatchPairs = useQuestionStore((s) => s.setMatchPairs);
@@ -35,11 +37,11 @@ export default function MtfEditor({ readOnly = false }: MtfEditorProps) {
   return (
     <div className="ce-ed-sec">
       <div className="ce-ed-lbl">
-        Matching pairs <span className="hint">Left items are shuffled for the learner</span>
+        {L('ui.matchingPairs', 'Matching pairs')} <span className="hint">{L('ui.mtfHint', 'Left items are shuffled for the learner')}</span>
       </div>
 
       <div className="ce-match-head">
-        <span>Item</span><span /><span>Match</span><span />
+        <span>{L('ui.item', 'Item')}</span><span /><span>{L('ui.match', 'Match')}</span><span />
       </div>
 
       {pairs.map(p => (
@@ -47,14 +49,14 @@ export default function MtfEditor({ readOnly = false }: MtfEditorProps) {
           <div className="ce-pair-fld">
             <div style={fieldStyle}>
               <ContentEditable value={p.left} onChange={v => update(p.id, 'left', v)}
-                placeholder="Left item" inline disabled={readOnly} bodyClass="cell" />
+                placeholder={L('ui.leftItemPh', 'Left item')} inline disabled={readOnly} bodyClass="cell" />
             </div>
           </div>
           <span className="link"><Icon name="link" size={18} /></span>
           <div className="ce-pair-fld">
             <div style={fieldStyle}>
               <ContentEditable value={p.right} onChange={v => update(p.id, 'right', v)}
-                placeholder="Correct match" inline disabled={readOnly} bodyClass="cell" />
+                placeholder={L('ui.matchPh', 'Correct match')} inline disabled={readOnly} bodyClass="cell" />
             </div>
           </div>
           <button type="button" className="del" title="Remove pair"
@@ -67,7 +69,7 @@ export default function MtfEditor({ readOnly = false }: MtfEditorProps) {
       {!readOnly && (
         <div style={{ marginTop: 4 }}>
           <button type="button" className="ce-addrow" onClick={addPair}>
-            <Icon name="plus" size={15} />Add pair
+            <Icon name="plus" size={15} />{L('ui.addPair', 'Add pair')}
           </button>
         </div>
       )}
