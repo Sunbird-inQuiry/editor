@@ -321,7 +321,8 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
     if (!isReadOnly && (isDirty || isUnsavedNew)) setConfirmBackOpen(true);
     else onBack?.();
   };
-  const handleSave = async () => { await save(); onBack?.(); };
+  // Navigate back to the set only when the creation/update succeeded.
+  const handleSave = async () => { if (await save()) onBack?.(); };
 
   return (
     <div className="ce-ed">
@@ -349,7 +350,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
           {/* Question stem */}
           <div className="ce-ed-sec ce-ed-stem">
             <div className="ce-ed-lbl">
-              Question stem
+              Question
               <span className="hint">{stemHint}</span>
             </div>
             <ContentEditable

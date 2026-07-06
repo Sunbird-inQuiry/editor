@@ -31,8 +31,14 @@ export function useQuestionRead() {
     [questionFormConfig],
   );
 
-  // temp- questions only exist client-side; nothing to read yet.
-  const enabled = !!selectedNodeId && isQuestion && !selectedNodeId.startsWith('temp-');
+  // temp- ids and client-generated UUIDs (a new question mid-creation, before
+  // the backend assigns its do_ id) only exist client-side — nothing to read.
+  const CLIENT_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const enabled =
+    !!selectedNodeId &&
+    isQuestion &&
+    !selectedNodeId.startsWith('temp-') &&
+    !CLIENT_UUID.test(selectedNodeId);
 
   const query = useQuery({
     queryKey: ['question-read', selectedNodeId, editorMode],
