@@ -360,7 +360,7 @@ export const Topbar: React.FC<TopbarProps> = ({
               title="View reviewer feedback"
             >
               <Icon name="info" size={15} />
-              Reviewer feedback
+              {L('ui.reviewerFeedback', 'Reviewer feedback')}
             </button>
           )}
 
@@ -481,7 +481,7 @@ export const Topbar: React.FC<TopbarProps> = ({
           >
             <div style={{ display: 'flex', alignItems: 'center', padding: '20px 24px 16px' }}>
               <span style={{ fontWeight: 800, fontSize: 18, flex: 1, color: 'var(--sb-text)' }}>
-                Reviewer feedback
+                {L('ui.reviewerFeedback', 'Reviewer feedback')}
               </span>
               <button
                 type="button"

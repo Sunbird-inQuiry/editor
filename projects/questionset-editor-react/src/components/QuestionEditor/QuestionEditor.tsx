@@ -7,6 +7,7 @@ import { useSaveQuestion } from '../../hooks/useSaveQuestion';
 import { useEditorStore } from '../../store/editor.store';
 import { getUserId, isEditingAllowed } from '../../utils/context';
 import { labelFrom } from '../../utils/labels';
+import { useLabels } from '../../hooks/useLabels';
 import SparkMetaForm from '../SparkMetaForm/SparkMetaForm';
 import { useFramework } from '../../hooks/useFramework';
 import ImagePickerModal from '../shared/ImagePickerModal';
@@ -53,19 +54,20 @@ function ConfigBlock({ type }: { type: QuestionType | null }) {
   const anyOrder    = useQuestionStore((s) => s.evalUnordered);
   const setPartial  = useQuestionStore((s) => s.setIsPartialScore);
   const setAnyOrder = useQuestionStore((s) => s.setEvalUnordered);
+  const L = useLabels();
   const hasPartial  = type === 'seq' || type === 'ftb' || type === 'mtf';
   const hasAnyOrder = type === 'ftb';
   if (!hasPartial && !hasAnyOrder) return null;
 
   return (
     <div className="ce-cfg">
-      <div className="ce-cfg-ttl">Configuration</div>
+      <div className="ce-cfg-ttl">{L('ui.configuration', 'Configuration')}</div>
       {hasPartial && (
         <label className="ce-cfg-row" onClick={() => setPartial(!partial)}>
           <input type="checkbox" className="sb-check" checked={partial} readOnly />
           <span className="t">
-            Partial scoring
-            <em>Award marks for each correct response, not all-or-nothing</em>
+            {L('ui.partialScoring', 'Partial scoring')}
+            <em>{L('ui.partialScoringDesc', 'Award marks for each correct response, not all-or-nothing')}</em>
           </span>
         </label>
       )}
@@ -73,8 +75,8 @@ function ConfigBlock({ type }: { type: QuestionType | null }) {
         <label className="ce-cfg-row" onClick={() => setAnyOrder(!anyOrder)}>
           <input type="checkbox" className="sb-check" checked={anyOrder} readOnly />
           <span className="t">
-            Allow answers in any order
-            <em>Blanks are evaluated without regard to position</em>
+            {L('ui.anyOrder', 'Allow answers in any order')}
+            <em>{L('ui.anyOrderDesc', 'Blanks are evaluated without regard to position')}</em>
           </span>
         </label>
       )}
@@ -89,6 +91,7 @@ function ConfigBlock({ type }: { type: QuestionType | null }) {
 function HintBlock() {
   const hintText = useQuestionStore((st) => st.hintText);
   const setHintText = useQuestionStore((st) => st.setHintText);
+  const L = useLabels();
   const [open, setOpen] = useState(false);
 
   if (!open && !hintText) {
@@ -96,8 +99,8 @@ function HintBlock() {
       <button type="button" className="ce-sol-add" onClick={() => setOpen(true)}>
         <span className="ic"><Icon name="plus" size={17} /></span>
         <span className="tx">
-          <b>Add a hint</b>
-          <em>Optional — a nudge shown to learners on request</em>
+          <b>{L('ui.addHint', 'Add a hint')}</b>
+          <em>{L('ui.addHintDesc', 'Optional — a nudge shown to learners on request')}</em>
         </span>
       </button>
     );
@@ -110,14 +113,14 @@ function HintBlock() {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
         <Icon name="info" size={18} style={{ color: 'var(--accent-deep)', flexShrink: 0 }} />
-        <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>Hint</span>
+        <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>{L('ui.hint', 'Hint')}</span>
         <span style={{
           fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase',
           border: '1.5px solid var(--sb-border)', borderRadius: 999, padding: '3px 10px',
           color: 'var(--sb-text-muted)', background: '#fff',
-        }}>Optional</span>
+        }}>{L('ui.optional', 'Optional')}</span>
         <button type="button" onClick={() => { setHintText(''); setOpen(false); }} title="Remove hint"
-          style={{ marginLeft: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--sb-text-faint)', display: 'grid', placeItems: 'center', width: 28, height: 28, borderRadius: 8 }}>
+          style={{ marginInlineStart: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--sb-text-faint)', display: 'grid', placeItems: 'center', width: 28, height: 28, borderRadius: 8 }}>
           <Icon name="x" size={18} />
         </button>
       </div>
@@ -145,6 +148,7 @@ function SolutionBlock() {
   const setSolutionText = useQuestionStore((st) => st.setSolutionText);
   const setSolutionAsset = useQuestionStore((st) => st.setSolutionAsset);
   const clearSolution   = useQuestionStore((st) => st.clearSolution);
+  const L = useLabels();
 
   const editorConfig = useEditorStore((st) => st.editorConfig);
   const channel = editorConfig?.context?.channel ?? '';
@@ -159,8 +163,8 @@ function SolutionBlock() {
       <button type="button" className="ce-sol-add" onClick={() => setSolutionType('html')}>
         <span className="ic"><Icon name="plus" size={17} /></span>
         <span className="tx">
-          <b>Add a solution</b>
-          <em>Optional — explain the answer with text, video or audio</em>
+          <b>{L('ui.addSolution', 'Add a solution')}</b>
+          <em>{L('ui.addSolutionDesc', 'Optional — explain the answer with text, video or audio')}</em>
         </span>
       </button>
     );
@@ -174,21 +178,25 @@ function SolutionBlock() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
         <Icon name="info" size={18} style={{ color: 'var(--accent-deep)', flexShrink: 0 }} />
-        <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>Solution</span>
+        <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>{L('ui.solution', 'Solution')}</span>
         <span style={{
           fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase',
           border: '1.5px solid var(--sb-border)', borderRadius: 999, padding: '3px 10px',
           color: 'var(--sb-text-muted)', background: '#fff',
-        }}>Optional</span>
+        }}>{L('ui.optional', 'Optional')}</span>
         <button type="button" onClick={clearSolution} title="Remove solution"
-          style={{ marginLeft: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--sb-text-faint)', display: 'grid', placeItems: 'center', width: 28, height: 28, borderRadius: 8 }}>
+          style={{ marginInlineStart: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--sb-text-faint)', display: 'grid', placeItems: 'center', width: 28, height: 28, borderRadius: 8 }}>
           <Icon name="x" size={18} />
         </button>
       </div>
 
       {/* Type tabs — html (Text+Image) / video / audio, like the old editor */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
-        {([['html', 'Text + Image', 'image'], ['video', 'Video', 'video'], ['audio', 'Audio', 'link']] as const).map(([k, label, icon]) => {
+        {([
+          ['html', L('ui.textImage', 'Text + Image'), 'image'],
+          ['video', L('ui.video', 'Video'), 'video'],
+          ['audio', L('ui.audio', 'Audio'), 'link'],
+        ] as const).map(([k, label, icon]) => {
           const active = kind === k;
           return (
             <button key={k} type="button" onClick={() => { if (!active) setSolutionType(k); }}
@@ -379,7 +387,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   return (
     <div className="ce-ed">
       <button className="ce-ed-back" type="button" onClick={handleBack}>
-        <Icon name="arrow-left" size={16} />Back to set
+        <Icon name="arrow-left" size={16} />{L('ui.backToSet', 'Back to set')}
       </button>
 
       <div className="ce-ed-card">
@@ -518,7 +526,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
           >
             <div style={{ display: 'flex', alignItems: 'center', padding: '20px 24px 16px' }}>
               <span style={{ fontWeight: 800, fontSize: 18, flex: 1, color: 'var(--sb-text)' }}>
-                Unsaved question
+                {L('ui.unsavedQuestion', 'Unsaved question')}
               </span>
               <button
                 type="button"

@@ -152,10 +152,13 @@ export function QuestionsetEditor(props: QuestionsetEditorProps) {
   const config: IEditorConfig = editorConfig as IEditorConfig;
   const events: IEditorEvents = { onToolbarEvent, onQuestionSaved, onHierarchySaved, onError };
 
+  // Whole-editor layout direction follows the UI language (ar = rtl).
+  const uiLanguage = useEditorStore((s) => s.uiLanguage);
+
   return (
     <EditorErrorBoundary onError={onError}>
       <QueryClientProvider client={queryClient}>
-        <div className={styles.root}>
+        <div className={styles.root} dir={uiLanguage === 'ar' ? 'rtl' : 'ltr'} lang={uiLanguage}>
           <Toaster
             position="top-right"
             toastOptions={{

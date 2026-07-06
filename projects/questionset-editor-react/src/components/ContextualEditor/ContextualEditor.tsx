@@ -11,6 +11,7 @@ import { isEditingAllowed } from '../../utils/context';
 import { telemetryImpression } from '../../utils/telemetry';
 import { useFramework } from '../../hooks/useFramework';
 import { useQuestionRead } from '../../hooks/useQuestionRead';
+import { useLabels } from '../../hooks/useLabels';
 import SparkMetaForm from '../SparkMetaForm/SparkMetaForm';
 import QuestionDetail from '../QuestionDetail/QuestionDetail';
 
@@ -72,6 +73,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   hasContent = true,
 }) => {
   const { frameworkTerms } = useFramework();
+  const L = useLabels();
   // Hydrate the selected question from question/v2/read (old-editor parity —
   // hierarchy responses don't embed editorState/options/solutions).
   const { isFetching: isQuestionLoading } = useQuestionRead();
@@ -343,7 +345,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                     aria-selected={activeTab === tab.key}
                     onClick={() => { setActiveTab(tab.key); setInlineEditorOpen(false); }}
                   >
-                    {tab.label}
+                    {L(`ui.${tab.key}`, tab.label)}
                   </button>
                 ))}
               </div>
