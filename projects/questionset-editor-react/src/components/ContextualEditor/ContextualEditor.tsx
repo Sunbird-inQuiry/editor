@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect, lazy, Suspense, Fragment } from 'react';
+import React, { useState, useCallback, useEffect, lazy, Suspense, Fragment } from 'react';
 import ImagePickerModal from '../shared/ImagePickerModal';
 import { Icon } from '../shared/Icon';
 import type { EditorMode, ToolbarAction } from '../../types/editor';
@@ -8,8 +8,10 @@ import { useTreeStore } from '../../store/tree.store';
 import { useQuestionStore } from '../../store/question.store';
 import { useUiStore } from '../../store/ui.store';
 import { isEditingAllowed } from '../../utils/context';
+import { telemetryImpression } from '../../utils/telemetry';
 import { useFramework } from '../../hooks/useFramework';
 import { useQuestionRead } from '../../hooks/useQuestionRead';
+import { useLabels } from '../../hooks/useLabels';
 import SparkMetaForm from '../SparkMetaForm/SparkMetaForm';
 import QuestionDetail from '../QuestionDetail/QuestionDetail';
 
@@ -71,6 +73,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   hasContent = true,
 }) => {
   const { frameworkTerms } = useFramework();
+  const L = useLabels();
   // Hydrate the selected question from question/v2/read (old-editor parity —
   // hierarchy responses don't embed editorState/options/solutions).
   const { isFetching: isQuestionLoading } = useQuestionRead();
@@ -106,23 +109,19 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   // Lock hierarchy + topbar while the inline question editor is open.
   useEffect(() => {
     setQuestionEditorOpen(isCurrentNodeQuestion && inlineEditorOpen);
+    if (isCurrentNodeQuestion && inlineEditorOpen) telemetryImpression('question_editor');
     return () => setQuestionEditorOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCurrentNodeQuestion, inlineEditorOpen]);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
-  const [isTitleEditing, setIsTitleEditing] = useState(false);
-  const [titleValue, setTitleValue] = useState('');
-  const titleInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync title + reset state on node change
+  // Reset state on node change
   // Also auto-open inline editor if this node was just created via type picker
   useEffect(() => {
     // A question save swaps node ids (temp → uuid → do_), which changes
     // selectedNodeId mid-save — keep the editor open until save completes.
     if (useQuestionStore.getState().isSaving) return;
 
-    setTitleValue((activeNodeMeta?.name as string) ?? '');
-    setIsTitleEditing(false);
     setActiveTab(isCurrentNodeQuestion ? 'question' : 'details');
 
     if (selectedNodeId && selectedNodeId === pendingEditorOpen) {
@@ -132,19 +131,6 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
       setInlineEditorOpen(false);
     }
   }, [selectedNodeId, isCurrentNodeQuestion]);
-
-  const commitTitle = useCallback(() => {
-    const trimmed = titleValue.trim();
-    if (selectedNodeId && trimmed && trimmed !== (activeNodeMeta?.name as string)) {
-      updateNode(selectedNodeId, { name: trimmed });
-    }
-    setIsTitleEditing(false);
-  }, [selectedNodeId, titleValue, activeNodeMeta, updateNode]);
-
-  const handleTitleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') { e.preventDefault(); commitTitle(); }
-    else if (e.key === 'Escape') { setTitleValue((activeNodeMeta?.name as string) ?? ''); setIsTitleEditing(false); }
-  }, [commitTitle, activeNodeMeta]);
 
   const handleFormChange = useCallback((code: string, value: unknown) => {
     if (!selectedNodeId) return;
@@ -183,15 +169,19 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
     if (isCurrentNodeFolder) {
       const node = useTreeStore.getState().getNodeById(selectedNodeId ?? '');
       const count = node?.children?.length ?? 0;
-      return `${count} question${count === 1 ? '' : 's'}`;
+      return `${count} ${count === 1 ? L('ui.questionOne', 'question') : L('ui.questionMany', 'questions')}`;
     }
     if (isCurrentNodeQuestion) {
       const qType = (m.questionType as string) ?? '';
-      const typeLabel = QUESTION_TYPE_LABELS[qType as QuestionType] ?? qType.toUpperCase();
+      const typeKey: Record<string, string> = { mcq: 'Mcq', sa: 'Sa', ftb: 'Ftb', mtf: 'Mtf', seq: 'Seq', reo: 'Reo' };
+      const typeLabel = typeKey[qType]
+        ? L(`ui.type${typeKey[qType]}`, QUESTION_TYPE_LABELS[qType as QuestionType] ?? qType)
+        : (QUESTION_TYPE_LABELS[qType as QuestionType] ?? qType.toUpperCase());
       const score = (m.maxScore as number) ?? 1;
       // Get parent section name from breadcrumb (second-to-last item)
       const sectionName = breadcrumb.length >= 2 ? breadcrumb[breadcrumb.length - 2]?.name : '';
-      return [typeLabel, sectionName, `${score} mark${score === 1 ? '' : 's'}`].filter(Boolean).join(' · ');
+      const marks = `${score} ${score === 1 ? L('ui.markOne', 'mark') : L('ui.markMany', 'marks')}`;
+      return [typeLabel, sectionName, marks].filter(Boolean).join(' · ');
     }
     return '';
   })();
@@ -305,27 +295,9 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   );
                 })()}
                 <div style={{ minWidth: 0 }}>
-                  {isTitleEditing && !isReadOnly ? (
-                    <input
-                      ref={titleInputRef}
-                      type="text"
-                      className="ce-title-input"
-                      value={titleValue}
-                      onChange={e => setTitleValue(e.target.value)}
-                      onBlur={commitTitle}
-                      onKeyDown={handleTitleKeyDown}
-                      maxLength={200}
-                      autoFocus
-                    />
-                  ) : (
-                    <h1
-                      style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: '-.015em', cursor: isReadOnly ? 'default' : 'text', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                      onClick={() => { if (!isReadOnly) setIsTitleEditing(true); }}
-                      title={isReadOnly ? undefined : 'Click to edit'}
-                    >
-                      {titleValue || 'Untitled'}
-                    </h1>
-                  )}
+                  <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: '-.015em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {(activeNodeMeta?.name as string) || 'Untitled'}
+                  </h1>
                   {metaSubtitle && <p className="sub">{metaSubtitle}</p>}
                 </div>
               </div>
@@ -341,7 +313,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                     aria-selected={activeTab === tab.key}
                     onClick={() => { setActiveTab(tab.key); setInlineEditorOpen(false); }}
                   >
-                    {tab.label}
+                    {L(`ui.${tab.key}`, tab.label)}
                   </button>
                 ))}
               </div>
@@ -382,14 +354,14 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   <div className="ce-tabbody">
                     {isCurrentNodeRoot && (
                       <>
-                        <h2 className="ce-secttl">Set Details</h2>
-                        <p className="ce-sectsub">Name, description and instructions shown before the set begins.</p>
+                        <h2 className="ce-secttl">{L('ui.setDetails', 'Set Details')}</h2>
+                        <p className="ce-sectsub">{L('ui.setDetailsSub', 'Name, description and instructions shown before the set begins.')}</p>
                       </>
                     )}
                     {isCurrentNodeFolder && !isCurrentNodeRoot && (
                       <>
-                        <h2 className="ce-secttl">Section Details</h2>
-                        <p className="ce-sectsub">Title and instructions for this section.</p>
+                        <h2 className="ce-secttl">{L('ui.sectionDetails', 'Section Details')}</h2>
+                        <p className="ce-sectsub">{L('ui.sectionDetailsSub', 'Title and instructions for this section.')}</p>
                       </>
                     )}
                     {formConfig && formConfig.length > 0 ? (
@@ -411,8 +383,8 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                 {/* ── Set: audience & curriculum tab ── */}
                 {isCurrentNodeRoot && activeTab === 'audience' && (
                   <div className="ce-tabbody">
-                    <h2 className="ce-secttl">Target Audience</h2>
-                    <p className="ce-sectsub">Curriculum alignment for the intended learners.</p>
+                    <h2 className="ce-secttl">{L('ui.targetAudience', 'Target Audience')}</h2>
+                    <p className="ce-sectsub">{L('ui.targetAudienceSub', 'Curriculum alignment for the intended learners.')}</p>
                     <SparkMetaForm
                       fields={withLicenseOptions(formConfig)}
                       values={activeNodeMeta as Record<string, unknown>}
@@ -430,14 +402,14 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   <div className="ce-tabbody">
                     {isCurrentNodeRoot && (
                       <>
-                        <h2 className="ce-secttl">Behaviour & Scoring</h2>
-                        <p className="ce-sectsub">How the set is timed, attempted and summarised.</p>
+                        <h2 className="ce-secttl">{L('ui.behaviourScoring', 'Behaviour & Scoring')}</h2>
+                        <p className="ce-sectsub">{L('ui.behaviourScoringSub', 'How the set is timed, attempted and summarised.')}</p>
                       </>
                     )}
                     {isCurrentNodeFolder && !isCurrentNodeRoot && (
                       <>
-                        <h2 className="ce-secttl">Section Behaviour</h2>
-                        <p className="ce-sectsub">Controls applied to this section inside the set.</p>
+                        <h2 className="ce-secttl">{L('ui.sectionBehaviour', 'Section Behaviour')}</h2>
+                        <p className="ce-sectsub">{L('ui.sectionBehaviourSub', 'Controls applied to this section inside the set.')}</p>
                       </>
                     )}
                     <SparkMetaForm

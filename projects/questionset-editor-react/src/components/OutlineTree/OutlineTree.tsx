@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Icon } from '../shared/Icon';
+import { useLabels } from '../../hooks/useLabels';
 import { useTreeStore } from '../../store/tree.store';
 import { useEditorStore } from '../../store/editor.store';
 import { useUiStore } from '../../store/ui.store';
@@ -51,8 +52,13 @@ interface ContextMenuProps {
   onDelete: () => void;
 }
 
-const ContextMenu: React.FC<ContextMenuProps> = ({
-  isRoot, isFolder, isEditMode, onClose, onAddSection, onAddQuestion, onDelete,
+const ContextMenu: React.FC<ContextMenuProps> = (props) => {
+  const L = useLabels();
+  return <ContextMenuInner {...props} L={L} />;
+};
+
+const ContextMenuInner: React.FC<ContextMenuProps & { L: (p: string, f: string) => string }> = ({
+  isRoot, isFolder, isEditMode, onClose, onAddSection, onAddQuestion, onDelete, L,
 }) => {
   React.useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -67,7 +73,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     <div
       data-ctxmenu="true"
       style={{
-        position: 'absolute', right: 0, top: '100%', zIndex: 200,
+        position: 'absolute', insetInlineEnd: 0, top: '100%', zIndex: 200,
         background: '#fff', border: '1px solid var(--sb-border)', borderRadius: 12,
         boxShadow: 'var(--sb-shadow-deep)', padding: 6, minWidth: 160,
       }}
@@ -79,7 +85,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           onClick={() => { onAddQuestion(); onClose(); }}
         >
-          <Icon name="plus" size={13} /> Add Question
+          <Icon name="plus" size={13} /> {L('ui.addQuestion', 'Add Question')}
         </button>
       )}
       {isRoot && isEditMode && (
@@ -89,7 +95,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           onClick={() => { onAddSection(); onClose(); }}
         >
-          <Icon name="plus" size={13} /> Add Section
+          <Icon name="plus" size={13} /> {L('ui.addSection', 'Add Section')}
         </button>
       )}
       {!isRoot && isEditMode && (
@@ -99,7 +105,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           onClick={() => { onDelete(); onClose(); }}
         >
-          <Icon name="trash" size={13} /> Delete
+          <Icon name="trash" size={13} /> {L('button_labels.delete_btn_label', 'Delete')}
         </button>
       )}
     </div>
@@ -251,6 +257,7 @@ const TreeNode: React.FC<NodeProps> = ({
 // ---------------------------------------------------------------------------
 
 const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
+  const L = useLabels();
   const treeData = useTreeStore((s) => s.treeData);
   const selectedNodeId = useTreeStore((s) => s.selectedNodeId);
   const selectNode = useTreeStore((s) => s.selectNode);
@@ -318,7 +325,7 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
   return (
     <>
       <div className="ce-tree-head">
-        <span className="lbl">Hierarchy</span>
+        <span className="lbl">{L('ui.hierarchy', 'Hierarchy')}</span>
         <button title="Collapse" onClick={onCollapse} aria-label="Collapse outline">
           <Icon name="panel-left" size={17} />
         </button>
@@ -357,14 +364,14 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
             disabled={addSectionDisabled}
             style={addSectionDisabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
           >
-            <Icon name="plus" size={15} />Add Section
+            <Icon name="plus" size={15} />{L('ui.addSection', 'Add Section')}
           </button>
           <button
             onClick={() => handleAddQuestion(questionParentId ?? rootId)}
             disabled={addQuestionDisabled}
             style={addQuestionDisabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
           >
-            <Icon name="plus" size={15} />Add Question
+            <Icon name="plus" size={15} />{L('ui.addQuestion', 'Add Question')}
           </button>
         </div>
       )}

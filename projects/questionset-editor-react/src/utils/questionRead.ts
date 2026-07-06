@@ -1,5 +1,7 @@
 import type { IQuestion, QuestionType, IOption, IMatchPair, IHint } from '../types/question';
 import { PRIMARY_CATEGORY_MAP, LEGACY_CATEGORY_MAP } from '../types/question';
+import { asI18nMap, readI18n } from './i18nField';
+import type { I18nMap, I18nValue } from './i18nField';
 
 /**
  * Normalizes a raw `question/v2/read` response into the shape the question
@@ -91,7 +93,7 @@ export function normalizeOptions(
       const idx = typeof value['value'] === 'number' ? (value['value'] as number) : index;
       return {
         id: makeId(),
-        body: (value['body'] as string) ?? '',
+        body: readI18n(value['body'] as I18nValue, 'en'),
         value: idx,
         isCorrect: o['answer'] === true || (correctIdx !== undefined && idx === correctIdx),
       };
@@ -176,6 +178,57 @@ function normalizeSolutions(raw: Record<string, unknown>): IQuestion['solutions'
   });
 }
 
+/** Decode all per-language text sources for the store's i18n maps. */
+function buildI18nSource(raw: Record<string, unknown>, editorState: Record<string, unknown>): IQuestion['i18nSource'] {
+  const mapOf = (v: unknown): I18nMap | undefined =>
+    v && typeof v === 'object' && !Array.isArray(v) ? asI18nMap(v as I18nValue) : undefined;
+
+  // Solution: value is {lang: {type, value}} in the newer old-editor format.
+  let solution: I18nMap | undefined;
+  const solutions = Array.isArray(raw['solutions']) && (raw['solutions'] as unknown[]).length
+    ? raw['solutions'] : editorState['solutions'];
+  if (Array.isArray(solutions) && solutions[0]) {
+    const valueMap = asRecord(asRecord(solutions[0])['value']);
+    const out: I18nMap = {};
+    for (const [lang, v] of Object.entries(valueMap)) {
+      const entry = asRecord(v);
+      if (entry['type'] === 'html' && typeof entry['value'] === 'string') out[lang] = entry['value'];
+    }
+    if (Object.keys(out).length) solution = out;
+  }
+
+  // Hint: the entry referenced by outcomeDeclaration.hint.defaultValue.
+  let hint: I18nMap | undefined;
+  const hintId = asRecord(asRecord(raw['outcomeDeclaration'])['hint'])['defaultValue'];
+  const hintEntry = typeof hintId === 'string' ? asRecord(raw['hints'])[hintId] : undefined;
+  if (hintEntry && typeof hintEntry === 'object') hint = asI18nMap(hintEntry as I18nValue);
+
+  const rawOptions = Array.isArray(editorState['options']) ? (editorState['options'] as unknown[]) : [];
+  const optionMaps = rawOptions.map((o) => mapOf(asRecord(asRecord(o)['value'])['body']) ?? {});
+
+  const rawPairs = Array.isArray(editorState['pairs']) ? (editorState['pairs'] as unknown[]) : [];
+
+  // SEQ labels in correctOrder order.
+  let sequence: I18nMap[] | undefined;
+  const correctOrder = editorState['correctOrder'];
+  if (Array.isArray(correctOrder) && correctOrder.length && rawOptions.length) {
+    const byValue = new Map(rawOptions.map((o) => [String(asRecord(o)['value']), asRecord(o)['label']]));
+    sequence = correctOrder.map((v) => mapOf(byValue.get(String(v))) ?? {});
+  }
+
+  return {
+    question: mapOf(editorState['question']),
+    answer: mapOf(editorState['answer']),
+    sentence: mapOf(editorState['sentence']),
+    solution,
+    hint,
+    options: optionMaps.some((m) => Object.keys(m).length) ? optionMaps : undefined,
+    pairsLeft: rawPairs.length ? rawPairs.map((p) => mapOf(asRecord(p)['left']) ?? {}) : undefined,
+    pairsRight: rawPairs.length ? rawPairs.map((p) => mapOf(asRecord(p)['right']) ?? {}) : undefined,
+    sequence,
+  };
+}
+
 export function normalizeQuestionRead(raw: Record<string, unknown>): IQuestion {
   const editorState = asRecord(raw['editorState']);
   const correctIdx = correctResponseIndex(raw);
@@ -202,10 +255,14 @@ export function normalizeQuestionRead(raw: Record<string, unknown>): IQuestion {
     primaryCategory: (raw['primaryCategory'] as string) ?? '',
     mimeType: 'application/vnd.sunbird.question',
     questionType,
-    body: (raw['body'] as string) ?? undefined,
+    body: typeof raw['body'] === 'string' ? raw['body'] : readI18n(raw['body'] as I18nValue, 'en') || undefined,
     editorState: {
       ...editorState,
-      question: (editorState['question'] as string) ?? (raw['body'] as string) ?? '',
+      // Fields may be i18n maps — the store shows the en slot; other
+      // languages are carried in i18nSource below.
+      question: readI18n(editorState['question'] as I18nValue, 'en') || readI18n(raw['body'] as I18nValue, 'en'),
+      answer: readI18n(editorState['answer'] as I18nValue, 'en') || undefined,
+      sentence: readI18n(editorState['sentence'] as I18nValue, 'en') || undefined,
       matchPairs:
         (editorState['matchPairs'] as IMatchPair[]) ??
         normalizePairs(editorState['pairs']) ??
@@ -220,5 +277,6 @@ export function normalizeQuestionRead(raw: Record<string, unknown>): IQuestion {
     solutions: normalizeSolutions(raw),
     media: (raw['media'] as IQuestion['media']) ?? [],
     maxScore,
+    i18nSource: buildI18nSource(raw, editorState),
   };
 }

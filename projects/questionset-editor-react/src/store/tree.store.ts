@@ -15,6 +15,12 @@ interface TreeState {
   selectNode: (id: string) => void;
   updateNode: (id: string, patch: Record<string, unknown>) => void;
   addNode: (parentId: string, type: 'section' | 'question', questionType?: string) => string;
+  /** Link an existing Live question (from the library) into a section —
+   *  returns its id, 'exists' if already in the set, '' on depth limit. */
+  addExistingQuestion: (
+    parentId: string,
+    item: { identifier: string; name?: string; questionType?: string } & Record<string, unknown>,
+  ) => string;
   deleteNode: (id: string) => void;
   reorderChildren: (parentId: string, fromIndex: number, toIndex: number) => void;
   markDirty: () => void;
@@ -249,6 +255,33 @@ export const useTreeStore = create<TreeState>((set, get) => ({
 
     setTimeout(() => get().selectNode(newId), 0);
     return newId;
+  },
+
+  addExistingQuestion: (parentId, item) => {
+    const state = get();
+    // Old editor LINKS an existing Live question into the hierarchy — it is
+    // NOT re-created: no treeCache entry, no isNew; save only lists it in
+    // the section's children.
+    if (bfsFind(state.treeData, item.identifier)) return 'exists';
+
+    const maxDepth = useEditorStore.getState().editorConfig?.config?.maxDepth ?? 3;
+    if (getNodeDepth(state.treeData, parentId) >= maxDepth - 1) return '';
+
+    const node: INode = {
+      id: item.identifier,
+      identifier: item.identifier,
+      name: item.name ?? 'Question',
+      isFolder: false,
+      isQuestion: true,
+      questionType: item.questionType,
+      children: [],
+      parent: parentId,
+      metadata: { ...item, objectType: 'Question' },
+    };
+    set((s) => ({ treeData: insertIntoParent(s.treeData, parentId, node) }));
+    useEditorStore.getState().setIsDirty(true);
+    setTimeout(() => get().selectNode(item.identifier), 0);
+    return item.identifier;
   },
 
   deleteNode: (id) => {

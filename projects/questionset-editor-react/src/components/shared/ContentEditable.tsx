@@ -6,6 +6,8 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from './Icon';
+import { useQuestionStore } from '../../store/question.store';
+import { useEditorStore } from '../../store/editor.store';
 
 export interface ContentEditableProps {
   value?: string;
@@ -100,23 +102,17 @@ export default function ContentEditable({
 
   const [floatTarget, setFloatTarget] = useState<HTMLElement | null>(null);
 
+  // Text direction: rtl when either the content language or the UI language
+  // is Arabic — the editor mirrors fully in an Arabic UI.
+  const contentLang = useQuestionStore((s) => s.contentLang);
+  const uiLanguage = useEditorStore((s) => s.uiLanguage);
+  const contentDir: 'ltr' | 'rtl' =
+    contentLang === 'ar' || uiLanguage === 'ar' ? 'rtl' : 'ltr';
+
   // Seed content once on mount
   useEffect(() => {
     if (ref.current) ref.current.innerHTML = value;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Apply language/direction changes from SharedRichToolbar
-  useEffect(() => {
-    const h = (e: Event) => {
-      const { dir } = (e as CustomEvent).detail as { dir: 'ltr' | 'rtl' };
-      // Only apply to the currently focused field
-      if (ref.current && document.activeElement && ref.current.contains(document.activeElement)) {
-        ref.current.setAttribute('dir', dir);
-      }
-    };
-    document.addEventListener('ce-lang-changed', h);
-    return () => document.removeEventListener('ce-lang-changed', h);
   }, []);
 
   // Sync external value
@@ -154,6 +150,7 @@ export default function ContentEditable({
         contentEditable={!disabled}
         suppressContentEditableWarning
         spellCheck={false}
+        dir={contentDir}
         data-ph={placeholder}
         style={{
           ...(minHeight ? { minHeight } : {}),

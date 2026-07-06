@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { IEditorConfig, EditorMode, IButtonLoaders } from '../types/editor';
 import type { ICategoryField, IParsedCategoryDefinition } from '../api/categoryDefinition';
 import type { IComment } from '../api/comments';
+import { setUiLanguage as buildLabels, type LabelConfig } from '../utils/labels';
 
 interface EditorState {
   editorConfig: IEditorConfig | null;
@@ -24,6 +25,10 @@ interface EditorState {
   rfcChecklist: ICategoryField[] | null;
   reviewComments: IComment[];
   setReviewComments: (comments: IComment[]) => void;
+  /** UI labels — merged label.config.<lang>.json like the old ConfigService. */
+  labels: LabelConfig;
+  uiLanguage: string;
+  setUiLanguage: (lang: string, hostLabels?: Record<string, string>) => void;
   /** License names from composite search (old helper.service.getLicenses). */
   licenses: string[];
   setLicenses: (licenses: string[]) => void;
@@ -79,6 +84,9 @@ export const useEditorStore = create<EditorState>((set) => ({
   reviewChecklist: null,
   rfcChecklist: null,
   reviewComments: [],
+  labels: buildLabels('en'),
+  uiLanguage: 'en',
+  setUiLanguage: (lang, hostLabels) => set({ uiLanguage: lang, labels: buildLabels(lang, hostLabels) }),
   licenses: [],
   setLicenses: (licenses) => set({ licenses }),
   channelData: null,

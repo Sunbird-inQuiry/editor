@@ -6,6 +6,7 @@ import { readHierarchy, readQuestionSet } from '../api/hierarchy';
 import { getCategoryDefinition } from '../api/categoryDefinition';
 import { setApiBaseUrl, setApiSlug } from '../api/client';
 import { getContentId } from '../utils/context';
+import { resolveUiLanguage } from '../utils/labels';
 
 interface UseEditorInitOptions {
   config: IEditorConfig;
@@ -33,6 +34,11 @@ export function useEditorInit({ config, onError }: UseEditorInitOptions) {
 
         setEditorConfig(config);
         setEditorMode(config.config.mode);
+        // UI labels — old ConfigService setLanguage (context lang → app-language).
+        useEditorStore.getState().setUiLanguage(
+          resolveUiLanguage(config.context.uiLanguage),
+          config.context.labels,
+        );
 
         const contentId = getContentId(config.context);
 

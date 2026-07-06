@@ -285,7 +285,9 @@
 
 /* ── Reopen collapsed panel tabs ────────────────────────────── */
 .ce-reopen { position: absolute; top: 78px; z-index: 25; width: 34px; height: 60px; border: 1px solid var(--sb-border); background: #fff; color: var(--sb-text-muted); cursor: pointer; display: grid; place-items: center; box-shadow: var(--sb-shadow-card); }
-.ce-reopen.left { left: 0; border-left: none; border-radius: 0 12px 12px 0; }
+// Logical positioning — sits at the tree's side in both ltr and rtl (Arabic).
+.ce-reopen.left { inset-inline-start: 0; border-inline-start: none; border-radius: 0 12px 12px 0; }
+[dir='rtl'] .ce-reopen.left { border-radius: 12px 0 0 12px; }
 .ce-reopen:hover { color: var(--accent-deep); }
 
 /* ── Checkbox (sb-check) ─────────────────────────────────────── */
@@ -470,7 +472,10 @@
 }
 .re-menu button:hover { background: var(--accent-soft); color: var(--accent-deep); }
 /* contenteditable body */
-.re-body { outline: none; }
+.re-body { outline: none; text-align: start; }
+/* Authored content must span the field and follow its direction — undo the
+   global `p { max-inline-size: 70ch }` reset and any host-page text-align. */
+.re-body p, .re-body li, .re-body figcaption { max-inline-size: none; text-align: inherit; }
 .re-body:empty::before { content: attr(data-ph); color: var(--sb-text-faint); }
 /* Make inserted tables and images discoverable */
 .re-body table { cursor: pointer; }

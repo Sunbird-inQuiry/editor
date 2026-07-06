@@ -18,6 +18,7 @@ import { useTreeStore } from '../store/tree.store';
 // via hierarchy update for consistent full-metadata delivery.
 import { useSaveHierarchy } from './useSaveHierarchy';
 import { getUserId } from '../utils/context';
+import { applyContentI18n } from '../utils/i18nSerialize';
 import { PRIMARY_CATEGORY_MAP } from '../types/question';
 import type { QuestionType, IOption, IMatchPair } from '../types/question';
 
@@ -366,6 +367,11 @@ export function useSaveQuestion() {
 
     const hasInteractions = ['mcq', 'ftb', 'mtf', 'seq', 'reo', 'boolean'].includes(questionType);
 
+    // Multilingual text (old editor i18n) — visible text merged into the
+    // active language before serialization.
+    const i18nSnapshot = useQuestionStore.getState().getI18nSnapshot();
+    const answerWrap = (t: string) => `<div class='answer-container'><div class='answer-body'>${t}</div></div>`;
+
     const mediaBaseUrl = config?.context?.host || window.location.origin;
     const questionMedia: Array<Record<string, unknown>> = collectMedia(
       [
@@ -506,6 +512,18 @@ export function useSaveQuestion() {
           // properties — the old editor never sends them in nodesModified.
         };
 
+        applyContentI18n(questionMeta, {
+          type: questionType,
+          i18n: i18nSnapshot,
+          options,
+          matchPairs,
+          hintUuid,
+          solutionId,
+          solutionType,
+          buildBodyHtml,
+          answerWrap,
+        });
+
         updateNode(selectedNodeId, { name: questionName, ...questionMeta });
         if (await saveHierarchy()) {
           notifySuccess('Question saved');
@@ -589,6 +607,18 @@ export function useSaveQuestion() {
           // difficultyLevel/bloomsLevel are NOT valid Question schema
           // properties — the old editor never sends them in nodesModified.
         };
+
+        applyContentI18n(questionMeta, {
+          type: questionType,
+          i18n: i18nSnapshot,
+          options,
+          matchPairs,
+          hintUuid,
+          solutionId,
+          solutionType,
+          buildBodyHtml,
+          answerWrap,
+        });
 
         // Replace temp- node with UUID, store full metadata, trigger hierarchy save
         replaceNodeId(selectedNodeId, questionUuid);

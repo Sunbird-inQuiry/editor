@@ -9,6 +9,7 @@ import React, { lazy, Suspense, useState } from 'react';
 import { Monitor, Smartphone } from 'lucide-react';
 import { Icon } from '../shared/Icon';
 import { useTreeStore } from '../../store/tree.store';
+import { useLabels } from '../../hooks/useLabels';
 import type { INode } from '../../types/editor';
 
 const QumlPlayer = lazy(() => import('../QumlPlayer/QumlPlayer'));
@@ -30,6 +31,7 @@ const QuestionDetail: React.FC<QuestionDetailProps> = ({
   isLoading = false,
 }) => {
   const rootId = useTreeStore((s) => s.treeData[0]?.identifier ?? '');
+  const L = useLabels();
   const [portrait, setPortrait] = useState(false);
   // A question that has never been saved/authored has nothing to play.
   const hasContent = !!(node.metadata?.body ?? node.metadata?.editorState);
@@ -95,10 +97,10 @@ const QuestionDetail: React.FC<QuestionDetailProps> = ({
       {isEditMode && (
         <div className="ce-qactions">
           <button className="ce-btn primary" onClick={onOpenEditor} type="button">
-            <Icon name="edit-sm" size={15} />Open in editor
+            <Icon name="edit-sm" size={15} />{L('ui.openInEditor', 'Open in editor')}
           </button>
           <button className="ce-btn danger" onClick={onRemove} type="button">
-            <Icon name="trash" size={15} />Remove
+            <Icon name="trash" size={15} />{L('ui.remove', 'Remove')}
           </button>
         </div>
       )}

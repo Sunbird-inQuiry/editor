@@ -1,7 +1,28 @@
 import { create } from 'zustand';
 import type { IQuestion, QuestionType, IOption, IMatchPair, IHint } from '../types/question';
+import type { I18nMap } from '../utils/i18nField';
 
 export type SolutionType = '' | 'html' | 'video' | 'audio';
+
+/** Per-field language maps — the plain string fields below always hold the
+ *  ACTIVE language's text; other languages live here (old editor i18n). */
+export interface II18nText {
+  questionBody: I18nMap;
+  answerText: I18nMap;
+  sentence: I18nMap;
+  solutionText: I18nMap;
+  hintText: I18nMap;
+  /** keyed by option/pair id; sequence positional */
+  options: Record<string, I18nMap>;
+  pairsLeft: Record<string, I18nMap>;
+  pairsRight: Record<string, I18nMap>;
+  sequence: I18nMap[];
+}
+
+const EMPTY_I18N: II18nText = {
+  questionBody: {}, answerText: {}, sentence: {}, solutionText: {}, hintText: {},
+  options: {}, pairsLeft: {}, pairsRight: {}, sequence: [],
+};
 
 export interface ISolutionAsset {
   id: string;
@@ -32,6 +53,13 @@ interface QuestionState {
   /** REO: the correct sentence — old editorState.sentence */
   sentence: string;
   questionBody: string;
+  /** Active content language (en/ar/fr/pt — old editor multilingual authoring). */
+  contentLang: string;
+  i18nText: II18nText;
+  /** Snapshot current fields into contentLang, then load `lang`'s text. */
+  switchContentLang: (lang: string) => void;
+  /** i18nText with the current visible text merged into the active lang. */
+  getI18nSnapshot: () => II18nText;
   // Question-level metadata (persisted on save)
   difficultyLevel: string;
   bloomsLevel: string;
@@ -102,7 +130,31 @@ const DEFAULT_META = {
   evalUnordered: true,
 };
 
-export const useQuestionStore = create<QuestionState>((set) => ({
+/** Merge the currently-visible field text into the active language's slots. */
+function mergeSnapshot(s: QuestionState): II18nText {
+  const put = (map: I18nMap | undefined, val: string): I18nMap => ({ ...(map ?? {}), [s.contentLang]: val });
+  const options: Record<string, I18nMap> = { ...s.i18nText.options };
+  s.options.forEach((o) => { options[o.id] = put(options[o.id], o.body); });
+  const pairsLeft: Record<string, I18nMap> = { ...s.i18nText.pairsLeft };
+  const pairsRight: Record<string, I18nMap> = { ...s.i18nText.pairsRight };
+  s.matchPairs.forEach((p) => {
+    pairsLeft[p.id] = put(pairsLeft[p.id], p.left);
+    pairsRight[p.id] = put(pairsRight[p.id], p.right);
+  });
+  return {
+    questionBody: put(s.i18nText.questionBody, s.questionBody),
+    answerText: put(s.i18nText.answerText, s.answerText),
+    sentence: put(s.i18nText.sentence, s.sentence),
+    solutionText: put(s.i18nText.solutionText, s.solutionText),
+    hintText: put(s.i18nText.hintText, s.hintText),
+    options,
+    pairsLeft,
+    pairsRight,
+    sequence: s.sequence.map((v, i) => put(s.i18nText.sequence[i], v)),
+  };
+}
+
+export const useQuestionStore = create<QuestionState>((set, get) => ({
   activeQuestion: null,
   questionType: null,
   isDirty: false,
@@ -119,7 +171,33 @@ export const useQuestionStore = create<QuestionState>((set) => ({
   answerText: '',
   sentence: '',
   questionBody: '',
+  contentLang: 'en',
+  i18nText: EMPTY_I18N,
   ...DEFAULT_META,
+
+  switchContentLang: (lang) => {
+    const s = get();
+    if (lang === s.contentLang) return;
+    const t = mergeSnapshot(s);
+    set({
+      contentLang: lang,
+      i18nText: t,
+      questionBody: t.questionBody[lang] ?? '',
+      answerText: t.answerText[lang] ?? '',
+      sentence: t.sentence[lang] ?? '',
+      solutionText: t.solutionText[lang] ?? '',
+      hintText: t.hintText[lang] ?? '',
+      options: s.options.map((o) => ({ ...o, body: t.options[o.id]?.[lang] ?? '' })),
+      matchPairs: s.matchPairs.map((p) => ({
+        ...p,
+        left: t.pairsLeft[p.id]?.[lang] ?? '',
+        right: t.pairsRight[p.id]?.[lang] ?? '',
+      })),
+      sequence: s.sequence.map((_, i) => t.sequence[i]?.[lang] ?? ''),
+    });
+  },
+
+  getI18nSnapshot: () => mergeSnapshot(get()),
 
   setActiveQuestion: (question) => {
     if (!question) {
@@ -132,6 +210,8 @@ export const useQuestionStore = create<QuestionState>((set) => ({
         hints: [],
         solutionText: '',
         questionBody: '',
+        contentLang: 'en',
+        i18nText: EMPTY_I18N,
         isDirty: false,
         ...DEFAULT_META,
       });
@@ -139,6 +219,32 @@ export const useQuestionStore = create<QuestionState>((set) => ({
     }
     set({
       activeQuestion: question,
+      // Seed per-language maps from the read response (old i18n content).
+      contentLang: 'en',
+      i18nText: (() => {
+        const src = question.i18nSource ?? {};
+        const opts = question.options ?? [];
+        const optionMaps: Record<string, I18nMap> = {};
+        opts.forEach((o, i) => { if (src.options?.[i]) optionMaps[o.id] = src.options[i]!; });
+        const pairs = question.editorState?.matchPairs ?? [];
+        const pairsLeft: Record<string, I18nMap> = {};
+        const pairsRight: Record<string, I18nMap> = {};
+        pairs.forEach((p, i) => {
+          if (src.pairsLeft?.[i]) pairsLeft[p.id] = src.pairsLeft[i]!;
+          if (src.pairsRight?.[i]) pairsRight[p.id] = src.pairsRight[i]!;
+        });
+        return {
+          questionBody: src.question ?? {},
+          answerText: src.answer ?? {},
+          sentence: src.sentence ?? {},
+          solutionText: src.solution ?? {},
+          hintText: src.hint ?? {},
+          options: optionMaps,
+          pairsLeft,
+          pairsRight,
+          sequence: src.sequence ?? [],
+        };
+      })(),
       questionType: (question.questionType as QuestionType) ?? null,
       options: question.options ?? DEFAULT_OPTIONS,
       matchPairs: question.editorState?.matchPairs ?? [],
@@ -273,6 +379,8 @@ export const useQuestionStore = create<QuestionState>((set) => ({
       answerText: '',
       sentence: '',
       questionBody: '',
+      contentLang: 'en',
+      i18nText: EMPTY_I18N,
       isDirty: false,
       isSaving: false,
       ...DEFAULT_META,

@@ -5,6 +5,7 @@ import { useUiStore } from '../../store/ui.store';
 import { useTreeStore } from '../../store/tree.store';
 import { deleteQuestion } from '../../api/question';
 import { useEditorStore } from '../../store/editor.store';
+import { useLabels } from '../../hooks/useLabels';
 
 // ---------------------------------------------------------------------------
 // ConnectedConfirmDialog — wired to the 'confirmDelete' modal in ui.store
@@ -17,6 +18,7 @@ export const ConnectedConfirmDialog: React.FC = () => {
   const deleteNode   = useTreeStore((s) => s.deleteNode);
   const getNodeById  = useTreeStore((s) => s.getNodeById);
   const setIsDirty   = useEditorStore((s) => s.setIsDirty);
+  const L            = useLabels();
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === 'Escape') closeModal(); };
@@ -102,10 +104,12 @@ export const ConnectedConfirmDialog: React.FC = () => {
           display: 'flex', justifyContent: 'flex-end', gap: 10,
           padding: '16px 24px', borderTop: '1px solid var(--sb-border)',
         }}>
-          <button type="button" className="ce-btn ghost" onClick={closeModal}>Cancel</button>
+          <button type="button" className="ce-btn ghost" onClick={closeModal}>
+            {L('button_labels.cancel_btn_label', 'Cancel')}
+          </button>
           <button type="button" className="ce-btn danger" onClick={() => void handleConfirm()}>
             <Icon name="trash" size={15} />
-            Delete
+            {L('button_labels.delete_btn_label', 'Delete')}
           </button>
         </div>
       </div>

@@ -80,6 +80,19 @@ export interface IQuestion {
   showSolutions?: boolean;
   showHints?: boolean;
   branchingLogic?: Record<string, IBranchingRule>;
+  /** Multilingual text sources decoded from the read response (lang → text).
+   *  Arrays are positional (same order as options/pairs/sequence). */
+  i18nSource?: {
+    question?: Record<string, string>;
+    answer?: Record<string, string>;
+    sentence?: Record<string, string>;
+    solution?: Record<string, string>;
+    hint?: Record<string, string>;
+    options?: Array<Record<string, string>>;
+    pairsLeft?: Array<Record<string, string>>;
+    pairsRight?: Array<Record<string, string>>;
+    sequence?: Array<Record<string, string>>;
+  };
   // Fields round-tripped from question/v2/read (old editor's readQuestionFields)
   qType?: string;
   templateId?: string;

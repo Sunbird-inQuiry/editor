@@ -13,6 +13,9 @@
   color: var(--sbx-color-text-primary);
   background-color: var(--sbx-color-surface-base);
   box-sizing: border-box;
+  // Follow the root `dir` attribute (rtl for Arabic) — resets any
+  // `text-align: left` inherited from the host portal page.
+  text-align: start;
 
   *,
   *::before,
