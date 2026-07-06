@@ -472,7 +472,10 @@
 }
 .re-menu button:hover { background: var(--accent-soft); color: var(--accent-deep); }
 /* contenteditable body */
-.re-body { outline: none; }
+.re-body { outline: none; text-align: start; }
+/* Authored content must span the field and follow its direction — undo the
+   global `p { max-inline-size: 70ch }` reset and any host-page text-align. */
+.re-body p, .re-body li, .re-body figcaption { max-inline-size: none; text-align: inherit; }
 .re-body:empty::before { content: attr(data-ph); color: var(--sb-text-faint); }
 /* Make inserted tables and images discoverable */
 .re-body table { cursor: pointer; }
