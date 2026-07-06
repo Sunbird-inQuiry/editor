@@ -287,7 +287,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   const editorConfigCtx = useEditorStore.getState().editorConfig?.context;
   const isReadOnly = !isEditingAllowed(editorMode, editorConfigCtx);
   const type = questionType as QuestionType | null;
-  const TYPE_KEY: Record<QuestionType, string> = { mcq: 'Mcq', sa: 'Sa', ftb: 'Ftb', mtf: 'Mtf', seq: 'Seq', reo: 'Reo' };
+  const TYPE_KEY: Record<QuestionType, string> = { mcq: 'Mcq', sa: 'Sa', ftb: 'Ftb', mtf: 'Mtf', seq: 'Seq', reo: 'Reo', boolean: 'Bool' };
   const typeLabel = type
     ? L(`ui.type${TYPE_KEY[type]}`, QUESTION_TYPE_LABELS[type] ?? type)
     : L('ui.question', 'Question');
