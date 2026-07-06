@@ -314,9 +314,12 @@ export const useTreeStore = create<TreeState>((set, get) => ({
       // cache, and active selection.
       function replaceInTree(nodes: INode[]): INode[] {
         return nodes.map(n => {
-          const updated = n.id === tempId || n.identifier === tempId
+          let updated = n.id === tempId || n.identifier === tempId
             ? { ...n, id: realId, identifier: realId }
             : n;
+          // Children reference their parent by id (breadcrumbs walk it) —
+          // repoint them or the ancestor walk dead-ends after the first save.
+          if (updated.parent === tempId) updated = { ...updated, parent: realId };
           return { ...updated, children: replaceInTree(updated.children ?? []) };
         });
       }

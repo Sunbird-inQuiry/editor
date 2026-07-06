@@ -122,9 +122,17 @@ export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {
   }
 
   // ── hint ────────────────────────────────────────────────────────────────
+  // Re-adding hints for non-English text must keep the outcomeDeclaration
+  // reference and editorState mirror consistent — useSaveQuestion omits all
+  // three when the English hint is cleared, and a hints object whose uuid
+  // isn't referenced from outcomeDeclaration is a dangling entry.
   const hintMap = dropEmpty(a.i18n.hintText);
   if (Object.keys(hintMap).length) {
-    meta.hints = { [a.hintUuid]: { ...hintMap } };
+    const hints = { [a.hintUuid]: { ...hintMap } };
+    meta.hints = hints;
+    es.hints = hints;
+    const od = meta.outcomeDeclaration as Record<string, Record<string, unknown>> | undefined;
+    if (od?.hint) od.hint.defaultValue = a.hintUuid;
   }
 
   // ── text solution ───────────────────────────────────────────────────────

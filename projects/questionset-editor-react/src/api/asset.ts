@@ -118,7 +118,7 @@ export async function uploadToBlob(
   file: File,
   presignedHeaders: Record<string, string> = {},
 ): Promise<void> {
-  await fetch(preSignedUrl, {
+  const response = await fetch(preSignedUrl, {
     method: 'PUT',
     body: file,
     headers: {
@@ -127,6 +127,11 @@ export async function uploadToBlob(
       ...presignedHeaders,
     },
   });
+  // fetch() only rejects on network failure — an expired pre-signed URL or a
+  // storage rejection (403/413/500) resolves normally and must be surfaced.
+  if (!response.ok) {
+    throw new Error(`Blob upload failed: ${response.status} ${response.statusText}`);
+  }
 }
 
 // Step 4 — register the blob URL with Sunbird via FormData

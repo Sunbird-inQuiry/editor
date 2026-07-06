@@ -27,7 +27,11 @@ export function useFramework() {
       staleTime: 10 * 60 * 1000,
     })),
   });
-  const targetData = targetResults.map((q) => q.data).filter(Boolean) as IFramework[];
+  // One dep slot per configured framework id — stable length across renders
+  // (a spread of the filtered results would grow as queries resolve, which
+  // breaks useMemo's stable-length-deps contract).
+  const targetDatas = targetResults.map((q) => q.data);
+  const targetData = targetDatas.filter(Boolean) as IFramework[];
 
   const frameworkTerms = useMemo<Map<string, Array<ITerm>>>(() => {
     const map = new Map<string, Array<ITerm>>();
@@ -43,7 +47,7 @@ export function useFramework() {
     targetData.forEach(addCategories);
     return map;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgQuery.data, ...targetData]);
+  }, [orgQuery.data, targetDatas.length, ...targetDatas]);
 
   return {
     orgFramework: orgQuery.data,

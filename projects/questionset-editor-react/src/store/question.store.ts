@@ -254,7 +254,12 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
       hintText: (() => {
         const hintId = (question.outcomeDeclaration as Record<string, Record<string, unknown>> | undefined)
           ?.hint?.defaultValue;
-        const hint = question.hints?.find((h) => h.id === hintId) ?? question.hints?.[0];
+        // defaultValue === '' means the hint was explicitly cleared — falling
+        // back to hints[0] would resurrect a deleted hint if the server merged
+        // rather than replaced. Only fall back when there's no reference at all.
+        const hint = typeof hintId === 'string' && hintId
+          ? question.hints?.find((h) => h.id === hintId)
+          : hintId === undefined ? question.hints?.[0] : undefined;
         return hint?.body ?? '';
       })(),
       // Solution: html keeps the text; video/audio keep the asset id in
