@@ -367,6 +367,11 @@
     "behaviourScoring": "Behaviour & Scoring",
     "behaviourScoringSub": "How the set is timed, attempted and summarised.",
     "sectionBehaviour": "Section Behaviour",
-    "sectionBehaviourSub": "Controls applied to this section inside the set."
+    "sectionBehaviourSub": "Controls applied to this section inside the set.",
+    "meta": "Details",
+    "questionOne": "question",
+    "questionMany": "questions",
+    "markOne": "mark",
+    "markMany": "marks"
   }
 }

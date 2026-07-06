@@ -11,8 +11,13 @@ export default function ReoEditor({ readOnly = false }: ReoEditorProps) {
   const sentence = useQuestionStore((s) => s.sentence);
   const setSentence = useQuestionStore((s) => s.setSentence);
 
-  // Strip HTML tags to get plain text for word chips
-  const plainText = sentence.replace(/<[^>]+>/g, '').trim();
+  // Extract plain text for word chips — the DOM decodes entities (&nbsp; from
+  // trailing spaces) that a tag-strip regex would leave behind as literal text.
+  const plainText = useMemo(() => {
+    const el = document.createElement('div');
+    el.innerHTML = sentence;
+    return (el.textContent ?? '').trim();
+  }, [sentence]);
   const words = plainText.split(/\s+/).filter(Boolean);
 
   // Deterministic shuffle so chips don't jump on every keystroke

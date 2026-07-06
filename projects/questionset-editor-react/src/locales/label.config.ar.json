@@ -332,6 +332,11 @@
     "behaviourScoring": "السلوك والتقييم",
     "behaviourScoringSub": "كيفية توقيت المجموعة ومحاولاتها وتلخيصها.",
     "sectionBehaviour": "سلوك القسم",
-    "sectionBehaviourSub": "الضوابط المطبقة على هذا القسم داخل المجموعة."
+    "sectionBehaviourSub": "الضوابط المطبقة على هذا القسم داخل المجموعة.",
+    "meta": "التفاصيل",
+    "questionOne": "سؤال",
+    "questionMany": "أسئلة",
+    "markOne": "علامة",
+    "markMany": "علامات"
   }
 }

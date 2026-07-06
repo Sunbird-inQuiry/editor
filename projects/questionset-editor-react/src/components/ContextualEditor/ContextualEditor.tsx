@@ -169,15 +169,19 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
     if (isCurrentNodeFolder) {
       const node = useTreeStore.getState().getNodeById(selectedNodeId ?? '');
       const count = node?.children?.length ?? 0;
-      return `${count} question${count === 1 ? '' : 's'}`;
+      return `${count} ${count === 1 ? L('ui.questionOne', 'question') : L('ui.questionMany', 'questions')}`;
     }
     if (isCurrentNodeQuestion) {
       const qType = (m.questionType as string) ?? '';
-      const typeLabel = QUESTION_TYPE_LABELS[qType as QuestionType] ?? qType.toUpperCase();
+      const typeKey: Record<string, string> = { mcq: 'Mcq', sa: 'Sa', ftb: 'Ftb', mtf: 'Mtf', seq: 'Seq', reo: 'Reo' };
+      const typeLabel = typeKey[qType]
+        ? L(`ui.type${typeKey[qType]}`, QUESTION_TYPE_LABELS[qType as QuestionType] ?? qType)
+        : (QUESTION_TYPE_LABELS[qType as QuestionType] ?? qType.toUpperCase());
       const score = (m.maxScore as number) ?? 1;
       // Get parent section name from breadcrumb (second-to-last item)
       const sectionName = breadcrumb.length >= 2 ? breadcrumb[breadcrumb.length - 2]?.name : '';
-      return [typeLabel, sectionName, `${score} mark${score === 1 ? '' : 's'}`].filter(Boolean).join(' · ');
+      const marks = `${score} ${score === 1 ? L('ui.markOne', 'mark') : L('ui.markMany', 'marks')}`;
+      return [typeLabel, sectionName, marks].filter(Boolean).join(' · ');
     }
     return '';
   })();
