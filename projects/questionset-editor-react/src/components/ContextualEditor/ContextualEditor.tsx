@@ -357,7 +357,8 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   </div>
                 )}
 
-                {/* ── Question: meta/details tab ── */}
+                {/* ── Question: meta/details tab — read-only view; details are
+                     authored inside the question editor's Details section ── */}
                 {isCurrentNodeQuestion && activeTab === 'meta' && (
                   <div className="ce-tabbody">
                     <SparkMetaForm
@@ -365,7 +366,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                       values={activeNodeMeta as Record<string, unknown>}
                       onChange={handleFormChange}
                       onValidityChange={handleFormValidityChange}
-                      readOnly={isReadOnly}
+                      readOnly
                       frameworkTerms={frameworkTerms}
                     />
                   </div>

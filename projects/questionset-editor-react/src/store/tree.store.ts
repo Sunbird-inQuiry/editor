@@ -222,7 +222,8 @@ export const useTreeStore = create<TreeState>((set, get) => ({
         primaryCategory: isSection ? rootPrimaryCategory : 'Multiple Choice Question',
         questionType,
         code: newId,
-        name: isSection ? 'Untitled Section' : 'Untitled Question',
+        // Questions get NO default title — it must be authored in Details.
+        ...(isSection ? { name: 'Untitled Section' } : {}),
         visibility: 'Parent',
       },
     };

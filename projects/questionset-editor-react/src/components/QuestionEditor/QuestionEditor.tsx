@@ -6,6 +6,8 @@ import { useQuestionStore } from '../../store/question.store';
 import { useSaveQuestion } from '../../hooks/useSaveQuestion';
 import { useEditorStore } from '../../store/editor.store';
 import { getUserId, isEditingAllowed } from '../../utils/context';
+import SparkMetaForm from '../SparkMetaForm/SparkMetaForm';
+import { useFramework } from '../../hooks/useFramework';
 import ImagePickerModal from '../shared/ImagePickerModal';
 import { lazy, Suspense } from 'react';
 import { useTreeStore } from '../../store/tree.store';
@@ -282,8 +284,37 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
     const text = (html ?? '').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
     return text || (/<(img|figure)\b/i.test(html ?? '') ? '[image]' : '');
   };
+  // Details form (childMetadata) — writes into the tree node like the tab did.
+  const questionFormConfig = useEditorStore((st) => st.questionFormConfig);
+  const activeNodeMeta = useTreeStore((st) => st.activeNodeMeta);
+  const updateNode = useTreeStore((st) => st.updateNode);
+  const detailNodeId = useTreeStore((st) => st.selectedNodeId);
+  const { frameworkTerms } = useFramework();
+  const handleDetailChange = (code: string, value: unknown) => {
+    if (detailNodeId) updateNode(detailNodeId, { [code]: value });
+  };
+  // Old getDefaultSessionContext: taxonomy defaults inherit from the question
+  // set but stay choosable per question.
+  const rootMeta = useTreeStore((st) => st.treeData[0]?.metadata) ?? {};
+  const detailValues = React.useMemo(() => {
+    const inherited: Record<string, unknown> = {};
+    (['board', 'medium', 'gradeLevel', 'subject'] as const).forEach((k) => {
+      if (rootMeta[k] != null && (activeNodeMeta as Record<string, unknown>)?.[k] == null) {
+        inherited[k] = rootMeta[k];
+      }
+    });
+    return { ...inherited, ...(activeNodeMeta as Record<string, unknown>) };
+  }, [rootMeta, activeNodeMeta]);
+
   const invalidReason = (() => {
     if (!plain(questionBody)) return 'Enter the question first';
+    // Title and Marks come from the Details section — no defaults.
+    if (!String((activeNodeMeta?.name as string) ?? '').trim()) {
+      return 'Enter the title in Details';
+    }
+    if ((type === 'mcq' || type === 'sa') && !(Number(activeNodeMeta?.maxScore) > 0)) {
+      return 'Enter the marks in Details';
+    }
     switch (type) {
       case 'mcq':
       case 'boolean':
@@ -324,7 +355,8 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
     if (!isReadOnly && (isDirty || isUnsavedNew)) setConfirmBackOpen(true);
     else onBack?.();
   };
-  const handleSave = async () => { await save(); onBack?.(); };
+  // Navigate back to the set only when the creation/update succeeded.
+  const handleSave = async () => { if (await save()) onBack?.(); };
 
   return (
     <div className="ce-ed">
@@ -352,7 +384,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
           {/* Question stem */}
           <div className="ce-ed-sec ce-ed-stem">
             <div className="ce-ed-lbl">
-              Question stem
+              Question
               <span className="hint">{stemHint}</span>
             </div>
             <ContentEditable
@@ -387,6 +419,21 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
 
           {/* Solution */}
           {!isReadOnly && <SolutionBlock />}
+
+          {/* Details — question metadata (childMetadata form) authored here;
+              the Details tab outside the editor is read-only */}
+          {questionFormConfig && questionFormConfig.length > 0 && (
+            <div className="ce-ed-sec">
+              <div className="ce-ed-lbl">Details</div>
+              <SparkMetaForm
+                fields={questionFormConfig.map((f) => ({ ...f, editable: true }))}
+                values={detailValues}
+                onChange={handleDetailChange}
+                readOnly={isReadOnly}
+                frameworkTerms={frameworkTerms}
+              />
+            </div>
+          )}
 
         </div>
 
