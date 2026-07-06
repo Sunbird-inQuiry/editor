@@ -18,13 +18,8 @@ import { getContentId } from '../../utils/context';
 const QumlPlayer = lazy(() => import('../QumlPlayer/QumlPlayer'));
 import { createPortal } from 'react-dom';
 import type { EditorMode } from '../../types/editor';
-import { QUESTION_TYPE_LABELS, type QuestionType } from '../../types/question';
-import McqEditor from './McqEditor/McqEditor';
-import SaEditor from './SaEditor/SaEditor';
-import FtbEditor from './FtbEditor/FtbEditor';
-import MtfEditor from './MtfEditor/MtfEditor';
-import SeqEditor from './SeqEditor/SeqEditor';
-import ReoEditor from './ReoEditor/ReoEditor';
+import type { QuestionType } from '../../types/question';
+import { resolveQuestionType } from '../../registry';
 
 
 export interface QuestionEditorProps {
@@ -32,10 +27,7 @@ export interface QuestionEditorProps {
   onBack?: () => void;
 }
 
-// Type-specific icon and hint text
-const TYPE_ICON: Record<QuestionType, string> = {
-  mcq: 'check', sa: 'doc', ftb: 'edit-sm', mtf: 'link', seq: 'numlist', reo: 'swap',
-};
+// Type-specific stem hint text
 const STEM_HINT: Record<QuestionType, string> = {
   mcq: 'Rich text, images & equations supported',
   sa:  'Rich text, images & equations supported',
@@ -285,11 +277,11 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   const editorConfigCtx = useEditorStore.getState().editorConfig?.context;
   const isReadOnly = !isEditingAllowed(editorMode, editorConfigCtx);
   const type = questionType as QuestionType | null;
-  const TYPE_KEY: Record<QuestionType, string> = { mcq: 'Mcq', sa: 'Sa', ftb: 'Ftb', mtf: 'Mtf', seq: 'Seq', reo: 'Reo' };
-  const typeLabel = type
-    ? L(`ui.type${TYPE_KEY[type]}`, QUESTION_TYPE_LABELS[type] ?? type)
+  const typeDef = resolveQuestionType(type);
+  const typeLabel = typeDef
+    ? L(typeDef.labelKey, typeDef.label)
     : L('ui.question', 'Question');
-  const typeIcon  = type ? (TYPE_ICON[type] ?? 'help') : 'help';
+  const typeIcon  = typeDef?.icon ?? 'help';
   const stemHint = type
     ? (type === 'ftb'
         ? L('ui.ftbHint', STEM_HINT.ftb)
@@ -333,6 +325,10 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
     return { ...inherited, ...(activeNodeMeta as Record<string, unknown>) };
   }, [rootMeta, activeNodeMeta]);
 
+  // Required-field validity of the Details (childMetadata) form below —
+  // gates Save so questions can't reach review with missing metadata.
+  const [detailsValid, setDetailsValid] = useState(true);
+
   const invalidReason = (() => {
     const qBody = enOf(i18nText.questionBody, questionBody);
     if (!plain(qBody)) return 'Enter the question first (in EN)';
@@ -344,6 +340,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
     if ((type === 'mcq' || type === 'sa') && !(Number(activeNodeMeta?.maxScore) > 0)) {
       return 'Enter the marks in Details';
     }
+    if (!detailsValid) return 'Fill all required fields in Details';
     switch (type) {
       case 'mcq':
         if (options.some((o) => !plain(enOf(i18nText.options[o.id], o.body)))) return 'Fill in all options (in EN)';
@@ -439,13 +436,8 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
             )}
           </div>
 
-          {/* Per-type answer section */}
-          {type === 'mcq' && <McqEditor readOnly={isReadOnly} />}
-          {type === 'ftb' && <FtbEditor stemText={questionBody} readOnly={isReadOnly} />}
-          {type === 'sa'  && <SaEditor readOnly={isReadOnly} />}
-          {type === 'mtf' && <MtfEditor readOnly={isReadOnly} />}
-          {type === 'seq' && <SeqEditor readOnly={isReadOnly} />}
-          {type === 'reo' && <ReoEditor readOnly={isReadOnly} />}
+          {/* Per-type answer section — component resolved from the registry */}
+          {typeDef && <typeDef.Editor readOnly={isReadOnly} stemText={questionBody} />}
 
           {/* Config */}
           <ConfigBlock type={type} />
@@ -460,11 +452,12 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
               the Details tab outside the editor is read-only */}
           {questionFormConfig && questionFormConfig.length > 0 && (
             <div className="ce-ed-sec">
-              <div className="ce-ed-lbl">Details</div>
+              <div className="ce-ed-lbl">{L('ui.details', 'Details')}</div>
               <SparkMetaForm
                 fields={questionFormConfig.map((f) => ({ ...f, editable: true }))}
                 values={detailValues}
                 onChange={handleDetailChange}
+                onValidityChange={setDetailsValid}
                 readOnly={isReadOnly}
                 frameworkTerms={frameworkTerms}
               />

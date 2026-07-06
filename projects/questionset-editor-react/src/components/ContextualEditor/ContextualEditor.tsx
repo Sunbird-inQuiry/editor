@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, lazy, Suspense, Fragment } fro
 import ImagePickerModal from '../shared/ImagePickerModal';
 import { Icon } from '../shared/Icon';
 import type { EditorMode, ToolbarAction } from '../../types/editor';
-import { QUESTION_TYPE_LABELS, type QuestionType } from '../../types/question';
+import { resolveQuestionType } from '../../registry';
 import { useEditorStore } from '../../store/editor.store';
 import { useTreeStore } from '../../store/tree.store';
 import { useQuestionStore } from '../../store/question.store';
@@ -18,14 +18,6 @@ import QuestionDetail from '../QuestionDetail/QuestionDetail';
 const QuestionEditor = lazy(() => import('../QuestionEditor/QuestionEditor'));
 const QumlPlayer    = lazy(() => import('../QumlPlayer/QumlPlayer'));
 
-const QUESTION_TYPE_ICON: Record<string, string> = {
-  mcq: 'check',
-  sa:  'doc',
-  ftb: 'edit-sm',
-  mtf: 'link',
-  seq: 'numlist',
-  reo: 'swap',
-};
 
 // ---------------------------------------------------------------------------
 // Types
@@ -173,10 +165,8 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
     }
     if (isCurrentNodeQuestion) {
       const qType = (m.questionType as string) ?? '';
-      const typeKey: Record<string, string> = { mcq: 'Mcq', sa: 'Sa', ftb: 'Ftb', mtf: 'Mtf', seq: 'Seq', reo: 'Reo' };
-      const typeLabel = typeKey[qType]
-        ? L(`ui.type${typeKey[qType]}`, QUESTION_TYPE_LABELS[qType as QuestionType] ?? qType)
-        : (QUESTION_TYPE_LABELS[qType as QuestionType] ?? qType.toUpperCase());
+      const typeDef = resolveQuestionType(qType);
+      const typeLabel = typeDef ? L(typeDef.labelKey, typeDef.label) : qType.toUpperCase();
       const score = (m.maxScore as number) ?? 1;
       // Get parent section name from breadcrumb (second-to-last item)
       const sectionName = breadcrumb.length >= 2 ? breadcrumb[breadcrumb.length - 2]?.name : '';
@@ -287,7 +277,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   const qType = (activeNodeMeta?.questionType as string)
                     ?? (activeNodeMeta?.metadata as Record<string,unknown>)?.questionType as string
                     ?? '';
-                  const iconName = QUESTION_TYPE_ICON[qType] ?? 'help';
+                  const iconName = resolveQuestionType(qType)?.icon ?? 'help';
                   return (
                     <div className="ce-thumb question">
                       <Icon name={iconName} size={26} />

@@ -19,7 +19,7 @@ import { useTreeStore } from '../store/tree.store';
 import { useSaveHierarchy } from './useSaveHierarchy';
 import { getUserId } from '../utils/context';
 import { applyContentI18n } from '../utils/i18nSerialize';
-import { PRIMARY_CATEGORY_MAP } from '../types/question';
+import { resolveQuestionType } from '../registry';
 import type { QuestionType, IOption, IMatchPair } from '../types/question';
 
 // ---------------------------------------------------------------------------
@@ -32,17 +32,6 @@ function genUuid(): string {
     return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
   });
 }
-
-// ---------------------------------------------------------------------------
-// qType map  (old editor uses qType, not questionType)
-// ---------------------------------------------------------------------------
-const Q_TYPE: Record<QuestionType, string> = {
-  mcq: 'MCQ', sa: 'SA', ftb: 'FTB', mtf: 'MTF', seq: 'SEQ', reo: 'REO',
-};
-
-const INTERACTION_TYPE: Partial<Record<QuestionType, string>> = {
-  mcq: 'choice', ftb: 'text', mtf: 'match', seq: 'order', reo: 'order',
-};
 
 // ---------------------------------------------------------------------------
 // body HTML — old editor wraps question in specific template divs
@@ -337,12 +326,17 @@ export function useSaveQuestion() {
   const { save: saveHierarchy }                         = useSaveHierarchy();
 
   const save = useCallback(async (): Promise<boolean> => {
-    if (!questionType || !selectedNodeId) return false;
+    // In-flight guard (same as useSaveHierarchy) — the Save button disables on
+    // isSaving, but only after React re-renders; block the race window here.
+    if (!questionType || !selectedNodeId || useQuestionStore.getState().isSaving) return false;
 
     const channel         = config?.context?.channel   ?? '';
     const createdBy       = getUserId(config?.context);
     const framework       = config?.context?.framework ?? '';
-    const primaryCategory = PRIMARY_CATEGORY_MAP[questionType] ?? 'Multiple Choice Question';
+    // qType / category / interaction come from the question type registry.
+    const typeDef = resolveQuestionType(questionType);
+    const primaryCategory = typeDef?.primaryCategory ?? 'Multiple Choice Question';
+    const qTypeValue = typeDef?.qType ?? 'MCQ';
 
     // Details-form values (childMetadata: name/Marks/…) live in treeCache —
     // they take precedence over auto-derived values, like the old editor.
@@ -365,7 +359,14 @@ export function useSaveQuestion() {
       questionType === 'reo' ? 1 :
       (Number.isFinite(formMarks) && formMarks > 0 ? formMarks : (maxScore ?? 1));
 
-    const hasInteractions = ['mcq', 'ftb', 'mtf', 'seq', 'reo'].includes(questionType);
+    // 'multiple' only when the score is actually per-blank — FTB always, MTF
+    // only with partial scoring (a scalar defaultValue must stay 'single',
+    // matching the old editor's mtf.component).
+    const maxScoreCardinality =
+      (questionType === 'ftb' || (questionType === 'mtf' && isPartialScore)) && blankCount > 1
+        ? 'multiple' : 'single';
+
+    const hasInteractions = !!typeDef?.interactionType;
 
     // Multilingual text (old editor i18n) — visible text merged into the
     // active language before serialization.
@@ -476,13 +477,13 @@ export function useSaveQuestion() {
           } : {}),
           maxScore:    effectiveMaxScore,
           name:        questionName,
-          qType:       Q_TYPE[questionType] ?? 'MCQ',
+          qType:       qTypeValue,
           primaryCategory,
           // Old editor sends interaction fields only for interactive types —
           // SA payloads carry just interactions:{} (no interactionTypes/
           // responseDeclaration/hints keys).
           ...(hasInteractions ? {
-            interactionTypes: [INTERACTION_TYPE[questionType] ?? 'text'],
+            interactionTypes: [typeDef?.interactionType ?? 'text'],
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
@@ -492,7 +493,7 @@ export function useSaveQuestion() {
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
-              cardinality: blankCount > 1 ? 'multiple' : 'single',
+              cardinality: maxScoreCardinality,
               type: 'integer',
               defaultValue: effectiveMaxScore,
             },
@@ -571,13 +572,13 @@ export function useSaveQuestion() {
           } : {}),
           maxScore:    effectiveMaxScore,
           name:        questionName,
-          qType:       Q_TYPE[questionType] ?? 'MCQ',
+          qType:       qTypeValue,
           primaryCategory,
           // Old editor sends interaction fields only for interactive types —
           // SA payloads carry just interactions:{} (no interactionTypes/
           // responseDeclaration/hints keys).
           ...(hasInteractions ? {
-            interactionTypes: [INTERACTION_TYPE[questionType] ?? 'text'],
+            interactionTypes: [typeDef?.interactionType ?? 'text'],
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
@@ -587,7 +588,7 @@ export function useSaveQuestion() {
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
-              cardinality: blankCount > 1 ? 'multiple' : 'single',
+              cardinality: maxScoreCardinality,
               type: 'integer',
               defaultValue: effectiveMaxScore,
             },

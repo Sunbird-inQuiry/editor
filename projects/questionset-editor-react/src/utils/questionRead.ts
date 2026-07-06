@@ -1,5 +1,5 @@
 import type { IQuestion, QuestionType, IOption, IMatchPair, IHint } from '../types/question';
-import { PRIMARY_CATEGORY_MAP, LEGACY_CATEGORY_MAP } from '../types/question';
+import { resolveQuestionType, resolveByQType, resolveByCategory, resolveByInteractionType } from '../registry';
 import { asI18nMap, readI18n } from './i18nField';
 import type { I18nMap, I18nValue } from './i18nField';
 
@@ -17,24 +17,6 @@ import type { I18nMap, I18nValue } from './i18nField';
  * (media, interactions, responseDeclaration, templateId, flags, …).
  */
 
-const QTYPE_REVERSE: Record<string, QuestionType> = {
-  MCQ: 'mcq',
-  SA: 'sa',
-  VSA: 'sa',
-  LA: 'sa',
-  FTB: 'ftb',
-  MTF: 'mtf',
-  SEQ: 'seq',
-  REO: 'reo',
-};
-
-const CATEGORY_REVERSE: Record<string, QuestionType> = {
-  ...(Object.fromEntries(
-    Object.entries(PRIMARY_CATEGORY_MAP).map(([k, v]) => [v, k as QuestionType]),
-  ) as Record<string, QuestionType>),
-  ...LEGACY_CATEGORY_MAP,
-};
-
 function makeId(): string {
   return Math.random().toString(36).slice(2, 9);
 }
@@ -46,18 +28,19 @@ function asRecord(v: unknown): Record<string, unknown> {
 export function deriveQuestionType(raw: Record<string, unknown>): QuestionType | undefined {
   // New-editor questions carry questionType directly (not persisted by the
   // backend schema, but present in hierarchy-embedded metadata).
-  const direct = raw['questionType'] as QuestionType | undefined;
-  if (direct && direct in PRIMARY_CATEGORY_MAP) return direct;
+  const direct = raw['questionType'] as string | undefined;
+  const directDef = resolveQuestionType(direct);
+  if (directDef) return directDef.key;
 
-  const qType = (raw['qType'] as string | undefined)?.toUpperCase();
-  if (qType && QTYPE_REVERSE[qType]) return QTYPE_REVERSE[qType];
+  const byQType = resolveByQType(raw['qType'] as string | undefined);
+  if (byQType) return byQType.key;
 
-  const category = raw['primaryCategory'] as string | undefined;
-  if (category && CATEGORY_REVERSE[category]) return CATEGORY_REVERSE[category];
+  const byCategory = resolveByCategory(raw['primaryCategory'] as string | undefined);
+  if (byCategory) return byCategory.key;
 
   const interactionTypes = raw['interactionTypes'] as string[] | undefined;
-  if (interactionTypes?.[0] === 'choice') return 'mcq';
-  if (interactionTypes?.[0] === 'text') return 'ftb';
+  const byInteraction = resolveByInteractionType(interactionTypes?.[0]);
+  if (byInteraction) return byInteraction.key;
 
   // Old editor treated no interaction type as 'default' (non-interactive
   // question — VSA/SA/LA/etc.), which maps to the subjective editor here.

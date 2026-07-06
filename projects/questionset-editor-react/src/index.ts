@@ -35,6 +35,21 @@ export { useUiStore } from './store/ui.store';
 export { setApiBaseUrl, setApiSlug } from './api/client';
 
 // ---------------------------------------------------------------------------
+// Question type registry — hosts can register additional question types
+// before mounting the editor (old editor's EDITOR_QUESTION_TYPE_REGISTRY).
+// ---------------------------------------------------------------------------
+
+export {
+  registerQuestionType,
+  resolveQuestionType,
+  resolveByQType,
+  resolveByCategory,
+  resolveByInteractionType,
+  allQuestionTypes,
+} from './registry';
+export type { QuestionTypeDefinition, QuestionTypeEditorProps } from './registry';
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 

@@ -119,37 +119,5 @@ export interface IQuestion {
   attributions?: string[];
 }
 
-export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
-  mcq: 'Multiple Choice',
-  sa:  'Subjective Answer',
-  ftb: 'Fill in the Blank',
-  mtf: 'Match the Following',
-  seq: 'Sequence',
-  reo: 'Reorder',
-};
-
-export const QUESTION_TYPE_ICONS: Record<QuestionType, string> = {
-  mcq: 'CircleDot',
-  sa:  'AlignLeft',
-  ftb: 'Underline',
-  mtf: 'Shuffle',
-  seq: 'List',
-  reo: 'ArrowUpDown',
-};
-
-// Registered object-category names (verified against the KP:
-// obj-cat:<slug>_question_all must exist or hierarchy update fails).
-export const PRIMARY_CATEGORY_MAP: Record<QuestionType, string> = {
-  mcq: 'Multiple Choice Question',
-  sa:  'Subjective Question',
-  ftb: 'FTB Question',
-  mtf: 'Match The Following Question',
-  seq: 'Sequence Question',
-  reo: 'Reorder Question',
-};
-
-/** Older category names still found on persisted questions. */
-export const LEGACY_CATEGORY_MAP: Record<string, QuestionType> = {
-  'Fill in the Blanks': 'ftb',
-  'Match The Following': 'mtf',
-};
+// Labels, icons, category and qType mappings live in the question type
+// registry (src/registry) — the single registration point per type.

@@ -3,11 +3,11 @@ import { Icon } from '../../shared/Icon';
 import { useLabels } from '../../../hooks/useLabels';
 
 interface FtbEditorProps {
-  stemText: string;  // plain text of the stem — blanks detected from [[text]]
+  stemText?: string;  // plain text of the stem — blanks detected from [[text]]
   readOnly?: boolean;
 }
 
-export default function FtbEditor({ stemText, readOnly = false }: FtbEditorProps) {
+export default function FtbEditor({ stemText = '', readOnly = false }: FtbEditorProps) {
   const L = useLabels();
   // Extract blanks from [[text]] markers in the stem's plain text
   const blanks = [...(stemText ?? '').matchAll(/\[\[(.+?)\]\]/g)].map(m => m[1].trim());
