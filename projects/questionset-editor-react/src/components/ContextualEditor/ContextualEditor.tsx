@@ -137,6 +137,10 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
     }
   }, [selectedNodeId, isCurrentNodeQuestion]);
 
+  // Questionset and section names are renamed via the outline tree / details
+  // form, not the card header — only question titles are editable inline.
+  const titleEditable = !isReadOnly && isCurrentNodeQuestion;
+
   const commitTitle = useCallback(() => {
     const trimmed = titleValue.trim();
     if (selectedNodeId && trimmed && trimmed !== (activeNodeMeta?.name as string)) {
@@ -309,7 +313,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                   );
                 })()}
                 <div style={{ minWidth: 0 }}>
-                  {isTitleEditing && !isReadOnly ? (
+                  {isTitleEditing && titleEditable ? (
                     <input
                       ref={titleInputRef}
                       type="text"
@@ -323,9 +327,9 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                     />
                   ) : (
                     <h1
-                      style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: '-.015em', cursor: isReadOnly ? 'default' : 'text', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                      onClick={() => { if (!isReadOnly) setIsTitleEditing(true); }}
-                      title={isReadOnly ? undefined : 'Click to edit'}
+                      style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: '-.015em', cursor: titleEditable ? 'text' : 'default', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      onClick={() => { if (titleEditable) setIsTitleEditing(true); }}
+                      title={titleEditable ? 'Click to edit' : undefined}
                     >
                       {titleValue || 'Untitled'}
                     </h1>
