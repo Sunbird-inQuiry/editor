@@ -1,0 +1,179 @@
+import React, { Component, useEffect } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
+import { useEditorStore } from '../../store/editor.store';
+import { useTelemetry } from '../../hooks/useTelemetry';
+import type { IEditorConfig, IEditorEvents } from '../../types/editor';
+import { useEditorInit } from '../../hooks/useEditorInit';
+import SplitEditorShell from '../SplitEditorShell/SplitEditorShell';
+import styles from './QuestionsetEditor.module.scss';
+import '../../styles/global.scss';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type QuestionsetEditorProps = IEditorConfig & IEditorEvents;
+
+// ---------------------------------------------------------------------------
+// QueryClient (singleton per component tree)
+// ---------------------------------------------------------------------------
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000,
+    },
+  },
+});
+
+// ---------------------------------------------------------------------------
+// Error Boundary
+// ---------------------------------------------------------------------------
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class EditorErrorBoundary extends Component<
+  React.PropsWithChildren<{ onError?: (e: Error) => void }>,
+  ErrorBoundaryState
+> {
+  constructor(props: React.PropsWithChildren<{ onError?: (e: Error) => void }>) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo): void {
+    console.error('[QuestionsetEditor] Unhandled error:', error, info);
+    this.props.onError?.(error);
+  }
+
+  handleRetry = (): void => {
+    this.setState({ hasError: false, error: null });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className={styles.errorState} role="alert">
+          <p className={styles.errorTitle}>Something went wrong</p>
+          <p className={styles.errorMessage}>{this.state.error?.message ?? 'An unexpected error occurred.'}</p>
+          <button className={styles.retryButton} onClick={this.handleRetry}>
+            Retry
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Inner editor — calls init hook and renders shell when ready
+// ---------------------------------------------------------------------------
+
+interface InnerEditorProps {
+  config: IEditorConfig;
+  events: IEditorEvents;
+}
+
+function InnerEditor({ config, events }: InnerEditorProps) {
+  // Host event callbacks (onQuestionSaved/onHierarchySaved) + telemetry START/END.
+  const setEventHandlers = useEditorStore((s) => s.setEventHandlers);
+  useEffect(() => {
+    setEventHandlers({
+      onQuestionSaved: events.onQuestionSaved,
+      onHierarchySaved: events.onHierarchySaved,
+    });
+    return () => setEventHandlers({});
+  }, [events.onQuestionSaved, events.onHierarchySaved, setEventHandlers]);
+  useTelemetry();
+
+  const { isLoading, error, isReady } = useEditorInit({
+    config,
+    onError: events.onError,
+  });
+
+  if (isLoading) {
+    return (
+      <div className={styles.loadingState}>
+        <span className={styles.loadingSpinner} aria-hidden="true" />
+        <span>Loading editor...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.errorState} role="alert">
+        <p className={styles.errorTitle}>Failed to load editor</p>
+        <p className={styles.errorMessage}>{error.message}</p>
+      </div>
+    );
+  }
+
+  if (!isReady) return null;
+
+  return <SplitEditorShell events={events} />;
+}
+
+// ---------------------------------------------------------------------------
+// Public component
+// ---------------------------------------------------------------------------
+
+// When the component is used as a web component, HTML attributes arrive as
+// JSON strings. This helper parses them back to objects so the rest of the
+// component can treat all inputs uniformly.
+function parseJsonProp<T>(val: T | string | undefined): T | undefined {
+  if (typeof val === 'string') {
+    try { return JSON.parse(val) as T; } catch { return undefined; }
+  }
+  return val as T | undefined;
+}
+
+export function QuestionsetEditor(props: QuestionsetEditorProps) {
+  const { onToolbarEvent, onQuestionSaved, onHierarchySaved, onError, ...rest } = props;
+
+  // Normalize: attributes from the WC arrive as JSON strings; React usage passes objects.
+  const editorConfig = {
+    ...rest,
+    context:  parseJsonProp(rest.context)  ?? rest.context,
+    config:   parseJsonProp(rest.config)   ?? rest.config,
+    metadata: parseJsonProp(rest.metadata) ?? rest.metadata,
+  };
+
+  const config: IEditorConfig = editorConfig as IEditorConfig;
+  const events: IEditorEvents = { onToolbarEvent, onQuestionSaved, onHierarchySaved, onError };
+
+  // Whole-editor layout direction follows the UI language (ar = rtl).
+  const uiLanguage = useEditorStore((s) => s.uiLanguage);
+
+  return (
+    <EditorErrorBoundary onError={onError}>
+      <QueryClientProvider client={queryClient}>
+        <div className={styles.root} dir={uiLanguage === 'ar' ? 'rtl' : 'ltr'} lang={uiLanguage}>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                fontSize: '14px',
+                borderRadius: '6px',
+              },
+            }}
+          />
+          <InnerEditor config={config} events={events} />
+        </div>
+      </QueryClientProvider>
+    </EditorErrorBoundary>
+  );
+}
+
+export default QuestionsetEditor;
