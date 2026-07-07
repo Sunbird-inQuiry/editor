@@ -85,28 +85,29 @@ const GROUP_SECTION_MAP: Record<string, string> = {
   // Section (unitMetadata) — no groups, assigned by field code below
 };
 
-// unitMetadata fields that belong to the Behaviour tab.
-const UNIT_BEHAVIOUR_FIELDS = new Set([
-  'maxQuestions', 'shuffle', 'showFeedback', 'showSolutions', 'showHint',
+// Field codes that always belong to the Behaviour tab, regardless of how (or
+// whether) the category definition groups them.
+const BEHAVIOUR_FIELDS = new Set([
+  'maxQuestions', 'shuffle', 'showFeedback', 'showSolutions',
+  'showHint', 'showHints', 'maxTime', 'maxAttempts', 'requiresSubmit',
+  'summaryType', 'showTimer', 'allowSkip', 'navigationMode',
 ]);
 
-function parseForm(form: unknown, isUnit = false): ICategoryField[] {
+function parseForm(form: unknown): ICategoryField[] {
   const properties = (form as { properties?: unknown })?.properties;
   if (!Array.isArray(properties)) return [];
   const fields: ICategoryField[] = [];
+  const sectionFor = (code: string, groupSection: string) =>
+    BEHAVIOUR_FIELDS.has(code) ? 'Behaviour' : groupSection;
   for (const item of properties as Array<Record<string, unknown>>) {
     if (Array.isArray(item.fields)) {
       const groupName = (item.name as string) ?? (item.title as string) ?? '';
       const section = GROUP_SECTION_MAP[groupName] ?? groupName ?? 'Details';
       for (const f of item.fields as Array<Record<string, unknown>>) {
-        if (f.code) fields.push(normalizeField(f, section));
+        if (f.code) fields.push(normalizeField(f, sectionFor(f.code as string, section)));
       }
     } else if (item.code) {
-      const code = item.code as string;
-      const section = isUnit
-        ? (UNIT_BEHAVIOUR_FIELDS.has(code) ? 'Behaviour' : 'Details')
-        : 'Details';
-      fields.push(normalizeField(item, section));
+      fields.push(normalizeField(item, sectionFor(item.code as string, 'Details')));
     }
   }
   return fields.sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
@@ -167,7 +168,7 @@ export async function getCategoryDefinition(
 
   return {
     rootForm: [...otherFields, ...sortedBehaviour],
-    unitForm: parseForm(forms.unitMetadata, true),
+    unitForm: parseForm(forms.unitMetadata),
     childForm: parseForm(forms.childMetadata ?? forms.questionMetadata),
     searchForm: parseForm(forms.search ?? forms.searchConfig),
     relationalForm: parseForm(forms.relationalMetadata),
