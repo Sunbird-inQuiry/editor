@@ -33,7 +33,7 @@ export async function searchAssets(params: {
 }): Promise<{ items: IAssetItem[]; count: number }> {
   // Old editor's questionService.getAssetMedia request shape.
   const filters: Record<string, unknown> = {
-    contentType: 'Asset',
+    primaryCategory: 'Asset',
     compatibilityLevel: { min: 1, max: 2 },
     status: ['Live'],
     mediaType: [params.mediaType],
