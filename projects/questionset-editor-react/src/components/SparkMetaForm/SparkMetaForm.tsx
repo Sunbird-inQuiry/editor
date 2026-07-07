@@ -482,16 +482,18 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
           || field.span === 'full';
         const fieldClass = [styles.field, isFullWidth ? styles.fieldFull : ''].filter(Boolean).join(' ');
 
-        // showTimer: separator above + no separate label (label is inline with checkbox)
+        // showTimer: separator above
         const isShowTimer = field.code === 'showTimer';
+        // Checkboxes (and showTimer's custom row) carry their label inline —
+        // a separate uppercase header would duplicate it.
+        const hideLabel = isShowTimer || field.inputType === 'checkbox';
 
         return (
           <div key={field.code} className={fieldClass}>
             {isShowTimer && (
               <div style={{ gridColumn: '1 / -1', borderTop: '1px solid var(--sb-border)', margin: '8px 0 4px' }} />
             )}
-            {/* Label — hidden for showTimer (text shown inside the checkbox row) */}
-            {!isShowTimer && (
+            {!hideLabel && (
             <label className={styles.label} htmlFor={fieldId}>
               {field.label}
               {field.required && (
