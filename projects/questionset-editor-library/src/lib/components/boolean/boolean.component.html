@@ -45,7 +45,7 @@
                     [placeholder]="'Add score here'"
                     (change)="setScore($event.target.value,i)"
                     type="number"
-                    [value]="mapping[i]?.outcomes?.score"
+                    [value]="mapping[i]?.score"
                     />
                 }
               </div>
@@ -64,11 +64,11 @@
             <label class="px-16 py-8 fs-0-92 mb-0 ckeditor-tool__label width-100">Option {{ i+1 }}</label>
             <div class="ckeditor-tool__solution__body">
               <p class="fs-0-785 p-16" [innerHTML]="option.body  | sanitizeHtml"></p>
-              @if (editorState.answer === i.toString()) {
+              @if (editorState.answer === i) {
                 <div class="mcq-checkbox-answer">
                   <div class="sb-checkbox sb-checkbox-primary mr-auto selected">
-                    <input type="checkbox" id="check1" name="example" disabled checked>
-                    <label for="check1">{{configService.labelConfig?.lbl?.correctAns}}</label>
+                    <input type="checkbox" id="check_{{ i + 1 }}" name="example" disabled checked>
+                    <label for="check_{{ i + 1 }}">{{configService.labelConfig?.lbl?.correctAns}}</label>
                   </div>
                 </div>
               }
@@ -87,7 +87,7 @@
                     [placeholder]="'Add score here'"
                     (change)="setScore($event.target.value,i)"
                     type="number"
-                    [value]="mapping[i]?.outcomes?.score"
+                    [value]="mapping[i]?.score"
                     disabled
                     />
                 }

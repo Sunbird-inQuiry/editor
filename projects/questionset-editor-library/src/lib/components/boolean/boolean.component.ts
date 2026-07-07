@@ -256,7 +256,13 @@ export class BooleanComponent implements OnInit, OnChanges {
     } else {
       this.selectedOptions = [];
     }
-    
+
+    // Sync option.selected so the checkbox binding stays consistent
+    // (addSelectedOptions sets it on init but onOptionChange didn't update it).
+    _.forEach(this.editorState.options, (option, index) => {
+      option['selected'] = _.includes(this.selectedOptions, Number(index));
+    });
+
     if (this.selectedOptions.length === 1) {
       this.editorState.answer = this.selectedOptions[0];
     } else {
@@ -267,13 +273,12 @@ export class BooleanComponent implements OnInit, OnChanges {
   }
 
   setScore(value, scoreIndex) {
-    const obj = {
-      response: scoreIndex,
-      outcomes: {
-        score: value,
-      },
+    // Use the same { value, score } shape as setMapping so the mapping
+    // array stays consistent regardless of which path wrote it.
+    this.mapping[scoreIndex] = {
+      value: scoreIndex,
+      score: parseFloat(value) || 0,
     };
-    this.mapping[scoreIndex] = obj;
     this.editorDataHandler();
   }
 }
