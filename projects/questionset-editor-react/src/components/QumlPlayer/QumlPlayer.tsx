@@ -32,14 +32,9 @@ interface QumlPlayerProps {
 }
 
 function loadPlayerScript(src: string): Promise<void> {
-  // Player styles ship separately (old Angular app included them globally).
-  const cssHref = src.replace(/\.js$/, '-styles.css');
-  if (!document.querySelector(`link[href="${cssHref}"]`)) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = cssHref;
-    document.head.appendChild(link);
-  }
+  // No global stylesheet link: the React player renders in shadow DOM with
+  // its own styles, and its styles.css contains unscoped rules that leak
+  // into (and break) the editor layout once injected into document.head.
   return new Promise((resolve, reject) => {
     if (customElements.get(PLAYER_TAG)) return resolve();
     const onDefined = () => customElements.whenDefined(PLAYER_TAG).then(() => resolve(), reject);
