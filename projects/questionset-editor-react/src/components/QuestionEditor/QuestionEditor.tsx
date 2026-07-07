@@ -380,6 +380,15 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
     if (!isReadOnly && (isDirty || isUnsavedNew)) setConfirmBackOpen(true);
     else onBack?.();
   };
+  // Leaving a never-saved question discards it — the temp node must not stay
+  // in the tree (a later hierarchy save would create an empty question).
+  const discardAndBack = () => {
+    setConfirmBackOpen(false);
+    if (activeQuestion?.identifier?.startsWith('temp-')) {
+      useTreeStore.getState().deleteNode(activeQuestion.identifier);
+    }
+    onBack?.();
+  };
   // Navigate back to the set only when the creation/update succeeded.
   const handleSave = async () => { if (await save()) onBack?.(); };
 
@@ -549,7 +558,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
               <button type="button" className="ce-btn ghost" onClick={() => setConfirmBackOpen(false)}>
                 {L('button_labels.no_btn_label', 'No')}
               </button>
-              <button type="button" className="ce-btn danger" onClick={() => { setConfirmBackOpen(false); onBack?.(); }}>
+              <button type="button" className="ce-btn danger" onClick={discardAndBack}>
                 {L('button_labels.yes_btn_label', 'Yes, go back')}
               </button>
             </div>
