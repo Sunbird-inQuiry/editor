@@ -110,8 +110,13 @@ const Modal: React.FC<ModalProps> = ({
     .filter(Boolean)
     .join(' ');
 
+  // Portal into the editor root when present — the sb/accent CSS variables
+  // are scoped to .ce, so a body-level portal loses the theme (e.g. the
+  // checked checkbox renders white-on-white).
   const portalTarget =
-    container ?? (typeof document !== 'undefined' ? document.body : null);
+    container ?? (typeof document !== 'undefined'
+      ? (document.querySelector('.ce') ?? document.body)
+      : null);
 
   if (!portalTarget) return null;
 
