@@ -22,7 +22,7 @@ export const URLS = {
     commentRead: 'questionset/v2/comment/read',
     commentUpdate: 'questionset/v2/comment/update',
     /** Extra read fields absent from the hierarchy response. */
-    defaultFields: 'instructions,outcomeDeclaration',
+    defaultFields: 'instructions,outcomeDeclaration,showTimer,timeLimits',
   },
   question: {
     read: 'question/v2/read',
