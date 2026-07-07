@@ -1,7 +1,6 @@
 /**
  * QumlPlayer — full-screen preview using the Sunbird QuML Player web
- * component (@project-sunbird/sunbird-quml-player-web-component@6.0.10,
- * until the new player is published).
+ * component (@project-sunbird/sunbird-quml-player-web-component-react).
  *
  * Mirrors the old editor's two preview flows:
  *  - Full question-set preview (toolbar): fresh hierarchy read → player
@@ -144,6 +143,10 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
         if (cancelled || !hostRef.current) return;
         hostRef.current.innerHTML = '';
         const el = document.createElement(PLAYER_TAG) as HTMLElement & { playerConfig?: unknown };
+        // The React player parses the player-config ATTRIBUTE once in
+        // connectedCallback — it must be set before appending. The property
+        // is kept for the old Angular WC bundle (playerScriptUrl override).
+        el.setAttribute('player-config', JSON.stringify(playerConfig));
         el.playerConfig = playerConfig;
         hostRef.current.appendChild(el);
         setStatus('ready');

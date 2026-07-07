@@ -61,3 +61,5 @@ project-sunbird-sunbird-questionset-editor-web-component-*
 /projects/questionset-editor-react/.env.local
 /projects/questionset-editor-react/.env.*.local
 /projects/questionset-editor-react/node_modules/.vite
+/projects/questionset-editor-react/public/assets/sunbird-quml-player.js
+/projects/questionset-editor-react/public/assets/sunbird-quml-player-styles.css
