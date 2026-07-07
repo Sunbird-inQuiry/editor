@@ -18,14 +18,26 @@ export type LabelConfig = Record<string, Record<string, unknown>>;
 
 const OVERRIDES: Record<string, unknown> = { ar, fr, hi, pt };
 
-function deepMerge(base: LabelConfig, over: unknown): LabelConfig {
-  const out: LabelConfig = { ...base };
-  for (const [section, values] of Object.entries((over ?? {}) as Record<string, unknown>)) {
-    if (values && typeof values === 'object') {
-      out[section] = { ...(out[section] ?? {}), ...(values as Record<string, unknown>) };
-    }
+const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+  !!v && typeof v === 'object' && !Array.isArray(v);
+
+// Recursive — locale files may only partially cover nested sections
+// (e.g. messages.error); missing keys must keep their English fallbacks.
+function deepMergeValues(
+  base: Record<string, unknown>,
+  over: Record<string, unknown>,
+): Record<string, unknown> {
+  const out = { ...base };
+  for (const [key, value] of Object.entries(over)) {
+    out[key] = isPlainObject(value) && isPlainObject(out[key])
+      ? deepMergeValues(out[key], value)
+      : value;
   }
   return out;
+}
+
+function deepMerge(base: LabelConfig, over: unknown): LabelConfig {
+  return deepMergeValues(base, isPlainObject(over) ? over : {}) as LabelConfig;
 }
 
 let current: LabelConfig = en as unknown as LabelConfig;

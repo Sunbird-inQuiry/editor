@@ -42,7 +42,10 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
   const handleToolbarEvent = useCallback(
     async (event: { action: ToolbarAction; data?: unknown }) => {
       const { action, data } = event;
-      events.onToolbarEvent?.(event);
+      // 'back' with unsaved changes is NOT forwarded yet — the host would
+      // navigate away before the prompt shows; it's emitted once the prompt
+      // resolves (save/discard handlers below).
+      if (!(action === 'back' && isDirty)) events.onToolbarEvent?.(event);
       // Old editor logs an INTERACT per toolbar action.
       if (!['onFormValueChange', 'onFormStatusChange'].includes(action)) {
         telemetryInteract(action);
@@ -100,6 +103,7 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
   }, []);
 
   const questionEditorOpen = useUiStore((s) => s.questionEditorOpen);
+  const hasContent = useTreeStore((s) => s.treeData.length > 0);
 
   return (
     <div className="ce">
@@ -141,7 +145,7 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
         {/* Center — Contextual editor */}
         <main className="ce-main">
           <ContextualEditor
-            hasContent={useTreeStore.getState().treeData.length > 0}
+            hasContent={hasContent}
             onToolbarEvent={handleToolbarEvent}
           />
         </main>

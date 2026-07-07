@@ -252,6 +252,8 @@ export const useTreeStore = create<TreeState>((set, get) => ({
       treeData: insertIntoParent(state.treeData, parentId, newNode),
       treeCache: { ...state.treeCache, [newId]: { ...newNode.metadata, isNew: true } },
     }));
+    // Unsaved-changes guard must fire for a newly added node too.
+    useEditorStore.getState().setIsDirty(true);
 
     setTimeout(() => get().selectNode(newId), 0);
     return newId;
@@ -285,10 +287,19 @@ export const useTreeStore = create<TreeState>((set, get) => ({
   },
 
   deleteNode: (id) => {
-    set((state) => ({
-      treeData: removeNode(state.treeData, id),
-      selectedNodeId: state.selectedNodeId === id ? null : state.selectedNodeId,
-    }));
+    set((state) => {
+      // Drop the node's unsaved edits — a stale treeCache entry would be
+      // merged back into the payload if the same identifier is re-linked.
+      const { [id]: _removed, ...restCache } = state.treeCache;
+      const wasSelected = state.selectedNodeId === id;
+      return {
+        treeData: removeNode(state.treeData, id),
+        treeCache: restCache,
+        selectedNodeId: wasSelected ? null : state.selectedNodeId,
+        activeNodeMeta: wasSelected ? undefined : state.activeNodeMeta,
+        breadcrumb: wasSelected ? [] : state.breadcrumb,
+      };
+    });
   },
 
   reorderChildren: (parentId, fromIndex, toIndex) => {

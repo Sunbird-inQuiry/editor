@@ -6,6 +6,7 @@
  * HTML for body/answer and i18n blocks for REO.
  */
 import { normalizeI18n } from './i18nField';
+import { htmlToText } from './html';
 import type { I18nMap } from './i18nField';
 import type { II18nText } from '../store/question.store';
 import type { QuestionType, IOption, IMatchPair } from '../types/question';
@@ -28,7 +29,8 @@ const dropEmpty = (m: I18nMap | undefined): I18nMap =>
 const hasExtraLangs = (m: I18nMap): boolean => Object.keys(m).some((l) => l !== 'en');
 
 function reoWords(sentence: string): string[] {
-  return sentence.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean);
+  // Entity-decoding extraction, same as useSaveQuestion/ReoEditor.
+  return htmlToText(sentence).trim().split(/\s+/).filter(Boolean);
 }
 
 export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {

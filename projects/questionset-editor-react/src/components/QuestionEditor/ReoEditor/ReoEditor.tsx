@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import ContentEditable from '../../shared/ContentEditable';
 import { useQuestionStore } from '../../../store/question.store';
 import { useLabels } from '../../../hooks/useLabels';
+import { htmlToText } from '../../../utils/html';
 
 interface ReoEditorProps { readOnly?: boolean; }
 
@@ -13,11 +14,7 @@ export default function ReoEditor({ readOnly = false }: ReoEditorProps) {
 
   // Extract plain text for word chips — the DOM decodes entities (&nbsp; from
   // trailing spaces) that a tag-strip regex would leave behind as literal text.
-  const plainText = useMemo(() => {
-    const el = document.createElement('div');
-    el.innerHTML = sentence;
-    return (el.textContent ?? '').trim();
-  }, [sentence]);
+  const plainText = useMemo(() => htmlToText(sentence).trim(), [sentence]);
   const words = plainText.split(/\s+/).filter(Boolean);
 
   // Deterministic shuffle so chips don't jump on every keystroke

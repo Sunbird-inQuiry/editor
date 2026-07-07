@@ -20,6 +20,7 @@ import { useSaveHierarchy } from './useSaveHierarchy';
 import { getUserId } from '../utils/context';
 import { applyContentI18n } from '../utils/i18nSerialize';
 import { resolveQuestionType } from '../registry';
+import { htmlToText } from '../utils/html';
 import type { QuestionType, IOption, IMatchPair } from '../types/question';
 
 // ---------------------------------------------------------------------------
@@ -37,7 +38,9 @@ function genUuid(): string {
 // body HTML — old editor wraps question in specific template divs
 // ---------------------------------------------------------------------------
 function parseBlanks(questionHtml: string): string[] {
-  return [...questionHtml.matchAll(/\[\[(.+?)\]\]/g)].map((m) => m[1]!);
+  // Extract from entity-decoded plain text — inline markup (<strong>) or
+  // &nbsp; inside [[ ]] would otherwise become part of the correct answer.
+  return [...htmlToText(questionHtml).matchAll(/\[\[(.+?)\]\]/g)].map((m) => m[1]!.trim());
 }
 
 function buildBodyHtml(type: QuestionType, questionHtml: string): string {
@@ -79,7 +82,9 @@ function seqOrder(sequence: string[]): string[] {
 // REO: sentence split into word options (A, B, C…) — mirrors old reorder
 // component; old payloads also embed an i18n.en copy of options/correctResponse.
 function reoWords(sentence: string): string[] {
-  return sentence.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean);
+  // Same entity-decoding extraction as the ReoEditor chips — a tag-strip
+  // regex would serialize `The&nbsp;cat` as one option.
+  return htmlToText(sentence).trim().split(/\s+/).filter(Boolean);
 }
 function reoOptions(sentence: string) {
   return seqOptions(reoWords(sentence));
@@ -317,7 +322,7 @@ export function useSaveQuestion() {
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
     hints, hintText, solutionText, solutionType, solutionAsset, solutionUUID,
     answerText, sentence, difficultyLevel, bloomsLevel, maxScore,
-    isPartialScore, evalUnordered,
+    isPartialScore, evalUnordered, layout,
     setIsDirty, setIsSaving,
   } = useQuestionStore();
 
@@ -450,7 +455,7 @@ export function useSaveQuestion() {
           },
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
-          ...(questionType === 'mcq' ? { templateId: 'mcq-vertical' } : {}),
+          ...(questionType === 'mcq' ? { templateId: `mcq-${layout}` } : {}),
           ...(questionType === 'ftb' ? {
             isPartialScore,
             evalUnordered,
@@ -465,7 +470,7 @@ export function useSaveQuestion() {
           } : {}),
           ...(questionType === 'seq' ? {
             correctOrder: seqOrder(sequence),
-            templateId: 'seq-vertical',
+            templateId: `seq-${layout === 'horizontal' ? 'horizontal' : 'vertical'}`,
             ...(isPartialScore ? { isPartialScore: true } : {}),
             scoringMode: 'responseProcessing',
             responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
@@ -527,6 +532,7 @@ export function useSaveQuestion() {
         updateNode(selectedNodeId, { name: questionName, ...questionMeta });
         if (await saveHierarchy()) {
           notifySuccess('Question saved');
+          setIsDirty(false);
           useEditorStore.getState().eventHandlers.onQuestionSaved?.({ identifier: selectedNodeId, ...questionMeta });
           return true;
         }
@@ -545,7 +551,7 @@ export function useSaveQuestion() {
           },
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
-          ...(questionType === 'mcq' ? { templateId: 'mcq-vertical' } : {}),
+          ...(questionType === 'mcq' ? { templateId: `mcq-${layout}` } : {}),
           ...(questionType === 'ftb' ? {
             isPartialScore,
             evalUnordered,
@@ -560,7 +566,7 @@ export function useSaveQuestion() {
           } : {}),
           ...(questionType === 'seq' ? {
             correctOrder: seqOrder(sequence),
-            templateId: 'seq-vertical',
+            templateId: `seq-${layout === 'horizontal' ? 'horizontal' : 'vertical'}`,
             ...(isPartialScore ? { isPartialScore: true } : {}),
             scoringMode: 'responseProcessing',
             responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
@@ -624,6 +630,7 @@ export function useSaveQuestion() {
         updateNode(questionUuid, { name: questionName, ...questionMeta });
         if (await saveHierarchy()) {
           notifySuccess('Question created');
+          setIsDirty(false);
           useEditorStore.getState().eventHandlers.onQuestionSaved?.({ identifier: questionUuid, ...questionMeta });
           return true;
         }
@@ -640,7 +647,7 @@ export function useSaveQuestion() {
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
     solutionText, solutionType, solutionAsset, solutionUUID,
     answerText, sentence, hints, hintText, difficultyLevel, bloomsLevel, maxScore,
-    isPartialScore, evalUnordered,
+    isPartialScore, evalUnordered, layout,
     config, selectedNodeId, updateNode, replaceNodeId, treeData, saveHierarchy,
     setIsDirty, setIsSaving,
   ]);

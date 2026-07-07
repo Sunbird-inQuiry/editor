@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { Icon } from '../../shared/Icon';
 import ContentEditable from '../../shared/ContentEditable';
 import { useQuestionStore } from '../../../store/question.store';
@@ -7,9 +7,9 @@ import { useLabels } from '../../../hooks/useLabels';
 interface McqEditorProps { readOnly?: boolean; }
 
 export default function McqEditor({ readOnly = false }: McqEditorProps) {
-  const { options, setOptions } = useQuestionStore();
+  // Layout lives in the store so useSaveQuestion serializes it as templateId.
+  const { options, setOptions, layout, setLayout } = useQuestionStore();
   const L = useLabels();
-  const [layout, setLayout] = useState<'vertical' | 'grid' | 'horizontal'>('vertical');
   const nextId = useRef(Date.now());
 
   const addOption = () =>

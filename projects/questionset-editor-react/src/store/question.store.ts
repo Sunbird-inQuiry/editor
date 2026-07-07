@@ -70,6 +70,8 @@ interface QuestionState {
   showSolutions: boolean;
   isPartialScore: boolean;
   evalUnordered: boolean;
+  /** MCQ/SEQ option layout — serialized as templateId (mcq-grid, seq-horizontal…). */
+  layout: 'vertical' | 'grid' | 'horizontal';
   // Actions
   setActiveQuestion: (question: IQuestion | null) => void;
   setQuestionType: (type: QuestionType) => void;
@@ -103,6 +105,7 @@ interface QuestionState {
   setShowSolutions: (v: boolean) => void;
   setIsPartialScore: (v: boolean) => void;
   setEvalUnordered: (v: boolean) => void;
+  setLayout: (v: 'vertical' | 'grid' | 'horizontal') => void;
   setIsDirty: (dirty: boolean) => void;
   setIsSaving: (saving: boolean) => void;
   resetQuestion: () => void;
@@ -128,6 +131,7 @@ const DEFAULT_META = {
   // Old editor defaults for FTB scoring config
   isPartialScore: true,
   evalUnordered: true,
+  layout: 'vertical' as const,
 };
 
 /** Merge the currently-visible field text into the active language's slots. */
@@ -201,20 +205,13 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
 
   setActiveQuestion: (question) => {
     if (!question) {
-      set({
-        activeQuestion: null,
-        questionType: null,
-        options: DEFAULT_OPTIONS,
-        matchPairs: [],
-        sequence: [],
-        hints: [],
-        solutionText: '',
-        questionBody: '',
-        contentLang: 'en',
-        i18nText: EMPTY_I18N,
-        isDirty: false,
-        ...DEFAULT_META,
-      });
+      // Full reset (same field set as resetQuestion) — a partial reset leaves
+      // the previous question's answer/hint/solution to be rendered into, and
+      // saved with, the wrong question. Preserve isSaving: node id swaps
+      // during a save can route through here mid-flight.
+      const saving = get().isSaving;
+      get().resetQuestion();
+      if (saving) set({ isSaving: true });
       return;
     }
     set({
@@ -299,6 +296,10 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
       showSolutions: question.showSolutions ?? DEFAULT_META.showSolutions,
       isPartialScore: question.isPartialScore ?? DEFAULT_META.isPartialScore,
       evalUnordered: question.evalUnordered ?? DEFAULT_META.evalUnordered,
+      // Restore the authored MCQ/SEQ layout from the saved templateId
+      layout: question.templateId?.endsWith('-grid') ? 'grid'
+        : question.templateId?.endsWith('-horizontal') ? 'horizontal'
+        : 'vertical',
     });
   },
 
@@ -364,6 +365,7 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
   setShowSolutions: (v) => set({ showSolutions: v, isDirty: true }),
   setIsPartialScore: (v) => set({ isPartialScore: v, isDirty: true }),
   setEvalUnordered: (v) => set({ evalUnordered: v, isDirty: true }),
+  setLayout: (v) => set({ layout: v, isDirty: true }),
 
   setIsDirty: (dirty) => set({ isDirty: dirty }),
   setIsSaving: (saving) => set({ isSaving: saving }),

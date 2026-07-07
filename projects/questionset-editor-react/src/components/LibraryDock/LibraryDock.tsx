@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import {
   Search,
@@ -67,12 +67,18 @@ let _toastIdCounter = 0;
 
 function useToast() {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const timersRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
 
   const show = useCallback((text: string, kind: 'success' | 'error' = 'success') => {
     const id = ++_toastIdCounter;
     setToasts((prev) => [...prev, { id, text, kind }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 2800);
+    timersRef.current.push(
+      setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 2800),
+    );
   }, []);
+
+  // Dismiss timers must not set state after unmount.
+  useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
 
   return { toasts, show };
 }
@@ -188,6 +194,9 @@ export function LibraryDock({ onCollapse }: LibraryDockProps) {
   // ── Search input local state (controlled) ─────────────────────────────────
   const [inputValue, setInputValue] = useState(searchQuery);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  // A pending debounced search must not fire into the library store after
+  // the dock unmounts.
+  useEffect(() => () => clearTimeout(debounceRef.current), []);
 
   // ── Advanced filters local state ──────────────────────────────────────────
   const [advancedOpen, setAdvancedOpen] = useState(false);

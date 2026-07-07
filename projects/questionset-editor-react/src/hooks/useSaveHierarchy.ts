@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useTreeStore } from '../store/tree.store';
 import { useEditorStore } from '../store/editor.store';
 import { updateHierarchy } from '../api/hierarchy';
@@ -163,19 +163,24 @@ function buildSavePayload(
 
 export function useSaveHierarchy() {
   const [isSaving, setIsSaving] = useState(false);
+  // Call-time in-flight guard — closure state is stale until React re-renders,
+  // so a double-click could send two hierarchy updates (duplicating isNew nodes).
+  const inFlight = useRef(false);
 
   const isDirty = useEditorStore((s) => s.isDirty);
+  const lastSaved = useEditorStore((s) => s.lastSaved);
   const { setIsDirty, setLastSaved } = useEditorStore();
   const config = useEditorStore((s) => s.editorConfig);
 
   const save = useCallback(async (): Promise<boolean> => {
-    if (!config || isSaving) return false;
+    if (!config || inFlight.current) return false;
     const contentId = getContentId(config.context);
     if (!contentId) return false;
 
     const channel = config.context.channel ?? '';
     const lastUpdatedBy = getUserId(config.context);
 
+    inFlight.current = true;
     setIsSaving(true);
     try {
       const rootPrimaryCategory = config.config.primaryCategory ?? 'Practice Question Set';
@@ -212,9 +217,10 @@ export function useSaveHierarchy() {
       notifyError(apiErrorMessage(e, 'Failed to save. Please try again.'));
       return false;
     } finally {
+      inFlight.current = false;
       setIsSaving(false);
     }
-  }, [config, isSaving, setIsDirty, setLastSaved]);
+  }, [config, setIsDirty, setLastSaved]);
 
-  return { save, isSaving, isDirty, lastSaved: useEditorStore.getState().lastSaved };
+  return { save, isSaving, isDirty, lastSaved };
 }
