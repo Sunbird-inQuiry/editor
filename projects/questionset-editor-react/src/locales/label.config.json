@@ -372,6 +372,11 @@
     "questionOne": "question",
     "questionMany": "questions",
     "markOne": "mark",
-    "markMany": "marks"
+    "markMany": "marks",
+    "unsavedChanges": "Unsaved Changes",
+    "unsavedChangesMsg": "You have unsaved changes. What would you like to do?",
+    "stay": "Stay",
+    "discardChanges": "Discard Changes",
+    "saveLeave": "Save & Leave"
   }
 }
