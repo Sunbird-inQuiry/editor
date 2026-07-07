@@ -9,7 +9,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { QuestionType } from '../../types/question';
-import { QUESTION_TYPE_LABELS } from '../../types/question';
+import { resolveQuestionType } from '../../registry';
 import styles from './Badge.module.scss';
 
 // -----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ export interface BadgeProps {
   type: QuestionType;
   /** Visual size of the badge. Defaults to 'md'. */
   size?: BadgeSize;
-  /** Override the displayed label. Falls back to QUESTION_TYPE_LABELS[type]. */
+  /** Override the displayed label. Falls back to the registry's type label. */
   label?: string;
   /** When true, only renders the icon (no label text). */
   iconOnly?: boolean;
@@ -60,7 +60,7 @@ const Badge: React.FC<BadgeProps> = ({
   style,
 }) => {
   const Icon = ICON_MAP[type];
-  const displayLabel = label ?? QUESTION_TYPE_LABELS[type];
+  const displayLabel = label ?? resolveQuestionType(type)?.label ?? type.toUpperCase();
   const iconSize = size === 'sm' ? 12 : 14;
 
   const rootClass = [

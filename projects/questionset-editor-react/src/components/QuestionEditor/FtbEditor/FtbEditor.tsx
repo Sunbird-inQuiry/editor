@@ -1,16 +1,18 @@
 import React from 'react';
 import { Icon } from '../../shared/Icon';
 import { useLabels } from '../../../hooks/useLabels';
+import { htmlToText } from '../../../utils/html';
 
 interface FtbEditorProps {
-  stemText: string;  // plain text of the stem — blanks detected from [[text]]
+  stemText?: string;  // plain text of the stem — blanks detected from [[text]]
   readOnly?: boolean;
 }
 
-export default function FtbEditor({ stemText, readOnly = false }: FtbEditorProps) {
+export default function FtbEditor({ stemText = '', readOnly = false }: FtbEditorProps) {
   const L = useLabels();
-  // Extract blanks from [[text]] markers in the stem's plain text
-  const blanks = [...(stemText ?? '').matchAll(/\[\[(.+?)\]\]/g)].map(m => m[1].trim());
+  // Extract blanks from the entity-decoded plain text of the stem — inline
+  // markup or &nbsp; inside [[ ]] must not leak into the shown answers.
+  const blanks = [...htmlToText(stemText ?? '').matchAll(/\[\[(.+?)\]\]/g)].map(m => m[1].trim());
 
   return (
     <div className="ce-ed-sec">

@@ -84,7 +84,12 @@ function ImageGrid({ tab, mediaType, createdBy, cloudStorageUrls, selectedUrl, o
   const [query, setQuery]     = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Stale-request guard — out-of-order search responses must not overwrite
+  // newer results (and pagination math) with an older query's page.
+  const requestSeq = useRef(0);
+
   const load = useCallback(async (nextOffset: number, nextQuery: string, replace: boolean) => {
+    const requestId = ++requestSeq.current;
     setLoading(true);
     try {
       const { items, count: total } = await searchAssets({
@@ -94,17 +99,20 @@ function ImageGrid({ tab, mediaType, createdBy, cloudStorageUrls, selectedUrl, o
         offset:    nextOffset,
         createdBy: tab === 'my' ? createdBy : undefined,
       });
+      if (requestId !== requestSeq.current) return;
       setImages(prev => replace ? items : [...prev, ...items]);
       setCount(total);
       setOffset(nextOffset);
     } finally {
-      setLoading(false);
+      if (requestId === requestSeq.current) setLoading(false);
     }
   }, [tab, createdBy, mediaType]);
 
   useEffect(() => {
     onSelectedChange(null);
-    void load(0, query, true);
+    // Debounce keystrokes; the initial/tab-switch load fires immediately.
+    const timer = setTimeout(() => { void load(0, query, true); }, query ? 300 : 0);
+    return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, query]);
 

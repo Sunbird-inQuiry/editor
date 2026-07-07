@@ -14,6 +14,7 @@ import ImagePickerModal from './ImagePickerModal';
 import { SPECIAL_CHAR_GROUPS, ALL_CATEGORIES, type CharCategory } from './specialCharsData';
 import { useQuestionStore } from '../../store/question.store';
 import { useLabels } from '../../hooks/useLabels';
+import { escapeHtmlAttr } from '../../utils/html';
 
 const FONT_SIZES = [8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 36];
 
@@ -230,11 +231,12 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
       const inToolbar = !!toolbarRef.current?.contains(el);
       setEditorFocused(inEditor || inToolbar);
     };
+    const onFocusOut = () => setTimeout(check, 0);
     document.addEventListener('focusin', check);
-    document.addEventListener('focusout', () => setTimeout(check, 0));
+    document.addEventListener('focusout', onFocusOut);
     return () => {
       document.removeEventListener('focusin', check);
-      document.removeEventListener('focusout', check);
+      document.removeEventListener('focusout', onFocusOut);
     };
   }, []);
 
@@ -451,8 +453,10 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
             // (asset do_ id, extractable from the /assets/public content path).
             const assetId = url.match(/(do_[A-Za-z0-9]+)/)?.[1];
             const alt = url.split('/').pop()?.split('?')[0] ?? '';
+            // Attribute-encode — a quote in the asset name/url would break out
+            // of the attribute and persist injected markup in the body.
             insertAtSavedRange(
-              `<figure class="image"><img src="${url}" alt="${alt}"${assetId ? ` data-asset-variable="${assetId}"` : ''}></figure>`,
+              `<figure class="image"><img src="${escapeHtmlAttr(url)}" alt="${escapeHtmlAttr(alt)}"${assetId ? ` data-asset-variable="${assetId}"` : ''}></figure>`,
             );
             setImagePickerOpen(false);
           }}

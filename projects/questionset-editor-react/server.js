@@ -248,23 +248,27 @@ app.use([
   proxyReqOptDecorator: decorateHeaders,
 }));
 
-// Catch-all for any remaining /api, /assets, /action paths
-app.use(['/api', '/assets', '/action'], proxy(BASE_URL, {
-  https: true,
-  limit: '30mb',
-  proxyReqPathResolver(req) {
-    console.log('[proxy]', req.method, req.url);
-    return parsePath(req.url);
-  },
-  proxyReqOptDecorator: decorateHeaders,
-}));
-
-// Blob-storage assets via portal proxy
+// Blob-storage assets via portal proxy — registered BEFORE the catch-all
+// below, which also matches /assets/* and would swallow these requests.
 app.use(['/assets/public/*'], proxy(BASE_URL, {
   https: true,
   proxyReqPathResolver(req) {
     return parsePath(`https://${BASE_URL}${req.originalUrl}`);
   },
+}));
+
+// Catch-all for any remaining /api, /assets, /action paths.
+// req.url has the mount path stripped by Express — use originalUrl (with the
+// old server's /action/ → /api/ rewrite) or the prefix is silently lost.
+app.use(['/api', '/assets', '/action'], proxy(BASE_URL, {
+  https: true,
+  limit: '30mb',
+  proxyReqPathResolver(req) {
+    const url = req.originalUrl.replace(/^\/action\//, '/api/');
+    console.log('[proxy]', req.method, req.originalUrl, '→', url);
+    return parsePath(url);
+  },
+  proxyReqOptDecorator: decorateHeaders,
 }));
 
 // ── Start ─────────────────────────────────────────────────────────────────────

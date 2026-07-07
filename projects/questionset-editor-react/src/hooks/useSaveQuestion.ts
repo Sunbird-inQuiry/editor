@@ -19,7 +19,8 @@ import { useTreeStore } from '../store/tree.store';
 import { useSaveHierarchy } from './useSaveHierarchy';
 import { getUserId } from '../utils/context';
 import { applyContentI18n } from '../utils/i18nSerialize';
-import { PRIMARY_CATEGORY_MAP } from '../types/question';
+import { resolveQuestionType } from '../registry';
+import { htmlToText } from '../utils/html';
 import type { QuestionType, IOption, IMatchPair } from '../types/question';
 
 // ---------------------------------------------------------------------------
@@ -34,21 +35,12 @@ function genUuid(): string {
 }
 
 // ---------------------------------------------------------------------------
-// qType map  (old editor uses qType, not questionType)
-// ---------------------------------------------------------------------------
-const Q_TYPE: Record<QuestionType, string> = {
-  mcq: 'MCQ', sa: 'SA', ftb: 'FTB', mtf: 'MTF', seq: 'SEQ', reo: 'REO', boolean: 'BOOL',
-};
-
-const INTERACTION_TYPE: Partial<Record<QuestionType, string>> = {
-  mcq: 'choice', ftb: 'text', mtf: 'match', seq: 'order', reo: 'order', boolean: 'choice',
-};
-
-// ---------------------------------------------------------------------------
 // body HTML — old editor wraps question in specific template divs
 // ---------------------------------------------------------------------------
 function parseBlanks(questionHtml: string): string[] {
-  return [...questionHtml.matchAll(/\[\[(.+?)\]\]/g)].map((m) => m[1]!);
+  // Extract from entity-decoded plain text — inline markup (<strong>) or
+  // &nbsp; inside [[ ]] would otherwise become part of the correct answer.
+  return [...htmlToText(questionHtml).matchAll(/\[\[(.+?)\]\]/g)].map((m) => m[1]!.trim());
 }
 
 function buildBodyHtml(type: QuestionType, questionHtml: string): string {
@@ -90,7 +82,9 @@ function seqOrder(sequence: string[]): string[] {
 // REO: sentence split into word options (A, B, C…) — mirrors old reorder
 // component; old payloads also embed an i18n.en copy of options/correctResponse.
 function reoWords(sentence: string): string[] {
-  return sentence.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean);
+  // Same entity-decoding extraction as the ReoEditor chips — a tag-strip
+  // regex would serialize `The&nbsp;cat` as one option.
+  return htmlToText(sentence).trim().split(/\s+/).filter(Boolean);
 }
 function reoOptions(sentence: string) {
   return seqOptions(reoWords(sentence));
@@ -328,7 +322,7 @@ export function useSaveQuestion() {
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
     hints, hintText, solutionText, solutionType, solutionAsset, solutionUUID,
     answerText, sentence, difficultyLevel, bloomsLevel, maxScore,
-    isPartialScore, evalUnordered,
+    isPartialScore, evalUnordered, layout,
     setIsDirty, setIsSaving,
   } = useQuestionStore();
 
@@ -337,12 +331,17 @@ export function useSaveQuestion() {
   const { save: saveHierarchy } = useSaveHierarchy();
 
   const save = useCallback(async (): Promise<boolean> => {
-    if (!questionType || !selectedNodeId) return false;
+    // In-flight guard (same as useSaveHierarchy) — the Save button disables on
+    // isSaving, but only after React re-renders; block the race window here.
+    if (!questionType || !selectedNodeId || useQuestionStore.getState().isSaving) return false;
 
-    const channel = config?.context?.channel ?? '';
-    const createdBy = getUserId(config?.context);
-    const framework = config?.context?.framework ?? '';
-    const primaryCategory = PRIMARY_CATEGORY_MAP[questionType] ?? 'Multiple Choice Question';
+    const channel         = config?.context?.channel   ?? '';
+    const createdBy       = getUserId(config?.context);
+    const framework       = config?.context?.framework ?? '';
+    // qType / category / interaction come from the question type registry.
+    const typeDef = resolveQuestionType(questionType);
+    const primaryCategory = typeDef?.primaryCategory ?? 'Multiple Choice Question';
+    const qTypeValue = typeDef?.qType ?? 'MCQ';
 
     // Details-form values (childMetadata: name/Marks/…) live in treeCache —
     // they take precedence over auto-derived values, like the old editor.
@@ -365,7 +364,14 @@ export function useSaveQuestion() {
             questionType === 'reo' ? 1 :
               (Number.isFinite(formMarks) && formMarks > 0 ? formMarks : (maxScore ?? 1));
 
-    const hasInteractions = ['mcq', 'ftb', 'mtf', 'seq', 'reo', 'boolean'].includes(questionType);
+    // 'multiple' only when the score is actually per-blank — FTB always, MTF
+    // only with partial scoring (a scalar defaultValue must stay 'single',
+    // matching the old editor's mtf.component).
+    const maxScoreCardinality =
+      (questionType === 'ftb' || (questionType === 'mtf' && isPartialScore)) && blankCount > 1
+        ? 'multiple' : 'single';
+
+    const hasInteractions = !!typeDef?.interactionType;
 
     // Multilingual text (old editor i18n) — visible text merged into the
     // active language before serialization.
@@ -447,10 +453,9 @@ export function useSaveQuestion() {
             ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
             ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           },
-          body: buildBodyHtml(questionType, questionBody),
-          answer: buildAnswerHtml(questionType, options, answerText),
-          ...(questionType === 'mcq' ? { templateId: 'mcq-vertical' } : {}),
-          ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
+          body:        buildBodyHtml(questionType, questionBody),
+          answer:      buildAnswerHtml(questionType, options, answerText),
+          ...(questionType === 'mcq' ? { templateId: `mcq-${layout}` } : {}),
           ...(questionType === 'ftb' ? {
             isPartialScore,
             evalUnordered,
@@ -465,7 +470,7 @@ export function useSaveQuestion() {
           } : {}),
           ...(questionType === 'seq' ? {
             correctOrder: seqOrder(sequence),
-            templateId: 'seq-vertical',
+            templateId: `seq-${layout === 'horizontal' ? 'horizontal' : 'vertical'}`,
             ...(isPartialScore ? { isPartialScore: true } : {}),
             scoringMode: 'responseProcessing',
             responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
@@ -475,15 +480,15 @@ export function useSaveQuestion() {
             scoringMode: 'responseProcessing',
             responseProcessing: { template: 'MATCH_CORRECT' },
           } : {}),
-          maxScore: effectiveMaxScore,
-          name: questionName,
-          qType: Q_TYPE[questionType] ?? 'MCQ',
+          maxScore:    effectiveMaxScore,
+          name:        questionName,
+          qType:       qTypeValue,
           primaryCategory,
           // Old editor sends interaction fields only for interactive types —
           // SA payloads carry just interactions:{} (no interactionTypes/
           // responseDeclaration/hints keys).
           ...(hasInteractions ? {
-            interactionTypes: [INTERACTION_TYPE[questionType] ?? 'text'],
+            interactionTypes: [typeDef?.interactionType ?? 'text'],
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
@@ -493,7 +498,7 @@ export function useSaveQuestion() {
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
-              cardinality: blankCount > 1 ? 'multiple' : 'single',
+              cardinality: maxScoreCardinality,
               type: 'integer',
               defaultValue: effectiveMaxScore,
             },
@@ -527,6 +532,7 @@ export function useSaveQuestion() {
         updateNode(selectedNodeId, { name: questionName, ...questionMeta });
         if (await saveHierarchy()) {
           notifySuccess('Question saved');
+          setIsDirty(false);
           useEditorStore.getState().eventHandlers.onQuestionSaved?.({ identifier: selectedNodeId, ...questionMeta });
           return true;
         }
@@ -543,9 +549,9 @@ export function useSaveQuestion() {
             ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
             ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
           },
-          body: buildBodyHtml(questionType, questionBody),
-          answer: buildAnswerHtml(questionType, options, answerText),
-          ...(questionType === 'mcq' ? { templateId: 'mcq-vertical' } : {}),
+          body:        buildBodyHtml(questionType, questionBody),
+          answer:      buildAnswerHtml(questionType, options, answerText),
+          ...(questionType === 'mcq' ? { templateId: `mcq-${layout}` } : {}),
           ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
           ...(questionType === 'ftb' ? {
             isPartialScore,
@@ -561,7 +567,7 @@ export function useSaveQuestion() {
           } : {}),
           ...(questionType === 'seq' ? {
             correctOrder: seqOrder(sequence),
-            templateId: 'seq-vertical',
+            templateId: `seq-${layout === 'horizontal' ? 'horizontal' : 'vertical'}`,
             ...(isPartialScore ? { isPartialScore: true } : {}),
             scoringMode: 'responseProcessing',
             responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
@@ -571,15 +577,15 @@ export function useSaveQuestion() {
             scoringMode: 'responseProcessing',
             responseProcessing: { template: 'MATCH_CORRECT' },
           } : {}),
-          maxScore: effectiveMaxScore,
-          name: questionName,
-          qType: Q_TYPE[questionType] ?? 'MCQ',
+          maxScore:    effectiveMaxScore,
+          name:        questionName,
+          qType:       qTypeValue,
           primaryCategory,
           // Old editor sends interaction fields only for interactive types —
           // SA payloads carry just interactions:{} (no interactionTypes/
           // responseDeclaration/hints keys).
           ...(hasInteractions ? {
-            interactionTypes: [INTERACTION_TYPE[questionType] ?? 'text'],
+            interactionTypes: [typeDef?.interactionType ?? 'text'],
             responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
@@ -589,7 +595,7 @@ export function useSaveQuestion() {
           interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
           outcomeDeclaration: {
             maxScore: {
-              cardinality: blankCount > 1 ? 'multiple' : 'single',
+              cardinality: maxScoreCardinality,
               type: 'integer',
               defaultValue: effectiveMaxScore,
             },
@@ -625,6 +631,7 @@ export function useSaveQuestion() {
         updateNode(questionUuid, { name: questionName, ...questionMeta });
         if (await saveHierarchy()) {
           notifySuccess('Question created');
+          setIsDirty(false);
           useEditorStore.getState().eventHandlers.onQuestionSaved?.({ identifier: questionUuid, ...questionMeta });
           return true;
         }
@@ -641,7 +648,7 @@ export function useSaveQuestion() {
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
     solutionText, solutionType, solutionAsset, solutionUUID,
     answerText, sentence, hints, hintText, difficultyLevel, bloomsLevel, maxScore,
-    isPartialScore, evalUnordered,
+    isPartialScore, evalUnordered, layout,
     config, selectedNodeId, updateNode, replaceNodeId, treeData, saveHierarchy,
     setIsDirty, setIsSaving,
   ]);

@@ -395,7 +395,8 @@ export const Topbar: React.FC<TopbarProps> = ({
               className="ce-btn primary"
               type="button"
               onClick={() => setShowConfirmReview(true)}
-              disabled={buttonLoaders.saveContent || isSaving}
+              disabled={buttonLoaders.saveContent || isSaving || !isFormValid}
+              title={!isFormValid ? 'Fill all required fields before sending for review' : undefined}
             >
               <Icon name="send" size={15} />
               {L('button_labels.submit_collection_btn_label', 'Send for Review')}
@@ -409,7 +410,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 variant="primary"
                 size="sm"
                 onClick={() => openModal('publishChecklist')}
-                disabled={buttonLoaders.publishContent}
+                disabled={buttonLoaders.publishContent || !isFormValid}
                 isLoading={buttonLoaders.publishContent}
               >
                 <Icon name="check" size={14} />

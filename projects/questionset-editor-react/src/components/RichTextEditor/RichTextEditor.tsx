@@ -16,6 +16,7 @@ import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { getUserId } from '../../utils/context';
+import { escapeHtmlAttr } from '../../utils/html';
 import {
   Bold,
   Italic,
@@ -256,8 +257,14 @@ export function Toolbar({ editor, disabled, enableImages, onImageClick }: Toolba
   const addLink = () => {
     const url = window.prompt('Enter URL');
     if (!url) return;
+    // Only http/https — a javascript: href would persist as an XSS vector.
+    if (!/^https?:\/\//i.test(url.trim())) return;
     if (editor.state.selection.empty) {
-      editor.chain().focus().insertContent(`<a href="${url}">${url}</a>`).run();
+      editor.chain().focus().insertContent({
+        type: 'text',
+        text: url,
+        marks: [{ type: 'link', attrs: { href: url } }],
+      }).run();
     } else {
       editor.chain().focus().setLink({ href: url }).run();
     }
@@ -266,7 +273,7 @@ export function Toolbar({ editor, disabled, enableImages, onImageClick }: Toolba
   const insertMath = () => {
     const latex = window.prompt('Enter LaTeX expression (e.g. x^2 + y^2 = z^2)');
     if (!latex) return;
-    editor.chain().focus().insertContent(`<span data-type="inlineMath" data-latex="${latex}"></span>`).run();
+    editor.chain().focus().insertContent(`<span data-type="inlineMath" data-latex="${escapeHtmlAttr(latex)}"></span>`).run();
   };
 
   const insertChar = (ch: string) => {

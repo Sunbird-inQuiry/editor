@@ -5,7 +5,7 @@ import { useTreeStore } from '../../store/tree.store';
 import { useEditorStore } from '../../store/editor.store';
 import { useUiStore } from '../../store/ui.store';
 import type { INode } from '../../types/editor';
-import { QUESTION_TYPE_LABELS } from '../../types/question';
+import { resolveQuestionType } from '../../registry';
 import { detectNodeKind } from '../../utils/nodeKind';
 
 // ---------------------------------------------------------------------------
@@ -23,14 +23,7 @@ interface OutlineTreeProps {
 
 function shortTypeLabel(questionType?: string): string {
   if (!questionType) return '';
-  const full = QUESTION_TYPE_LABELS[questionType as keyof typeof QUESTION_TYPE_LABELS];
-  if (!full) return questionType.toUpperCase();
-  const map: Record<string, string> = {
-    'Multiple Choice': 'MCQ', 'Multi-Select': 'MSQ', 'Subjective Answer': 'SA',
-    'Fill in the Blank': 'FTB', 'Match the Following': 'MTF',
-    'Sequence': 'SEQ', 'Reorder': 'REO', 'Slider / Rating': 'SLDR',
-  };
-  return map[full] ?? questionType.toUpperCase().slice(0, 3);
+  return resolveQuestionType(questionType)?.qType ?? questionType.toUpperCase();
 }
 
 function getStatusClass(status?: string): string {

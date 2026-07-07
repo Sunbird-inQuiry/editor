@@ -10,6 +10,13 @@ export function useLibrary() {
   const store = useLibraryStore();
   const channel = useEditorStore((s) => s.editorConfig?.context?.channel ?? '');
   const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  // Monotonic request id — a slow response for an older query must not
+  // overwrite the results of a newer one.
+  const requestSeq = useRef(0);
+
+  // Clear a pending debounced search on unmount so it can't fire into the
+  // global library store after the panel closes.
+  useEffect(() => () => clearTimeout(searchTimerRef.current), []);
 
   const load = useCallback(
     async (
@@ -19,7 +26,11 @@ export function useLibrary() {
       reset = true,
       sortAZ = false,
     ) => {
-      store.setLoading(true);
+      const requestId = ++requestSeq.current;
+      // Call-time store read — the hook-snapshot `store` captured at render
+      // keeps a stale offset, which would re-request page 1 forever.
+      const state = useLibraryStore.getState();
+      state.setLoading(true);
       try {
         const filters: Record<string, unknown> = { status: ['Live'] };
         if (filter && filter !== 'all') filters['primaryCategory'] = [filter];
@@ -28,7 +39,7 @@ export function useLibrary() {
         if (advancedFilters?.gradeLevel?.length) filters['gradeLevel'] = advancedFilters.gradeLevel;
         if (advancedFilters?.subject?.length) filters['subject'] = advancedFilters.subject;
 
-        const currentOffset = reset ? 0 : store.offset;
+        const currentOffset = reset ? 0 : state.offset;
         const { content, count } = await compositeSearch({
           filters,
           query,
@@ -38,12 +49,13 @@ export function useLibrary() {
           sortBy: sortAZ ? { name: 'asc' } : { lastUpdatedOn: 'desc' },
         });
 
-        if (reset) store.setContent(content, count);
-        else store.appendContent(content, count);
+        if (requestId !== requestSeq.current) return; // stale response — a newer load superseded it
+        if (reset) state.setContent(content, count);
+        else state.appendContent(content, count);
       } catch (e) {
         console.error('[useLibrary] load error:', e);
       } finally {
-        store.setLoading(false);
+        if (requestId === requestSeq.current) useLibraryStore.getState().setLoading(false);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

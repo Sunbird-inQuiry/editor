@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Icon } from '../../shared/Icon';
 import ContentEditable from '../../shared/ContentEditable';
 import { useQuestionStore } from '../../../store/question.store';
@@ -14,7 +14,11 @@ export default function SeqEditor({ readOnly = false }: SeqEditorProps) {
   const sequence = useQuestionStore((s) => s.sequence);
   const setSequence = useQuestionStore((s) => s.setSequence);
   const setIsDirty = useQuestionStore((s) => s.setIsDirty);
-  const [layout, setLayout] = useState<'vertical' | 'horizontal'>('vertical');
+  // SEQ supports vertical/horizontal only — 'grid' (a leftover from an MCQ
+  // read) renders as vertical.
+  const storeLayout = useQuestionStore((s) => s.layout);
+  const setLayout = useQuestionStore((s) => s.setLayout);
+  const layout: 'vertical' | 'horizontal' = storeLayout === 'horizontal' ? 'horizontal' : 'vertical';
 
   // Seed starter rows without dirtying the store (dirty blocks read hydration).
   useEffect(() => {

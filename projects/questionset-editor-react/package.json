@@ -1,7 +1,7 @@
 {
   "name": "@project-sunbird/sunbird-questionset-editor-web-component-react",
   "version": "0.1.0",
-  "description": "React-based QuML QuestionSet Editor \u2014 usable as a React component or as a <sb-questionset-editor> web component in any framework.",
+  "description": "React-based QuML QuestionSet Editor — usable as a React component or as a <sb-questionset-editor> web component in any framework.",
   "keywords": [
     "sunbird",
     "quml",
@@ -69,6 +69,7 @@
     "@tiptap/react": "^3.27.1",
     "@tiptap/starter-kit": "^3.27.1",
     "axios": "^1.7.2",
+    "dompurify": "^3.4.11",
     "katex": "^0.16.21",
     "lucide-react": "^0.400.0",
     "react-arborist": "^3.4.0",

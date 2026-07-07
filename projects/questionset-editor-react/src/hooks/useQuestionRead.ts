@@ -36,7 +36,9 @@ export function useQuestionRead() {
   const enabled = !!selectedNodeId && isQuestion && selectedNodeId.startsWith('do_');
 
   const query = useQuery({
-    queryKey: ['question-read', selectedNodeId, editorMode],
+    // extraFields is part of the key — a cached read fetched before the
+    // category definition resolved would be missing the leaf-form fields.
+    queryKey: ['question-read', selectedNodeId, editorMode, extraFields.join(',')],
     queryFn: () => readQuestion(selectedNodeId!, extraFields),
     enabled,
     retry: 1,

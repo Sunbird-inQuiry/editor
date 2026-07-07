@@ -27,7 +27,11 @@ export function useFramework() {
       staleTime: 10 * 60 * 1000,
     })),
   });
-  const targetData = targetResults.map((q) => q.data).filter(Boolean) as IFramework[];
+  const targetDatas = targetResults.map((q) => q.data);
+  const targetData = targetDatas.filter(Boolean) as IFramework[];
+  // Scalar dep — an array spread would change the deps length as queries
+  // resolve (or when targetFWIds itself changes), violating the Rules of Hooks.
+  const targetKey = targetDatas.map((d) => d?.identifier ?? '').join(',');
 
   const frameworkTerms = useMemo<Map<string, Array<ITerm>>>(() => {
     const map = new Map<string, Array<ITerm>>();
@@ -43,7 +47,7 @@ export function useFramework() {
     targetData.forEach(addCategories);
     return map;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgQuery.data, ...targetData]);
+  }, [orgQuery.data, targetKey]);
 
   return {
     orgFramework: orgQuery.data,

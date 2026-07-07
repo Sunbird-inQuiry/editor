@@ -5,6 +5,7 @@
  */
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import DOMPurify from 'dompurify';
 import { Icon } from './Icon';
 import { useQuestionStore } from '../../store/question.store';
 import { useEditorStore } from '../../store/editor.store';
@@ -109,16 +110,21 @@ export default function ContentEditable({
   const contentDir: 'ltr' | 'rtl' =
     contentLang === 'ar' || uiLanguage === 'ar' ? 'rtl' : 'ltr';
 
+  // Server-loaded metadata is untrusted — sanitize before innerHTML or a
+  // stored `<img onerror=…>` executes in every editor/reviewer session.
+  const sanitize = (html: string) => DOMPurify.sanitize(html);
+
   // Seed content once on mount
   useEffect(() => {
-    if (ref.current) ref.current.innerHTML = value;
+    if (ref.current) ref.current.innerHTML = sanitize(value);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync external value
   useEffect(() => {
     if (!ref.current) return;
-    if (ref.current.innerHTML !== value) ref.current.innerHTML = value;
+    const clean = sanitize(value);
+    if (ref.current.innerHTML !== clean) ref.current.innerHTML = clean;
     // Clear float toolbar when value resets
     setFloatTarget(null);
   }, [value]);

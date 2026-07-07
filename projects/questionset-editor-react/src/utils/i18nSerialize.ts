@@ -6,6 +6,7 @@
  * HTML for body/answer and i18n blocks for REO.
  */
 import { normalizeI18n } from './i18nField';
+import { htmlToText } from './html';
 import type { I18nMap } from './i18nField';
 import type { II18nText } from '../store/question.store';
 import type { QuestionType, IOption, IMatchPair } from '../types/question';
@@ -28,7 +29,8 @@ const dropEmpty = (m: I18nMap | undefined): I18nMap =>
 const hasExtraLangs = (m: I18nMap): boolean => Object.keys(m).some((l) => l !== 'en');
 
 function reoWords(sentence: string): string[] {
-  return sentence.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).filter(Boolean);
+  // Entity-decoding extraction, same as useSaveQuestion/ReoEditor.
+  return htmlToText(sentence).trim().split(/\s+/).filter(Boolean);
 }
 
 export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {
@@ -122,9 +124,17 @@ export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {
   }
 
   // ── hint ────────────────────────────────────────────────────────────────
+  // Re-adding hints for non-English text must keep the outcomeDeclaration
+  // reference and editorState mirror consistent — useSaveQuestion omits all
+  // three when the English hint is cleared, and a hints object whose uuid
+  // isn't referenced from outcomeDeclaration is a dangling entry.
   const hintMap = dropEmpty(a.i18n.hintText);
   if (Object.keys(hintMap).length) {
-    meta.hints = { [a.hintUuid]: { ...hintMap } };
+    const hints = { [a.hintUuid]: { ...hintMap } };
+    meta.hints = hints;
+    es.hints = hints;
+    const od = meta.outcomeDeclaration as Record<string, Record<string, unknown>> | undefined;
+    if (od?.hint) od.hint.defaultValue = a.hintUuid;
   }
 
   // ── text solution ───────────────────────────────────────────────────────

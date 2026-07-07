@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { escapeHtml, escapeHtmlAttr } from '../../utils/html';
 
 interface MathModalProps {
   /** Position of the Σ toolbar button — dropdown appears below it */
@@ -64,10 +65,12 @@ export default function MathModal({ anchor, onClose, savedRange }: MathModalProp
         const latex    = data.latexFrmla?.trim();
         if (!imgURL && !latex) { onClose(); return; }
 
-        // Same as Angular editor: insert the server-rendered PNG image
+        // Same as Angular editor: insert the server-rendered PNG image.
+        // Iframe-provided strings are encoded — a quote/`<` in the formula
+        // would otherwise inject markup that gets saved into the body.
         const html = imgURL
-          ? `<img src="${imgURL}" alt="${latex ?? 'equation'}" style="vertical-align:middle;max-height:2em;" />&nbsp;`
-          : `<span>${latex}</span>&nbsp;`;
+          ? `<img src="${escapeHtmlAttr(imgURL)}" alt="${escapeHtmlAttr(latex ?? 'equation')}" style="vertical-align:middle;max-height:2em;" />&nbsp;`
+          : `<span>${escapeHtml(latex ?? '')}</span>&nbsp;`;
 
         if (savedRange) {
           insertAtRange(html, savedRange);
