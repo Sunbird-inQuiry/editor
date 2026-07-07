@@ -10,6 +10,7 @@ import { apiClient } from '../../api/client';
 import { URLS } from '../../api/urls';
 import { useEditorStore } from '../../store/editor.store';
 import { uploadAsset } from '../../api/asset';
+import { getUserFullName } from '../../utils/context';
 import styles from './AssetBrowser.module.scss';
 
 // ---------------------------------------------------------------------------
@@ -210,7 +211,10 @@ const AssetBrowser: React.FC<AssetBrowserProps> = ({
     try {
       const presignedHeaders =
         useEditorStore.getState().editorConfig?.context?.cloudStorage?.presigned_headers ?? {};
-      const url = await uploadAsset(selectedFile, channel, userId, presignedHeaders);
+      const url = await uploadAsset(
+        selectedFile, channel, userId, presignedHeaders,
+        getUserFullName(useEditorStore.getState().editorConfig?.context),
+      );
       onSelect({ url, name: assetName.trim(), id: url.match(/(do_[A-Za-z0-9]+)/)?.[1] ?? '' });
       onClose();
     } catch {

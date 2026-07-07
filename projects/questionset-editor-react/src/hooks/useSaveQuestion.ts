@@ -22,17 +22,7 @@ import { applyContentI18n } from '../utils/i18nSerialize';
 import { resolveQuestionType } from '../registry';
 import { htmlToText } from '../utils/html';
 import type { QuestionType, IOption, IMatchPair } from '../types/question';
-
-// ---------------------------------------------------------------------------
-// UUID generator
-// ---------------------------------------------------------------------------
-function genUuid(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-  });
-}
+import { v4 as genUuid } from 'uuid';
 
 // ---------------------------------------------------------------------------
 // body HTML — old editor wraps question in specific template divs

@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { apiClient } from './client';
 import { URLS } from './urls';
 
@@ -70,19 +71,26 @@ export async function createMediaAsset(
   file: File,
   channel: string,
   createdBy: string,
+  creator = '',
 ): Promise<IAssetCreateResult> {
+  // Exact old-editor body: question.service.createMediaAsset merges
+  // {primaryCategory:'Asset', language:['English'], code:uuid} with the
+  // component's {name, mediaType, mimeType, createdBy, creator, channel}.
+  // No contentType — the v4 API rejects it from the request.
   const response = await apiClient.post(URLS.asset.create, {
     request: {
       asset: {
+        primaryCategory: 'Asset',
+        language: ['English'],
+        code: uuidv4(),
         name: file.name,
-        mimeType: file.type,
-        primaryCategory: 'asset',
         mediaType: file.type.startsWith('image/') ? 'image'
                  : file.type.startsWith('video/') ? 'video'
                  : 'audio',
-        channel,
+        mimeType: file.type,
         createdBy,
-        contentType: 'Asset',
+        ...(creator ? { creator } : {}),
+        channel,
       },
     },
   });
@@ -163,8 +171,9 @@ export async function uploadAsset(
   channel: string,
   createdBy: string,
   presignedHeaders: Record<string, string> = {},
+  creator = '',
 ): Promise<string> {
-  const { identifier }   = await createMediaAsset(file, channel, createdBy);
+  const { identifier }   = await createMediaAsset(file, channel, createdBy, creator);
   const { preSignedUrl } = await getPreSignedUrl(identifier, file.name);
   await uploadToBlob(preSignedUrl, file, presignedHeaders);
   // Old editor registers the blob URL as signedURL minus the query string.
