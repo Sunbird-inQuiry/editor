@@ -13,6 +13,7 @@ import FtbEditor from '../components/QuestionEditor/FtbEditor/FtbEditor';
 import MtfEditor from '../components/QuestionEditor/MtfEditor/MtfEditor';
 import SeqEditor from '../components/QuestionEditor/SeqEditor/SeqEditor';
 import ReoEditor from '../components/QuestionEditor/ReoEditor/ReoEditor';
+import BooleanEditor from '../components/QuestionEditor/BooleanEditor/BooleanEditor';
 
 export function registerDefaultQuestionTypes(): void {
   registerQuestionType({
@@ -70,4 +71,13 @@ export function registerDefaultQuestionTypes(): void {
     icon: 'swap',
     Editor: ReoEditor,
   });
+  registerQuestionType({
+    key: 'boolean', qType: 'BOOL',
+    primaryCategory: 'Boolean Question',
+    interactionType: 'choice',
+    label: 'True / False', labelKey: 'ui.typeBoolean',
+    desc: 'Pick between true or false choices', descKey: 'ui.typeBooleanDesc',
+    icon: 'check',
+    Editor: BooleanEditor,
+});
 }

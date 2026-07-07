@@ -23,6 +23,7 @@ const ICON_MAP: Record<QuestionType, LucideIcon> = {
   mtf: Shuffle,
   seq: List,
   reo: ArrowUpDown,
+  boolean: CircleDot,
 };
 
 // -----------------------------------------------------------------------------

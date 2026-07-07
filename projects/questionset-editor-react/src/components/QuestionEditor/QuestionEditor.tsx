@@ -35,6 +35,7 @@ const STEM_HINT: Record<QuestionType, string> = {
   mtf: 'Rich text, images & equations supported',
   seq: 'Rich text, images & equations supported',
   reo: 'Rich text, images & equations supported',
+  boolean: 'Rich text, images & equations supported',
 };
 
 // ---------------------------------------------------------------------------
@@ -343,6 +344,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
     if (!detailsValid) return 'Fill all required fields in Details';
     switch (type) {
       case 'mcq':
+      case 'boolean':
         if (options.some((o) => !plain(enOf(i18nText.options[o.id], o.body)))) return 'Fill in all options (in EN)';
         if (!options.some((o) => o.isCorrect)) return 'Mark one option as the correct answer';
         return null;

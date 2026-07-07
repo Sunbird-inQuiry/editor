@@ -44,8 +44,8 @@ function parseBlanks(questionHtml: string): string[] {
 }
 
 function buildBodyHtml(type: QuestionType, questionHtml: string): string {
-  if (type === 'mcq') {
-    return `<div class='question-body' tabindex='-1'><div class='mcq-title' tabindex='0'>${questionHtml}</div><div data-choice-interaction='response1' class='mcq-vertical'></div></div>`;
+  if (type === 'mcq' || type === 'boolean') {
+    return `<div class='question-body' tabindex='-1'><div class='mcq-title' tabindex='0'>${questionHtml}</div><div data-choice-interaction='response1' class='${type === 'boolean' ? 'boolean' : 'mcq-vertical'}'></div></div>`;
   }
   if (type === 'ftb') {
     // Old editor replaces each [[answer]] blank with [[responseN]] in body.
@@ -164,7 +164,7 @@ function buildInteractions(type: QuestionType, options: IOption[], questionBody 
       },
     };
   }
-  if (type === 'mcq') {
+  if (type === 'mcq' || type === 'boolean') {
     return {
       response1: {
         type: 'choice',
@@ -244,7 +244,7 @@ function buildResponseDeclaration(
     });
     if (blanks.length) return rd;
   }
-  if (type === 'mcq') {
+  if (type === 'mcq' || type === 'boolean') {
     const correctIdx = options.findIndex(o => o.isCorrect);
     const idx = correctIdx >= 0 ? correctIdx : 0;
     return {
@@ -268,7 +268,7 @@ function buildEditorState(
   sequence: string[] = [],
   sentence = '',
 ) {
-  if (type === 'mcq') {
+  if (type === 'mcq' || type === 'boolean') {
     return {
       options: options.map((o, i) => ({ answer: !!o.isCorrect, value: { body: o.body, value: i } })),
       question: questionBody,
@@ -306,7 +306,7 @@ function buildEditorState(
 // answer HTML — correct option in old editor's answer container
 // ---------------------------------------------------------------------------
 function buildAnswerHtml(type: QuestionType, options: IOption[], answerText: string): string {
-  if (type === 'mcq') {
+  if (type === 'mcq' || type === 'boolean') {
     const correct = options.find(o => o.isCorrect);
     return `<div class='answer-container'><div class='answer-body'>${correct?.body ?? ''}</div></div>`;
   }
@@ -326,9 +326,9 @@ export function useSaveQuestion() {
     setIsDirty, setIsSaving,
   } = useQuestionStore();
 
-  const config                                          = useEditorStore((s) => s.editorConfig);
+  const config = useEditorStore((s) => s.editorConfig);
   const { selectedNodeId, updateNode, replaceNodeId, treeData } = useTreeStore();
-  const { save: saveHierarchy }                         = useSaveHierarchy();
+  const { save: saveHierarchy } = useSaveHierarchy();
 
   const save = useCallback(async (): Promise<boolean> => {
     // In-flight guard (same as useSaveHierarchy) — the Save button disables on
@@ -356,13 +356,13 @@ export function useSaveQuestion() {
     // from the details form.
     const blankCount =
       questionType === 'ftb' ? parseBlanks(questionBody).length :
-      questionType === 'mtf' ? matchPairs.length : 0;
+        questionType === 'mtf' ? matchPairs.length : 0;
     const effectiveMaxScore =
       questionType === 'ftb' && blankCount > 0 ? blankCount :
-      questionType === 'mtf' ? (isPartialScore && blankCount > 0 ? blankCount : 1) :
-      questionType === 'seq' ? (isPartialScore && sequence.length > 0 ? sequence.length : 1) :
-      questionType === 'reo' ? 1 :
-      (Number.isFinite(formMarks) && formMarks > 0 ? formMarks : (maxScore ?? 1));
+        questionType === 'mtf' ? (isPartialScore && blankCount > 0 ? blankCount : 1) :
+          questionType === 'seq' ? (isPartialScore && sequence.length > 0 ? sequence.length : 1) :
+            questionType === 'reo' ? 1 :
+              (Number.isFinite(formMarks) && formMarks > 0 ? formMarks : (maxScore ?? 1));
 
     // 'multiple' only when the score is actually per-blank — FTB always, MTF
     // only with partial scoring (a scalar defaultValue must stay 'single',
@@ -446,8 +446,8 @@ export function useSaveQuestion() {
         // Old editor always sends full metadata in nodesModified for both new
         // and modified questions — same field set, isNew:false for existing.
         const questionMeta: Record<string, unknown> = {
-          mimeType:    'application/vnd.sunbird.question',
-          media:       questionMedia,
+          mimeType: 'application/vnd.sunbird.question',
+          media: questionMedia,
           editorState: {
             ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
             ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
@@ -542,8 +542,8 @@ export function useSaveQuestion() {
         const questionUuid = genUuid();
 
         const questionMeta: Record<string, unknown> = {
-          mimeType:    'application/vnd.sunbird.question',
-          media:       questionMedia,
+          mimeType: 'application/vnd.sunbird.question',
+          media: questionMedia,
           editorState: {
             ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
             ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
@@ -552,6 +552,7 @@ export function useSaveQuestion() {
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
           ...(questionType === 'mcq' ? { templateId: `mcq-${layout}` } : {}),
+          ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
           ...(questionType === 'ftb' ? {
             isPartialScore,
             evalUnordered,

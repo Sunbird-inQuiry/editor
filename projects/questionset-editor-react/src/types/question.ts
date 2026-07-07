@@ -1,4 +1,4 @@
-export type QuestionType = 'mcq' | 'sa' | 'ftb' | 'mtf' | 'seq' | 'reo';
+export type QuestionType = 'mcq' | 'sa' | 'ftb' | 'mtf' | 'seq' | 'reo' | 'boolean';
 
 export interface IOption {
   id: string;
