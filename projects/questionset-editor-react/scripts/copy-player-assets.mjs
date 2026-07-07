@@ -13,8 +13,11 @@ mkdirSync(publicAssets, { recursive: true });
 //                             (the loader's default path, old editor parity)
 //   styles.css              → /assets/sunbird-quml-player-styles.css
 //   assets/*                → /assets/ (icons/fonts the player fetches)
-const playerPkg = resolve(root, 'node_modules', '@project-sunbird', 'sunbird-quml-player-web-component', 'assets', 'quml-player');
-if (existsSync(playerPkg)) {
+// Prefer the React player; fall back to the old Angular WC bundle if absent.
+const playerPkg = ['sunbird-quml-player-web-component-react', 'sunbird-quml-player-web-component']
+  .map((pkg) => resolve(root, 'node_modules', '@project-sunbird', pkg, 'assets', 'quml-player'))
+  .find(existsSync);
+if (playerPkg) {
   const playerJs = resolve(playerPkg, 'sunbird-quml-player.js');
   if (existsSync(playerJs)) {
     cpSync(playerJs, resolve(publicAssets, 'sunbird-quml-player.js'));
@@ -27,7 +30,7 @@ if (existsSync(playerPkg)) {
   if (existsSync(playerAssets)) {
     cpSync(playerAssets, publicAssets, { recursive: true });
   }
-  console.log('[copy-player-assets] Copied QUML player bundle + assets');
+  console.log(`[copy-player-assets] Copied QUML player bundle + assets from ${playerPkg}`);
 } else {
   console.warn('[copy-player-assets] QUML player package not found – run npm install');
 }
