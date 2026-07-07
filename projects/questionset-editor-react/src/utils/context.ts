@@ -12,6 +12,13 @@ export function getContentId(ctx?: IContext | null): string {
   return ctx?.identifier ?? ctx?.contentId ?? '';
 }
 
+/** Old editor sends context.user.fullName as the asset `creator`. */
+export function getUserFullName(ctx?: IContext | null): string {
+  const user = ctx?.user as { fullName?: string; firstName?: string; lastName?: string } | undefined;
+  return user?.fullName
+    ?? [user?.firstName, user?.lastName].filter(Boolean).join(' ');
+}
+
 /**
  * Old editor's role rule (header.component handleActionButtons): content is
  * editable in edit mode, or during org/sourcing review when the host allows

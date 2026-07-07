@@ -13,7 +13,7 @@ import { Icon } from './Icon';
 import { searchAssets, uploadAsset, type IAssetItem } from '../../api/asset';
 import { useEditorStore } from '../../store/editor.store';
 import { rewriteAssetUrl } from '../../utils/assetUrl';
-import { getUserId } from '../../utils/context';
+import { getUserId, getUserFullName } from '../../utils/context';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -240,7 +240,10 @@ function UploadTab({ mediaType, channel, createdBy, presignedHeaders, cloudStora
     setError('');
     setUploading(true);
     try {
-      const rawUrl = await uploadAsset(file, channel, createdBy, presignedHeaders);
+      const rawUrl = await uploadAsset(
+        file, channel, createdBy, presignedHeaders,
+        getUserFullName(useEditorStore.getState().editorConfig?.context),
+      );
       const url = rewriteAssetUrl(rawUrl, cloudStorageUrls);
       const id = url.match(/(do_[A-Za-z0-9]+)/)?.[1] ?? '';
       onUploaded(url, { id, name: file.name.replace(/\.[^.]+$/, '') });

@@ -5,6 +5,8 @@ import { updateHierarchy } from '../api/hierarchy';
 import type { INode } from '../types/editor';
 import { getContentId, getUserId } from '../utils/context';
 import { notifyError, apiErrorMessage } from '../utils/notify';
+import { v4 as genUuid } from 'uuid';
+
 
 function buildSavePayload(
   nodes: INode[],
@@ -77,15 +79,21 @@ function buildSavePayload(
           const { isNew: _, ...cacheEdits } = cached ?? {};
           metadata = { ...cleanMetadata({ ...(node.metadata ?? {}), ...cacheEdits }) };
         } else {
-          // New section
+          // New section — cached form edits win over creation-time metadata,
+          // and name comes last from node.name (the rename target) so it
+          // can't be overwritten by the stale 'Untitled Section' default.
+          const { isNew: _, ...cacheEdits } = cached ?? {};
           metadata = {
             mimeType: 'application/vnd.sunbird.questionset',
             primaryCategory: rootPrimaryCategory,
-            code: identifier,
-            name: node.name,
             visibility: 'Parent',
             channel,
             ...cleanMetadata(node.metadata ?? {}),
+            ...cleanMetadata(cacheEdits),
+            // After the spreads — creation-time metadata still carries the
+            // stale temp- code and 'Untitled Section' name.
+            code: identifier,
+            name: node.name,
           };
         }
       } else if (isLeaf) {
@@ -187,6 +195,19 @@ export function useSaveHierarchy() {
       // Read treeData + treeCache from the store at call-time, not from the
       // React closure — prevents stale data when saveHierarchy() is called
       // immediately after replaceNodeId() + updateNode() in useSaveQuestion.
+      // Old editor keys NEW SECTIONS by a client uuid (code = uuid) — not the
+      // internal temp- marker. Swap before building the payload; question
+      // temp- nodes stay (they're excluded from the save until authored).
+      const swapTempSectionIds = (nodes: INode[]) => {
+        for (const n of nodes) {
+          if (!n.isQuestion && n.identifier.startsWith('temp-')) {
+            useTreeStore.getState().replaceNodeId(n.identifier, genUuid());
+          }
+          if (n.children) swapTempSectionIds(n.children);
+        }
+      };
+      swapTempSectionIds(useTreeStore.getState().treeData);
+
       const { treeData, treeCache, replaceNodeId } = useTreeStore.getState();
       const { nodesModified, hierarchy } = buildSavePayload(treeData, treeCache, channel, rootPrimaryCategory);
       const { identifiers } = await updateHierarchy(contentId, nodesModified, hierarchy, lastUpdatedBy);
