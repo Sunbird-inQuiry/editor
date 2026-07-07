@@ -1,13 +1,21 @@
 import { useMemo } from 'react';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { useEditorStore } from '../store/editor.store';
+import { useTreeStore } from '../store/tree.store';
 import { getFramework } from '../api/framework';
 import type { IFramework, ITerm } from '../types/framework';
 
 export function useFramework() {
   const config = useEditorStore((s) => s.editorConfig);
-  const frameworkIds = config?.context?.framework ? [config.context.framework] : (config?.config?.framework ?? []);
-  const targetFWIds = config?.context?.targetFWIds ?? config?.config?.targetFWIds ?? [];
+  // Old editor precedence: the questionset's own framework/targetFWIds (read
+  // via the hierarchy API) win over the host-supplied context — the host
+  // value is only a fallback for when the questionset itself has none.
+  const rootMeta = useTreeStore((s) => s.treeData[0]?.metadata) as Record<string, unknown> | undefined;
+  const frameworkIds = rootMeta?.framework
+    ? [rootMeta.framework as string]
+    : config?.context?.framework ? [config.context.framework] : (config?.config?.framework ?? []);
+  const targetFWIds = (rootMeta?.targetFWIds as string[] | undefined)
+    ?? config?.context?.targetFWIds ?? config?.config?.targetFWIds ?? [];
 
   const orgFrameworkId = frameworkIds[0] ?? '';
 

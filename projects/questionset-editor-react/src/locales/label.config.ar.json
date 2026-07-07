@@ -337,6 +337,11 @@
     "questionOne": "سؤال",
     "questionMany": "أسئلة",
     "markOne": "علامة",
-    "markMany": "علامات"
+    "markMany": "علامات",
+    "unsavedChanges": "تغييرات غير محفوظة",
+    "unsavedChangesMsg": "لديك تغييرات غير محفوظة. ماذا تريد أن تفعل؟",
+    "stay": "البقاء",
+    "discardChanges": "تجاهل التغييرات",
+    "saveLeave": "حفظ ومغادرة"
   }
 }

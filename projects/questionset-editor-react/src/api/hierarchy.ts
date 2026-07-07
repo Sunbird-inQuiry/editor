@@ -56,11 +56,17 @@ export async function readQuestionSet(
     `${URLS.questionSet.read}/${contentId}`,
     { params: { mode: 'edit', fields: EXTRA_FIELDS } },
   );
-  return (
+  const result =
     response.data?.result?.questionSet as Record<string, unknown> | undefined ??
     response.data?.result?.questionset as Record<string, unknown> | undefined ??
-    {}
-  );
+    {};
+  // The form edits maxTime (seconds); the backend persists it as
+  // timeLimits.questionSet.max — map it back so the timer field populates.
+  const max = (result.timeLimits as { questionSet?: { max?: number } } | undefined)?.questionSet?.max;
+  if (typeof max === 'number' && result.maxTime === undefined) {
+    result.maxTime = max;
+  }
+  return result;
 }
 
 export async function readHierarchy(

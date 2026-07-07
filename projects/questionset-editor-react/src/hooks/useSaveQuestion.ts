@@ -426,11 +426,11 @@ export function useSaveQuestion() {
       ? { [hintUuid]: { en: hintText } }
       : {};
 
-    // Taxonomy copied from root questionset — old editor includes these on every question
+    // License only — board/medium/gradeLevel/subject/audience are no longer
+    // copied from the root questionset onto every question.
     const rootMeta = (treeData[0]?.metadata ?? {}) as Record<string, unknown>;
     const taxonomy: Record<string, unknown> = {};
-    (['audience', 'board', 'medium', 'gradeLevel', 'subject', 'license'] as const)
-      .forEach(k => { if (rootMeta[k]) taxonomy[k] = rootMeta[k]; });
+    if (rootMeta.license) taxonomy.license = rootMeta.license;
     // Old editor: channel read supplies the default license when unset.
     if (!taxonomy.license) {
       const defaultLicense = useEditorStore.getState().channelData?.defaultLicense;
