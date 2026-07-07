@@ -36,6 +36,8 @@ export interface IParsedCategoryDefinition {
   schemaDefaults: Record<string, unknown>;
   frameworkMetadata: { orgFWType?: string[]; targetFWType?: string[] };
   sourcingSettings: Record<string, unknown>;
+  /** Hierarchy depth from objectMetadata.config (NOT sourcingSettings). */
+  maxDepth?: number;
 }
 
 function maxLengthFromValidations(field: Record<string, unknown>): number | undefined {
@@ -178,5 +180,6 @@ export async function getCategoryDefinition(
     schemaDefaults: parseSchemaDefaults(objectMetadata.schema),
     frameworkMetadata: (config.frameworkMetadata ?? {}) as { orgFWType?: string[]; targetFWType?: string[] },
     sourcingSettings: (config.sourcingSettings ?? {}) as Record<string, unknown>,
+    ...(typeof config.maxDepth === 'number' ? { maxDepth: config.maxDepth } : {}),
   };
 }

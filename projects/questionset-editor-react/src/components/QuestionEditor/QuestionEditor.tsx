@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Icon } from '../shared/Icon';
 import SharedRichToolbar from '../shared/SharedRichToolbar';
 import ContentEditable from '../shared/ContentEditable';
@@ -313,18 +313,9 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   const handleDetailChange = (code: string, value: unknown) => {
     if (detailNodeId) updateNode(detailNodeId, { [code]: value });
   };
-  // Old getDefaultSessionContext: taxonomy defaults inherit from the question
-  // set but stay choosable per question.
-  const rootMeta = useTreeStore((st) => st.treeData[0]?.metadata) ?? {};
-  const detailValues = React.useMemo(() => {
-    const inherited: Record<string, unknown> = {};
-    (['board', 'medium', 'gradeLevel', 'subject'] as const).forEach((k) => {
-      if (rootMeta[k] != null && (activeNodeMeta as Record<string, unknown>)?.[k] == null) {
-        inherited[k] = rootMeta[k];
-      }
-    });
-    return { ...inherited, ...(activeNodeMeta as Record<string, unknown>) };
-  }, [rootMeta, activeNodeMeta]);
+  // board/medium/gradeLevel/subject/audience are no longer inherited from
+  // the question set — each question leaves them unset until chosen explicitly.
+  const detailValues = (activeNodeMeta as Record<string, unknown>) ?? {};
 
   // Required-field validity of the Details (childMetadata) form below —
   // gates Save so questions can't reach review with missing metadata.

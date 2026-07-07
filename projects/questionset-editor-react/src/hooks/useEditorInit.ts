@@ -71,9 +71,11 @@ export function useEditorInit({ config, onError }: UseEditorInitOptions) {
             if (!cancelled) {
               setCategoryDefinition(parsed);
 
-              const sourcing = (parsed.sourcingSettings?.collection as Record<string, unknown> | undefined) ?? {};
               const configPatch: Record<string, unknown> = {};
-              if (sourcing.maxDepth && !config.config.maxDepth) configPatch.maxDepth = sourcing.maxDepth;
+              // Hierarchy depth comes from objectMetadata.config.maxDepth —
+              // sourcingSettings.collection.maxDepth is a contribution-flow
+              // setting (often 1) and must not cap the edit hierarchy.
+              if (parsed.maxDepth && !config.config.maxDepth) configPatch.maxDepth = parsed.maxDepth;
               if (Object.keys(configPatch).length > 0) {
                 setEditorConfig({ ...config, config: { ...config.config, ...configPatch } });
               }
