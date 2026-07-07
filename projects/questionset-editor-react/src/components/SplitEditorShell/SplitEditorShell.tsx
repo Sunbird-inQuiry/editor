@@ -76,7 +76,11 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
         case 'sendForReview':
         case 'reject':
         case 'publish': {
-          await runAction(action, data);
+          // Old editor closes after a successful workflow action — emit
+          // 'back' so the host navigates away (portal returns to workspace).
+          if (await runAction(action, data)) {
+            events.onToolbarEvent?.({ action: 'back' });
+          }
           break;
         }
         default:

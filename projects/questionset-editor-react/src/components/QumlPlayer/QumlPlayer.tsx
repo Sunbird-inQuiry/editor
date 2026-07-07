@@ -98,11 +98,17 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
 
         if (singleQuestionId) {
           // Old question.component.previewContent single-question settings.
+          // The child is a bare reference — the player fetches the question
+          // body itself via question/v2/list (old editor behaviour); embedding
+          // tree metadata here would skip that call and render stale/empty
+          // content after a reload.
           const qNode = bfsFind(treeData, singleQuestionId);
           const qMeta = {
-            ...(qNode?.metadata ?? {}),
             identifier: singleQuestionId,
             name: qNode?.name ?? 'Question',
+            mimeType: 'application/vnd.sunbird.question',
+            objectType: 'Question',
+            visibility: 'Parent',
           };
           metadata = {
             ...metadata,

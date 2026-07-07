@@ -41,16 +41,16 @@
   cursor: pointer;
   width: 100%;
   padding: var(--sbx-space-3) var(--sbx-space-4);
-  border-radius: var(--sbx-radius-lg);
-  border: 1px solid var(--sbx-color-border-default);
-  background-color: var(--sbx-color-surface-sunken);
+  border-radius: 14px;
+  border: 1.5px solid var(--sb-border);
+  background-color: #fff;
   transition:
     background-color var(--sbx-duration-base) var(--sbx-ease-default),
     border-color     var(--sbx-duration-base) var(--sbx-ease-default);
 
   &:hover {
-    background-color: var(--sbx-color-primary-subtle);
-    border-color: var(--sbx-color-primary);
+    background-color: var(--accent-soft);
+    border-color: var(--accent);
   }
 }
 
@@ -92,9 +92,9 @@
 }
 
 .customCheckChecked {
-  border-color: var(--sbx-color-primary);
-  background-color: var(--sbx-color-primary);
-  color: var(--sbx-color-primary-fg);
+  border-color: var(--accent);
+  background-color: var(--accent);
+  color: #fff;
 }
 
 // Item text

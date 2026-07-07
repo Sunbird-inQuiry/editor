@@ -15,9 +15,8 @@
   justify-content: center;
   padding: var(--sbx-space-4);
 
-  background-color: rgba(17, 24, 39, 0.55);   // neutral-900 @ 55%
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background-color: rgba(0, 0, 0, 0.45);      // matches ConfirmDialog scrim
+  font-family: var(--sb-font, inherit);
 
   // Entry animation
   animation: sbx-overlay-in var(--sbx-duration-slow) var(--sbx-ease-out) both;
@@ -57,10 +56,11 @@
   max-width: 560px;
   max-height: calc(100dvh - var(--sbx-space-8));
 
-  background-color: var(--sbx-color-surface-raised);
-  border-radius:    var(--sbx-radius-xl);
-  box-shadow:       var(--sbx-shadow-xl);
-  border:           1px solid var(--sbx-color-border-subtle);
+  // Editor dialog theme (same surface as ConfirmDialog)
+  background-color: var(--sb-card, #fff);
+  border-radius:    18px;
+  box-shadow:       var(--sb-shadow-deep);
+  border:           none;
 
   overflow: hidden;
 
@@ -102,15 +102,14 @@
   justify-content: space-between;
   gap: var(--sbx-space-3);
 
-  padding: var(--sbx-space-4) var(--sbx-space-6);
-  border-bottom: 1px solid var(--sbx-color-border-subtle);
+  padding: 20px 24px 16px;
   flex-shrink: 0;
 }
 
 .title {
-  font-size:   var(--sbx-text-lg);
-  font-weight: var(--sbx-font-semibold);
-  color:       var(--sbx-color-text-primary);
+  font-size:   18px;
+  font-weight: 800;
+  color:       var(--sb-text);
   line-height: var(--sbx-leading-snug);
   margin: 0;
 }
@@ -152,7 +151,9 @@
   flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--sbx-space-6);
+  padding: 0 24px 24px;
+  font-size: 15px;
+  color: var(--sb-text-2);
 
   // Subtle inset shadow when content overflows
   scroll-padding-block: var(--sbx-space-4);
@@ -176,8 +177,8 @@
   justify-content: flex-end;
   gap: var(--sbx-space-3);
 
-  padding: var(--sbx-space-4) var(--sbx-space-6);
-  border-top: 1px solid var(--sbx-color-border-subtle);
-  background-color: var(--sbx-color-surface-sunken);
+  padding: 16px 24px;
+  border-top: 1px solid var(--sb-border);
+  background-color: transparent;
   flex-shrink: 0;
 }

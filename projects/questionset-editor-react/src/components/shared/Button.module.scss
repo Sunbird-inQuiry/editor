@@ -24,14 +24,14 @@
   gap: var(--sbx-space-2);
   flex-shrink: 0;
 
-  // Typography
-  font-family: var(--sbx-font-sans);
-  font-weight: var(--sbx-font-medium);
+  // Typography — matches .ce-btn
+  font-family: var(--sb-font, var(--sbx-font-sans));
+  font-weight: 700;
   line-height: 1;
   white-space: nowrap;
 
-  // Shape
-  border-radius: var(--sbx-radius-md);
+  // Shape — matches .ce-btn
+  border-radius: 13px;
   border: 1px solid transparent;
 
   // Transition
@@ -61,36 +61,33 @@
 // Size variants
 // ---------------------------------------------------------------------------
 .button--sm {
-  padding: var(--sbx-space-1) var(--sbx-space-3);
-  font-size: var(--sbx-text-sm);
-  min-height: 32px;
+  padding: 0 14px;
+  font-size: 13.5px;
+  min-height: 38px;
 }
 
 .button--md {
-  padding: var(--sbx-space-2) var(--sbx-space-4);
-  font-size: var(--sbx-text-sm);
-  min-height: 40px;
+  padding: 0 18px;
+  font-size: 14px;
+  min-height: 44px;
 }
 
 // ---------------------------------------------------------------------------
 // Variant: Primary
 // ---------------------------------------------------------------------------
 .button--primary {
-  background-color: var(--sbx-color-primary);
-  border-color:     var(--sbx-color-primary);
-  color:            var(--sbx-color-primary-fg);
-  box-shadow:       var(--sbx-shadow-xs);
+  // matches .ce-btn.primary
+  background-color: var(--accent);
+  border-color:     var(--accent);
+  color:            #fff;
 
   &:hover:not(:disabled):not([aria-disabled='true']) {
-    background-color: var(--sbx-color-primary-hover);
-    border-color:     var(--sbx-color-primary-hover);
-    box-shadow:       var(--sbx-shadow-sm);
+    background-color: var(--accent-deep);
+    border-color:     var(--accent-deep);
   }
 
   &:active:not(:disabled):not([aria-disabled='true']) {
-    background-color: var(--sbx-color-primary-active);
-    border-color:     var(--sbx-color-primary-active);
-    box-shadow:       none;
+    background-color: var(--accent-deep);
     transform: translateY(1px);
   }
 }
@@ -99,17 +96,18 @@
 // Variant: Ghost
 // ---------------------------------------------------------------------------
 .button--ghost {
-  background-color: transparent;
-  border-color:     transparent;
-  color:            var(--sbx-color-text-secondary);
+  // matches .ce-btn.ghost
+  background-color: #fff;
+  border-color:     var(--sb-border);
+  color:            var(--sb-text-2);
 
   &:hover:not(:disabled):not([aria-disabled='true']) {
-    background-color: var(--sbx-color-surface-muted);
-    color:            var(--sbx-color-text-primary);
+    border-color: var(--accent);
+    color:        var(--accent-deep);
   }
 
   &:active:not(:disabled):not([aria-disabled='true']) {
-    background-color: var(--sbx-color-surface-dim);
+    border-color: var(--accent-deep);
   }
 }
 
@@ -117,20 +115,16 @@
 // Variant: Outline
 // ---------------------------------------------------------------------------
 .button--outline {
-  background-color: var(--sbx-color-surface-base);
-  border-color:     var(--sbx-color-border-default);
-  color:            var(--sbx-color-text-primary);
-  box-shadow:       var(--sbx-shadow-xs);
+  background-color: #fff;
+  border-color:     var(--sb-border);
+  color:            var(--sb-text);
 
   &:hover:not(:disabled):not([aria-disabled='true']) {
-    background-color: var(--sbx-color-surface-muted);
-    border-color:     var(--sbx-color-border-strong);
-    box-shadow:       var(--sbx-shadow-sm);
+    border-color: var(--accent);
+    color:        var(--accent-deep);
   }
 
   &:active:not(:disabled):not([aria-disabled='true']) {
-    background-color: var(--sbx-color-surface-dim);
-    box-shadow:       none;
     transform: translateY(1px);
   }
 }
@@ -139,20 +133,17 @@
 // Variant: Danger
 // ---------------------------------------------------------------------------
 .button--danger {
-  background-color: var(--sbx-color-error);
-  border-color:     var(--sbx-color-error);
-  color:            var(--sbx-color-error-fg);
-  box-shadow:       var(--sbx-shadow-xs);
+  // matches .ce-btn.danger (outline red)
+  background-color: #fff;
+  border-color:     var(--sb-red-border);
+  color:            var(--sb-red);
 
   &:hover:not(:disabled):not([aria-disabled='true']) {
-    background-color: var(--sbx-color-error-hover);
-    border-color:     var(--sbx-color-error-hover);
-    box-shadow:       var(--sbx-shadow-sm);
+    background-color: var(--sb-red-soft);
   }
 
   &:active:not(:disabled):not([aria-disabled='true']) {
-    filter: brightness(0.9);
-    box-shadow: none;
+    background-color: var(--sb-red-soft);
     transform: translateY(1px);
   }
 }
