@@ -8,7 +8,7 @@
 import { normalizeI18n } from './i18nField';
 import { htmlToText } from './html';
 import type { I18nMap } from './i18nField';
-import type { II18nText } from '../store/question.store';
+import type { II18nText, ISolutionAsset } from '../store/question.store';
 import type { QuestionType, IOption, IMatchPair } from '../types/question';
 
 interface Args {
@@ -18,7 +18,9 @@ interface Args {
   matchPairs: IMatchPair[];
   hintUuid: string;
   solutionId: string;
-  solutionType: string;
+  /** Per-language video/audio asset — solutionType/solutionText live on `i18n`. */
+  solutionAsset: Record<string, ISolutionAsset | null>;
+  assetSolutionHtml: (type: 'video' | 'audio', asset: { id: string; src: string; thumbnail?: string }) => string;
   buildBodyHtml: (type: QuestionType, questionHtml: string) => string;
   answerWrap: (text: string) => string;
 }
@@ -137,13 +139,29 @@ export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {
     if (od?.hint) od.hint.defaultValue = a.hintUuid;
   }
 
-  // ── text solution ───────────────────────────────────────────────────────
-  const solMap = dropEmpty(a.i18n.solutionText);
-  if (a.solutionType === 'html' && hasExtraLangs(solMap)) {
-    es.solutions = [{
-      id: a.solutionId,
-      value: Object.fromEntries(Object.entries(solMap).map(([l, v]) => [l, { type: 'html', value: v }])),
-    }];
-    meta.solutions = { [a.solutionId]: normalizeI18n(solMap) };
+  // ── solution (html/video/audio) ────────────────────────────────────────
+  // Driven by i18n.solutionType — html keeps text (i18n.solutionText),
+  // video/audio keep the per-language asset id (a.solutionAsset).
+  const solTextMap = dropEmpty(a.i18n.solutionText);
+  const solEntries: Record<string, { type: string; value: string }> = {};
+  const solHtmlByLang: I18nMap = {};
+  for (const [lang, type] of Object.entries(a.i18n.solutionType)) {
+    if (type === 'html') {
+      const text = solTextMap[lang];
+      if (text) {
+        solEntries[lang] = { type: 'html', value: text };
+        solHtmlByLang[lang] = text;
+      }
+    } else if (type === 'video' || type === 'audio') {
+      const asset = a.solutionAsset[lang];
+      if (asset) {
+        solEntries[lang] = { type, value: asset.id };
+        solHtmlByLang[lang] = a.assetSolutionHtml(type, asset);
+      }
+    }
+  }
+  if (Object.keys(solEntries).some((l) => l !== 'en')) {
+    es.solutions = [{ id: a.solutionId, value: solEntries }];
+    meta.solutions = { [a.solutionId]: normalizeI18n(solHtmlByLang) };
   }
 }
