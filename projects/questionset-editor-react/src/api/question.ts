@@ -30,6 +30,15 @@ export async function readQuestion(
   return (response.data?.result?.question ?? {}) as Record<string, unknown>;
 }
 
+/** Old editor's question list (search by identifiers) — used by previews. */
+export async function listQuestions(questionIds: string[]): Promise<Array<Record<string, unknown>>> {
+  if (questionIds.length === 0) return [];
+  const response = await apiClient.post(URLS.question.list, {
+    request: { search: { identifier: questionIds } },
+  });
+  return (response.data?.result?.questions ?? []) as Array<Record<string, unknown>>;
+}
+
 export async function deleteQuestion(questionId: string): Promise<void> {
   await apiClient.delete(`${URLS.question.retire}/${questionId}`);
 }
