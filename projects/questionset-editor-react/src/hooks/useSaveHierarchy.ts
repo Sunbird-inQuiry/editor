@@ -23,7 +23,7 @@ function buildSavePayload(
     'id', 'isFolder', 'isQuestion', 'children', 'parent', 'isNew', 'breadcrumb', 'title', 'metadata', 'questionType', 'objectType',
     // System/read-only fields hydrated from question/v2/read — the backend
     // rejects index/depth and manages the rest itself; old editor never sends them.
-    'index', 'depth', 'status', 'versionKey', 'createdOn', 'lastUpdatedOn', 'lastStatusChangedOn',
+    'index', 'depth', 'status', 'versionKey', 'createdOn', 'lastUpdatedOn', 'lastStatusChangedOn','graphId'
   ]);
   const ARRAY_FIELDS  = new Set(['audience', 'medium', 'gradeLevel', 'subject', 'keywords', 'language', 'topic']);
   const NUMBER_FIELDS = new Set(['copyrightYear', 'maxScore', 'expectedDuration', 'maxAttempts']);
