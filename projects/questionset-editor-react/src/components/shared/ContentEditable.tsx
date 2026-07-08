@@ -9,6 +9,20 @@ import DOMPurify from 'dompurify';
 import { Icon } from './Icon';
 import { useQuestionStore } from '../../store/question.store';
 import { useEditorStore } from '../../store/editor.store';
+import { escapeHtml } from '../../utils/html';
+
+// Pasted HTML carries markup from its source app (Word, Google Docs, AI chat
+// tools, etc.) — unlike CKEditor's schema-based paste filtering in the old
+// editor, a plain contenteditable keeps everything the clipboard provides.
+// Strip it down to the tags/attributes this editor itself produces (e.g.
+// `data-start`/`data-end` from AI-tool copies has shown up in saved content).
+const PASTE_ALLOWED_TAGS = [
+  'b', 'strong', 'i', 'em', 'u', 'sub', 'sup', 'br', 'p', 'div', 'span',
+  'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'figure', 'img',
+];
+// style: font-size spans + math equation images; data-asset-variable: image
+// picker inserts (ContentEditable's own image-delete handler targets these).
+const PASTE_ALLOWED_ATTR = ['src', 'alt', 'style', 'data-asset-variable'];
 
 export interface ContentEditableProps {
   value?: string;
@@ -133,7 +147,10 @@ export default function ContentEditable({
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (disabled) return;
     const target = e.target as HTMLElement;
-    const img = target.tagName === 'IMG' ? target : null;
+    // Target the whole figure.image wrapper, not just the <img> inside it —
+    // deleting only the <img> left an empty <figure> behind, which then
+    // saved as an imageless body/option (no <img> to reinsert on reopen).
+    const img = target.tagName === 'IMG' ? (target.closest('figure.image') as HTMLElement | null) ?? target : null;
     const table = target.closest('table') as HTMLElement | null;
     if (img) { setFloatTarget(img); return; }
     if (table) { setFloatTarget(table); return; }
@@ -147,6 +164,26 @@ export default function ContentEditable({
     setFloatTarget(null);
     onChangeRef.current?.(ref.current.innerHTML);
   }, [floatTarget]);
+
+  // Strip clipboard HTML down to this editor's own tag/attribute set before
+  // inserting — execCommand('insertHTML', ...) fires a native input event,
+  // so onInput picks up the cleaned result without any extra dispatch.
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
+    if (disabled) return;
+    e.preventDefault();
+    const html = e.clipboardData.getData('text/html');
+    if (html) {
+      const clean = DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: PASTE_ALLOWED_TAGS,
+        ALLOWED_ATTR: PASTE_ALLOWED_ATTR,
+        ALLOW_DATA_ATTR: false,
+      });
+      document.execCommand('insertHTML', false, clean);
+      return;
+    }
+    const text = e.clipboardData.getData('text/plain');
+    if (text) document.execCommand('insertHTML', false, escapeHtml(text).replace(/\n/g, '<br>'));
+  }, [disabled]);
 
   return (
     <>
@@ -163,6 +200,7 @@ export default function ContentEditable({
           // Highlight tables and images on hover for discoverability
         }}
         onInput={() => onChangeRef.current?.(ref.current?.innerHTML ?? '')}
+        onPaste={handlePaste}
         onClick={handleClick}
         onKeyDown={e => {
           if (inline && e.key === 'Enter') { e.preventDefault(); (e.currentTarget as HTMLDivElement).blur(); }
