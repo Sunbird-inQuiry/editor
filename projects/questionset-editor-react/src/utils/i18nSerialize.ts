@@ -40,11 +40,16 @@ export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {
   const interactions = meta.interactions as Record<string, Record<string, unknown>> | undefined;
 
   // ── question stem + body ────────────────────────────────────────────────
+  // metadata.body is a schema-typed String field, same as answer/sentence —
+  // old editor's buildI18nBody() always returns a string, JSON.stringifying
+  // the per-language map rather than sending an object. Sending an object
+  // isn't rejected at draft-save time, but the publish/ECAR pipeline can't
+  // render it, so the published question comes back with an empty body.
   const qMap = dropEmpty(a.i18n.questionBody);
   if (hasExtraLangs(qMap)) {
     es.question = normalizeI18n(qMap);
-    meta.body = Object.fromEntries(
-      Object.entries(qMap).map(([l, t]) => [l, a.buildBodyHtml(a.type, t)]),
+    meta.body = JSON.stringify(
+      Object.fromEntries(Object.entries(qMap).map(([l, t]) => [l, a.buildBodyHtml(a.type, t)])),
     );
   }
 

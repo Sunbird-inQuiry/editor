@@ -88,7 +88,9 @@ describe('applyContentI18n (save serialization)', () => {
       answerWrap: (t) => `<a>${t}</a>`,
     });
     expect((meta.editorState as Record<string, unknown>).question).toEqual({ en: '<p>en</p>', ar: '<p>ar</p>' });
-    expect(meta.body).toEqual({ en: '<div><p>en</p></div>', ar: '<div><p>ar</p></div>' });
+    // Top-level metadata.body is a schema-typed String field — stringified
+    // when multilingual, matching old editor's buildI18nBody().
+    expect(meta.body).toBe(JSON.stringify({ en: '<div><p>en</p></div>', ar: '<div><p>ar</p></div>' }));
     const esOpts = (meta.editorState as { options: Array<{ value: { body: unknown } }> }).options;
     expect(esOpts[0]!.value.body).toEqual({ en: 'Four', ar: 'أربعة' });
     const itOpts = (meta.interactions as { response1: { options: Array<{ label: unknown }> } }).response1.options;
