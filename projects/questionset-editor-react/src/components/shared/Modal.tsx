@@ -1,6 +1,7 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useContext } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { EditorRootContext } from './EditorRootContext';
 import styles from './Modal.module.scss';
 
 // -----------------------------------------------------------------------------
@@ -110,8 +111,15 @@ const Modal: React.FC<ModalProps> = ({
     .filter(Boolean)
     .join(' ');
 
+  // Portal into the OWNING editor instance's .ce root (via context) — the
+  // sb/accent CSS variables are scoped to .ce, so a body-level portal loses
+  // the theme, and a global querySelector('.ce') would resolve to the first
+  // editor instance on the page, not necessarily this one.
+  const editorRoot = useContext(EditorRootContext);
   const portalTarget =
-    container ?? (typeof document !== 'undefined' ? document.body : null);
+    container ?? editorRoot ?? (typeof document !== 'undefined'
+      ? (document.querySelector('.ce') ?? document.body)
+      : null);
 
   if (!portalTarget) return null;
 

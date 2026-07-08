@@ -299,10 +299,14 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   // Validation runs against the PRIMARY language (en) — other languages are
   // optional translations (old editor semantics). When editing a non-en
   // language, the en text lives in the i18n maps.
-  const contentLang = useQuestionStore((st) => st.contentLang);
   const i18nText = useQuestionStore((st) => st.i18nText);
-  const enOf = (map: Record<string, string> | undefined, current: string) =>
-    contentLang === 'en' ? current : (map?.en ?? '');
+  // A field is "filled" when it has content in the visible language OR any
+  // authored language — questions may be authored in a non-English language
+  // only (old editor allowed this; English is not mandatory).
+  const anyOf = (map: Record<string, string> | undefined, current: string) => {
+    if (plain(current)) return current;
+    return Object.values(map ?? {}).find((v) => plain(v)) ?? '';
+  };
   
   // Details form (childMetadata) — writes into the tree node like the tab did.
   const questionFormConfig = useEditorStore((st) => st.questionFormConfig);
@@ -322,9 +326,8 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   const [detailsValid, setDetailsValid] = useState(true);
 
   const invalidReason = (() => {
-    const qBody = enOf(i18nText.questionBody, questionBody);
-    if (!plain(qBody)) return 'Enter the question first (in EN)';
-    if (!plain(questionBody)) return 'Enter the question first';
+    const qBody = anyOf(i18nText.questionBody, questionBody);
+    if (!plain(qBody)) return 'Enter the question first';
     // Title and Marks come from the Details section — no defaults.
     if (!String((activeNodeMeta?.name as string) ?? '').trim()) {
       return 'Enter the title in Details';
@@ -336,31 +339,31 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
     switch (type) {
       case 'mcq':
       case 'boolean':
-        if (options.some((o) => !plain(enOf(i18nText.options[o.id], o.body)))) return 'Fill in all options (in EN)';
+        if (options.some((o) => !plain(anyOf(i18nText.options[o.id], o.body)))) return 'Fill in all options';
         if (!options.some((o) => o.isCorrect)) return 'Mark one option as the correct answer';
         return null;
       case 'ftb':
         if (!/\[\[.+?\]\]/.test(qBody)) return 'Add at least one [[blank]] with its answer';
         return null;
       case 'sa':
-        if (!plain(enOf(i18nText.answerText, answerText))) return 'Enter the answer (in EN)';
+        if (!plain(anyOf(i18nText.answerText, answerText))) return 'Enter the answer';
         return null;
       case 'mtf':
         if (
           matchPairs.length < 2 ||
-          matchPairs.some((p) => !plain(enOf(i18nText.pairsLeft[p.id], p.left)) || !plain(enOf(i18nText.pairsRight[p.id], p.right)))
+          matchPairs.some((p) => !plain(anyOf(i18nText.pairsLeft[p.id], p.left)) || !plain(anyOf(i18nText.pairsRight[p.id], p.right)))
         ) {
-          return 'Fill in all matching pairs (in EN)';
+          return 'Fill in all matching pairs';
         }
         return null;
       case 'seq':
-        if (sequence.length < 2 || sequence.some((s, i) => !plain(enOf(i18nText.sequence[i], s)))) {
-          return 'Fill in all sequence items (in EN)';
+        if (sequence.length < 2 || sequence.some((s, i) => !plain(anyOf(i18nText.sequence[i], s)))) {
+          return 'Fill in all sequence items';
         }
         return null;
       case 'reo':
-        if (plain(enOf(i18nText.sentence, sentence)).split(/\s+/).filter(Boolean).length < 2) {
-          return 'Enter a sentence with at least two words (in EN)';
+        if (plain(anyOf(i18nText.sentence, sentence)).split(/\s+/).filter(Boolean).length < 2) {
+          return 'Enter a sentence with at least two words';
         }
         return null;
       default:

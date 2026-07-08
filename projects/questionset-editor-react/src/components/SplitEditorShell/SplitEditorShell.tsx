@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { EditorRootContext } from '../shared/EditorRootContext';
 import type { IEditorEvents, ToolbarAction } from '../../types/editor';
 import { useTreeStore } from '../../store/tree.store';
 import { useEditorStore } from '../../store/editor.store';
@@ -109,8 +110,14 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
   const questionEditorOpen = useUiStore((s) => s.questionEditorOpen);
   const hasContent = useTreeStore((s) => s.treeData.length > 0);
 
+  // Own root element — modals portal into THIS instance's .ce (multiple
+  // editors can be mounted on one host page; a global querySelector would
+  // always hit the first).
+  const [rootEl, setRootEl] = useState<HTMLElement | null>(null);
+
   return (
-    <div className="ce">
+    <EditorRootContext.Provider value={rootEl}>
+    <div className="ce" ref={setRootEl}>
       {/* Top bar */}
       <Topbar
         disabled={questionEditorOpen}
@@ -167,6 +174,7 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
       <QuestionTypeSelectorModal />
       <ConnectedConfirmDialog />
     </div>
+    </EditorRootContext.Provider>
   );
 }
 

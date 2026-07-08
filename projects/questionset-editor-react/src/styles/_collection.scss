@@ -149,7 +149,10 @@
 .ce-tree-foot button svg { color: var(--accent); }
 
 /* ── Center detail ──────────────────────────────────────────── */
-.ce-main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
+/* Defensive: host pages target the semantic <main>/<aside> elements with
+   width/centering rules — pin ours so the editor pane always fills. */
+.ce-main { flex: 1; min-width: 0; max-width: none; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 0; }
+aside.ce-tree { max-width: none; margin: 0; }
 .ce-crumb { flex: none; display: flex; align-items: center; gap: 9px; padding: 16px 28px 4px; font-size: 13.5px; color: var(--sb-text-muted); }
 .ce-crumb button { display: inline-flex; align-items: center; gap: 7px; border: none; background: transparent; cursor: pointer; font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--sb-text-muted); padding: 3px 4px; border-radius: 7px; }
 .ce-crumb button:hover { color: var(--accent-deep); }
@@ -157,7 +160,10 @@
 .ce-crumb .sep { color: var(--sb-text-faint); display: grid; place-items: center; }
 .ce-main-scroll { flex: 1; overflow: auto; padding: 12px 28px 60px; }
 .ce-card {
-  max-width: 940px; margin: 0 auto; background: var(--sb-card);
+  /* Fill the pane up to 940px, never collapse below a usable width on
+     normal screens, and stay responsive below 640px. */
+  width: 100%; min-width: min(640px, 100%); max-width: 940px; margin: 0 auto;
+  background: var(--sb-card);
   border: 1px solid var(--sb-border-soft); border-radius: 22px; box-shadow: var(--sb-shadow-card);
   overflow: hidden;
 }
@@ -310,7 +316,7 @@
 @keyframes ce-spin { to { transform: rotate(360deg); } }
 
 /* ── Question editor (when opened inline) ────────────────────── */
-.ce-ed { max-width: 940px; margin: 0 auto; }
+.ce-ed { width: 100%; min-width: min(640px, 100%); max-width: 940px; margin: 0 auto; }
 .ce-ed-back { display: inline-flex; align-items: center; gap: 8px; border: none; background: transparent; cursor: pointer; font-family: inherit; font-size: 13.5px; font-weight: 700; color: var(--sb-text-muted); padding: 6px 8px; border-radius: 9px; margin-bottom: 12px; }
 .ce-ed-back:hover { color: var(--accent-deep); background: var(--accent-soft); }
 /* overflow:clip preserves border-radius visual clipping but does NOT break position:sticky (unlike overflow:hidden) */
@@ -351,8 +357,10 @@
 .ce-opt { display: flex; align-items: center; gap: 12px; padding: 6px 12px 6px 6px; border: 1.5px solid var(--sb-border); border-radius: 14px; background: #fff; margin-bottom: 11px; transition: border-color .14s, background .14s; }
 .ce-opt.correct { border-color: var(--sb-green); background: var(--sb-green-soft); }
 .ce-opt .pick { width: 38px; height: 38px; flex: none; border-radius: 10px; border: none; background: transparent; cursor: pointer; display: grid; place-items: center; color: var(--sb-text-faint); }
-.ce-opt .pick .ring { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--sb-border); display: grid; place-items: center; color: #fff; transition: all .14s; }
-.ce-opt.correct .pick .ring { border-color: var(--sb-green); background: var(--sb-green); }
+/* .pick-ring, not .ring — the host portal's Tailwind build ships a global
+   `.ring` utility (blue box-shadow) that collides with the bare name. */
+.ce-opt .pick .pick-ring { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--sb-border); display: grid; place-items: center; color: #fff; transition: all .14s; }
+.ce-opt.correct .pick .pick-ring { border-color: var(--sb-green); background: var(--sb-green); }
 .ce-opt .grip { border: none; background: transparent; color: var(--sb-text-faint); cursor: grab; flex: none; display: grid; place-items: center; padding: 0; }
 .ce-opt .re { flex: 1; min-width: 0; }
 .ce-opt .del { width: 34px; height: 34px; flex: none; border-radius: 9px; border: none; background: transparent; color: var(--sb-text-faint); cursor: pointer; display: grid; place-items: center; }

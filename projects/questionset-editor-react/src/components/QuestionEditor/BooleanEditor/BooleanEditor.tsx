@@ -51,7 +51,7 @@ export default function BooleanEditor({ readOnly = false }: BooleanEditorProps) 
         {options.map(o => (
           <div key={o.id} className={`ce-opt${o.isCorrect ? ' correct' : ''}`}>
             <button type="button" className="pick" title="Mark correct" onClick={() => !readOnly && markCorrect(o.id)}>
-              <span className="ring">{o.isCorrect && <Icon name="check" size={12} />}</span>
+              <span className="pick-ring">{o.isCorrect && <Icon name="check" size={12} />}</span>
             </button>
             <div className="re">
               <ContentEditable

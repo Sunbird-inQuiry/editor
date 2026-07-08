@@ -65,6 +65,72 @@ function hmsToSeconds(hms: string): number {
   return Number(hms) || 0;
 }
 
+// HH:mm timer input — keeps the typed digits in local state; committing on
+// every keystroke and re-deriving from seconds would zero-pad ("1" → "01"),
+// hit maxLength and block the second digit.
+function TimerHmsField({ seconds, disabled, onCommit, onBlur }: {
+  seconds: number;
+  disabled?: boolean;
+  onCommit: (secs: number) => void;
+  onBlur?: () => void;
+}) {
+  const [hh, setHh] = useState('');
+  const [mm, setMm] = useState('');
+
+  const localSecs = (h: string, m: string) =>
+    hmsToSeconds(`${(h || '0').padStart(2, '0')}:${(m || '0').padStart(2, '0')}:00`);
+
+  // Re-sync only when the committed value changed externally (hydration/reset).
+  useEffect(() => {
+    if (localSecs(hh, mm) !== seconds) {
+      const parts = secondsToHms(seconds).split(':');
+      setHh(parts[0] === '00' ? '' : (parts[0] ?? ''));
+      setMm(parts[1] === '00' ? '' : (parts[1] ?? ''));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seconds]);
+
+  const change = (h: string, m: string) => {
+    setHh(h);
+    setMm(m);
+    onCommit(localSecs(h, m));
+  };
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <input
+        type="text" maxLength={2} placeholder="HH"
+        className={styles.input}
+        style={{ width: 72, textAlign: 'center' }}
+        value={hh}
+        onChange={e => change(e.target.value.replace(/\D/g, ''), mm)}
+        onBlur={onBlur}
+        disabled={disabled}
+      />
+      <span style={{ fontWeight: 700, color: 'var(--sb-text-muted)', fontSize: 18 }}>:</span>
+      <input
+        type="text" maxLength={2} placeholder="mm"
+        className={styles.input}
+        style={{ width: 72, textAlign: 'center' }}
+        value={mm}
+        onChange={e => change(hh, e.target.value.replace(/\D/g, ''))}
+        onBlur={onBlur}
+        disabled={disabled}
+      />
+      {!disabled && (
+        <button
+          type="button"
+          onClick={() => change('', '')}
+          className="ce-btn ghost"
+          style={{ height: 38, padding: '0 14px', fontSize: 13 }}
+        >
+          Reset
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Types for range items (framework-driven options)
 // ---------------------------------------------------------------------------
@@ -477,13 +543,18 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
         const isDisabled = readOnly || !field.editable;
         const validator = makeFieldValidator(field);
 
-        // Full-width: textarea, richtext, keywords/chips, multiselect, checkbox, time, appIcon
-        const isFullWidth = ['textarea', 'richtext', 'keywords', 'checkbox', 'time', 'appIcon'].includes(field.inputType ?? '')
-          || field.span === 'full';
-        const fieldClass = [styles.field, isFullWidth ? styles.fieldFull : ''].filter(Boolean).join(' ');
-
-        // showTimer: separator above
+        // showTimer: separator above, keeps its own full row
         const isShowTimer = field.code === 'showTimer';
+
+        // Full-width: textarea, richtext, keywords/chips, time, appIcon.
+        // Checkboxes flow two per row in the grid.
+        const isFullWidth = ['textarea', 'richtext', 'keywords', 'time', 'appIcon'].includes(field.inputType ?? '')
+          || field.span === 'full'
+          || isShowTimer
+          // Count select takes its own row — only the behaviour checkboxes
+          // (shuffle/feedback/solution/hint) flow two per row.
+          || field.code === 'maxQuestions';
+        const fieldClass = [styles.field, isFullWidth ? styles.fieldFull : ''].filter(Boolean).join(' ');
         // Checkboxes (and showTimer's custom row) carry their label inline —
         // a separate uppercase header would duplicate it.
         const hideLabel = isShowTimer || field.inputType === 'checkbox';
@@ -688,48 +759,13 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
 
                 // ── timer — HH : mm split inputs ─────────────────────────
                 if (inputType === 'timepicker' || inputType === 'timer' || field.code === 'maxTime' || field.code === 'warningTime') {
-                  const numVal = Number(rhfField.value) || 0;
-                  const hms    = secondsToHms(numVal).split(':');
-                  const hh = hms[0] ?? '00';
-                  const mm = hms[1] ?? '00';
-                  const update = (newHH: string, newMM: string) => {
-                    const secs = hmsToSeconds(`${newHH.padStart(2,'0')}:${newMM.padStart(2,'0')}:00`);
-                    rhfField.onChange(secs);
-                    onChange(field.code, secs);
-                  };
-                  const reset = () => { rhfField.onChange(0); onChange(field.code, 0); };
                   return (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <input
-                        type="text" maxLength={2} placeholder="HH"
-                        className={styles.input}
-                        style={{ width: 72, textAlign: 'center' }}
-                        value={hh === '00' ? '' : hh}
-                        onChange={e => update(e.target.value.replace(/\D/g,''), mm)}
-                        onBlur={rhfField.onBlur}
-                        disabled={isDisabled}
-                      />
-                      <span style={{ fontWeight: 700, color: 'var(--sb-text-muted)', fontSize: 18 }}>:</span>
-                      <input
-                        type="text" maxLength={2} placeholder="mm"
-                        className={styles.input}
-                        style={{ width: 72, textAlign: 'center' }}
-                        value={mm === '00' ? '' : mm}
-                        onChange={e => update(hh, e.target.value.replace(/\D/g,''))}
-                        onBlur={rhfField.onBlur}
-                        disabled={isDisabled}
-                      />
-                      {!isDisabled && (
-                        <button
-                          type="button"
-                          onClick={reset}
-                          className="ce-btn ghost"
-                          style={{ height: 38, padding: '0 14px', fontSize: 13 }}
-                        >
-                          Reset
-                        </button>
-                      )}
-                    </div>
+                    <TimerHmsField
+                      seconds={Number(rhfField.value) || 0}
+                      disabled={isDisabled}
+                      onCommit={(secs) => { rhfField.onChange(secs); onChange(field.code, secs); }}
+                      onBlur={rhfField.onBlur}
+                    />
                   );
                 }
 
