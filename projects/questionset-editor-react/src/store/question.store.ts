@@ -11,6 +11,10 @@ export interface II18nText {
   answerText: I18nMap;
   sentence: I18nMap;
   solutionText: I18nMap;
+  /** Solution type/asset per language — video/audio solutions are otherwise
+   *  invisible to switchContentLang and leak into every language tab. */
+  solutionType: Record<string, SolutionType>;
+  solutionAsset: Record<string, ISolutionAsset | null>;
   hintText: I18nMap;
   /** keyed by option/pair id; sequence positional */
   options: Record<string, I18nMap>;
@@ -21,6 +25,7 @@ export interface II18nText {
 
 const EMPTY_I18N: II18nText = {
   questionBody: {}, answerText: {}, sentence: {}, solutionText: {}, hintText: {},
+  solutionType: {}, solutionAsset: {},
   options: {}, pairsLeft: {}, pairsRight: {}, sequence: [],
 };
 
@@ -150,6 +155,8 @@ function mergeSnapshot(s: QuestionState): II18nText {
     answerText: put(s.i18nText.answerText, s.answerText),
     sentence: put(s.i18nText.sentence, s.sentence),
     solutionText: put(s.i18nText.solutionText, s.solutionText),
+    solutionType: { ...s.i18nText.solutionType, [s.contentLang]: s.solutionType },
+    solutionAsset: { ...s.i18nText.solutionAsset, [s.contentLang]: s.solutionAsset },
     hintText: put(s.i18nText.hintText, s.hintText),
     options,
     pairsLeft,
@@ -190,6 +197,8 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
       answerText: t.answerText[lang] ?? '',
       sentence: t.sentence[lang] ?? '',
       solutionText: t.solutionText[lang] ?? '',
+      solutionType: t.solutionType[lang] ?? '',
+      solutionAsset: t.solutionAsset[lang] ?? null,
       hintText: t.hintText[lang] ?? '',
       options: s.options.map((o) => ({ ...o, body: t.options[o.id]?.[lang] ?? '' })),
       matchPairs: s.matchPairs.map((p) => ({
@@ -230,11 +239,31 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
           if (src.pairsLeft?.[i]) pairsLeft[p.id] = src.pairsLeft[i]!;
           if (src.pairsRight?.[i]) pairsRight[p.id] = src.pairsRight[i]!;
         });
+        // Solution: decode every language's {type, value} entry — html keeps
+        // the text, video/audio resolve to a media asset via question.media[].
+        const solutionByLang = src.solutionByLang ?? {};
+        const solutionText: I18nMap = {};
+        const solutionType: Record<string, SolutionType> = {};
+        const solutionAsset: Record<string, ISolutionAsset | null> = {};
+        for (const [lang, entry] of Object.entries(solutionByLang)) {
+          const t = entry.type as SolutionType;
+          solutionType[lang] = t;
+          if (t === 'video' || t === 'audio') {
+            const media = question.media?.find((m) => m.id === entry.value);
+            solutionAsset[lang] = media
+              ? { id: media.id, src: media.src, name: media.name ?? media.id, thumbnail: media.thumbnail }
+              : (entry.value ? { id: entry.value, src: '', name: entry.value } : null);
+          } else if (t === 'html') {
+            solutionText[lang] = entry.value;
+          }
+        }
         return {
           questionBody: src.question ?? {},
           answerText: src.answer ?? {},
           sentence: src.sentence ?? {},
-          solutionText: src.solution ?? {},
+          solutionText,
+          solutionType,
+          solutionAsset,
           hintText: src.hint ?? {},
           options: optionMaps,
           pairsLeft,

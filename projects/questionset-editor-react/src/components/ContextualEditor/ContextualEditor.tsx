@@ -284,6 +284,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
                     </div>
                     {iconPickerOpen && (
                       <ImagePickerModal
+                        preserveAbsoluteUrl
                         onSelect={(url) => {
                           if (selectedNodeId) handleFormChange('appIcon', url);
                           setIconPickerOpen(false);

@@ -34,6 +34,9 @@ export interface ImagePickerModalProps {
   onClose: () => void;
   /** Asset type to browse/upload — labels and search filters follow. */
   mediaType?: PickerMediaType;
+  /** appIcon is stored as the absolute blob-storage URL, not the /assets/public/
+   *  proxy path every other asset reference uses — skip the rewrite for it. */
+  preserveAbsoluteUrl?: boolean;
 }
 
 const MEDIA_LABEL: Record<PickerMediaType, string> = { image: 'Image', video: 'Video', audio: 'Audio' };
@@ -311,7 +314,7 @@ function UploadTab({ mediaType, channel, createdBy, presignedHeaders, cloudStora
 // ImagePickerModal
 // ---------------------------------------------------------------------------
 
-export default function ImagePickerModal({ onSelect, onClose, mediaType = 'image' }: ImagePickerModalProps) {
+export default function ImagePickerModal({ onSelect, onClose, mediaType = 'image', preserveAbsoluteUrl = false }: ImagePickerModalProps) {
   const [tab, setTab]                 = useState<Tab>('my');
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<PickedAsset | undefined>(undefined);
@@ -321,7 +324,9 @@ export default function ImagePickerModal({ onSelect, onClose, mediaType = 'image
   const editorConfig     = useEditorStore(s => s.editorConfig);
   const channel          = editorConfig?.context.channel          ?? '';
   const createdBy        = getUserId(editorConfig?.context);
-  const cloudStorageUrls = editorConfig?.context.cloudStorageUrls ?? [];
+  // rewriteAssetUrl no-ops on an empty list — passing [] for appIcon keeps
+  // the absolute blob-storage URL instead of rewriting to /assets/public/.
+  const cloudStorageUrls = preserveAbsoluteUrl ? [] : (editorConfig?.context.cloudStorageUrls ?? []);
   const presignedHeaders = editorConfig?.context.cloudStorage?.presigned_headers ?? {};
 
   const switchTab = (next: Tab) => {

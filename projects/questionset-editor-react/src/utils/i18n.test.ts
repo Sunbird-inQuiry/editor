@@ -62,6 +62,7 @@ describe('question store language switching', () => {
 describe('applyContentI18n (save serialization)', () => {
   const baseI18n = (over: Partial<II18nText>): II18nText => ({
     questionBody: {}, answerText: {}, sentence: {}, solutionText: {}, hintText: {},
+    solutionType: {}, solutionAsset: {},
     options: {}, pairsLeft: {}, pairsRight: {}, sequence: [], ...over,
   });
 
@@ -81,7 +82,8 @@ describe('applyContentI18n (save serialization)', () => {
       matchPairs: [],
       hintUuid: 'h-1',
       solutionId: 's-1',
-      solutionType: '',
+      solutionAsset: {},
+      assetSolutionHtml: () => '',
       buildBodyHtml: (_t, q) => `<div>${q}</div>`,
       answerWrap: (t) => `<a>${t}</a>`,
     });
@@ -107,7 +109,7 @@ describe('applyContentI18n (save serialization)', () => {
         hintText: { en: 'think', fr: 'pense' },
       }),
       options: [], matchPairs: [],
-      hintUuid: 'h-9', solutionId: 's-9', solutionType: '',
+      hintUuid: 'h-9', solutionId: 's-9', solutionAsset: {}, assetSolutionHtml: () => '',
       buildBodyHtml: (_t, q) => q,
       answerWrap: (t) => t,
     });

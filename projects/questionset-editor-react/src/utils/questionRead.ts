@@ -167,17 +167,21 @@ function buildI18nSource(raw: Record<string, unknown>, editorState: Record<strin
     v && typeof v === 'object' && !Array.isArray(v) ? asI18nMap(v as I18nValue) : undefined;
 
   // Solution: value is {lang: {type, value}} in the newer old-editor format.
-  let solution: I18nMap | undefined;
+  // Capture every language AND every type (html/video/audio) — the type
+  // decides whether `value` is rendered text or a media asset id.
+  let solutionByLang: Record<string, { type: string; value: string }> | undefined;
   const solutions = Array.isArray(raw['solutions']) && (raw['solutions'] as unknown[]).length
     ? raw['solutions'] : editorState['solutions'];
   if (Array.isArray(solutions) && solutions[0]) {
     const valueMap = asRecord(asRecord(solutions[0])['value']);
-    const out: I18nMap = {};
+    const out: Record<string, { type: string; value: string }> = {};
     for (const [lang, v] of Object.entries(valueMap)) {
       const entry = asRecord(v);
-      if (entry['type'] === 'html' && typeof entry['value'] === 'string') out[lang] = entry['value'];
+      if (typeof entry['type'] === 'string' && typeof entry['value'] === 'string') {
+        out[lang] = { type: entry['type'], value: entry['value'] };
+      }
     }
-    if (Object.keys(out).length) solution = out;
+    if (Object.keys(out).length) solutionByLang = out;
   }
 
   // Hint: the entry referenced by outcomeDeclaration.hint.defaultValue.
@@ -203,7 +207,7 @@ function buildI18nSource(raw: Record<string, unknown>, editorState: Record<strin
     question: mapOf(editorState['question']),
     answer: mapOf(editorState['answer']),
     sentence: mapOf(editorState['sentence']),
-    solution,
+    solutionByLang,
     hint,
     options: optionMaps.some((m) => Object.keys(m).length) ? optionMaps : undefined,
     pairsLeft: rawPairs.length ? rawPairs.map((p) => mapOf(asRecord(p)['left']) ?? {}) : undefined,
