@@ -140,19 +140,11 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   // Old meta-form fills the license field's options from getLicenses(), and
   // the section's maxQuestions dropdown offers 1..N where N is the number of
   // questions currently in the section (old editor behaviour).
-  const questionCount = useTreeStore((s) => {
-    const node = s.selectedNodeId ? bfs(s.treeData, s.selectedNodeId) : undefined;
-    return (node?.children ?? []).filter((c) => c.isQuestion).length;
-    function bfs(nodes: typeof s.treeData, id: string) {
-      const q = [...nodes];
-      while (q.length) {
-        const n = q.shift()!;
-        if (n.id === id || n.identifier === id) return n;
-        if (n.children) q.push(...n.children);
-      }
-      return undefined;
-    }
-  });
+  const questionCount = useTreeStore((s) =>
+    s.selectedNodeId
+      ? s.getChildrenOf(s.selectedNodeId).filter((c) => c.isQuestion).length
+      : 0,
+  );
   const withLicenseOptions = useCallback(
     (fields: typeof rootFormConfig) =>
       (fields ?? []).map((f) => {
