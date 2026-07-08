@@ -653,7 +653,7 @@ export function useSaveQuestion() {
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
     solutionText, solutionType, solutionAsset, solutionUUID,
     answerText, sentence, hints, hintText, difficultyLevel, bloomsLevel, maxScore,
-    isPartialScore, evalUnordered, layout,
+    isPartialScore, evalUnordered, layout, contentLang,
     config, selectedNodeId, updateNode, replaceNodeId, treeData, saveHierarchy,
     setIsDirty, setIsSaving,
   ]);
