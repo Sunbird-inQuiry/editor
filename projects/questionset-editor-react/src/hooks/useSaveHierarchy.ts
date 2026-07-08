@@ -229,6 +229,8 @@ export function useSaveHierarchy() {
         }
       }
       useTreeStore.setState({ treeCache: clearedCache });
+      // The backend accepted this batch — it's now the rollback baseline.
+      useTreeStore.getState().markSaved();
       setLastSaved(new Date().toISOString());
       setIsDirty(false);
       useEditorStore.getState().eventHandlers.onHierarchySaved?.({ identifiers });
@@ -236,6 +238,11 @@ export function useSaveHierarchy() {
     } catch (e) {
       console.error('[useSaveHierarchy] save failed:', e);
       notifyError(apiErrorMessage(e, 'Failed to save. Please try again.'));
+      // nodesModified/hierarchy are rejected as a single transaction — none
+      // of the pending nodes since the last successful save actually exist
+      // on the backend. Discard them instead of leaving them in the tree
+      // looking saved.
+      useTreeStore.getState().revertToSaved();
       return false;
     } finally {
       inFlight.current = false;

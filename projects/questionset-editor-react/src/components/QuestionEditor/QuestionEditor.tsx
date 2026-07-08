@@ -392,8 +392,15 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
     }
     onBack?.();
   };
-  // Navigate back to the set only when the creation/update succeeded.
-  const handleSave = async () => { if (await save()) onBack?.(); };
+  // Navigate back to the set when the save succeeded, or when it failed and
+  // the backend rejected the whole batch — a failed hierarchy save reverts
+  // the tree to its last confirmed state, so this question's node (and
+  // anything else pending) may no longer exist to keep editing against.
+  const handleSave = async () => {
+    const editingId = activeQuestion?.identifier;
+    const ok = await save();
+    if (ok || (editingId && !useTreeStore.getState().getNodeById(editingId))) onBack?.();
+  };
 
   return (
     <div className="ce-ed">
