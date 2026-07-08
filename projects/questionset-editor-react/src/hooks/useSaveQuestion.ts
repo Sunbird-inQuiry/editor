@@ -339,8 +339,12 @@ export function useSaveQuestion() {
     const formName = typeof formMeta.name === 'string' && formMeta.name.trim() ? formMeta.name.trim() : undefined;
     const formMarks = Number(formMeta.maxScore);
 
+    const isExisting = activeQuestion?.identifier && !activeQuestion.identifier.startsWith('temp-');
+    const autoName = ((questionBody || '').replace(/<[^>]+>/g, '').slice(0, 60).trim() || 'Untitled Question');
+
     const questionName = formName
-      ?? ((questionBody || '').replace(/<[^>]+>/g, '').slice(0, 60).trim() || 'Untitled Question');
+      ?? (isExisting ? activeQuestion?.name : undefined)
+      ?? autoName;
 
     // FTB scores 1 per blank, MTF 1 per pair (when partial); otherwise Marks
     // from the details form.
@@ -429,7 +433,6 @@ export function useSaveQuestion() {
 
     setIsSaving(true);
     try {
-      const isExisting = activeQuestion?.identifier && !activeQuestion.identifier.startsWith('temp-');
 
       if (isExisting) {
         // ── Update existing question via hierarchy update ───────────────────
