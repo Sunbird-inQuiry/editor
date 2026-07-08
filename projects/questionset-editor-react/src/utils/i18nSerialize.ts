@@ -139,7 +139,7 @@ export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {
       // per-language map only in editorState.sentence, which is opaque JSON.
       meta.sentence = readI18n(sMap, 'en');
       es.sentence = normalizeI18n(sMap);
-      const blocks: Record<string, unknown> = {};
+      const blocks: Record<string, { options: Array<{ value: string; label: string }>; correctResponse: string[] }> = {};
       const rdBlocks: Record<string, unknown> = {};
       for (const [lang, text] of Object.entries(sMap)) {
         const words = reoWords(text);
@@ -152,6 +152,16 @@ export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {
       if (interactions?.response1) interactions.response1.i18n = blocks;
       const rd = (meta.responseDeclaration as Record<string, Record<string, unknown>> | undefined)?.response1;
       if (rd) rd.i18n = rdBlocks;
+
+      // The top-level (non-i18n) options/correctResponse are the "primary"
+      // language shown outside a language picker — old editor always prefers
+      // 'en' here (reorder.component.ts emitBody: primaryLang = i18nToks['en']
+      // ? 'en' : first available), regardless of which tab was last active
+      // when the question was saved.
+      const primaryLang = blocks['en'] ? 'en' : Object.keys(blocks)[0];
+      const primary = primaryLang ? blocks[primaryLang] : undefined;
+      if (primary && interactions?.response1) interactions.response1.options = primary.options;
+      if (primary && rd) rd.correctResponse = { value: primary.correctResponse };
     }
   }
 
