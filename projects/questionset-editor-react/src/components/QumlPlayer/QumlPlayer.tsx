@@ -14,7 +14,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { useTreeStore } from '../../store/tree.store';
 import { useEditorStore } from '../../store/editor.store';
-import { readHierarchy } from '../../api/hierarchy';
 import { listQuestions } from '../../api/question';
 import type { INode } from '../../types/editor';
 import styles from './QumlPlayer.module.scss';
@@ -86,16 +85,12 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
 
         const treeData = useTreeStore.getState().treeData;
 
-        // Full-set preview re-reads the hierarchy (old setUpdatedTreeNodeData);
-        // falls back to the in-memory tree if the read fails.
-        let metadata: Record<string, unknown>;
-        try {
-          if (singleQuestionId || !questionSetId || questionSetId.startsWith('temp-')) throw new Error('local');
-          const { content } = await readHierarchy(questionSetId);
-          metadata = content;
-        } catch {
-          metadata = treeData[0] ? nodeToHierarchy(treeData[0]) : {};
-        }
+        // Full-set preview used to re-read the hierarchy here (old
+        // setUpdatedTreeNodeData), but the player web component re-fetches
+        // the hierarchy itself once mounted — that made every full-set
+        // preview fire the read call twice. Seed it from the in-memory tree
+        // instead; the player's own fetch brings it fully up to date.
+        let metadata: Record<string, unknown> = treeData[0] ? nodeToHierarchy(treeData[0]) : {};
 
         if (singleQuestionId) {
           // Old question.component.previewContent single-question settings.
