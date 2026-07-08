@@ -5,7 +5,7 @@
  * becomes a {lang: text} map (normalizeI18n), with per-language rendered
  * HTML for body/answer and i18n blocks for REO.
  */
-import { normalizeI18n } from './i18nField';
+import { normalizeI18n, readI18n } from './i18nField';
 import { htmlToText } from './html';
 import type { I18nMap } from './i18nField';
 import type { II18nText, ISolutionAsset } from '../store/question.store';
@@ -49,11 +49,14 @@ export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {
   }
 
   // ── SA answer ───────────────────────────────────────────────────────────
+  // metadata.answer is a schema-typed String field for every question type,
+  // not just choice — old editor JSON.stringifies it here too
+  // (question.component.ts setQuestionProperties, non-choice branch).
   const ansMap = dropEmpty(a.i18n.answerText);
   if (a.type === 'sa' && hasExtraLangs(ansMap)) {
     es.answer = normalizeI18n(ansMap);
-    meta.answer = Object.fromEntries(
-      Object.entries(ansMap).map(([l, t]) => [l, a.answerWrap(t)]),
+    meta.answer = JSON.stringify(
+      Object.fromEntries(Object.entries(ansMap).map(([l, t]) => [l, a.answerWrap(t)])),
     );
   }
 
@@ -69,6 +72,23 @@ export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {
         if (esOptions?.[i]?.value) esOptions[i]!.value!.body = normalizeI18n(map);
         if (itOptions?.[i]) itOptions[i]!.label = { ...map };
       });
+    }
+  }
+
+  // ── MCQ/boolean answer — the correct option's per-language label, not
+  // whichever language tab happened to be active at save time. Old editor
+  // (question.component.ts setQuestionProperties, choice branch) builds this
+  // from the interactions label map and, when more than English is filled,
+  // JSON.stringifies the per-language map rather than sending an object —
+  // `answer` is a string-typed schema field, unlike `body`.
+  if (a.type === 'mcq' || a.type === 'boolean') {
+    const correct = a.options.find((o) => o.isCorrect);
+    const answerMap = correct ? dropEmpty(a.i18n.options[correct.id]) : {};
+    if (hasExtraLangs(answerMap)) {
+      const wrap = (html: string) => `<div class='answer-container'><div class='answer-body'>${html}</div></div>`;
+      meta.answer = JSON.stringify(
+        Object.fromEntries(Object.entries(answerMap).map(([l, t]) => [l, wrap(t)])),
+      );
     }
   }
 
@@ -107,8 +127,13 @@ export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {
   if (a.type === 'reo') {
     const sMap = dropEmpty(a.i18n.sentence);
     if (hasExtraLangs(sMap)) {
-      meta.sentence = normalizeI18n(sMap);
-      es.sentence = meta.sentence;
+      // Top-level metadata.sentence is a schema-typed String field — the
+      // backend rejects an object ("Metadata sentence should be a/an String
+      // value"). Old editor explicitly collapses it back to the 'en' slot
+      // (question.component.ts setQuestionProperties) and keeps the full
+      // per-language map only in editorState.sentence, which is opaque JSON.
+      meta.sentence = readI18n(sMap, 'en');
+      es.sentence = normalizeI18n(sMap);
       const blocks: Record<string, unknown> = {};
       const rdBlocks: Record<string, unknown> = {};
       for (const [lang, text] of Object.entries(sMap)) {

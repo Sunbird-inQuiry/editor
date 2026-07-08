@@ -114,7 +114,11 @@ describe('applyContentI18n (save serialization)', () => {
       answerWrap: (t) => t,
     });
     expect(meta.hints).toEqual({ 'h-9': { en: 'think', fr: 'pense' } });
-    expect(meta.sentence).toEqual({ en: 'The tree is tall', fr: 'Le arbre est grand' });
+    // Top-level metadata.sentence is a schema-typed String field — the
+    // backend rejects an object, so it stays the 'en' slot; the full
+    // per-language map lives only in editorState.sentence.
+    expect(meta.sentence).toBe('The tree is tall');
+    expect((meta.editorState as Record<string, unknown>).sentence).toEqual({ en: 'The tree is tall', fr: 'Le arbre est grand' });
     const blocks = (meta.editorState as { i18n: Record<string, { correctResponse: string[] }> }).i18n;
     expect(blocks.en!.correctResponse).toEqual(['A', 'B', 'C', 'D']);
     expect(blocks.fr!.correctResponse).toEqual(['A', 'B', 'C', 'D']);
