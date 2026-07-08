@@ -441,6 +441,7 @@ function AppIconPicker({
       </button>
       {open && (
         <ImagePickerModal
+          preserveAbsoluteUrl
           onSelect={(url) => { onChange(url); setOpen(false); }}
           onClose={() => setOpen(false)}
         />
