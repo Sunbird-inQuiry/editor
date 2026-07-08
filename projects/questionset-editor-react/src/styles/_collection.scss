@@ -151,7 +151,7 @@
 /* ── Center detail ──────────────────────────────────────────── */
 /* Defensive: host pages target the semantic <main>/<aside> elements with
    width/centering rules — pin ours so the editor pane always fills. */
-.ce-main { flex: 1; min-width: 0; max-width: none; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 0; }
+.ce-main { flex: 1; min-width: 0; max-width: none; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 0; align-items: normal !important; }
 aside.ce-tree { max-width: none; margin: 0; }
 .ce-crumb { flex: none; display: flex; align-items: center; gap: 9px; padding: 16px 28px 4px; font-size: 13.5px; color: var(--sb-text-muted); }
 .ce-crumb button { display: inline-flex; align-items: center; gap: 7px; border: none; background: transparent; cursor: pointer; font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--sb-text-muted); padding: 3px 4px; border-radius: 7px; }
