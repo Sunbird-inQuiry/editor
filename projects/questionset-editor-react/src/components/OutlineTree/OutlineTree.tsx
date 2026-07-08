@@ -7,6 +7,7 @@ import { useUiStore } from '../../store/ui.store';
 import type { INode } from '../../types/editor';
 import { resolveQuestionType } from '../../registry';
 import { detectNodeKind } from '../../utils/nodeKind';
+import { notifyError } from '../../utils/notify';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -289,10 +290,21 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
   }, [selectNode]);
 
   const handleAddSection = useCallback((parentId: string) => {
+    const root = useTreeStore.getState().treeData[0];
+    const rootSaved = !!useEditorStore.getState().lastSaved || (root?.children?.length ?? 0) > 0;
+    if (!rootSaved) {
+      notifyError('Please save the question set before adding a section.');
+      return;
+    }
     addNode(parentId, 'section');
   }, [addNode]);
 
   const handleAddQuestion = useCallback((parentId: string) => {
+    const parentNode = useTreeStore.getState().getNodeById(parentId);
+    if (parentNode?.identifier.startsWith('temp-')) {
+      notifyError('Please save the section before adding a question.');
+      return;
+    }
     openModal('questionTypeSelector', { parentId });
   }, [openModal]);
 
@@ -301,6 +313,7 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
   }, [openModal]);
 
   const rootId = treeData[0]?.id;
+  const lastSaved = useEditorStore((s) => s.lastSaved);
 
   // Determine selected node kind to conditionally disable footer buttons
   const selectedNode = selectedNodeId
@@ -314,6 +327,17 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
   const questionParentId = selectedKind === 'section'
     ? (selectedNodeId ?? rootId)
     : rootId;
+
+  // Dimmed (but still clickable, so the click surfaces the "save first"
+  // toast from handleAddSection/handleAddQuestion) until the prerequisite
+  // is saved: the root questionset for "Add Section", the selected section
+  // for "Add Question". A questionset that already has sections was clearly
+  // saved in a previous session, so it isn't blocked just for lacking a
+  // lastSaved timestamp in THIS one.
+  const rootNeedsSaveFirst = !lastSaved && (treeData[0]?.children?.length ?? 0) === 0;
+  const addSectionNeedsSaveFirst = !addSectionDisabled && rootNeedsSaveFirst;
+  const sectionNeedsSaveFirst = selectedKind === 'section' && !!selectedNode?.identifier.startsWith('temp-');
+  const addQuestionNeedsSaveFirst = !addQuestionDisabled && sectionNeedsSaveFirst;
 
   return (
     <>
@@ -355,14 +379,14 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
           <button
             onClick={() => handleAddSection(rootId)}
             disabled={addSectionDisabled}
-            style={addSectionDisabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+            style={(addSectionDisabled || addSectionNeedsSaveFirst) ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
           >
             <Icon name="plus" size={15} />{L('ui.addSection', 'Add Section')}
           </button>
           <button
             onClick={() => handleAddQuestion(questionParentId ?? rootId)}
             disabled={addQuestionDisabled}
-            style={addQuestionDisabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+            style={(addQuestionDisabled || addQuestionNeedsSaveFirst) ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
           >
             <Icon name="plus" size={15} />{L('ui.addQuestion', 'Add Question')}
           </button>

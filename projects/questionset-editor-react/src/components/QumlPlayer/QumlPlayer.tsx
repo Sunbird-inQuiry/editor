@@ -14,7 +14,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { useTreeStore } from '../../store/tree.store';
 import { useEditorStore } from '../../store/editor.store';
-import { readHierarchy } from '../../api/hierarchy';
+import { listQuestions } from '../../api/question';
 import type { INode } from '../../types/editor';
 import styles from './QumlPlayer.module.scss';
 
@@ -85,35 +85,49 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
 
         const treeData = useTreeStore.getState().treeData;
 
-        // Full-set preview re-reads the hierarchy (old setUpdatedTreeNodeData);
-        // falls back to the in-memory tree if the read fails.
-        let metadata: Record<string, unknown>;
-        try {
-          if (singleQuestionId || !questionSetId || questionSetId.startsWith('temp-')) throw new Error('local');
-          const { content } = await readHierarchy(questionSetId);
-          metadata = content;
-        } catch {
-          metadata = treeData[0] ? nodeToHierarchy(treeData[0]) : {};
-        }
+        // Full-set preview used to re-read the hierarchy here (old
+        // setUpdatedTreeNodeData), but the player web component re-fetches
+        // the hierarchy itself once mounted — that made every full-set
+        // preview fire the read call twice. Seed it from the in-memory tree
+        // instead; the player's own fetch brings it fully up to date.
+        let metadata: Record<string, unknown> = treeData[0] ? nodeToHierarchy(treeData[0]) : {};
 
         if (singleQuestionId) {
           // Old question.component.previewContent single-question settings.
-          // The child is a bare reference — the player fetches the question
-          // body itself via question/v2/list (old editor behaviour); embedding
-          // tree metadata here would skip that call and render stale/empty
-          // content after a reload.
+          // Fetch the question via question/v2/list (old editor call) and
+          // EMBED it with its body — the react player only honours embedded
+          // metadata when a question carries body/interactions; otherwise it
+          // re-fetches the full hierarchy and previews the entire set.
           const qNode = bfsFind(treeData, singleQuestionId);
+          let qFull: Record<string, unknown> = { ...(qNode?.metadata ?? {}) };
+          try {
+            const [fetched] = await listQuestions([singleQuestionId]);
+            if (fetched) qFull = { ...qFull, ...fetched };
+          } catch { /* fall back to tree metadata */ }
           const qMeta = {
+            ...qFull,
             identifier: singleQuestionId,
             name: qNode?.name ?? 'Question',
             mimeType: 'application/vnd.sunbird.question',
             objectType: 'Question',
             visibility: 'Parent',
           };
+          // Keep the question inside its real section wrapper so the player's
+          // section walker finds it in the same shape as a hierarchy read.
+          const parentNode = qNode?.parent ? bfsFind(treeData, qNode.parent) : undefined;
+          const children = parentNode?.isFolder
+            ? [{
+                ...(parentNode.metadata ?? {}),
+                identifier: parentNode.identifier,
+                name: parentNode.name,
+                childNodes: [singleQuestionId],
+                children: [qMeta],
+              }]
+            : [qMeta];
           metadata = {
             ...metadata,
             childNodes: [singleQuestionId],
-            children: [qMeta],
+            children,
             maxQuestions: 1,
             showStartPage: 'No',
             showTimer: false,

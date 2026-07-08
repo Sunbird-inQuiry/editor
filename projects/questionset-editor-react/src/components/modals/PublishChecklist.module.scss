@@ -72,11 +72,8 @@
   }
 }
 
-// Custom visible checkbox
+// Custom visible checkbox — matches TermAndConditionModal's checkbox exactly.
 .customCheck {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
   width: 18px;
   height: 18px;
@@ -84,17 +81,33 @@
   border-radius: var(--sbx-radius-sm);
   border: 2px solid var(--sbx-color-border-strong);
   background-color: var(--sbx-color-surface-base);
-  color: transparent;
+  position: relative;
   transition:
     background-color var(--sbx-duration-base) var(--sbx-ease-default),
-    border-color     var(--sbx-duration-base) var(--sbx-ease-default),
-    color            var(--sbx-duration-base) var(--sbx-ease-default);
+    border-color     var(--sbx-duration-base) var(--sbx-ease-default);
+
+  &::after {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 3px;
+    top: 0px;
+    width: 5px;
+    height: 9px;
+    border: 2px solid var(--sbx-color-primary-fg);
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+  }
 }
 
 .customCheckChecked {
   border-color: var(--accent);
   background-color: var(--accent);
-  color: #fff;
+
+  &::after {
+    display: block;
+  }
 }
 
 // Item text
@@ -104,15 +117,4 @@
   color: var(--sbx-color-text-primary);
   line-height: var(--sbx-leading-normal);
   flex: 1;
-}
-
-// ---------------------------------------------------------------------------
-// Hint below checklist
-// ---------------------------------------------------------------------------
-
-.hint {
-  margin: 0;
-  font-size: var(--sbx-text-xs);
-  color: var(--sbx-color-text-tertiary);
-  text-align: right;
 }

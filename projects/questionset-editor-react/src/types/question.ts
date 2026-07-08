@@ -86,7 +86,9 @@ export interface IQuestion {
     question?: Record<string, string>;
     answer?: Record<string, string>;
     sentence?: Record<string, string>;
-    solution?: Record<string, string>;
+    /** Full per-language solution entries (type + value); value is html text
+     *  or a media asset id for video/audio. */
+    solutionByLang?: Record<string, { type: string; value: string }>;
     hint?: Record<string, string>;
     options?: Array<Record<string, string>>;
     pairsLeft?: Array<Record<string, string>>;

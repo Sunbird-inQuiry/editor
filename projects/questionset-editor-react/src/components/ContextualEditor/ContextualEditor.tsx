@@ -256,21 +256,35 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
               <div className="ce-card-head">
                 {isCurrentNodeRoot && (
                   <>
-                    <button
-                      type="button"
-                      className="ce-thumb"
-                      title={isReadOnly ? undefined : 'Click to change icon'}
-                      onClick={() => !isReadOnly && setIconPickerOpen(true)}
-                      style={{ cursor: isReadOnly ? 'default' : 'pointer' }}
-                    >
-                      {activeNodeMeta?.appIcon ? (
-                        <img src={activeNodeMeta.appIcon as string} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
-                      ) : (
-                        <Icon name="image" size={28} />
-                      )}
-                    </button>
+                    <div className="ce-thumb-wrap">
+                      <button
+                        type="button"
+                        className="ce-thumb"
+                        title={isReadOnly ? undefined : 'Click to change icon'}
+                        onClick={() => !isReadOnly && setIconPickerOpen(true)}
+                        style={{ cursor: isReadOnly ? 'default' : 'pointer' }}
+                      >
+                        {activeNodeMeta?.appIcon ? (
+                          <img src={activeNodeMeta.appIcon as string} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+                        ) : (
+                          <Icon name="image" size={28} />
+                        )}
+                      </button>
+                      {!isReadOnly && activeNodeMeta?.appIcon ? (
+                        <button
+                          type="button"
+                          className="ce-thumb-remove"
+                          title="Remove icon"
+                          aria-label="Remove icon"
+                          onClick={() => handleFormChange('appIcon', '')}
+                        >
+                          <Icon name="x" size={10} />
+                        </button>
+                      ) : null}
+                    </div>
                     {iconPickerOpen && (
                       <ImagePickerModal
+                        preserveAbsoluteUrl
                         onSelect={(url) => {
                           if (selectedNodeId) handleFormChange('appIcon', url);
                           setIconPickerOpen(false);

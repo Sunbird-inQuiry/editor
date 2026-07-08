@@ -312,7 +312,7 @@ export function useSaveQuestion() {
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
     hints, hintText, solutionText, solutionType, solutionAsset, solutionUUID,
     answerText, sentence, difficultyLevel, bloomsLevel, maxScore,
-    isPartialScore, evalUnordered, layout,
+    isPartialScore, evalUnordered, layout, contentLang,
     setIsDirty, setIsSaving,
   } = useQuestionStore();
 
@@ -339,8 +339,12 @@ export function useSaveQuestion() {
     const formName = typeof formMeta.name === 'string' && formMeta.name.trim() ? formMeta.name.trim() : undefined;
     const formMarks = Number(formMeta.maxScore);
 
+    const isExisting = activeQuestion?.identifier && !activeQuestion.identifier.startsWith('temp-');
+    const autoName = ((questionBody || '').replace(/<[^>]+>/g, '').slice(0, 60).trim() || 'Untitled Question');
+
     const questionName = formName
-      ?? ((questionBody || '').replace(/<[^>]+>/g, '').slice(0, 60).trim() || 'Untitled Question');
+      ?? (isExisting ? activeQuestion?.name : undefined)
+      ?? autoName;
 
     // FTB scores 1 per blank, MTF 1 per pair (when partial); otherwise Marks
     // from the details form.
@@ -381,27 +385,36 @@ export function useSaveQuestion() {
 
     // Solution — old editor shape: editorState.solutions keeps {type, value}
     // per lang (value = asset id for video/audio); metadata.solutions maps
-    // {uuid: rendered html}. Asset + thumbnail entries join media[].
+    // {uuid: rendered html}. This is just the current-tab fallback (keyed by
+    // contentLang, not hardcoded 'en') — applyContentI18n() below merges in
+    // every other language's solution once i18nSnapshot is available.
     const solutionId = solutionUUID || genUuid();
     let editorStateSolutions: Array<Record<string, unknown>> | undefined;
     let metadataSolutions: Record<string, unknown> = {};
     if (solutionType === 'html' && solutionText.trim()) {
-      editorStateSolutions = [{ id: solutionId, value: { en: { type: 'html', value: solutionText } } }];
+      editorStateSolutions = [{ id: solutionId, value: { [contentLang]: { type: 'html', value: solutionText } } }];
       metadataSolutions = { [solutionId]: solutionText };
     } else if ((solutionType === 'video' || solutionType === 'audio') && solutionAsset) {
-      editorStateSolutions = [{ id: solutionId, value: { en: { type: solutionType, value: solutionAsset.id } } }];
+      editorStateSolutions = [{ id: solutionId, value: { [contentLang]: { type: solutionType, value: solutionAsset.id } } }];
       metadataSolutions = { [solutionId]: assetSolutionHtml(solutionType, solutionAsset) };
-      if (!questionMedia.some((m) => m.id === solutionAsset.id)) {
+    }
+    // Every language's attached video/audio (+ thumbnail) must land in
+    // media[], not just whichever tab happens to be active at save time.
+    for (const [lang, type] of Object.entries(i18nSnapshot.solutionType)) {
+      if (type !== 'video' && type !== 'audio') continue;
+      const asset = i18nSnapshot.solutionAsset[lang];
+      if (!asset) continue;
+      if (!questionMedia.some((m) => m.id === asset.id)) {
         questionMedia.push({
-          id: solutionAsset.id, src: solutionAsset.src, type: solutionType,
-          assetId: solutionAsset.id, name: solutionAsset.name, baseUrl: mediaBaseUrl,
-          ...(solutionAsset.thumbnail ? { thumbnail: solutionAsset.thumbnail } : {}),
+          id: asset.id, src: asset.src, type,
+          assetId: asset.id, name: asset.name, baseUrl: mediaBaseUrl,
+          ...(asset.thumbnail ? { thumbnail: asset.thumbnail } : {}),
         });
       }
-      if (solutionAsset.thumbnail) {
-        const thumbId = `${solutionType}_${solutionAsset.id}`;
+      if (asset.thumbnail) {
+        const thumbId = `${type}_${asset.id}`;
         if (!questionMedia.some((m) => m.id === thumbId)) {
-          questionMedia.push({ id: thumbId, src: solutionAsset.thumbnail, type: 'image', baseUrl: mediaBaseUrl });
+          questionMedia.push({ id: thumbId, src: asset.thumbnail, type: 'image', baseUrl: mediaBaseUrl });
         }
       }
     }
@@ -429,7 +442,6 @@ export function useSaveQuestion() {
 
     setIsSaving(true);
     try {
-      const isExisting = activeQuestion?.identifier && !activeQuestion.identifier.startsWith('temp-');
 
       if (isExisting) {
         // ── Update existing question via hierarchy update ───────────────────
@@ -446,6 +458,7 @@ export function useSaveQuestion() {
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
           ...(questionType === 'mcq' ? { templateId: `mcq-${layout}` } : {}),
+          ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
           ...(questionType === 'ftb' ? {
             isPartialScore,
             evalUnordered,
@@ -514,7 +527,8 @@ export function useSaveQuestion() {
           matchPairs,
           hintUuid,
           solutionId,
-          solutionType,
+          solutionAsset: i18nSnapshot.solutionAsset,
+          assetSolutionHtml,
           buildBodyHtml,
           answerWrap,
         });
@@ -611,7 +625,8 @@ export function useSaveQuestion() {
           matchPairs,
           hintUuid,
           solutionId,
-          solutionType,
+          solutionAsset: i18nSnapshot.solutionAsset,
+          assetSolutionHtml,
           buildBodyHtml,
           answerWrap,
         });
@@ -638,7 +653,7 @@ export function useSaveQuestion() {
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
     solutionText, solutionType, solutionAsset, solutionUUID,
     answerText, sentence, hints, hintText, difficultyLevel, bloomsLevel, maxScore,
-    isPartialScore, evalUnordered, layout,
+    isPartialScore, evalUnordered, layout, contentLang,
     config, selectedNodeId, updateNode, replaceNodeId, treeData, saveHierarchy,
     setIsDirty, setIsSaving,
   ]);

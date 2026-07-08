@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { CheckSquare } from 'lucide-react';
 import Modal from '../shared/Modal';
 import Button from '../shared/Button';
 import { useEditorStore } from '../../store/editor.store';
@@ -17,41 +16,6 @@ export interface PublishChecklistProps {
 }
 
 // -----------------------------------------------------------------------------
-// Default checklist items used when no publishChecklist is configured
-// -----------------------------------------------------------------------------
-
-const DEFAULT_CHECKLIST_ITEMS: ICategoryField[] = [
-  {
-    code: 'question_body',
-    label: 'All questions have a question body',
-    required: true,
-    editable: false,
-    visible: true,
-  },
-  {
-    code: 'one_question_complete',
-    label: 'At least one question is complete',
-    required: true,
-    editable: false,
-    visible: true,
-  },
-  {
-    code: 'metadata_filled',
-    label: 'Metadata (title, description) is filled',
-    required: true,
-    editable: false,
-    visible: true,
-  },
-  {
-    code: 'section_exists',
-    label: 'At least one section exists',
-    required: true,
-    editable: false,
-    visible: true,
-  },
-];
-
-// -----------------------------------------------------------------------------
 // Component
 // -----------------------------------------------------------------------------
 
@@ -62,19 +26,22 @@ const PublishChecklist: React.FC<PublishChecklistProps> = ({
 }) => {
   const configuredChecklist = useEditorStore((s) => s.publishChecklist);
 
-  const checklistItems = useMemo<ICategoryField[]>(() => {
-    if (configuredChecklist && configuredChecklist.length > 0) {
-      return configuredChecklist.filter((f) => f.visible !== false);
-    }
-    return DEFAULT_CHECKLIST_ITEMS;
-  }, [configuredChecklist]);
+  // No fallback list — matches the old editor's PublishChecklistComponent,
+  // which shows a plain confirmation (no checkboxes) when the category
+  // definition has no `forms.publishchecklist` configured.
+  const checklistItems = useMemo<ICategoryField[]>(
+    () => (configuredChecklist ?? []).filter((f) => f.visible !== false),
+    [configuredChecklist],
+  );
 
   const [checked, setChecked] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(checklistItems.map((item) => [item.code, false])),
   );
 
+  // Old editor: isButtonEnable = _.isEmpty(publishchecklist) ? true : false —
+  // an unconfigured checklist never blocks publishing.
   const allChecked = useMemo(
-    () => checklistItems.every((item) => checked[item.code]),
+    () => checklistItems.length === 0 || checklistItems.every((item) => checked[item.code]),
     [checked, checklistItems],
   );
 
@@ -102,44 +69,45 @@ const PublishChecklist: React.FC<PublishChecklistProps> = ({
       size="md"
     >
       <div className={styles.root}>
-        <p className={styles.intro}>
-          Please confirm all items below before publishing this Question Set.
-        </p>
-
-        <ul className={styles.checklist} role="list">
-          {checklistItems.map((item) => {
-            const isChecked = checked[item.code] ?? false;
-            const labelId = `publish-check-label-${item.code}`;
-            return (
-              <li key={item.code} className={styles.item}>
-                <label className={styles.itemLabel} htmlFor={`publish-check-${item.code}`}>
-                  <input
-                    id={`publish-check-${item.code}`}
-                    type="checkbox"
-                    className={styles.checkbox}
-                    checked={isChecked}
-                    onChange={() => toggle(item.code)}
-                    aria-labelledby={labelId}
-                  />
-                  <span
-                    className={`${styles.customCheck} ${isChecked ? styles.customCheckChecked : ''}`}
-                    aria-hidden="true"
-                  >
-                    {isChecked && <CheckSquare size={14} strokeWidth={2.5} />}
-                  </span>
-                  <span id={labelId} className={styles.itemText}>
-                    {item.label}
-                  </span>
-                </label>
-              </li>
-            );
-          })}
-        </ul>
-
-        {!allChecked && (
-          <p className={styles.hint} role="note">
-            Check all items to enable the Publish button.
+        {checklistItems.length === 0 ? (
+          <p className={styles.intro}>
+            Are you sure you want to publish this Question Set?
           </p>
+        ) : (
+          <>
+            <p className={styles.intro}>
+              Please confirm that ALL the following items are verified (by ticking the
+              check-boxes) before you can publish:
+            </p>
+
+            <ul className={styles.checklist} role="list">
+              {checklistItems.map((item) => {
+                const isChecked = checked[item.code] ?? false;
+                const labelId = `publish-check-label-${item.code}`;
+                return (
+                  <li key={item.code} className={styles.item}>
+                    <label className={styles.itemLabel} htmlFor={`publish-check-${item.code}`}>
+                      <input
+                        id={`publish-check-${item.code}`}
+                        type="checkbox"
+                        className={styles.checkbox}
+                        checked={isChecked}
+                        onChange={() => toggle(item.code)}
+                        aria-labelledby={labelId}
+                      />
+                      <span
+                        className={`${styles.customCheck} ${isChecked ? styles.customCheckChecked : ''}`}
+                        aria-hidden="true"
+                      />
+                      <span id={labelId} className={styles.itemText}>
+                        {item.label}
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
         )}
       </div>
     </Modal>
