@@ -273,13 +273,15 @@ function buildCascadedOptions(
   // Parent term not found in framework data
   if (!parentTerm) return [];
 
-  // Parent has no associations (e.g. "State (Maharashtra)" has no mediums) → empty
-  if (!parentTerm.associations?.length) return [];
-
   // Return only the associations that belong to this child category
-  return parentTerm.associations
+  const associatedOptions = (parentTerm.associations ?? [])
     .filter(a => a.category === field.code)
     .map(a => ({ value: a.name, label: a.name }));
+
+  // Parent has no associations for this child category (e.g. a framework
+  // hasn't authored them yet) → show all terms of the child category
+  // instead of leaving the dropdown empty.
+  return associatedOptions.length > 0 ? associatedOptions : buildOptions(field, frameworkTerms);
 }
 
 // ---------------------------------------------------------------------------
