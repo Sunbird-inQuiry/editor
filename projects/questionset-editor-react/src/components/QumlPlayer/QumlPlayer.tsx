@@ -193,23 +193,25 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
   }, [onClose]);
 
   // Status messages live OUTSIDE the manually-managed host div — the player
-  // is appended imperatively and must not fight React's children.
-  const statusEl = (
-    <>
+  // is appended imperatively and must not fight React's children. Rendered
+  // as an absolutely-centered overlay so it never sits beside the (empty,
+  // but already-styled) host box as a flex sibling.
+  const statusEl = status === 'loading' || status === 'error' ? (
+    <div className={styles.statusOverlay}>
       {status === 'loading' && (
-        <p style={{ textAlign: 'center', color: '#888', padding: 40, margin: 0 }}>{L('ui.loadingPreview', 'Loading preview…')}</p>
+        <p style={{ color: '#888', margin: 0 }}>{L('ui.loadingPreview', 'Loading preview…')}</p>
       )}
       {status === 'error' && (
-        <p style={{ textAlign: 'center', color: '#c33', padding: 40, margin: 0 }}>
+        <p style={{ color: '#c33', margin: 0 }}>
           {L('ui.previewUnavailable', 'Could not load the QuML player. Please try again.')}
         </p>
       )}
-    </>
-  );
+    </div>
+  ) : null;
 
   if (inline) {
     return (
-      <div style={{ minHeight: status === 'ready' ? 420 : undefined }}>
+      <div style={{ position: 'relative', minHeight: status === 'ready' ? 420 : undefined }}>
         {statusEl}
         <div ref={hostRef} />
       </div>
@@ -235,7 +237,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
       <div className={styles.playerContainer}>
         {statusEl}
         {/* Full width/height so the player lays out in desktop mode */}
-        <div ref={hostRef} style={{ width: '100%', height: '100%' }} />
+        <div ref={hostRef} className={styles.playerHost} style={{ height: '100%' }} />
       </div>
     </div>
   );
