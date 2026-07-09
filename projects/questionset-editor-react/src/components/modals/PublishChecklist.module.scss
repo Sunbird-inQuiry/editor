@@ -1,0 +1,120 @@
+// =============================================================================
+// PublishChecklist Modal — CSS Module
+// =============================================================================
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sbx-space-4);
+}
+
+// Introductory text
+.intro {
+  margin: 0;
+  font-size: var(--sbx-text-sm);
+  color: var(--sbx-color-text-secondary);
+  line-height: var(--sbx-leading-relaxed);
+}
+
+// ---------------------------------------------------------------------------
+// Checklist
+// ---------------------------------------------------------------------------
+
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sbx-space-2);
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+}
+
+.itemLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sbx-space-3);
+  cursor: pointer;
+  width: 100%;
+  padding: var(--sbx-space-3) var(--sbx-space-4);
+  border-radius: 14px;
+  border: 1.5px solid var(--sb-border);
+  background-color: #fff;
+  transition:
+    background-color var(--sbx-duration-base) var(--sbx-ease-default),
+    border-color     var(--sbx-duration-base) var(--sbx-ease-default);
+
+  &:hover {
+    background-color: var(--accent-soft);
+    border-color: var(--accent);
+  }
+}
+
+// Native checkbox — visually hidden, still focusable
+.checkbox {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+
+  &:focus-visible + .customCheck {
+    outline: 2px solid var(--sbx-color-border-focus);
+    outline-offset: 2px;
+  }
+}
+
+// Custom visible checkbox — matches TermAndConditionModal's checkbox exactly.
+.customCheck {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border-radius: var(--sbx-radius-sm);
+  border: 2px solid var(--sbx-color-border-strong);
+  background-color: var(--sbx-color-surface-base);
+  position: relative;
+  transition:
+    background-color var(--sbx-duration-base) var(--sbx-ease-default),
+    border-color     var(--sbx-duration-base) var(--sbx-ease-default);
+
+  &::after {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 3px;
+    top: 0px;
+    width: 5px;
+    height: 9px;
+    border: 2px solid var(--sbx-color-primary-fg);
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+  }
+}
+
+.customCheckChecked {
+  border-color: var(--accent);
+  background-color: var(--accent);
+
+  &::after {
+    display: block;
+  }
+}
+
+// Item text
+.itemText {
+  font-size: var(--sbx-text-sm);
+  font-weight: var(--sbx-font-medium);
+  color: var(--sbx-color-text-primary);
+  line-height: var(--sbx-leading-normal);
+  flex: 1;
+}

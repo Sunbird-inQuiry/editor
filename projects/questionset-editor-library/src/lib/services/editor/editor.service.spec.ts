@@ -63,7 +63,7 @@ describe('EditorService', () => {
   });
 
   it('should be created', () => {
-    const service: EditorService = TestBed.get(EditorService);
+    const service: EditorService = TestBed.inject(EditorService);
     expect(service).toBeTruthy();
   });
 

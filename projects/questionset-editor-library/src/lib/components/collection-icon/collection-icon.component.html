@@ -1,13 +1,19 @@
 <ng-container>
-    <div (click)="initializeImagePicker()" class="mb-20 w-15">
-        <div class="app-icon-label" [attr.data-title]="appIconConfig?.description ? appIconConfig?.description : null">{{appIconConfig?.label}}</div>
-        <div *ngIf='!appIcon' class="sb-centericon" aria-label="app icon" tabindex="0">
-            <div>
-                <i id="icon_appIcon" name="icon_appIcon" class="icon image outline" ></i>
-            </div>
-            <div class="addImageText">{{configService.labelConfig?.lbl?.addAnImage}}</div>
+  <div (click)="initializeImagePicker()" class="mb-20 w-15">
+    <div class="app-icon-label" [attr.data-title]="appIconConfig?.description ? appIconConfig?.description : null">{{appIconConfig?.label}}</div>
+    @if (!appIcon) {
+      <div class="sb-centericon" aria-label="app icon" tabindex="0">
+        <div>
+          <i id="icon_appIcon" name="icon_appIcon" class="icon image outline" ></i>
         </div>
-        <img *ngIf="appIcon" class="ui image sb-appicon" src="{{appIcon}}" alt="app icon"/>
-    </div>
-    <lib-assets-browser *ngIf="showImagePicker" [showAssetPicker]="showImagePicker" (assetDataOutput)="collectionIconHandler($event)" [assetType]="'image'" [isAppIcon]="true"></lib-assets-browser>
+        <div class="addImageText">{{configService.labelConfig?.lbl?.addAnImage}}</div>
+      </div>
+    }
+    @if (appIcon) {
+      <img class="ui image sb-appicon" src="{{appIcon}}" alt="app icon"/>
+    }
+  </div>
+  @if (showImagePicker) {
+    <lib-assets-browser [showAssetPicker]="showImagePicker" (assetDataOutput)="collectionIconHandler($event)" [assetType]="'image'" [isAppIcon]="true"></lib-assets-browser>
+  }
 </ng-container>

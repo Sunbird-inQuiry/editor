@@ -30,11 +30,16 @@ export class HelperService {
 
   initialize(channelId) {
     this.getLicenses().subscribe((data: any) => this._availableLicenses = _.get(data, 'license'));
-    this.getChannelData(channelId).subscribe(data => {
-      this._channelData = data;
-      this._channelPrimaryCategories =  _.get(this._channelData, 'primaryCategories') || [];
-      this._channelData$.next({ err: null, channelData: this._channelData });
-    });
+    this.getChannelData(channelId).subscribe(
+      data => {
+        this._channelData = data;
+        this._channelPrimaryCategories = _.get(this._channelData, 'primaryCategories') || [];
+        this._channelData$.next({ err: null, channelData: this._channelData });
+      },
+      error => {
+        this._channelData$.next({ err: error, channelData: {} });
+      }
+    );
   }
 
   setShuffleValue(value) {

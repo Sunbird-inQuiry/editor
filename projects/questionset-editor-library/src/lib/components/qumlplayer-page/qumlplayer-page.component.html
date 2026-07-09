@@ -11,7 +11,7 @@
             questionMetaData?.status !='Approved')" (click)="editQuestion();"
                 libTelemetryInteract
                 [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('edit','click','launch', telemetryService.telemetryPageId)">
-                <i class="icon edit"></i>Edit</button>
+                <i class="icon edit"></i>{{configService.labelConfig?.button_labels?.edit_question_btn_label}}</button>
             <button type="button" class="sb-btn sb-btn-normal sb-btn-outline-primary"
                 (click)="removeQuestion()"><i class="icon trash sb-color-primary" aria-hidden="true" libTelemetryInteract
                     [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('delete','click','launch', telemetryService.telemetryPageId)"></i>{{configService.labelConfig?.button_labels?.delete_btn_label}}</button>

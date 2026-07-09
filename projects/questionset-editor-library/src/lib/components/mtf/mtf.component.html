@@ -1,0 +1,72 @@
+@if (!isReadOnlyMode) {
+  <div>
+    <div class="mt-15">
+      <label class="fs-0-92 font-weight-bold d-block">{{ configService.labelConfig?.lbl?.mtfSetAnswers }}</label>
+      <p class="fs-0-785 mb-15">{{ configService.labelConfig?.lbl?.mtfAnswersDesc }}</p>
+      @for (pair of pairs; track pair; let i = $index) {
+        <div class="mtf-pair-row mb-20">
+          <div class="d-flex">
+            <div class="mtf-cell mr-10" [attr.dir]="globalDir">
+              <lib-ckeditor-tool [editorDataInput]="cellValue(pair.left)" [lang]="globalLang" [compact]="false"
+                [setCharacterLimit]="160" (editorDataOutput)="onCellChange($event, i, 'left')"
+                [showLangSelector]="true" [langs]="langs" [activeLangCode]="currentLang" (langChange)="onLangChange($event)">
+              </lib-ckeditor-tool>
+              @if (showFormError && !cellValue(pair.left)) {
+                <label class="sb-color-error fs-0-785">
+                  {{ configService.labelConfig?.lbl?.mtfRequired }}
+                </label>
+              }
+            </div>
+            <div class="mtf-cell" [attr.dir]="globalDir">
+              <lib-ckeditor-tool [editorDataInput]="cellValue(pair.right)" [lang]="globalLang" [compact]="false"
+                [setCharacterLimit]="160" (editorDataOutput)="onCellChange($event, i, 'right')"
+                [showLangSelector]="true" [langs]="langs" [activeLangCode]="currentLang" (langChange)="onLangChange($event)">
+              </lib-ckeditor-tool>
+              @if (showFormError && !cellValue(pair.right)) {
+                <label class="sb-color-error fs-0-785">
+                  {{ configService.labelConfig?.lbl?.mtfRequired }}
+                </label>
+              }
+            </div>
+          </div>
+          <div class="mt-8">
+            <button class="sb-btn sb-btn-xs sb-btn-outline-error" [disabled]="pairs.length <= 2" (click)="deletePair(i)">
+              <i class="trash alternate outline icon mr-5"></i>{{ configService.labelConfig?.lbl?.mtfDeletePair }}
+            </button>
+          </div>
+        </div>
+      }
+      @if (pairs.length < 5) {
+        <button class="sb-btn sb-btn-primary sb-btn-normal w-100 mt-5" (click)="addPair()">
+          {{ configService.labelConfig?.lbl?.mtfAddPair }}
+        </button>
+      }
+      @if (showFormError && pairs.length < 2) {
+        <label class="sb-color-error fs-0-785 d-block mt-5">
+          {{ configService.labelConfig?.lbl?.mtfMinPairs }}
+        </label>
+      }
+      <div class="mt-15 br-4 b-1-100 px-16 py-12 sb-bg-color-white">
+        <label class="fs-0-92 font-weight-bold d-block mb-10">{{ configService.labelConfig?.lbl?.configuration }}</label>
+        <label class="d-flex flex-ai-center cursor-pointer pl-16">
+          <input type="checkbox" [(ngModel)]="isPartialScore" (change)="editorDataHandler()" class="mr-8">
+          <span class="fs-0-785">{{ configService.labelConfig?.lbl?.partialScoring }}</span>
+        </label>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="mt-15">
+    <div class="d-flex mb-5">
+      <div class="sb-w-45 fs-0-785 font-weight-bold">Column 1</div>
+      <div class="sb-w-45 fs-0-785 font-weight-bold">Column 2</div>
+    </div>
+    @for (pair of pairs; track pair; let i = $index) {
+      <div class="d-flex mb-8">
+        <div class="sb-w-45 pr-10"><p class="fs-0-785 m-0" [innerHTML]="cellValue(pair.left) | sanitizeHtml"></p></div>
+        <div class="sb-w-45"><p class="fs-0-785 m-0" [innerHTML]="cellValue(pair.right) | sanitizeHtml"></p></div>
+      </div>
+    }
+  </div>
+}
+

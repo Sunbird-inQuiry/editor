@@ -1,0 +1,148 @@
+// =============================================================================
+// Question Type — Badge Colors & Icon Associations
+// =============================================================================
+@use 'sass:map';
+// Each question type gets a semantic color palette:
+//   --sbx-qt-{type}-color      → foreground / text
+//   --sbx-qt-{type}-bg         → badge background
+//   --sbx-qt-{type}-border     → badge border / ring
+//   --sbx-qt-{type}-icon       → lucide icon name (informational, used in JS)
+//
+// Types: mcq | msq | sa | ftb | mtf | seq | reo
+// =============================================================================
+
+:root {
+  // ---------------------------------------------------------------------------
+  // MCQ — Multiple Choice Question  (#2563EB blue)
+  // ---------------------------------------------------------------------------
+  --sbx-qt-mcq-color:  #1D4ED8;
+  --sbx-qt-mcq-bg:     #EFF6FF;
+  --sbx-qt-mcq-border: #BFDBFE;
+
+  // ---------------------------------------------------------------------------
+  // MSQ — Multi-Select Question  (#7C3AED violet)
+  // ---------------------------------------------------------------------------
+  --sbx-qt-msq-color:  #6D28D9;
+  --sbx-qt-msq-bg:     #F5F3FF;
+  --sbx-qt-msq-border: #DDD6FE;
+
+  // ---------------------------------------------------------------------------
+  // SA  — Subjective Answer  (#059669 emerald)
+  // ---------------------------------------------------------------------------
+  --sbx-qt-sa-color:  #047857;
+  --sbx-qt-sa-bg:     #ECFDF5;
+  --sbx-qt-sa-border: #A7F3D0;
+
+  // ---------------------------------------------------------------------------
+  // FTB — Fill in the Blank  (#D97706 amber)
+  // ---------------------------------------------------------------------------
+  --sbx-qt-ftb-color:  #B45309;
+  --sbx-qt-ftb-bg:     #FFFBEB;
+  --sbx-qt-ftb-border: #FDE68A;
+
+  // ---------------------------------------------------------------------------
+  // MTF — Match the Following  (#DC2626 red)
+  // ---------------------------------------------------------------------------
+  --sbx-qt-mtf-color:  #B91C1C;
+  --sbx-qt-mtf-bg:     #FEF2F2;
+  --sbx-qt-mtf-border: #FECACA;
+
+  // ---------------------------------------------------------------------------
+  // SEQ — Sequence  (#0891B2 cyan)
+  // ---------------------------------------------------------------------------
+  --sbx-qt-seq-color:  #0E7490;
+  --sbx-qt-seq-bg:     #ECFEFF;
+  --sbx-qt-seq-border: #A5F3FC;
+
+  // ---------------------------------------------------------------------------
+  // REO — Reorder  (#DB2777 pink)
+  // ---------------------------------------------------------------------------
+  --sbx-qt-reo-color:  #BE185D;
+  --sbx-qt-reo-bg:     #FDF2F8;
+  --sbx-qt-reo-border: #FBCFE8;
+}
+
+// ---------------------------------------------------------------------------
+// SCSS map — lets you iterate in mixins without duplicating values
+// ---------------------------------------------------------------------------
+$question-type-palettes: (
+  'mcq': (
+    color:  #1D4ED8,
+    bg:     #EFF6FF,
+    border: #BFDBFE,
+    icon:   'CircleDot',
+    label:  'Multiple Choice',
+  ),
+  'msq': (
+    color:  #6D28D9,
+    bg:     #F5F3FF,
+    border: #DDD6FE,
+    icon:   'CheckSquare',
+    label:  'Multi-Select',
+  ),
+  'sa': (
+    color:  #047857,
+    bg:     #ECFDF5,
+    border: #A7F3D0,
+    icon:   'AlignLeft',
+    label:  'Subjective Answer',
+  ),
+  'ftb': (
+    color:  #B45309,
+    bg:     #FFFBEB,
+    border: #FDE68A,
+    icon:   'Underline',
+    label:  'Fill in the Blank',
+  ),
+  'mtf': (
+    color:  #B91C1C,
+    bg:     #FEF2F2,
+    border: #FECACA,
+    icon:   'Shuffle',
+    label:  'Match the Following',
+  ),
+  'seq': (
+    color:  #0E7490,
+    bg:     #ECFEFF,
+    border: #A5F3FC,
+    icon:   'List',
+    label:  'Sequence',
+  ),
+  'reo': (
+    color:  #BE185D,
+    bg:     #FDF2F8,
+    border: #FBCFE8,
+    icon:   'ArrowUpDown',
+    label:  'Reorder',
+  ),
+);
+
+// ---------------------------------------------------------------------------
+// Utility mixin — apply question-type color scheme to a selector
+//
+// Usage:
+//   .my-badge {
+//     @include qt-colors('mcq');
+//   }
+// ---------------------------------------------------------------------------
+@mixin qt-colors($type) {
+  $palette: map.get($question-type-palettes, $type);
+  @if $palette {
+    color:            map.get($palette, color);
+    background-color: map.get($palette, bg);
+    border-color:     map.get($palette, border);
+  } @else {
+    @warn "Unknown question type: #{$type}";
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Auto-generate .sbx-qt-badge--{type} modifier classes
+// ---------------------------------------------------------------------------
+@each $type, $palette in $question-type-palettes {
+  .sbx-qt-badge--#{$type} {
+    color:            map.get($palette, color);
+    background-color: map.get($palette, bg);
+    border-color:     map.get($palette, border);
+  }
+}

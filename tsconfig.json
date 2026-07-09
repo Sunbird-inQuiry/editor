@@ -15,10 +15,6 @@
     "typeRoots": [
       "node_modules/@types"
     ],
-    "lib": [
-      "ES2022",
-      "dom"
-    ],
     "paths": {
       "questionset-editor-library": [
         "projects/questionset-editor-library/src/public-api.ts"

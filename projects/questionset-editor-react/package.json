@@ -1,0 +1,101 @@
+{
+  "name": "@project-sunbird/sunbird-questionset-editor-web-component-react",
+  "version": "0.1.8",
+  "description": "React-based QuML QuestionSet Editor — usable as a React component or as a <sb-questionset-editor> web component in any framework.",
+  "keywords": [
+    "sunbird",
+    "quml",
+    "questionset",
+    "editor",
+    "web-component",
+    "react"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sunbird-inQuiry/editor.git",
+    "directory": "projects/questionset-editor-react"
+  },
+  "private": false,
+  "type": "module",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./dist/style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "copy-player-assets": "node scripts/copy-player-assets.mjs",
+    "predev": "npm run copy-player-assets",
+    "dev": "vite",
+    "prebuild": "npm run copy-player-assets",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "serve": "node server.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.1.0",
+    "@dnd-kit/sortable": "^8.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@project-sunbird/ckeditor-build-classic": "^4.1.3",
+    "@project-sunbird/sunbird-quml-player-web-component-react": "0.1.7",
+    "@tanstack/react-query": "^5.51.0",
+    "@tiptap/extension-code-block": "^3.27.1",
+    "@tiptap/extension-image": "^3.27.1",
+    "@tiptap/extension-link": "^3.27.1",
+    "@tiptap/extension-mathematics": "^3.27.1",
+    "@tiptap/extension-placeholder": "^3.27.1",
+    "@tiptap/extension-subscript": "^3.27.1",
+    "@tiptap/extension-superscript": "^3.27.1",
+    "@tiptap/extension-table": "^3.27.1",
+    "@tiptap/extension-table-cell": "^3.27.1",
+    "@tiptap/extension-table-header": "^3.27.1",
+    "@tiptap/extension-table-row": "^3.27.1",
+    "@tiptap/extension-text-align": "^3.27.1",
+    "@tiptap/extension-underline": "^3.27.1",
+    "@tiptap/pm": "^3.27.1",
+    "@tiptap/react": "^3.27.1",
+    "@tiptap/starter-kit": "^3.27.1",
+    "axios": "^1.7.2",
+    "dompurify": "^3.4.11",
+    "katex": "^0.16.21",
+    "lucide-react": "^0.400.0",
+    "react-arborist": "^3.4.0",
+    "react-hook-form": "^7.52.0",
+    "react-hot-toast": "^2.4.1",
+    "react-to-webcomponent": "^1.1.0",
+    "uuid": "^14.0.1",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.6",
+    "@testing-library/react": "^16.0.0",
+    "@types/node": "^26.0.1",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "sass": "^1.77.6",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.4",
+    "vite-plugin-dts": "^3.9.1",
+    "vitest": "^2.0.3"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  }
+}

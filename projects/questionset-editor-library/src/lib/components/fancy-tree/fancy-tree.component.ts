@@ -40,20 +40,34 @@ export class FancyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
   public nodeParentDependentMap = {};
   public treeData: any = [];
   public branchingObject = {};
-  public rootMenuTemplate = `<span class="ui dropdown sb-dotted-dropdown" autoclose="itemClick" suidropdown="" tabindex="0">
+  get isRTL(): boolean {
+    void this.configService.labelConfig; // creates CD dependency so this re-runs on language change
+    return document.documentElement.dir === 'rtl';
+  }
+  get rootMenuTemplate(): string {
+    const lbl = this.configService.labelConfig?.button_labels;
+    const addChild = lbl?.add_child_btn_label || 'Add Child';
+    return `<span class="ui dropdown sb-dotted-dropdown" autoclose="itemClick" suidropdown="" tabindex="0">
   <span id="contextMenu" class="p-0 w-auto"><i class="icon ellipsis vertical sb-color-black"></i></span>
   <span id= "contextMenuDropDown" class="menu transition hidden" suidropdownmenu="" style="">
-    <div id="addchild" class="item">Add Child</div>
+    <div id="addchild" class="item">${addChild}</div>
   </span>
   </span>`;
-  public folderMenuTemplate = `<span id= "removeNodeIcon"> <i class="fa fa-trash-o" type="button"></i> </span><span class="ui dropdown sb-dotted-dropdown" autoclose="itemClick" suidropdown="" tabindex="0">
+  }
+  get folderMenuTemplate(): string {
+    const lbl = this.configService.labelConfig?.button_labels;
+    const addSibling = lbl?.add_sibling_btn_label || 'Add Sibling';
+    const addChild   = lbl?.add_child_btn_label   || 'Add Child';
+    const deleteLabel = lbl?.delete_btn_label      || 'Delete';
+    return `<span id= "removeNodeIcon"> <i class="fa fa-trash-o" type="button"></i> </span><span class="ui dropdown sb-dotted-dropdown" autoclose="itemClick" suidropdown="" tabindex="0">
   <span id="contextMenu" class="p-0 w-auto"><i class="icon ellipsis vertical sb-color-black"></i></span>
   <span id= "contextMenuDropDown" class="menu transition hidden" suidropdownmenu="" style="">
-    <div id="addsibling" class="item">Add Sibling</div>
-    <div id="addchild" class="item">Add Child</div>
-    <div id="delete" class="item">Delete</div>
+    <div id="addsibling" class="item">${addSibling}</div>
+    <div id="addchild" class="item">${addChild}</div>
+    <div id="delete" class="item">${deleteLabel}</div>
   </span>
   </span>`;
+  }
   // tslint:disable-next-line:max-line-length
   public contentMenuTemplate = `<span id="contextMenu"><span id= "removeNodeIcon" type="content" > <i class="fa fa-trash-o" type="button"></i> </span></span>`;
   constructor(public treeService: TreeService, private editorService: EditorService,

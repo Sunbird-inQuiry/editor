@@ -1,0 +1,182 @@
+// =============================================================================
+// Button — CSS Module
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// Base button — reset + shared layout
+// ---------------------------------------------------------------------------
+.button {
+  // Reset
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  // Layout
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sbx-space-2);
+  flex-shrink: 0;
+
+  // Typography — matches .ce-btn
+  font-family: var(--sb-font, var(--sbx-font-sans));
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+
+  // Shape — matches .ce-btn
+  border-radius: 13px;
+  border: 1px solid transparent;
+
+  // Transition
+  transition:
+    background-color var(--sbx-duration-base) var(--sbx-ease-default),
+    border-color     var(--sbx-duration-base) var(--sbx-ease-default),
+    color            var(--sbx-duration-base) var(--sbx-ease-default),
+    box-shadow       var(--sbx-duration-base) var(--sbx-ease-default),
+    opacity          var(--sbx-duration-base) var(--sbx-ease-default);
+
+  // Focus ring
+  &:focus-visible {
+    outline: 2px solid var(--sbx-color-border-focus);
+    outline-offset: 2px;
+  }
+
+  // Disabled state — shared
+  &:disabled,
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Size variants
+// ---------------------------------------------------------------------------
+.button--sm {
+  padding: 0 14px;
+  font-size: 13.5px;
+  min-height: 38px;
+}
+
+.button--md {
+  padding: 0 18px;
+  font-size: 14px;
+  min-height: 44px;
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Primary
+// ---------------------------------------------------------------------------
+.button--primary {
+  // matches .ce-btn.primary
+  background-color: var(--accent);
+  border-color:     var(--accent);
+  color:            #fff;
+
+  &:hover:not(:disabled):not([aria-disabled='true']) {
+    background-color: var(--accent-deep);
+    border-color:     var(--accent-deep);
+  }
+
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    background-color: var(--accent-deep);
+    transform: translateY(1px);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Ghost
+// ---------------------------------------------------------------------------
+.button--ghost {
+  // matches .ce-btn.ghost
+  background-color: #fff;
+  border-color:     var(--sb-border);
+  color:            var(--sb-text-2);
+
+  &:hover:not(:disabled):not([aria-disabled='true']) {
+    border-color: var(--accent);
+    color:        var(--accent-deep);
+  }
+
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    border-color: var(--accent-deep);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Outline
+// ---------------------------------------------------------------------------
+.button--outline {
+  background-color: #fff;
+  border-color:     var(--sb-border);
+  color:            var(--sb-text);
+
+  &:hover:not(:disabled):not([aria-disabled='true']) {
+    border-color: var(--accent);
+    color:        var(--accent-deep);
+  }
+
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    transform: translateY(1px);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Variant: Danger
+// ---------------------------------------------------------------------------
+.button--danger {
+  // matches .ce-btn.danger (outline red)
+  background-color: #fff;
+  border-color:     var(--sb-red-border);
+  color:            var(--sb-red);
+
+  &:hover:not(:disabled):not([aria-disabled='true']) {
+    background-color: var(--sb-red-soft);
+  }
+
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    background-color: var(--sb-red-soft);
+    transform: translateY(1px);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Loading state overlay
+// ---------------------------------------------------------------------------
+.button--loading {
+  // Keep the button visually stable while showing spinner
+  position: relative;
+  cursor: wait;
+  pointer-events: none;
+
+  // Dim content behind spinner
+  .buttonContent {
+    opacity: 0.5;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Inner layout helpers
+// ---------------------------------------------------------------------------
+.buttonContent {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sbx-space-2);
+  transition: opacity var(--sbx-duration-base) var(--sbx-ease-default);
+}
+
+.spinnerWrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

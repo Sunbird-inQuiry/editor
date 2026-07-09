@@ -1226,7 +1226,7 @@ export const categoryDefinitionData = {
                                       "Complete",
                                       "Score",
                                       "Duration",
-                                      "Score & Duration"
+                                      "Score and Duration"
                                   ],
                                   "renderingHints": {
                                       "class": "sb-g-col-lg-1"

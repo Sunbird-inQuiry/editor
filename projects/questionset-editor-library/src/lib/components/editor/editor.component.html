@@ -1,5 +1,6 @@
-<ng-container [ngSwitch]="pageId">
-  <ng-container *ngSwitchCase="'questionset_editor'">
+
+@switch (pageId) {
+  @case ('questionset_editor') {
     <div class="add-to-library mb-10">
       <lib-header [pageId]="pageId" [publishchecklist]="publishchecklist" [rejectComment]="draftComment"
       [labelConfigData]="toolbarConfig" [buttonLoaders]="buttonLoaders" (toolbarEmitter)="toolbarEventListener($event)" (reviewerComment)="saveDraftComments($event)"> </lib-header>
@@ -8,68 +9,76 @@
           <div class="ui twelve column grid m-0 ">
             <!-- Left Sidebar for cards -->
             <div class="three wide column p-0 overflow-y  mb-40 h-100vh">
-              <lib-fancy-tree  *ngIf="collectionTreeNodes && collectionTreeNodes.data && ishierarchyConfigSet"
-              [nodes]="collectionTreeNodes" [options]="{ showConnectors: true }" [buttonLoaders]="buttonLoaders"
-              (treeEventEmitter)="treeEventListener($event)" class="sb-collectionTree-fancyTree sb-collectionTree-fancyTreelist sb-questionset-scroll">
-              </lib-fancy-tree>
+              @if (collectionTreeNodes && collectionTreeNodes.data && ishierarchyConfigSet) {
+                <lib-fancy-tree
+                  [nodes]="collectionTreeNodes" [options]="{ showConnectors: true }" [buttonLoaders]="buttonLoaders"
+                  (treeEventEmitter)="treeEventListener($event)" class="sb-collectionTree-fancyTree sb-collectionTree-fancyTreelist sb-questionset-scroll">
+                </lib-fancy-tree>
+              }
             </div>
             <!-- Right Player Sections -->
             <div class="eight wide column bg-white pl-40 mb-10 w-73">
-              <ng-container *ngIf="(isCurrentNodeFolder === true || isCurrentNodeRoot === true) && unitFormConfig && selectedNodeData && rootFormConfig">
+              @if ((isCurrentNodeFolder === true || isCurrentNodeRoot === true) && unitFormConfig && selectedNodeData && rootFormConfig) {
                 <lib-meta-form [rootFormConfig]="rootFormConfig" [nodeMetadata]="selectedNodeData" [unitFormConfig]="unitFormConfig"
                 (toolbarEmitter)="toolbarEventListener($event)"></lib-meta-form>
-              </ng-container>
-              <ng-container *ngIf="isCurrentNodeFolder === false && isCurrentNodeRoot !== true">
-                  <lib-qumlplayer-page *ngIf="isQumlPlayer" [leafFormConfig]="leafFormConfig" [questionMetaData]="selectedNodeData" [questionSetHierarchy]="collectionTreeNodes?.data"
-                      (toolbarEmitter)="toolbarEventListener($event)">
-                    </lib-qumlplayer-page>
-                  <div *ngIf="relationFormConfig" class="p-2">
+              }
+              @if (isCurrentNodeFolder === false && isCurrentNodeRoot !== true) {
+                @if (isQumlPlayer) {
+                  <lib-qumlplayer-page [leafFormConfig]="leafFormConfig" [questionMetaData]="selectedNodeData" [questionSetHierarchy]="collectionTreeNodes?.data"
+                    (toolbarEmitter)="toolbarEventListener($event)">
+                  </lib-qumlplayer-page>
+                }
+                @if (relationFormConfig) {
+                  <div class="p-2">
                     <hr>
-                    <lib-relational-metadata [contentMetadata]="selectedNodeData" [formConfig]="relationFormConfig" (statusChanges)="onFormStatusChange($event)"></lib-relational-metadata>
-                  </div>
-              </ng-container>
+                      <lib-relational-metadata [contentMetadata]="selectedNodeData" [formConfig]="relationFormConfig" (statusChanges)="onFormStatusChange($event)"></lib-relational-metadata>
+                    </div>
+                  }
+                }
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <sui-modal *ngIf="showDeleteConfirmationPopUp" [mustScroll]="true" [isClosable]="true" [transitionDuration]="0"
-        [size]="'normal'" class="sb-modal bx-none overflow-modal" appBodyScroll
-        (dismissed)="showDeleteConfirmationPopUp = !showDeleteConfirmationPopUp" #modal>
-        <div class="sb-modal-header">
-          {{configService.labelConfig?.lbl?.confirmDeleteContent}}
-        </div>
-        <div class="sb-modal-content">
-            <div> {{deleteConfirmMessage}}</div>
-        </div>
-        <div class="sb-modal-actions">
-          <button type="button" class="sb-btn sb-btn-normal sb-btn-primary mr-8" (click)="showDeleteConfirmationPopUp = !showDeleteConfirmationPopUp"
-          libTelemetryInteract
-          [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('no','click','cancel', this.telemetryService.telemetryPageId,{key: 'dialog_id', value: 'confirm_delete_content','identifier' : selectedNodeData?.data?.id})"> {{configService.labelConfig?.button_labels?.no_btn_label}} </button>
-          <button type="button" class="sb-btn sb-btn-secondary sb-btn-normal " (click)="deleteNode();"
-          libTelemetryInteract
-          [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('yes','click','submit', this.telemetryService.telemetryPageId,{key: 'dialog_id', value: 'confirm_delete_content','identifier' : selectedNodeData?.data?.id})"> {{configService.labelConfig?.button_labels?.yes_btn_label}} </button>
-        </div>
-      </sui-modal>
-      <sui-modal *ngIf='showConfirmPopup' [mustScroll]="false" [isClosable]="true" [transitionDuration]="0" [size]="'normal'"
-          class="sb-modal overflow-modal" appBodyScroll (dismissed)="showConfirmPopup = !showConfirmPopup; terms = false;" #modal>
-          <div class="sb-modal-header">
-            {{configService.labelConfig?.lbl?.acceptTerms}}
-          </div>
-          <div class="sb-modal-content">
-            <div class="ui grid">
-              <div class="twelve wide column sb-checkbox-tnc mt-10">
-                <div class="sb-checkbox sb-checkbox-primary font-italic p-0 m-0"><input [(ngModel)]="terms" id="termAndConditions"
+        @if (showDeleteConfirmationPopUp) {
+          <sui-modal [mustScroll]="true" [isClosable]="true" [transitionDuration]="0"
+            [size]="'normal'" class="sb-modal bx-none overflow-modal" appBodyScroll
+            (dismissed)="showDeleteConfirmationPopUp = !showDeleteConfirmationPopUp" #modal>
+            <div class="sb-modal-header">
+              {{configService.labelConfig?.lbl?.confirmDeleteContent}}
+            </div>
+            <div class="sb-modal-content">
+              <div> {{deleteConfirmMessage}}</div>
+            </div>
+            <div class="sb-modal-actions">
+              <button type="button" class="sb-btn sb-btn-normal sb-btn-primary mr-8" (click)="showDeleteConfirmationPopUp = !showDeleteConfirmationPopUp"
+                libTelemetryInteract
+              [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('no','click','cancel', this.telemetryService.telemetryPageId,{key: 'dialog_id', value: 'confirm_delete_content','identifier' : selectedNodeData?.data?.id})"> {{configService.labelConfig?.button_labels?.no_btn_label}} </button>
+              <button type="button" class="sb-btn sb-btn-secondary sb-btn-normal " (click)="deleteNode();"
+                libTelemetryInteract
+              [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('yes','click','submit', this.telemetryService.telemetryPageId,{key: 'dialog_id', value: 'confirm_delete_content','identifier' : selectedNodeData?.data?.id})"> {{configService.labelConfig?.button_labels?.yes_btn_label}} </button>
+            </div>
+          </sui-modal>
+        }
+        @if (showConfirmPopup) {
+          <sui-modal [mustScroll]="false" [isClosable]="true" [transitionDuration]="0" [size]="'normal'"
+            class="sb-modal overflow-modal" appBodyScroll (dismissed)="showConfirmPopup = !showConfirmPopup; terms = false;" #modal>
+            <div class="sb-modal-header">
+              {{configService.labelConfig?.lbl?.acceptTerms}}
+            </div>
+            <div class="sb-modal-content">
+              <div class="ui grid">
+                <div class="twelve wide column sb-checkbox-tnc mt-10">
+                  <div class="sb-checkbox sb-checkbox-primary font-italic p-0 m-0"><input [(ngModel)]="terms" id="termAndConditions"
                     name="example" type="checkbox">
-                  <label for="termAndConditions" class="fsmall pl-32">
-                    <div class="d-flex flex-ai-center">
-                      <span class="sb-required">*</span><span
-                        class="font-weight-bold mb-4 d-block">"{{configService.labelConfig?.lbl?.iAgreeSubmit}}</span>
+                    <label for="termAndConditions" class="fsmall pl-32">
+                      <div class="d-flex flex-ai-center">
+                        <span class="sb-required">*</span><span
+                      class="font-weight-bold mb-4 d-block">"{{configService.labelConfig?.lbl?.iAgreeSubmit}}</span>
                     </div>
                     <div class="sb-color-gray-300">{{configService.labelConfig?.lbl?.iconfirmContent}}<a
-                        class="sb-color-primary font-weight-bold cursor-pointer" href="{{commonFrameworkLicenseUrl}}" target="_blank" > {{configService.labelConfig?.lbl?.createCommonFramework}}</a>
-                        {{configService.labelConfig?.lbl?.accordance}}
-                     <a class="sb-color-primary font-weight-bold cursor-pointer" href="{{contentPolicyUrl}}" target="_blank" >{{configService.labelConfig?.lbl?.contentPolicy}}</a> {{configService.labelConfig?.lbl?.privacyRights}}"</div>
+                    class="sb-color-primary font-weight-bold cursor-pointer" href="{{commonFrameworkLicenseUrl}}" target="_blank" > {{configService.labelConfig?.lbl?.createCommonFramework}}</a>
+                    {{configService.labelConfig?.lbl?.accordance}}
+                    <a class="sb-color-primary font-weight-bold cursor-pointer" href="{{contentPolicyUrl}}" target="_blank" >{{configService.labelConfig?.lbl?.contentPolicy}}</a> {{configService.labelConfig?.lbl?.privacyRights}}"</div>
                   </label>
                 </div>
               </div>
@@ -82,8 +91,10 @@
               {{configService.labelConfig?.button_labels?.submit_btn_label}}
             </button>
           </div>
-      </sui-modal>
-      <sui-modal *ngIf='showPreview' [mustScroll]="false" [isClosable]="true" [transitionDuration]="0" [size]="'large'"
+        </sui-modal>
+      }
+      @if (showPreview) {
+        <sui-modal [mustScroll]="false" [isClosable]="true" [transitionDuration]="0" [size]="'large'"
           class="sb-modal overflow-modal preview-modal" appBodyScroll (dismissed)="showPreview = !showPreview;" #modal>
           <div class="sb-modal-header">
             {{configService.labelConfig?.lbl?.questionSetPreview}}
@@ -93,39 +104,46 @@
               <lib-quml-player [questionSetHierarchy]="collectionTreeNodes?.data"></lib-quml-player>
             </div>
           </div>
-      </sui-modal>
-      <lib-template *ngIf='showQuestionTemplatePopup' [templateList]="templateList"
-      (templateSelection)="handleTemplateSelection($event)">
-      </lib-template>
+        </sui-modal>
+      }
+      @if (showQuestionTemplatePopup) {
+        <lib-template [templateList]="templateList"
+          (templateSelection)="handleTemplateSelection($event)">
+        </lib-template>
+      }
     </div>
-  </ng-container>
-  <ng-container *ngSwitchCase="'question_library'">
+  }
+  @case ('question_library') {
     <lib-library [libraryInput]="questionlibraryInput" (libraryEmitter)="onQuestionLibraryChange($event)"></lib-library>
-  </ng-container>
-  <ng-container *ngSwitchCase="'question'">
-    <lib-question *ngIf="leafFormConfig" [questionInput]="questionComponentInput" [leafFormConfig]="leafFormConfig" [sourcingSettings]="sourcingSettings" (questionEmitter)="questionEventListener($event)" >
-    </lib-question>
-  </ng-container>
-  <ng-container *ngSwitchCase="'pagination'">
+  }
+  @case ('question') {
+    @if (leafFormConfig) {
+      <lib-question [questionInput]="questionComponentInput" [leafFormConfig]="leafFormConfig" [sourcingSettings]="sourcingSettings" (questionEmitter)="questionEventListener($event)" >
+      </lib-question>
+    }
+  }
+  @case ('pagination') {
     <lib-assign-page-number (assignPageEmitter)="assignPageEmitterListener($event)"></lib-assign-page-number>
-  </ng-container>
-  <ng-container *ngSwitchCase="'progressStatus'">
+  }
+  @case ('progressStatus') {
     <lib-progress-status (assignPageEmitter)="assignPageEmitterListener($event)"></lib-progress-status>
-  </ng-container>
-</ng-container>
-<sui-modal *ngIf="showReviewModal" [mustScroll]="true" [isClosable]="false" [transitionDuration]="0"
-  [size]="'normal'" class="sb-modal bx-none overflow-modal" appBodyScroll #modal (dismissed)="showReviewModal = false;">
-  <div class="sb-modal-header">
-    {{configService.labelConfig?.lbl?.reviewComments}}
-  </div>
-  <div class="sb-modal-content">
+  }
+}
+@if (showReviewModal) {
+  <sui-modal [mustScroll]="true" [isClosable]="false" [transitionDuration]="0"
+    [size]="'normal'" class="sb-modal bx-none overflow-modal" appBodyScroll #modal (dismissed)="showReviewModal = false;">
+    <div class="sb-modal-header">
+      {{configService.labelConfig?.lbl?.reviewComments}}
+    </div>
+    <div class="sb-modal-content">
       <div class="sb-field">
-          <label>{{configService.labelConfig?.lbl?.comments}}</label>
-            <textarea disabled="disabled" type="text" class="wmd-input width-100 sb-form-control p-10 sb-disabled-textarea" id="wmd-input" [(ngModel)]="contentComment" name="rejectedComment"></textarea>
+        <label>{{configService.labelConfig?.lbl?.comments}}</label>
+        <textarea disabled="disabled" type="text" class="wmd-input width-100 sb-form-control p-10 sb-disabled-textarea" id="wmd-input" [(ngModel)]="contentComment" name="rejectedComment"></textarea>
       </div>
-  </div>
-  <div class="sb-modal-actions">
-    <button class="sb-btn sb-btn-normal sb-btn-outline-primary" (click)="modal.deny('denied')"
-    libTelemetryInteract [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('close','click','cancel', telemetryService.telemetryPageId,  {key: 'dialog_id', value: 'review_comments'})">{{configService.labelConfig?.button_labels?.close_btn_label}}</button>
-  </div>
-</sui-modal>
+    </div>
+    <div class="sb-modal-actions">
+      <button class="sb-btn sb-btn-normal sb-btn-outline-primary" (click)="modal.deny('denied')"
+      libTelemetryInteract [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('close','click','cancel', telemetryService.telemetryPageId,  {key: 'dialog_id', value: 'review_comments'})">{{configService.labelConfig?.button_labels?.close_btn_label}}</button>
+    </div>
+  </sui-modal>
+}

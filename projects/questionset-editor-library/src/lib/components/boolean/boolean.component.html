@@ -1,0 +1,101 @@
+@if (!isReadOnlyMode) {
+  <div class="pt-10 fs-0-92 sb-w-85">
+    <label class="fs-0-92 font-weight-bold">{{configService.labelConfig?.lbl?.options}}<span class="sb-required">*</span></label>
+  </div>
+  @if (showFormError && editorState.answer == undefined && sourcingSettings?.enforceCorrectAnswer) {
+    <label class="ui basic red error label pt-1 mt-10">
+    {{configService.labelConfig?.lbl?.selectOneAns}}</label>
+  }
+  <div class="d-flex pt-10 flex-dc sb-mcq-form">
+    @for (option of editorState.options; track option; let i = $index) {
+      <div class="d-flex sb-mcq-item flex-w-wrap">
+        <div class="sb-w-85 sb-ckeditor relative mb-15">
+          <lib-ckeditor-tool [setCharacterLimit]="setCharacterLimit"
+            (editorDataOutput)="setOptionBody(option, $event.body); option.length = $event.length; editorDataHandler($event)"
+            [editorDataInput]="optionBody(option)" [lang]="globalLang" class="ckeditor-tool__option mb-10"
+            [class.mb-5]="showFormError && ([undefined, ''].includes(optionBody(option)) || option.length > setCharacterLimit)"
+            [showLangSelector]="true" [langs]="langs" [activeLangCode]="currentLang" (langChange)="onLangChange($event)">
+          </lib-ckeditor-tool>
+          @if (showFormError && !optionBody(option)) {
+            <label class="sb-color-error fs-0-785">{{configService.labelConfig?.lbl?.fillThisOption}}</label>
+          }
+          @if (option.length > setCharacterLimit) {
+            <label class="ui basic red error label pt-1">
+            {{configService.labelConfig?.lbl?.reduceSize}}</label>
+          }
+        </div>
+        @if (sourcingSettings?.enforceCorrectAnswer !== false) {
+          <div class="sb-checkbox sb-checkbox-primary pl-10 mt-0 pt-0" [class.selected]="option.selected === true">
+            <input type="checkbox" id="answer_{{ i + 1 }}" name="example" value="{{ i }}"  (click)="onOptionChange($event);"
+              [checked]="option.selected === true"
+              libTelemetryInteract
+              [telemetryInteractEdata]="telemetryService.getTelemetryInteractEdata('mark_as_right_anwser','click',undefined,telemetryService.telemetryPageId,{answer:i.toString()})" />
+            <label for="answer_{{ i + 1 }}" class="mr-0 fs-0-785">{{configService.labelConfig?.lbl?.correctAns}}</label>
+          </div>
+        }
+        @if (showSubMenu) {
+          <div class="w-100">
+            <lib-question-option-sub-menu [subMenus]="subMenus[i]" (onChange)="subMenuChange($event,i)"></lib-question-option-sub-menu>
+            @if (parentMeta?.allowScoring === 'Yes') {
+              <div>
+                <label for="score" class="d-block mt-10 optionLabel">Score <span class="sb-required">*</span></label>
+                @if (sourcingSettings.showAddScore) {
+                  <input
+                    class="sb-textbox false mb-30"
+                    [placeholder]="'Add score here'"
+                    (change)="setScore($event.target.value,i)"
+                    type="number"
+                    [value]="mapping[i]?.score"
+                    />
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+} @else {
+  @for (option of editorState.options; track option; let i = $index) {
+    <div class="row mb-0 p-0">
+      <div class="twelve wide column p-0">
+        <div class="ckeditor-tool width-100">
+          <div class="ckeditor-tool__question-readonly mb-24">
+            <label class="px-16 py-8 fs-0-92 mb-0 ckeditor-tool__label width-100">Option {{ i+1 }}</label>
+            <div class="ckeditor-tool__solution__body">
+              <p class="fs-0-785 p-16" [innerHTML]="option.body  | sanitizeHtml"></p>
+              @if (editorState.answer === i) {
+                <div class="mcq-checkbox-answer">
+                  <div class="sb-checkbox sb-checkbox-primary mr-auto selected">
+                    <input type="checkbox" id="check_{{ i + 1 }}" name="example" disabled checked>
+                    <label for="check_{{ i + 1 }}">{{configService.labelConfig?.lbl?.correctAns}}</label>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+        @if (showSubMenu) {
+          <div class="w-100">
+            <lib-question-option-sub-menu [subMenus]="subMenus[i]" (onChange)="subMenuChange($event,i)"></lib-question-option-sub-menu>
+            @if (parentMeta?.allowScoring === 'Yes') {
+              <div>
+                <label for="score" class="d-block mt-10 optionLabel">Score</label>
+                @if (sourcingSettings.showAddScore) {
+                  <input
+                    class="sb-textbox false mb-30"
+                    [placeholder]="'Add score here'"
+                    (change)="setScore($event.target.value,i)"
+                    type="number"
+                    [value]="mapping[i]?.score"
+                    disabled
+                    />
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+}

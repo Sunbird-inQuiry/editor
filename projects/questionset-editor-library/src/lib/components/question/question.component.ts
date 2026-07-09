@@ -1,4 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output, AfterViewInit, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, ComponentRef, EventEmitter, Input, NgModuleRef, OnInit, Output, AfterViewInit, ViewChild, ViewContainerRef, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { EditorQuestionTypeRegistryService } from '../../registry';
+import { ActiveLanguageService } from '../../services/language/active-language.service';
+import { readI18n, writeI18n, normalizeI18n, I18nValue, I18nMap } from '../../utils/i18nField';
 import * as _ from 'lodash-es';
 import { v4 as uuidv4 } from 'uuid';
 import { McqForm } from '../../interfaces/McqForm';
@@ -45,13 +48,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   public assetShow = false;
   public showFormError = false;
   public actionType: string;
-  assetType: string; 
-  selectedSolutionType: string;
-  showSolutionDropDown = true;
-  showSolution = false;
-  assetSolutionName: string;
+  assetType: string;
   assetSolutionData: any;
-  assetThumbnail: string;
   solutionUUID: string;
   solutionTypes: any = [{
     type: 'html',
@@ -102,6 +100,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   hints: any;
   categoryLabel: any = {};
   scoreMapping: any;
+  @ViewChild('editorOutlet', { read: ViewContainerRef }) editorOutlet: ViewContainerRef;
+  private activeEditorRef: ComponentRef<any> | null = null;
   condition = 'default';
   targetOption: any;
   responseVariable = 'response1';
@@ -124,7 +124,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     private questionService: QuestionService, public editorService: EditorService, public telemetryService: EditorTelemetryService,
     public playerService: PlayerService, private toasterService: ToasterService, private treeService: TreeService,
     private frameworkService: FrameworkService, private router: Router, public configService: ConfigService,
-    private editorCursor: EditorCursor) {
+    private editorCursor: EditorCursor, private editorRegistry: EditorQuestionTypeRegistryService,
+    private ngModuleRef: NgModuleRef<any>, public activeLang: ActiveLanguageService,
+    private changeDetectionRef: ChangeDetectorRef) {
     const { primaryCategory, label } = this.editorService.selectedChildren;
     this.questionPrimaryCategory = primaryCategory;
     this.pageStartTime = Date.now();
@@ -135,7 +137,64 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  currentLang = 'en';
+  langs = ActiveLanguageService.LANGS;
+
+  get globalLang(): string { return localStorage.getItem('app-language') || 'en'; }
+  get globalDir(): string  { return this.globalLang === 'ar' ? 'rtl' : 'ltr'; }
+
+  onLangChange(code: string): void { this.activeLang.set(code); }
+
+  get questionBody(): string {
+    const q = this.editorState.question as I18nValue;
+    if (!q) return '';
+    if (typeof q === 'string') {
+      return this.currentLang === 'en' ? q : '';
+    }
+    return (q as I18nMap)[this.currentLang] ?? '';
+  }
+
+  private get _currentLangSolution(): { type: string; value: string } | null {
+    const sols = this.editorState?.solutions;
+    if (!sols || typeof sols !== 'object' || Array.isArray(sols)) return null;
+    return (sols as any)[this.currentLang] || null;
+  }
+
+  get selectedSolutionType(): string {
+    return this._currentLangSolution?.type || '';
+  }
+
+  get showSolutionDropDown(): boolean {
+    return !this._currentLangSolution;
+  }
+
+  get showSolution(): boolean {
+    const t = this._currentLangSolution?.type;
+    return t === 'video' || t === 'audio';
+  }
+
+  get assetSolutionName(): string {
+    const sol = this._currentLangSolution;
+    if (!sol || sol.type === 'html') return '';
+    return this.mediaArr.find((m: any) => m.id === sol.value)?.name || '';
+  }
+
+  get assetThumbnail(): string {
+    const sol = this._currentLangSolution;
+    if (!sol || sol.type === 'html') return '';
+    return this.mediaArr.find((m: any) => m.id === sol.value)?.thumbnail || '';
+  }
+
+  get solutionBody(): string {
+    const sol = this._currentLangSolution;
+    if (!sol || sol.type !== 'html') return '';
+    return sol.value || '';
+  }
+
   ngOnInit() {
+    this.activeLang.lang$.pipe(takeUntil(this.onComponentDestroy$)).subscribe(lang => {
+      this.currentLang = lang;
+    });
     const { questionSetId, questionId, type, category, creationContext, creationMode } = this.questionInput;
     this.questionInteractionType = type;
     this.questionCategory = category;
@@ -178,7 +237,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       this.frameworkService.frameworkData$.pipe(
         takeUntil(this.onComponentDestroy$)
       ).subscribe(frameworkData => {
-        if (frameworkData?.frameworkdata[frameworkId]) {
+        if (frameworkData?.frameworkdata?.[frameworkId]) {
           const categories = frameworkData.frameworkdata[frameworkId].categories || [];
           if (categories.length) {
             this.categoryCodes = categories?.map(category => category.code)
@@ -205,6 +264,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    // Covers the synchronous new-question path where renderEditorComponent()
+    // was called in ngOnInit before the ViewChild was resolved.
+    this.renderEditorComponent();
     this.telemetryService.impression({
       type: 'edit', pageid: this.telemetryService.telemetryPageId, uri: this.router.url,
       duration: (Date.now() - this.pageStartTime) / 1000
@@ -237,9 +299,20 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
               this.questionInteractionType = _.get(this.questionMetaData,'interactionTypes') ? _.get(this.questionMetaData,'interactionTypes[0]') : 'default';
               this.editorService.setIsReviewModificationAllowed(_.get(this.questionMetaData, 'isReviewModificationAllowed', false));
               this.populateFormData();
-              if (_.includes(['default', 'text', 'date', 'slider'], this.questionInteractionType)) {
+              if (_.includes(['default', 'text', 'date', 'slider', 'match', 'order'], this.questionInteractionType)) {
                 if (this.questionMetaData.editorState) {
                   this.editorState = this.questionMetaData.editorState;
+                }
+                if (this.questionInteractionType === 'order' && this.questionMetaData.templateId) {
+                  this.editorState.templateId = this.questionMetaData.templateId;
+                }
+                // isPartialScore and evalUnordered are stored as top-level metadata fields;
+                // copy into editorState so sub-components can hydrate their toggles
+                if (this.questionMetaData.isPartialScore !== undefined) {
+                  this.editorState.isPartialScore = this.questionMetaData.isPartialScore;
+                }
+                if (this.questionMetaData.evalUnordered !== undefined) {
+                  this.editorState.evalUnordered = this.questionMetaData.evalUnordered;
                 }
               }
 
@@ -287,20 +360,19 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
               }
               this.setQuestionTitle(this.questionId);
               if (!_.isEmpty(this.editorState.solutions)) {
-                this.selectedSolutionType = this.editorState.solutions[0].type;
-                this.solutionUUID = this.editorState.solutions[0].id;
-                this.showSolutionDropDown = false;
-                this.showSolution = true;
-                if (this.selectedSolutionType === 'video' || this.selectedSolutionType === 'audio') {
-                  const index = _.findIndex(this.questionMetaData.media, (o) => {
-                    return o.type === this.selectedSolutionType && o.id === this.editorState.solutions[0].value;
-                  });
-                  this.assetSolutionName = this.questionMetaData.media[index].name;
-                  this.assetThumbnail = this.questionMetaData.media[index].thumbnail;
-                } 
-                if (this.selectedSolutionType === 'html') {
-                  this.editorState.solutions = this.editorState.solutions[0].value;
+                const savedSolutions: any[] = this.editorState.solutions;
+                this.solutionUUID = savedSolutions[0]?.id || uuidv4();
+                const saved = savedSolutions[0];
+                let solutionsMap: Record<string, { type: string; value: string }> = {};
+
+                if (saved?.value && typeof saved.value === 'object' && !Array.isArray(saved.value)) {
+                  // New format: [{ id, value: { lang: { type, value } } }]
+                  solutionsMap = saved.value as Record<string, { type: string; value: string }>;
+                } else if (saved?.type) {
+                  // Legacy format: [{ id, type, value }] — single lang (en)
+                  solutionsMap = { en: { type: saved.type, value: saved.value } };
                 }
+                this.editorState.solutions = solutionsMap;
               }
               if (this.questionMetaData.media) {
                 this.mediaArr = this.questionMetaData.media;
@@ -314,6 +386,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.previewContent();
               }
               this.showLoader = false;
+              this.changeDetectionRef.detectChanges();
+              this.renderEditorComponent();
             }
           }, (err: ServerResponse) => {
             const errInfo = {
@@ -340,8 +414,29 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         else if (this.questionInteractionType === 'choice') {
           this.editorState = new McqForm({ question: '', options: [] }, { numberOfOptions: _.get(this.questionInput, 'config.numberOfOptions'), maximumOptions: _.get(this.questionInput, 'config.maximumOptions') });
         }
+        else if (this.questionInteractionType === 'text') {
+          this.editorState = { question: '', solutions: '' };
+        }
+        else if (this.questionInteractionType === 'match') {
+          this.editorState = {
+            question: '', solutions: '',
+            pairs: [{ left: '', right: '' }, { left: '', right: '' }, { left: '', right: '' }],
+          };
+        }
+        else if (this.questionInteractionType === 'order') {
+          if ((this.questionPrimaryCategory || '').toLowerCase() === 'reorder question') {
+            this.editorState = { question: '', solutions: '', sentence: '' };
+          } else {
+            this.editorState = {
+              question: '', solutions: '',
+              options: [{ value: 'A', label: '' }, { value: 'B', label: '' }],
+              correctOrder: ['A', 'B'],
+            };
+          }
+        }
         this.showLoader = false;
-        /** for observation and survey to show hint,tip,dependent question option. */
+        this.changeDetectionRef.detectChanges();
+        this.renderEditorComponent();
         if(!_.isUndefined(this.editorService?.editorConfig?.config?.renderTaxonomy)){
           this.subMenuConfig();
         }
@@ -396,6 +491,8 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
         this.showPreview = false;
         this.toolbarConfig.showPreview = false;
         this.previewFormData(!this.toolbarConfig.showPreview);
+        this.changeDetectionRef.detectChanges();
+        this.renderEditorComponent();
         break;
       case 'showReviewcomments':
         this.showReviewModal = !this.showReviewModal;
@@ -667,10 +764,11 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   editorDataHandler(event, type?) {
     if (type === 'question') {
-      this.editorState.question = event.body;
-      this.editorState.responseDeclaration = event.body.responseDeclaration
+      this.editorState.question = writeI18n(this.editorState.question as I18nValue, this.currentLang, event.body);
     } else if (type === 'solution') {
-      this.editorState.solutions = event.body;
+      const current = this._getSolutionsMap();
+      current[this.currentLang] = { type: 'html', value: event.body };
+      this.editorState.solutions = current;
     } else {
       this.editorState = _.assign(this.editorState, event.body);
     }
@@ -729,33 +827,34 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   }
 
+  private _getSolutionsMap(): Record<string, { type: string; value: string }> {
+    const sols = this.editorState?.solutions;
+    if (!sols || typeof sols !== 'object' || Array.isArray(sols)) return {};
+    return { ...(sols as any) };
+  }
+
   assetDataOutput(event) {
     if (event) {
+      const lang = this.currentLang;
+      const host = _.get(this.editorService.editorConfig, 'context.host') || document.location.origin;
+      const current = this._getSolutionsMap();
+      current[lang] = { type: this.assetType, value: event.identifier };
+      this.editorState.solutions = current;
       this.assetSolutionData = event;
-      this.assetSolutionName = event.name;
-      this.editorState.solutions = event.identifier;
-      this.assetThumbnail = event?.thumbnail;
-      const assetMedia: any = {};
-      assetMedia.id = event.identifier;
-      assetMedia.src = event.src;
-      assetMedia.type = this.assetType;
-      assetMedia.assetId = event.identifier;
-      assetMedia.name = event.name;
+      if (!this.mediaArr.find((m: any) => m.id === event.identifier)) {
+        const assetMedia: any = {
+          id: event.identifier, src: event.src, type: this.assetType,
+          assetId: event.identifier, name: event.name, baseUrl: host,
+        };
+        if (event?.thumbnail) { assetMedia.thumbnail = event.thumbnail; }
+        this.mediaArr.push(assetMedia);
+      }
       if (event?.thumbnail) {
-        assetMedia.thumbnail = this.assetThumbnail;
+        const thumbId = `${this.assetType}_${event.identifier}`;
+        if (!this.mediaArr.find((m: any) => m.id === thumbId)) {
+          this.mediaArr.push({ src: event.thumbnail, type: 'image', id: thumbId, baseUrl: host });
+        }
       }
-      assetMedia.baseUrl = _.get(this.editorService.editorConfig, 'context.host') || document.location.origin;
-      if (assetMedia.thumbnail) {
-        const thumbnailMedia: any = {};
-        thumbnailMedia.src = this.assetThumbnail;
-        thumbnailMedia.type = 'image';
-        thumbnailMedia.id = `${this.assetType}_${event.identifier}`;
-        thumbnailMedia.baseUrl = _.get(this.editorService.editorConfig, 'context.host') || document.location.origin;
-        this.mediaArr.push(thumbnailMedia);
-      }
-      this.mediaArr.push(assetMedia);
-      this.showSolutionDropDown = false;
-      this.showSolution = true;
     } else {
       this.deleteSolution();
     }
@@ -763,45 +862,45 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   selectSolutionType(data: any) {
-    const index = _.findIndex(this.solutionTypes, (sol: any) => {
-      return sol.value === data;
-    });
+    const index = _.findIndex(this.solutionTypes, (sol: any) => sol.value === data);
     this.assetType = data;
-    this.selectedSolutionType = this.solutionTypes[index].type;
-    if (this.selectedSolutionType === 'video' || this.selectedSolutionType === 'audio') {
-      const showAsset = true;
-      this.assetShow = showAsset;
-    } 
-    else {
-      this.showSolutionDropDown = false;
+    const type = this.solutionTypes[index].type;
+    if (type === 'video' || type === 'audio') {
+      this.assetShow = true;
+    } else {
+      // html: create empty entry for this lang so solutionDropDown hides
+      const current = this._getSolutionsMap();
+      current[this.currentLang] = { type: 'html', value: '' };
+      this.editorState.solutions = current;
     }
   }
 
   deleteSolution() {
-    if (this.selectedSolutionType === 'video' || this.selectedSolutionType === 'audio') {
-      this.mediaArr = _.filter(this.mediaArr, (item: any) => item.id !== this.editorState.solutions);
-    } 
-    this.showSolutionDropDown = true;
-    this.selectedSolutionType = '';
-    this.assetType = '';
-    this.assetSolutionName = '';
-    this.editorState.solutions = '';
-    this.assetThumbnail = '';
-    this.showSolution = false;
+    const sol = this._currentLangSolution;
+    if (sol?.type === 'video' || sol?.type === 'audio') {
+      this.mediaArr = _.filter(this.mediaArr, (item: any) =>
+        item.id !== sol.value && item.id !== `${this.assetType}_${sol.value}`);
+    }
+    const remaining = this._getSolutionsMap();
+    delete remaining[this.currentLang];
+    this.editorState.solutions = Object.keys(remaining).length > 0 ? remaining : '';
+    if (!this.selectedSolutionType) {
+      // all langs cleared
+      this.assetType = '';
+    }
   }
 
   getSolutionObj(solutionUUID, selectedSolutionType, editorStateSolutions: any) {
-    let solutionObj: any;
-    solutionObj = {};
-    solutionObj.id = solutionUUID;
-    solutionObj.type = selectedSolutionType;
+    // Legacy method for backward compat — new path uses _buildSolutionsHtml directly
+    const solutionObj: any = { id: solutionUUID, type: selectedSolutionType };
     if (_.isString(editorStateSolutions)) {
       solutionObj.value = editorStateSolutions;
-    }
-    if (_.isArray(editorStateSolutions)) {
+    } else if (_.isArray(editorStateSolutions)) {
       if (_.has(editorStateSolutions[0], 'value')) {
         solutionObj.value = editorStateSolutions[0].value;
       }
+    } else if (editorStateSolutions && typeof editorStateSolutions === 'object') {
+      solutionObj.value = editorStateSolutions;
     }
     return solutionObj;
   }
@@ -809,31 +908,144 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   setQuestionProperties(metadata) {
     if (this.questionInteractionType != 'choice') {
       if (!_.isUndefined(metadata.answer)) {
-        const answerHtml = this.getAnswerHtml(metadata.answer);
-        const finalAnswer = this.getAnswerWrapperHtml(answerHtml);
-        metadata.answer = finalAnswer;
+        if (typeof metadata.answer === 'object') {
+          const answerI18n: Record<string, string> = {};
+          Object.entries(metadata.answer as Record<string, string>).forEach(([lang, text]) => {
+            if (text) {
+              answerI18n[lang] = this.getAnswerWrapperHtml(this.getAnswerHtml(text));
+            }
+          });
+          const keys = Object.keys(answerI18n);
+          metadata.answer = (keys.length === 1 && keys[0] === 'en')
+            ? answerI18n['en']
+            : JSON.stringify(answerI18n);
+        } else {
+          metadata.answer = this.getAnswerWrapperHtml(this.getAnswerHtml(metadata.answer));
+        }
       } else {
         metadata.answer = '';
       }
     }
 
     if (this.questionInteractionType === 'choice') {
-      metadata.body = this.getMcqQuestionHtmlBody(this.editorState.question, this.editorState.templateId);
+      metadata.body = this.buildI18nBody(
+        this.editorState.question as I18nValue,
+        (text) => this.getMcqQuestionHtmlBody(text, this.editorState.templateId)
+      );
       if(_.isNumber(metadata.answer)) {
         metadata.answer = [metadata.answer];
       }
       const correctAnswersData = this.getInteractionValues(metadata.answer, metadata.interactions);
-      let concatenatedAnswers = '';
+      const answerI18n: Record<string, string> = {};
       _.forEach(correctAnswersData, (answer) => {
-        const optionAnswer = this.getAnswerHtml(answer.label);
-        concatenatedAnswers = concatenatedAnswers.concat(optionAnswer);
-      })
-      const finalAnswer = this.getAnswerWrapperHtml(concatenatedAnswers);
-      metadata.answer = finalAnswer;
-    } else if (this.questionInteractionType != 'default' && this.questionInteractionType != 'choice') {
+        const label = answer.label;
+        if (label && typeof label === 'object') {
+          Object.entries(label as Record<string, string>).forEach(([lang, text]) => {
+            if (text) { answerI18n[lang] = (answerI18n[lang] || '') + this.getAnswerHtml(text); }
+          });
+        } else {
+          answerI18n['en'] = (answerI18n['en'] || '') + this.getAnswerHtml(label || '');
+        }
+      });
+      const answerKeys = Object.keys(answerI18n);
+      if (answerKeys.length === 0) {
+        metadata.answer = this.getAnswerWrapperHtml('');
+      } else if (answerKeys.length === 1 && answerKeys[0] === 'en') {
+        metadata.answer = this.getAnswerWrapperHtml(answerI18n['en']);
+      } else {
+        metadata.answer = JSON.stringify(
+          Object.fromEntries(
+            Object.entries(answerI18n).map(([lang, html]) => [lang, this.getAnswerWrapperHtml(html)])
+          )
+        );
+      }
+    } else if (this.questionInteractionType === 'text') {
+      // FTB: transform [[answer]] → [[responseN]] in stored body (language-agnostic keys).
+      // The editorState keeps [[answer]] for authoring; body uses [[responseN]] for the player.
+      const question = this.editorState.question as I18nValue;
+      const langs = typeof question === 'string' ? ['en'] : Object.keys(question as any);
+      const rd: any = {};
+      const interactions: any = {};
+      const transformedBody: Record<string, string> = {};
+      langs.forEach(lang => {
+        let blankIdx = 0;
+        const rawBody = readI18n(question, lang);
+        transformedBody[lang] = rawBody.replace(/\[\[(.*?)\]\]/g, (_: string, ans: string) => {
+          blankIdx++;
+          const key = `response${blankIdx}`;
+          const trimmed = ans.trim();
+          if (!rd[key]) {
+            rd[key] = { cardinality: 'single', type: 'string',
+              correctResponse: { value: lang === 'en' ? trimmed : '' }, mapping: [] };
+            interactions[key] = { type: 'text' };
+          }
+          if (lang === 'en') { rd[key].correctResponse.value = trimmed; }
+          rd[key].mapping.push({ value: trimmed, score: 1, caseSensitive: false });
+          return `[[${key}]]`;
+        });
+      });
+      // evalUnordered: encode the author's intent into the QuML payload by placing all correct
+      // answers in every blank's mapping. The player uses MAP_RESPONSE + set-intersection to
+      // award credit regardless of which blank the student fills. This is a serialization
+      // concern — the player is responsible for the runtime scoring algorithm.
+      const allAnswers = Object.values(rd).map((r: any) => r.correctResponse?.value).filter(Boolean);
+      if (this.editorState.evalUnordered && allAnswers.length > 1) {
+        Object.keys(rd).forEach(key => {
+          rd[key].mapping = allAnswers.map((ans: string) => ({ value: ans, score: 1, caseSensitive: false }));
+        });
+      }
+
+      const numBlanks = Object.keys(rd).length;
+      const isPartialScore = !!this.editorState.isPartialScore;
+      metadata.body = normalizeI18n(transformedBody);
+      metadata.responseDeclaration = rd;
+      metadata.interactions = { ...(metadata.interactions || {}), ...interactions };
+      metadata.interactionTypes = ['text'];
+      metadata.qType = 'FTB';
+      metadata.primaryCategory = this.questionPrimaryCategory;
+      metadata.scoringMode = 'responseProcessing';
+      metadata.responseProcessing = { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' };
+      metadata.outcomeDeclaration = {
+        maxScore: { cardinality: 'single', type: 'integer', defaultValue: isPartialScore ? numBlanks : 1 }
+      };
+    } else if (this.questionInteractionType === 'match') {
+      metadata.body = this.buildI18nBody(
+        this.editorState.question as I18nValue,
+        (text) => this.getMtfQuestionHtmlBody(text)
+      );
+    } else if (this.questionInteractionType === 'order') {
+      metadata.body = this.buildI18nBody(
+        this.editorState.question as I18nValue,
+        (text) => this.getOrderQuestionHtmlBody(text)
+      );
+      if (metadata.sentence && typeof metadata.sentence === 'object') {
+        metadata.sentence = readI18n(metadata.sentence as I18nValue, 'en');
+      }
+    } else if (this.questionInteractionType != 'default') {
       metadata.responseDeclaration = this.getResponseDeclaration(this.questionInteractionType);
     }
     return metadata;
+  }
+
+  buildI18nBody(question: I18nValue, buildFn: (text: string) => string): string {
+    if (!question) return buildFn('');
+    if (typeof question === 'string') return buildFn(question);
+    const bodyI18n: Record<string, string> = {};
+    Object.entries(question as Record<string, string>).forEach(([lang, text]) => {
+      if (text) { bodyI18n[lang] = buildFn(text); }
+    });
+    const keys = Object.keys(bodyI18n);
+    if (keys.length === 0) return buildFn('');
+    if (keys.length === 1 && keys[0] === 'en') return bodyI18n['en'];
+    return JSON.stringify(bodyI18n);
+  }
+
+  getMtfQuestionHtmlBody(question: string): string {
+    return `<div class='question-body' tabindex='-1'><div class='mtf-title' tabindex='0'>${question}</div><div data-match-interaction='response1'></div></div>`;
+  }
+
+  getOrderQuestionHtmlBody(question: string): string {
+    return `<div class='question-body' tabindex='-1'><div class='order-title' tabindex='0'>${question}</div><div data-ordered-interaction='response1'></div></div>`;
   }
 
   getQuestionMetadata() {
@@ -854,10 +1066,19 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
 
     metadata = this.setQuestionProperties(metadata);
 
-    if (!_.isUndefined(this.selectedSolutionType) && !_.isEmpty(this.selectedSolutionType)) {
-      const solutionObj = this.getSolutionObj(this.solutionUUID, this.selectedSolutionType, this.editorState.solutions);
-      metadata.editorState.solutions = [solutionObj];
-      metadata.solutions = this.getQuestionSolution(solutionObj);
+    const solutionsMap = this._getSolutionsMap();
+    if (Object.keys(solutionsMap).length > 0) {
+      // editorState.solutions: { uuid: { lang: { type, value } } }
+      // — editor needs type+value per lang for rehydration (to show CKEditor vs asset picker)
+      const editorStateSolValue: Record<string, { type: string; value: string }> = {};
+      Object.entries(solutionsMap).forEach(([lang, sol]) => {
+        editorStateSolValue[lang] = { type: sol.type, value: sol.value };
+      });
+      metadata.editorState.solutions = [{ id: this.solutionUUID, value: editorStateSolValue }];
+
+      // metadata.solutions: { uuid: { lang: "<rendered html>" } }
+      // — player only needs HTML per lang, not the type
+      metadata.solutions = this._buildSolutionsHtml(solutionsMap);
     }
     if (_.isEmpty(this.editorState.solutions)) {
       metadata.solutions = {};
@@ -870,6 +1091,9 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     metadata['outcomeDeclaration'] = this.getOutcomeDeclaration(metadata);
     metadata = _.merge(metadata, _.pickBy(this.childFormData, _.identity));
+    if (!metadata.name) {
+      metadata.name = this.questionPrimaryCategory || 'Untitled Question';
+    }
     if (_.get(this.creationContext, 'objectType') === 'question') {
       metadata.isReviewModificationAllowed = !!_.get(this.questionMetaData, 'isReviewModificationAllowed');
     }
@@ -878,7 +1102,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       metadata.media = this.removeUnusedMedia(metadata);
     }
     // tslint:disable-next-line:max-line-length
-    return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions']);
+    return _.omit(metadata, ['question', 'numberOfOptions', 'options', 'allowMultiSelect', 'showEvidence', 'evidenceMimeType', 'showRemarks', 'markAsNotMandatory', 'leftAnchor', 'rightAnchor', 'step', 'numberOnly', 'characterLimit', 'dateFormat', 'autoCapture', 'remarksLimit', 'maximumOptions', 'i18n']);
   }
 
   removeUnusedMedia(questionMetadata: any) {
@@ -892,23 +1116,34 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   checkMediaExists(questionMetadata, mediaId) {
-    if (_.includes(questionMetadata.body, mediaId) || _.includes(questionMetadata.answer, mediaId)) {
+    // body/answer may be i18n map objects — stringify to enable substring search
+    const bodyStr   = typeof questionMetadata.body   === 'object' ? JSON.stringify(questionMetadata.body)   : questionMetadata.body;
+    const answerStr = typeof questionMetadata.answer === 'object' ? JSON.stringify(questionMetadata.answer) : questionMetadata.answer;
+    if (_.includes(bodyStr, mediaId) || _.includes(answerStr, mediaId)) {
       return true;
     }
 
     if (questionMetadata?.solutions) {
       const solutionValues = _.values(questionMetadata.solutions);
       for (const solution of solutionValues) {
-        if (_.includes(solution, mediaId)) {
+        const solStr = typeof solution === 'object' ? JSON.stringify(solution) : solution;
+        if (_.includes(solStr, mediaId)) {
           return true;
         }
       }
     }
 
     if (questionMetadata?.qType !== 'SA' && questionMetadata?.interactions?.response1?.options) {
-      const interactionsOptions = questionMetadata.interactions.response1.options;
-      for (const option of interactionsOptions) {
-        if (_.includes(option?.label, mediaId)) {
+      const raw = questionMetadata.interactions.response1.options;
+      // MCQ: options is a flat array; MTF: options is { left: [...], right: [...] }
+      const optionsList: any[] = Array.isArray(raw)
+        ? raw
+        : ([] as any[]).concat(...Object.values(raw));
+      for (const option of optionsList) {
+        // MTF labels are i18n map objects — stringify for substring search
+        const labelStr = typeof option?.label === 'object'
+          ? JSON.stringify(option.label) : (option?.label ?? '');
+        if (_.includes(labelStr, mediaId)) {
           return true;
         }
       }
@@ -940,15 +1175,57 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     if (solutionObj?.type === 'html') {
       return {[solutionObj?.id]: solutionObj.value};
     } else if (solutionObj?.type === 'video' || solutionObj?.type === 'audio') {
-      const assetMedia = this.getMediaById(solutionObj?.value);
-      const assetThumbnail = assetMedia?.thumbnail ? assetMedia?.thumbnail : '';
-      const assetSolution = this.getAssetSolutionHtml(assetThumbnail, assetMedia?.src, assetMedia.id);
-      return {[solutionObj.id]: assetSolution};
-    } 
+      const val = solutionObj?.value;
+      if (val && typeof val === 'object' && !Array.isArray(val)) {
+        // i18n map of asset IDs → build per-language HTML
+        const solutionHtml: Record<string, string> = {};
+        Object.entries(val as Record<string, string>).forEach(([lang, assetId]) => {
+          const media = this.getMediaById(assetId);
+          if (media) {
+            solutionHtml[lang] = this.getAssetSolutionHtml(media.thumbnail || '', media.src, media.id, solutionObj.type);
+          }
+        });
+        const keys = Object.keys(solutionHtml);
+        if (keys.length === 0) return {[solutionObj.id]: ''};
+        if (keys.length === 1 && keys[0] === 'en') return {[solutionObj.id]: solutionHtml['en']};
+        return {[solutionObj.id]: solutionHtml};
+      } else {
+        // Legacy single-asset string
+        const assetMedia = this.getMediaById(val);
+        if (!assetMedia) return {[solutionObj.id]: ''};
+        const assetSolution = this.getAssetSolutionHtml(assetMedia?.thumbnail || '', assetMedia?.src, assetMedia.id, solutionObj.type);
+        return {[solutionObj.id]: assetSolution};
+      }
+    }
   }
 
   getMediaById(mediaId) {
     return _.find(this.mediaArr, { 'id': mediaId });
+  }
+
+  private _buildSolutionsHtml(solutionsMap: Record<string, { type: string; value: string }>): Record<string, any> {
+    const perLang: Record<string, string> = {};
+    Object.entries(solutionsMap).forEach(([lang, sol]) => {
+      let html = '';
+      if (sol.type === 'html') {
+        html = sol.value;
+      } else if (sol.type === 'video' || sol.type === 'audio') {
+        const media = this.getMediaById(sol.value);
+        if (media) {
+          html = this.getAssetSolutionHtml(media.thumbnail || '', media.src, media.id, sol.type);
+        }
+      }
+      if (html) perLang[lang] = html;
+    });
+
+    if (Object.keys(perLang).length === 0) return {};
+
+    // Single EN-only: keep as plain string for backward compat with existing players
+    const langKeys = Object.keys(perLang);
+    if (langKeys.length === 1 && langKeys[0] === 'en') {
+      return { [this.solutionUUID]: perLang['en'] };
+    }
+    return { [this.solutionUUID]: perLang };
   }
 
   getResponseDeclaration(type) {
@@ -960,15 +1237,16 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
     return responseDeclaration;
   }
 
-  getAssetSolutionHtml(posterURL, srcUrl, solutionMediaId) {
-    let assetSolutionHtml
-    if (this.selectedSolutionType === 'video') {
-      assetSolutionHtml = '<video data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'video/mp4\' src=\'{sourceURL}\'><source type=\'video/webm\' src=\'{sourceURL}\'></video>'
-    } else if(this.selectedSolutionType === 'audio') {
-      assetSolutionHtml = '<audio data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'audio/mp3\' src=\'{sourceURL}\'><source type=\'audio/wav\' src=\'{sourceURL}\'></audio>'
+  getAssetSolutionHtml(posterURL, srcUrl, solutionMediaId, solType: string) {
+    let assetSolutionHtml: string;
+    if (solType === 'video') {
+      assetSolutionHtml = '<video data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'video/mp4\' src=\'{sourceURL}\'><source type=\'video/webm\' src=\'{sourceURL}\'></video>';
+    } else if (solType === 'audio') {
+      assetSolutionHtml = '<audio data-asset-variable=\'{solutionMediaId}\' width=\'400\' controls=\'\' poster=\'{posterUrl}\'><source type=\'audio/mp3\' src=\'{sourceURL}\'><source type=\'audio/wav\' src=\'{sourceURL}\'></audio>';
+    } else {
+      return '';
     }
-    const assetSolutionValue = assetSolutionHtml.replace('{posterUrl}', posterURL).replace('{sourceURL}', srcUrl).replace('{sourceURL}', srcUrl).replace('{solutionMediaId}', solutionMediaId);
-    return assetSolutionValue;
+    return assetSolutionHtml.replace('{posterUrl}', posterURL).replace('{sourceURL}', srcUrl).replace('{sourceURL}', srcUrl).replace('{solutionMediaId}', solutionMediaId);
   }
 
   getMcqQuestionHtmlBody(question, templateId) {
@@ -1049,7 +1327,7 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       };
   }
 
-    if (this.questionInteractionType === 'text') {
+    if (this.questionInteractionType === 'text' && this.questionPrimaryCategory !== 'FTB Question') {
       metaData.interactionTypes = [this.questionInteractionType];
       metaData.primaryCategory = this.questionPrimaryCategory;
       metaData.interactions = {
@@ -1531,7 +1809,30 @@ export class QuestionComponent implements OnInit, AfterViewInit, OnDestroy {
       show: _.get(this.sourcingSettings, 'showAddTips')
     }
   }
+  private renderEditorComponent(): void {
+    if (!this.editorOutlet) { return; }
+    const def = this.editorRegistry.resolveByCategory(this.questionPrimaryCategory) ||
+                this.editorRegistry.resolveByInteractionType(this.questionInteractionType);
+    if (!def) { return; }
+    this.activeEditorRef?.destroy();
+    this.editorOutlet.clear();
+    const ref = this.editorOutlet.createComponent(def.component, { ngModuleRef: this.ngModuleRef });
+    ref.instance.editorState            = this.editorState;
+    ref.instance.questionPrimaryCategory = this.questionPrimaryCategory;
+    ref.instance.showFormError          = this.showFormError;
+    ref.instance.isReadOnlyMode         = this.isReadOnlyMode;
+    if ('sourcingSettings' in ref.instance) { ref.instance['sourcingSettings'] = this.sourcingSettings; }
+    if ('mapping'          in ref.instance) { ref.instance['mapping']          = this.scoreMapping; }
+    if ('maxScore'         in ref.instance) { ref.instance['maxScore']         = this.maxScore; }
+    if ('activeLang'       in ref.instance) { (ref.instance as any)['activeLang'] = this.activeLang; }
+    ref.instance.editorDataOutput.subscribe((e: any) => this.editorDataHandler(e));
+    ref.changeDetectorRef.markForCheck();
+    this.activeEditorRef = ref;
+  }
+
   ngOnDestroy() {
+    try { this.activeEditorRef?.destroy(); } catch (_) {}
+    this.activeEditorRef = null;
     this.onComponentDestroy$.next();
     this.onComponentDestroy$.complete();
     this.editorCursor.clearQuestionMap();

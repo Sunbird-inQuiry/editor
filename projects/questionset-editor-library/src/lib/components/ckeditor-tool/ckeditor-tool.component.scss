@@ -2,6 +2,41 @@
   border: 0px solid white;
 }
 
+:host ::ng-deep .ck.ck-label.ck-voice-label {
+  display: none !important;
+}
+
+:host ::ng-deep .ck-lang-selector-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+:host ::ng-deep .ck-lang-selector-label {
+  font-size: 12px;
+  color: var(--ck-color-text, #333);
+  white-space: nowrap;
+  user-select: none;
+}
+
+:host ::ng-deep .ck-lang-selector {
+  border: 1px solid var(--ck-color-base-border, #c4c4c4);
+  border-radius: 2px;
+  background: var(--ck-color-base-background, #fff);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 2px 6px;
+  height: 28px;
+  color: var(--ck-color-text, #333);
+  outline: none;
+}
+
+:host ::ng-deep .ck-lang-selector:hover {
+  background-color: var(--ck-color-button-default-hover-background, #f0f0f0);
+}
+
 .editorWrapper.hasError {
   border: 1px solid red;
   border-radius: 2px;
