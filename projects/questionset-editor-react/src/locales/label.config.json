@@ -377,6 +377,8 @@
     "markMany": "marks",
     "unsavedChanges": "Unsaved Changes",
     "unsavedChangesMsg": "You have unsaved changes. What would you like to do?",
+    "missingRequiredFieldsTitle": "Required fields missing",
+    "missingRequiredFieldsMsg": "Please fill the following required fields before saving:",
     "stay": "Stay",
     "discardChanges": "Discard Changes",
     "saveLeave": "Save & Leave",
