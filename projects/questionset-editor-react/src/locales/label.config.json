@@ -312,6 +312,8 @@
     "typeSeqDesc": "Arrange items in the correct order",
     "typeReo": "Reorder",
     "typeReoDesc": "Rearrange shuffled words into a sentence",
+    "typeBoolean": "True / False",
+    "typeBooleanDesc": "Pick between true or false choices",
     "statusDraft": "Draft",
     "statusReview": "Review",
     "statusLive": "Live",

@@ -294,6 +294,8 @@
     "typeSeqDesc": "Classez les éléments dans le bon ordre",
     "typeReo": "Réorganiser",
     "typeReoDesc": "Réorganisez des mots mélangés pour former une phrase",
+    "typeBoolean": "Vrai / Faux",
+    "typeBooleanDesc": "Choisissez entre vrai ou faux",
     "statusDraft": "Brouillon",
     "statusReview": "Révision",
     "statusLive": "Publié",

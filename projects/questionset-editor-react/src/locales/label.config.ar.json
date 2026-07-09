@@ -303,6 +303,8 @@
     "typeSeqDesc": "رتّب العناصر بالترتيب الصحيح",
     "typeReo": "إعادة الترتيب",
     "typeReoDesc": "أعد ترتيب الكلمات المبعثرة لتكوين جملة",
+    "typeBoolean": "صحيح / خطأ",
+    "typeBooleanDesc": "اختر بين صحيح أو خطأ",
     "statusDraft": "مسودة",
     "statusReview": "قيد المراجعة",
     "statusLive": "منشور",
