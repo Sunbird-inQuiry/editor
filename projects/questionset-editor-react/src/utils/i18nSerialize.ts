@@ -65,8 +65,12 @@ export function applyContentI18n(meta: Record<string, unknown>, a: Args): void {
     );
   }
 
-  // ── MCQ options ─────────────────────────────────────────────────────────
-  if (a.type === 'mcq') {
+  // ── MCQ/boolean options ─────────────────────────────────────────────────
+  // Every other builder in useSaveQuestion.ts treats mcq/boolean identically
+  // (same options array, same interaction shape) — this block only checked
+  // 'mcq', so a boolean question's per-language True/False edits were never
+  // merged in and silently fell back to the single active-language string.
+  if (a.type === 'mcq' || a.type === 'boolean') {
     const anyOptExtra = a.options.some((o) => hasExtraLangs(dropEmpty(a.i18n.options[o.id])));
     if (anyOptExtra) {
       const esOptions = es.options as Array<Record<string, Record<string, unknown>>> | undefined;
