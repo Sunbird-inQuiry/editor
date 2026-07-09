@@ -60,6 +60,7 @@
 }
 
 .playerContainer {
+  position: relative;
   flex: 1 1 0;
   padding: 20px;
   display: flex;
@@ -69,7 +70,9 @@
 
   // Centered desktop-width card — wide enough for the player's landscape
   // layout, but bounded so options/nav controls stay inside the preview.
-  > div {
+  // Scoped to this class (not a generic `> div`) so the status overlay,
+  // which is also a direct div child, isn't drawn as a second white box.
+  .playerHost {
     width: 100%;
     max-width: 1000px;
     position: relative;
@@ -83,6 +86,17 @@
     width: 100%;
     height: 100%;
   }
+}
+
+.statusOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
 }
 
 .playerPreview {

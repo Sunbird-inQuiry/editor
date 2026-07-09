@@ -359,6 +359,8 @@
     "markMany": "pontos",
     "unsavedChanges": "Alterações não salvas",
     "unsavedChangesMsg": "Você tem alterações não salvas. O que gostaria de fazer?",
+    "missingRequiredFieldsTitle": "Campos obrigatórios pendentes",
+    "missingRequiredFieldsMsg": "Preencha os seguintes campos obrigatórios antes de salvar:",
     "stay": "Permanecer",
     "discardChanges": "Descartar alterações",
     "saveLeave": "Salvar e sair",

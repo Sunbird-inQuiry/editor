@@ -13,8 +13,10 @@ import { label } from '../../utils/labels';
 import { telemetryInteract } from '../../utils/telemetry';
 import ContextualEditor from '../ContextualEditor/ContextualEditor';
 import UnsavedChangesModal from '../modals/UnsavedChangesModal';
+import MissingRequiredFieldsModal, { type MissingFieldGroup } from '../modals/MissingRequiredFieldsModal';
 import { QuestionTypeSelectorModal } from '../modals/QuestionTypeSelectorModal';
 import { ConnectedConfirmDialog } from '../modals/ConfirmDialog';
+import { findMissingRequiredFields } from '../SparkMetaForm/SparkMetaForm';
 
 interface SplitEditorShellProps {
   events: IEditorEvents;
@@ -25,6 +27,7 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
   const [showUnsavedPrompt, setShowUnsavedPrompt] = useState(false);
   const [isFormValid, setIsFormValid] = useState(true);
   const [pendingBack, setPendingBack] = useState(false);
+  const [missingFieldGroups, setMissingFieldGroups] = useState<MissingFieldGroup[] | null>(null);
 
   const isDirty = useEditorStore((s) => s.isDirty);
   const editorMode = useEditorStore((s) => s.editorMode);
@@ -72,6 +75,29 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
           break;
         }
         case 'saveContent': {
+          // Each tab mounts its own SparkMetaForm, so onFormStatusChange only
+          // ever reflects the currently active tab — check every tab's
+          // required fields against the current node's metadata directly.
+          const { isCurrentNodeRoot, rootFormConfig, unitFormConfig } = useEditorStore.getState();
+          const { activeNodeMeta } = useTreeStore.getState();
+          const fields = isCurrentNodeRoot ? rootFormConfig : unitFormConfig;
+          const missing = findMissingRequiredFields(fields ?? [], activeNodeMeta as Record<string, unknown>);
+          if (missing.length > 0) {
+            const TAB_LABELS: Record<string, string> = {
+              'Audience & Curriculum': label('ui.audience', 'Audience & Curriculum'),
+              Behaviour: label('ui.behaviour', 'Behaviour'),
+            };
+            const detailsLabel = label('ui.details', 'Details');
+            const order: string[] = [];
+            const byTab = new Map<string, string[]>();
+            for (const f of missing) {
+              const tab = (f.section && TAB_LABELS[f.section]) || detailsLabel;
+              if (!byTab.has(tab)) { byTab.set(tab, []); order.push(tab); }
+              byTab.get(tab)!.push(f.label);
+            }
+            setMissingFieldGroups(order.map((tab) => ({ tab, fields: byTab.get(tab)! })));
+            break;
+          }
           if (await save()) notifySuccess(label('messages.success.001', 'Question set saved as draft'));
           break;
         }
@@ -170,6 +196,12 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
           onSave={handleSaveAndProceed}
           onCancel={handleCancelUnsaved}
           isSaving={isSaving}
+        />
+      )}
+      {missingFieldGroups && (
+        <MissingRequiredFieldsModal
+          groups={missingFieldGroups}
+          onClose={() => setMissingFieldGroups(null)}
         />
       )}
       <QuestionTypeSelectorModal />

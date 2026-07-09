@@ -368,6 +368,8 @@
     "markMany": "علامات",
     "unsavedChanges": "تغييرات غير محفوظة",
     "unsavedChangesMsg": "لديك تغييرات غير محفوظة. ماذا تريد أن تفعل؟",
+    "missingRequiredFieldsTitle": "حقول مطلوبة مفقودة",
+    "missingRequiredFieldsMsg": "يرجى تعبئة الحقول المطلوبة التالية قبل الحفظ:",
     "stay": "البقاء",
     "discardChanges": "تجاهل التغييرات",
     "saveLeave": "حفظ ومغادرة",

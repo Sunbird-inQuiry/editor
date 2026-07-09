@@ -359,6 +359,8 @@
     "markMany": "points",
     "unsavedChanges": "Modifications non enregistrées",
     "unsavedChangesMsg": "Vous avez des modifications non enregistrées. Que souhaitez-vous faire ?",
+    "missingRequiredFieldsTitle": "Champs obligatoires manquants",
+    "missingRequiredFieldsMsg": "Veuillez remplir les champs obligatoires suivants avant d'enregistrer :",
     "stay": "Rester",
     "discardChanges": "Annuler les modifications",
     "saveLeave": "Enregistrer et quitter",

@@ -16,7 +16,7 @@ const SectionBehaviourForm: React.FC<SectionBehaviourFormProps> = ({ nodeId, rea
   const shuffle       = (meta.shuffle       as boolean) ?? true;
   const showFeedback  = (meta.showFeedback  as boolean) ?? false;
   const showSolutions = (meta.showSolutions as boolean) ?? false;
-  const showHint      = (meta.showHint      as boolean) ?? false;
+  const showHints     = (meta.showHints     as boolean) ?? false;
 
   const patch = useCallback((key: string, value: unknown) => {
     if (!nodeId) return;
@@ -58,8 +58,8 @@ const SectionBehaviourForm: React.FC<SectionBehaviourFormProps> = ({ nodeId, rea
             Show solutions
           </label>
           <label className={styles.checkRow}>
-            <input type="checkbox" className={styles.checkbox} checked={showHint}
-              disabled={readOnly} onChange={e => patch('showHint', e.target.checked)} />
+            <input type="checkbox" className={styles.checkbox} checked={showHints}
+              disabled={readOnly} onChange={e => patch('showHints', e.target.checked)} />
             Show hint
           </label>
         </div>

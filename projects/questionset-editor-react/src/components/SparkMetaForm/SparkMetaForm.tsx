@@ -201,6 +201,22 @@ function makeFieldValidator(field: ICategoryField) {
 }
 
 // ---------------------------------------------------------------------------
+// Required-field check across an arbitrary field set — used to validate all
+// tabs at once (each tab only mounts its own SparkMetaForm, so per-tab
+// onValidityChange only ever reflects the currently visible tab).
+// ---------------------------------------------------------------------------
+
+export function findMissingRequiredFields(
+  fields: ICategoryField[],
+  values: Record<string, unknown>,
+): ICategoryField[] {
+  return fields.filter((f) => {
+    if (!f.visible || !f.required) return false;
+    return makeFieldValidator(f)(values[f.code]) !== true;
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Helpers — build select/multiselect options
 // ---------------------------------------------------------------------------
 
