@@ -11,6 +11,7 @@
  */
 import { useCallback } from 'react';
 import { notifySuccess, notifyError, apiErrorMessage } from '../utils/notify';
+import { label } from '../utils/labels';
 import { useQuestionStore } from '../store/question.store';
 import { useEditorStore } from '../store/editor.store';
 import { useTreeStore } from '../store/tree.store';
@@ -535,7 +536,7 @@ export function useSaveQuestion() {
 
         updateNode(selectedNodeId, { name: questionName, ...questionMeta });
         if (await saveHierarchy()) {
-          notifySuccess('Question saved');
+          notifySuccess(label('messages.success.013', 'Question saved'));
           setIsDirty(false);
           useEditorStore.getState().eventHandlers.onQuestionSaved?.({ identifier: selectedNodeId, ...questionMeta });
           return true;
@@ -635,7 +636,7 @@ export function useSaveQuestion() {
         replaceNodeId(selectedNodeId, questionUuid);
         updateNode(questionUuid, { name: questionName, ...questionMeta });
         if (await saveHierarchy()) {
-          notifySuccess('Question created');
+          notifySuccess(label('messages.success.007', 'Question created'));
           setIsDirty(false);
           useEditorStore.getState().eventHandlers.onQuestionSaved?.({ identifier: questionUuid, ...questionMeta });
           return true;
@@ -644,7 +645,7 @@ export function useSaveQuestion() {
       }
     } catch (e) {
       console.error('[useSaveQuestion] save failed:', e);
-      notifyError(apiErrorMessage(e, 'Failed to save question. Please try again.'));
+      notifyError(apiErrorMessage(e, label('messages.error.001', 'Failed to save question. Please try again.')));
       return false;
     } finally {
       setIsSaving(false);

@@ -66,7 +66,7 @@ export default function SeqEditor({ readOnly = false }: SeqEditorProps) {
               <ContentEditable value={it.value} onChange={v => update(it.id, v)}
                 placeholder={`${L('ui.stepPh', 'Step')} ${i + 1}`} inline disabled={readOnly} bodyClass="seqline" />
             </div>
-            <button type="button" className="del" title="Remove"
+            <button type="button" className="del" title={L('ui.remove', 'Remove')}
               disabled={items.length <= 2 || readOnly} onClick={() => removeItem(it.id)}>
               <Icon name="trash" size={16} />
             </button>

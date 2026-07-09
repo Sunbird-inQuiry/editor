@@ -31,12 +31,10 @@ export const ConnectedConfirmDialog: React.FC = () => {
   const nodeId = modalData.nodeId as string | undefined;
   const node   = nodeId ? getNodeById(nodeId) : undefined;
   const isQuestion = node?.isQuestion ?? false;
-  const nodeName   = node?.name ?? '';
   const nodeType   = isQuestion ? 'question' : 'section';
 
-  const title   = (modalData.title   as string | undefined) ?? `Delete ${nodeType}`;
-  const message = (modalData.message as string | undefined) ??
-    `Are you sure you want to delete "${nodeName}"? This action cannot be undone.`;
+  const title   = (modalData.title   as string | undefined) ?? L('lbl.confirmDeleteContent', `Delete ${nodeType}`);
+  const message = (modalData.message as string | undefined) ?? L('lbl.confirmDeleteNode', 'Are you sure want to delete the selected Node?');
 
   const handleConfirm = async () => {
     if (nodeId) {

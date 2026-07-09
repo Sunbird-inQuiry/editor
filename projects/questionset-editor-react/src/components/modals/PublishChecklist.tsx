@@ -3,6 +3,7 @@ import Modal from '../shared/Modal';
 import Button from '../shared/Button';
 import { useEditorStore } from '../../store/editor.store';
 import type { ICategoryField } from '../../api/categoryDefinition';
+import { useLabels } from '../../hooks/useLabels';
 import styles from './PublishChecklist.module.scss';
 
 // -----------------------------------------------------------------------------
@@ -24,6 +25,7 @@ const PublishChecklist: React.FC<PublishChecklistProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const L = useLabels();
   const configuredChecklist = useEditorStore((s) => s.publishChecklist);
 
   // No fallback list — matches the old editor's PublishChecklistComponent,
@@ -52,17 +54,17 @@ const PublishChecklist: React.FC<PublishChecklistProps> = ({
   const footer = (
     <>
       <Button variant="ghost" onClick={onCancel}>
-        Cancel
+        {L('button_labels.cancel_btn_label', 'Cancel')}
       </Button>
       <Button variant="primary" disabled={!allChecked} onClick={onConfirm}>
-        Publish
+        {L('button_labels.publish_collection_btn_label', 'Publish')}
       </Button>
     </>
   );
 
   return (
     <Modal
-      title="Publish Question Set"
+      title={L('lbl.publishCollection', 'Publish ${objectType}').replace('${objectType}', 'Question Set')}
       isOpen
       onClose={onCancel}
       footer={footer}
@@ -71,13 +73,12 @@ const PublishChecklist: React.FC<PublishChecklistProps> = ({
       <div className={styles.root}>
         {checklistItems.length === 0 ? (
           <p className={styles.intro}>
-            Are you sure you want to publish this Question Set?
+            {L('lbl.confirmPublishCollection', 'Are you sure you want to publish this ${objectType}?').replace('${objectType}', 'Question Set')}
           </p>
         ) : (
           <>
             <p className={styles.intro}>
-              Please confirm that ALL the following items are verified (by ticking the
-              check-boxes) before you can publish:
+              {L('lbl.publishchecklistTitle', 'Please confirm that ALL the following items are verified (by ticking the check-boxes) before you can publish:')}
             </p>
 
             <ul className={styles.checklist} role="list">

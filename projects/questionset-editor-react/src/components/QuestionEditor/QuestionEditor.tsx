@@ -112,7 +112,7 @@ function HintBlock() {
           border: '1.5px solid var(--sb-border)', borderRadius: 999, padding: '3px 10px',
           color: 'var(--sb-text-muted)', background: '#fff',
         }}>{L('ui.optional', 'Optional')}</span>
-        <button type="button" onClick={() => { setHintText(''); setOpen(false); }} title="Remove hint"
+        <button type="button" onClick={() => { setHintText(''); setOpen(false); }} title={L('ui.remove', 'Remove')}
           style={{ marginInlineStart: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--sb-text-faint)', display: 'grid', placeItems: 'center', width: 28, height: 28, borderRadius: 8 }}>
           <Icon name="x" size={18} />
         </button>
@@ -177,7 +177,7 @@ function SolutionBlock() {
           border: '1.5px solid var(--sb-border)', borderRadius: 999, padding: '3px 10px',
           color: 'var(--sb-text-muted)', background: '#fff',
         }}>{L('ui.optional', 'Optional')}</span>
-        <button type="button" onClick={clearSolution} title="Remove solution"
+        <button type="button" onClick={clearSolution} title={L('ui.remove', 'Remove')}
           style={{ marginInlineStart: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--sb-text-faint)', display: 'grid', placeItems: 'center', width: 28, height: 28, borderRadius: 8 }}>
           <Icon name="x" size={18} />
         </button>
@@ -229,7 +229,7 @@ function SolutionBlock() {
               {solutionAsset.name}
             </span>
             <button type="button" className="ce-btn ghost" onClick={() => setBrowserOpen(true)}>{L('ui.change', 'Change')}</button>
-            <button type="button" className="ce-btn ghost" onClick={() => setSolutionAsset(null)} title="Remove">
+            <button type="button" className="ce-btn ghost" onClick={() => setSolutionAsset(null)} title={L('ui.remove', 'Remove')}>
               <Icon name="trash" size={15} />
             </button>
           </div>
@@ -327,43 +327,43 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
 
   const invalidReason = (() => {
     const qBody = anyOf(i18nText.questionBody, questionBody);
-    if (!plain(qBody)) return 'Enter the question first';
+    if (!plain(qBody)) return L('ui.invalidEnterQuestion', 'Enter the question first');
     // Title and Marks come from the Details section — no defaults.
     if (!String((activeNodeMeta?.name as string) ?? '').trim()) {
-      return 'Enter the title in Details';
+      return L('ui.invalidEnterTitle', 'Enter the title in Details');
     }
     if ((type === 'mcq' || type === 'sa') && !(Number(activeNodeMeta?.maxScore) > 0)) {
-      return 'Enter the marks in Details';
+      return L('ui.invalidEnterMarks', 'Enter the marks in Details');
     }
-    if (!detailsValid) return 'Fill all required fields in Details';
+    if (!detailsValid) return L('ui.invalidFillDetails', 'Fill all required fields in Details');
     switch (type) {
       case 'mcq':
       case 'boolean':
-        if (options.some((o) => !plain(anyOf(i18nText.options[o.id], o.body)))) return 'Fill in all options';
-        if (!options.some((o) => o.isCorrect)) return 'Mark one option as the correct answer';
+        if (options.some((o) => !plain(anyOf(i18nText.options[o.id], o.body)))) return L('ui.invalidFillOptions', 'Fill in all options');
+        if (!options.some((o) => o.isCorrect)) return L('ui.invalidMarkCorrect', 'Mark one option as the correct answer');
         return null;
       case 'ftb':
-        if (!/\[\[.+?\]\]/.test(qBody)) return 'Add at least one [[blank]] with its answer';
+        if (!/\[\[.+?\]\]/.test(qBody)) return L('ui.invalidAddBlank', 'Add at least one [[blank]] with its answer');
         return null;
       case 'sa':
-        if (!plain(anyOf(i18nText.answerText, answerText))) return 'Enter the answer';
+        if (!plain(anyOf(i18nText.answerText, answerText))) return L('ui.invalidEnterAnswer', 'Enter the answer');
         return null;
       case 'mtf':
         if (
           matchPairs.length < 2 ||
           matchPairs.some((p) => !plain(anyOf(i18nText.pairsLeft[p.id], p.left)) || !plain(anyOf(i18nText.pairsRight[p.id], p.right)))
         ) {
-          return 'Fill in all matching pairs';
+          return L('ui.invalidFillPairs', 'Fill in all matching pairs');
         }
         return null;
       case 'seq':
         if (sequence.length < 2 || sequence.some((s, i) => !plain(anyOf(i18nText.sequence[i], s)))) {
-          return 'Fill in all sequence items';
+          return L('ui.invalidFillSequence', 'Fill in all sequence items');
         }
         return null;
       case 'reo':
         if (plain(anyOf(i18nText.sentence, sentence)).split(/\s+/).filter(Boolean).length < 2) {
-          return 'Enter a sentence with at least two words';
+          return L('ui.invalidSentence', 'Enter a sentence with at least two words');
         }
         return null;
       default:
@@ -486,7 +486,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
             className="ce-btn ghost"
             onClick={() => setPreviewOpen(true)}
             disabled={!!invalidReason}
-            title={invalidReason ?? 'Preview this question'}
+            title={invalidReason ?? L('ui.previewThisQuestion', 'Preview this question')}
           >
             {L('button_labels.preview_question_btn_label', 'Preview')}
           </button>
@@ -502,7 +502,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
               title={invalidReason ?? undefined}
             >
               <Icon name="check" size={16} />
-              {isSaving ? 'Saving…' : L('button_labels.save_question_btn_label', 'Save question')}
+              {isSaving ? L('ui.saving', 'Saving…') : L('button_labels.save_question_btn_label', 'Save question')}
             </button>
           )}
         </div>

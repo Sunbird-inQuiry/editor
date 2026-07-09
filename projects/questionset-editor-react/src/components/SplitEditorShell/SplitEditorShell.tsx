@@ -9,6 +9,7 @@ import { Topbar } from '../Topbar/Topbar';
 import OutlineTree from '../OutlineTree/OutlineTree';
 import { useUiStore } from '../../store/ui.store';
 import { notifySuccess } from '../../utils/notify';
+import { label } from '../../utils/labels';
 import { telemetryInteract } from '../../utils/telemetry';
 import ContextualEditor from '../ContextualEditor/ContextualEditor';
 import UnsavedChangesModal from '../modals/UnsavedChangesModal';
@@ -71,7 +72,7 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
           break;
         }
         case 'saveContent': {
-          if (await save()) notifySuccess('Question set saved as draft');
+          if (await save()) notifySuccess(label('messages.success.001', 'Question set saved as draft'));
           break;
         }
         case 'sendForReview':

@@ -59,7 +59,7 @@ export default function MtfEditor({ readOnly = false }: MtfEditorProps) {
                 placeholder={L('ui.matchPh', 'Correct match')} inline disabled={readOnly} bodyClass="cell" />
             </div>
           </div>
-          <button type="button" className="del" title="Remove pair"
+          <button type="button" className="del" title={L('ui.removePair', 'Remove pair')}
             disabled={pairs.length <= 2 || readOnly} onClick={() => removePair(p.id)}>
             <Icon name="trash" size={16} />
           </button>

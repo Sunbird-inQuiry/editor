@@ -50,7 +50,7 @@ export default function BooleanEditor({ readOnly = false }: BooleanEditorProps) 
       <div className="ce-opts lay-vertical">
         {options.map(o => (
           <div key={o.id} className={`ce-opt${o.isCorrect ? ' correct' : ''}`}>
-            <button type="button" className="pick" title="Mark correct" onClick={() => !readOnly && markCorrect(o.id)}>
+            <button type="button" className="pick" title={L('ui.markCorrect', 'Mark correct')} onClick={() => !readOnly && markCorrect(o.id)}>
               <span className="pick-ring">{o.isCorrect && <Icon name="check" size={12} />}</span>
             </button>
             <div className="re">

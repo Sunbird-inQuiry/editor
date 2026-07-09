@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../shared/Modal';
 import Button from '../shared/Button';
+import { useLabels } from '../../hooks/useLabels';
 import styles from './TermAndConditionModal.module.scss';
 
 // -----------------------------------------------------------------------------
@@ -20,22 +21,23 @@ const TermAndConditionModal: React.FC<TermAndConditionModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const L = useLabels();
   const [agreed, setAgreed] = useState(false);
 
   const footer = (
     <>
       <Button variant="ghost" onClick={onCancel}>
-        Cancel
+        {L('button_labels.cancel_btn_label', 'Cancel')}
       </Button>
       <Button variant="primary" disabled={!agreed} onClick={onConfirm}>
-        Submit for Review
+        {L('button_labels.submit_collection_btn_label', 'Submit for Review')}
       </Button>
     </>
   );
 
   return (
     <Modal
-      title="Accept Terms & Conditions"
+      title={L('lbl.acceptTerms', 'Accept Terms & Conditions')}
       isOpen
       onClose={onCancel}
       footer={footer}
@@ -68,7 +70,7 @@ const TermAndConditionModal: React.FC<TermAndConditionModalProps> = ({
           />
           <span className={`${styles.customCheck} ${agreed ? styles.customCheckChecked : ''}`} aria-hidden="true" />
           <span className={styles.agreeText}>
-            I agree to the Terms &amp; Conditions and Content Policy
+            {L('ui.agreeTerms', 'I agree to the Terms & Conditions and Content Policy')}
           </span>
         </label>
       </div>
