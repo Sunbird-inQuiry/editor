@@ -5,6 +5,7 @@ import { updateHierarchy } from '../api/hierarchy';
 import type { INode } from '../types/editor';
 import { getContentId, getUserId } from '../utils/context';
 import { notifyError, apiErrorMessage } from '../utils/notify';
+import { label } from '../utils/labels';
 import { v4 as genUuid } from 'uuid';
 
 
@@ -23,7 +24,7 @@ function buildSavePayload(
     'id', 'isFolder', 'isQuestion', 'children', 'parent', 'isNew', 'breadcrumb', 'title', 'metadata', 'questionType', 'objectType',
     // System/read-only fields hydrated from question/v2/read — the backend
     // rejects index/depth and manages the rest itself; old editor never sends them.
-    'index', 'depth', 'status', 'versionKey', 'createdOn', 'lastUpdatedOn', 'lastStatusChangedOn',
+    'index', 'depth', 'status', 'versionKey', 'createdOn', 'lastUpdatedOn', 'lastStatusChangedOn','graphId'
   ]);
   const ARRAY_FIELDS  = new Set(['audience', 'medium', 'gradeLevel', 'subject', 'keywords', 'language', 'topic']);
   const NUMBER_FIELDS = new Set(['copyrightYear', 'maxScore', 'expectedDuration', 'maxAttempts']);
@@ -229,13 +230,20 @@ export function useSaveHierarchy() {
         }
       }
       useTreeStore.setState({ treeCache: clearedCache });
+      // The backend accepted this batch — it's now the rollback baseline.
+      useTreeStore.getState().markSaved();
       setLastSaved(new Date().toISOString());
       setIsDirty(false);
       useEditorStore.getState().eventHandlers.onHierarchySaved?.({ identifiers });
       return true;
     } catch (e) {
       console.error('[useSaveHierarchy] save failed:', e);
-      notifyError(apiErrorMessage(e, 'Failed to save. Please try again.'));
+      notifyError(apiErrorMessage(e, label('messages.error.001', 'Failed to save. Please try again.')));
+      // nodesModified/hierarchy are rejected as a single transaction — none
+      // of the pending nodes since the last successful save actually exist
+      // on the backend. Discard them instead of leaving them in the tree
+      // looking saved.
+      useTreeStore.getState().revertToSaved();
       return false;
     } finally {
       inFlight.current = false;

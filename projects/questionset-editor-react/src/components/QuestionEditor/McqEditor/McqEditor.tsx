@@ -46,7 +46,7 @@ export default function McqEditor({ readOnly = false }: McqEditorProps) {
       <div className={`ce-opts lay-${layout}`}>
         {options.map(o => (
           <div key={o.id} className={`ce-opt${o.isCorrect ? ' correct' : ''}`}>
-            <button type="button" className="pick" title="Mark correct" onClick={() => !readOnly && markCorrect(o.id)}>
+            <button type="button" className="pick" title={L('ui.markCorrect', 'Mark correct')} onClick={() => !readOnly && markCorrect(o.id)}>
               <span className="pick-ring">{o.isCorrect && <Icon name="check" size={12} />}</span>
             </button>
             <div className="re">
@@ -60,7 +60,7 @@ export default function McqEditor({ readOnly = false }: McqEditorProps) {
               />
             </div>
             {o.isCorrect && <span className="badge-correct">{L('ui.correct', 'Correct')}</span>}
-            <button type="button" className="del" title="Remove option"
+            <button type="button" className="del" title={L('ui.removeOption', 'Remove option')}
               disabled={options.length <= 2 || readOnly}
               onClick={() => removeOption(o.id)}>
               <Icon name="trash" size={16} />

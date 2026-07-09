@@ -6,6 +6,7 @@ import { useTreeStore } from '../store/tree.store';
 import { useQuestionStore } from '../store/question.store';
 import { normalizeQuestionRead } from '../utils/questionRead';
 import { notifyError, apiErrorMessage } from '../utils/notify';
+import { label } from '../utils/labels';
 
 /**
  * Reads the selected question individually from `question/v2/read`, the way
@@ -47,7 +48,7 @@ export function useQuestionRead() {
   // Read failed — surface the server error and fall back to the root node.
   useEffect(() => {
     if (!query.error || !enabled) return;
-    notifyError(apiErrorMessage(query.error, 'Failed to load the question.'));
+    notifyError(apiErrorMessage(query.error, label('messages.error.001', 'Failed to load the question.')));
     const rootId = useTreeStore.getState().treeData[0]?.id;
     if (rootId) useTreeStore.getState().selectNode(rootId);
   }, [query.error, enabled]);

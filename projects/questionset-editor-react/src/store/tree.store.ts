@@ -36,6 +36,19 @@ interface TreeState {
   hydrateNodeMeta: (id: string, patch: Record<string, unknown>) => void;
   /** Replace a temp- identifier with the real one returned by hierarchy update. */
   replaceNodeId: (tempId: string, realId: string) => void;
+  /** Last tree state the backend actually accepted — the rollback target
+   *  for a failed hierarchy save (the backend rejects nodesModified/
+   *  hierarchy as a single transaction, so a failure means NONE of the
+   *  pending nodes since the last successful save actually exist there). */
+  confirmedTreeData: INode[];
+  confirmedTreeCache: Record<string, Record<string, unknown>>;
+  /** Snapshot the current tree as the new confirmed baseline (call after a
+   *  successful hierarchy save). */
+  markSaved: () => void;
+  /** Discard every change since the last confirmed baseline (call after a
+   *  failed hierarchy save) — removes nodes the backend never persisted
+   *  instead of leaving them visible as if they'd saved. */
+  revertToSaved: () => void;
 }
 
 function bfsFind(nodes: INode[], id: string): INode | undefined {
@@ -123,10 +136,12 @@ export const useTreeStore = create<TreeState>((set, get) => ({
   treeCache: {},
   breadcrumb: [],
   activeNodeMeta: {},
+  confirmedTreeData: [],
+  confirmedTreeCache: {},
 
   setTreeData: (nodes) => {
     const firstId = nodes[0]?.id ?? null;
-    set({ treeData: nodes, selectedNodeId: firstId });
+    set({ treeData: nodes, selectedNodeId: firstId, confirmedTreeData: nodes, confirmedTreeCache: {} });
     if (firstId) {
       setTimeout(() => get().selectNode(firstId), 0);
     }
@@ -344,5 +359,27 @@ export const useTreeStore = create<TreeState>((set, get) => ({
           : state.activeNodeMeta,
       };
     });
+  },
+
+  markSaved: () => {
+    set((state) => ({ confirmedTreeData: state.treeData, confirmedTreeCache: state.treeCache }));
+  },
+
+  revertToSaved: () => {
+    set((state) => {
+      const stillExists = state.selectedNodeId
+        ? !!bfsFind(state.confirmedTreeData, state.selectedNodeId)
+        : true;
+      const fallbackId = state.confirmedTreeData[0]?.id ?? null;
+      return {
+        treeData: state.confirmedTreeData,
+        treeCache: state.confirmedTreeCache,
+        selectedNodeId: stillExists ? state.selectedNodeId : fallbackId,
+      };
+    });
+    // Re-derive breadcrumb/activeNodeMeta/question-store sync for whatever
+    // ended up selected — selectNode already handles the "unchanged" case.
+    const id = get().selectedNodeId;
+    if (id) get().selectNode(id);
   },
 }));

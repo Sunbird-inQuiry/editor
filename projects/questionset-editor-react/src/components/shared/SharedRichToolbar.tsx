@@ -56,6 +56,7 @@ const keep = (e: React.MouseEvent) => e.preventDefault();
 // SpecialCharsPopup — full character set matching the old Angular editor
 // ---------------------------------------------------------------------------
 function SpecialCharsPopup({ anchor, onClose }: { anchor: DOMRect; onClose: () => void }) {
+  const L = useLabels();
   const ref = useRef<HTMLDivElement>(null);
   const [category, setCategory] = useState<CharCategory>('All');
   const [hovered, setHovered] = useState<{ char: string; title: string } | null>(null);
@@ -86,7 +87,7 @@ function SpecialCharsPopup({ anchor, onClose }: { anchor: DOMRect; onClose: () =
     }}>
       {/* Header: title + category filter */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px 8px', borderBottom: '1px solid var(--sb-divider)' }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--sb-text-2)' }}>Special characters</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--sb-text-2)' }}>{L('ui.specialCharacters', 'Special characters')}</span>
         <select
           value={category}
           onChange={e => setCategory(e.target.value as CharCategory)}
@@ -341,31 +342,31 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
 
       {/* Inline marks */}
       <div className="re-grp">
-        <Btn cmd="bold"       title="Bold">      <span className="b">B</span></Btn>
-        <Btn cmd="italic"     title="Italic">    <span className="i">I</span></Btn>
-        <Btn cmd="underline"  title="Underline"> <span className="u">U</span></Btn>
+        <Btn cmd="bold"       title={L('ui.bold', 'Bold')}>      <span className="b">B</span></Btn>
+        <Btn cmd="italic"     title={L('ui.italic', 'Italic')}>    <span className="i">I</span></Btn>
+        <Btn cmd="underline"  title={L('ui.underline', 'Underline')}> <span className="u">U</span></Btn>
       </div>
       <span className="re-div" />
 
       {/* Lists */}
       <div className="re-grp">
-        <Btn cmd="insertUnorderedList" title="Bullet list">  <Icon name="bullet"  size={17} /></Btn>
-        <Btn cmd="insertOrderedList"   title="Numbered list"><Icon name="numlist" size={17} /></Btn>
+        <Btn cmd="insertUnorderedList" title={L('ui.bulletList', 'Bullet list')}>  <Icon name="bullet"  size={17} /></Btn>
+        <Btn cmd="insertOrderedList"   title={L('ui.numberedList', 'Numbered list')}><Icon name="numlist" size={17} /></Btn>
       </div>
       <span className="re-div" />
 
       {/* Alignment dropdown */}
       <div className="re-grp">
         <span className="re-pop">
-          <button type="button" className={`re-tb caret${menu === 'align' ? ' on' : ''}`} title="Alignment"
+          <button type="button" className={`re-tb caret${menu === 'align' ? ' on' : ''}`} title={L('ui.alignment', 'Alignment')}
             onMouseDown={e => { e.preventDefault(); toggle('align'); }} disabled={off}>
             <Icon name="align" size={17} /><Icon name="caret" size={10} />
           </button>
           {menu === 'align' && (
             <div className="re-menu" onMouseDown={keep}>
-              <button type="button" onMouseDown={run('justifyLeft')}>  <Icon name="align-left"   size={16} />Left</button>
-              <button type="button" onMouseDown={run('justifyCenter')}><Icon name="align-center" size={16} />Center</button>
-              <button type="button" onMouseDown={run('justifyRight')}> <Icon name="align-right"  size={16} />Right</button>
+              <button type="button" onMouseDown={run('justifyLeft')}>  <Icon name="align-left"   size={16} />{L('ui.alignLeft', 'Left')}</button>
+              <button type="button" onMouseDown={run('justifyCenter')}><Icon name="align-center" size={16} />{L('ui.alignCenter', 'Center')}</button>
+              <button type="button" onMouseDown={run('justifyRight')}> <Icon name="align-right"  size={16} />{L('ui.alignRight', 'Right')}</button>
             </div>
           )}
         </span>
@@ -375,7 +376,7 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
       {/* Font size dropdown */}
       <div className="re-grp">
         <span className="re-pop">
-          <button type="button" className={`re-tb caret${menu === 'size' ? ' on' : ''}`} title="Font size"
+          <button type="button" className={`re-tb caret${menu === 'size' ? ' on' : ''}`} title={L('ui.fontSize', 'Font size')}
             onMouseDown={e => { e.preventDefault(); toggle('size'); }} disabled={off}>
             <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-1px' }}>A</span><Icon name="caret" size={10} />
           </button>
@@ -390,18 +391,18 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
             </div>
           )}
         </span>
-        <Btn cmd="subscript"   title="Subscript">  <span>X<sub>2</sub></span></Btn>
-        <Btn cmd="superscript" title="Superscript"><span>X<sup>2</sup></span></Btn>
+        <Btn cmd="subscript"   title={L('ui.subscript', 'Subscript')}>  <span>X<sub>2</sub></span></Btn>
+        <Btn cmd="superscript" title={L('ui.superscript', 'Superscript')}><span>X<sup>2</sup></span></Btn>
       </div>
       <span className="re-div" />
 
       {/* Special chars + equation */}
       <div className="re-grp">
-        <button ref={charsRef} type="button" className={`re-tb${menu === 'chars' ? ' on' : ''}`} title="Special characters"
+        <button ref={charsRef} type="button" className={`re-tb${menu === 'chars' ? ' on' : ''}`} title={L('ui.specialCharacters', 'Special characters')}
           onMouseDown={e => { e.preventDefault(); openChars(); }} disabled={off}>
           <span style={{ fontSize: 16, fontWeight: 600 }}>Ω</span>
         </button>
-        <button ref={mathBtnRef} type="button" className="re-tb" title="Insert equation"
+        <button ref={mathBtnRef} type="button" className="re-tb" title={L('ui.insertEquation', 'Insert equation')}
           onMouseDown={e => {
             e.preventDefault();
             saveRange();
@@ -414,7 +415,7 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
       <span className="re-div" />
 
       {/* Image */}
-      <button type="button" className="re-tb" title="Insert image"
+      <button type="button" className="re-tb" title={L('ui.insertImage', 'Insert image')}
         onMouseDown={e => { e.preventDefault(); saveRange(); setImagePickerOpen(true); }}
         disabled={off}>
         <Icon name="image" size={17} />
@@ -422,7 +423,7 @@ export default function SharedRichToolbar({ disabled = false }: { disabled?: boo
 
       {/* Table */}
       <div className="re-grp">
-        <button ref={tableRef} type="button" className={`re-tb${menu === 'table' ? ' on' : ''}`} title="Insert table"
+        <button ref={tableRef} type="button" className={`re-tb${menu === 'table' ? ' on' : ''}`} title={L('ui.insertTable', 'Insert table')}
           onMouseDown={e => { e.preventDefault(); openTable(); }} disabled={off}>
           <Icon name="table" size={17} />
         </button>

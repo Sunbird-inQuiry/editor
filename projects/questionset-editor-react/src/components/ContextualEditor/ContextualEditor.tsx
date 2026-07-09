@@ -72,6 +72,7 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
 
   const storeEditorMode = useEditorStore((s) => s.editorMode);
   const showPreview = useEditorStore((s) => s.showPreview);
+  const previewQuestionId = useEditorStore((s) => s.previewQuestionId);
   const isCurrentNodeRoot = useEditorStore((s) => s.isCurrentNodeRoot);
   const isCurrentNodeFolder = useEditorStore((s) => s.isCurrentNodeFolder);
   const isCurrentNodeQuestion = useEditorStore((s) => s.isCurrentNodeQuestion);
@@ -198,11 +199,17 @@ const ContextualEditor: React.FC<ContextualEditorProps> = ({
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}>
 
-      {/* Preview overlay */}
+      {/* Preview overlay — previewQuestionId scopes to a single question
+          (triggered from the sidebar); otherwise this always previews the
+          whole set regardless of what's selected in the hierarchy. */}
       {showPreview && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 300, background: '#fff', display: 'flex', flexDirection: 'column' }}>
           <Suspense fallback={<PanelSpinner />}>
-            <QumlPlayer questionSetId={selectedNodeId ?? ''} onClose={() => onToolbarEvent({ action: 'preview' })} />
+            <QumlPlayer
+              questionSetId={selectedNodeId ?? ''}
+              singleQuestionId={previewQuestionId ?? undefined}
+              onClose={() => onToolbarEvent({ action: 'preview' })}
+            />
           </Suspense>
         </div>
       )}

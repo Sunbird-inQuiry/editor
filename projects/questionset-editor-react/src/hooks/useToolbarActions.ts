@@ -5,6 +5,7 @@ import { useEditorStore } from '../store/editor.store';
 import { sendForReview, rejectContent, publishContent } from '../api/hierarchy';
 import { getContentId, getUserId } from '../utils/context';
 import { useTreeStore } from '../store/tree.store';
+import { label } from '../utils/labels';
 
 /** Reflect the workflow result on the root node so the status chip is live. */
 function setRootStatus(status: string): void {
@@ -20,7 +21,7 @@ export function useToolbarActions(save: () => Promise<boolean | void>) {
     async (action: ToolbarAction, data?: unknown): Promise<boolean> => {
       const contentId = getContentId(config?.context);
       if (!contentId) {
-        notifyError('No content identifier found.');
+        notifyError(label('messages.error.001', 'No content identifier found.'));
         return false;
       }
       const lastUpdatedBy = getUserId(config?.context);
@@ -32,7 +33,7 @@ export function useToolbarActions(save: () => Promise<boolean | void>) {
             if ((await save()) === false) return false;
             await sendForReview(contentId);
             setRootStatus('Review');
-            notifySuccess('Question set sent for review');
+            notifySuccess(label('messages.success.002', 'Question set sent for review'));
             return true;
 
           case 'reject': {
@@ -40,7 +41,7 @@ export function useToolbarActions(save: () => Promise<boolean | void>) {
             const comment = (data as { comment?: string } | undefined)?.comment ?? '';
             await rejectContent(contentId, comment);
             setRootStatus('Draft');
-            notifySuccess('Content rejected');
+            notifySuccess(label('messages.success.039', 'Content rejected'));
             return true;
           }
 
@@ -49,7 +50,7 @@ export function useToolbarActions(save: () => Promise<boolean | void>) {
             if ((await save()) === false) return false;
             await publishContent(contentId, lastUpdatedBy);
             setRootStatus('Live');
-            notifySuccess('Question set published successfully');
+            notifySuccess(label('messages.success.004', 'Question set published successfully'));
             return true;
 
           default:
@@ -58,7 +59,8 @@ export function useToolbarActions(save: () => Promise<boolean | void>) {
       } catch (err) {
         console.error(`[useToolbarActions] ${action} failed`, err);
         const verb = action === 'sendForReview' ? 'send for review' : action === 'reject' ? 'reject' : 'publish';
-        notifyError(apiErrorMessage(err, `Failed to ${verb}. Please try again.`));
+        const errorKey = action === 'sendForReview' ? 'messages.error.002' : action === 'reject' ? 'messages.error.003' : 'messages.error.004';
+        notifyError(apiErrorMessage(err, label(errorKey, `Failed to ${verb}. Please try again.`)));
         return false;
       } finally {
         setButtonLoader('saveContent', false);

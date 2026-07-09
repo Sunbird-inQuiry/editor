@@ -17,6 +17,7 @@ import { useEditorStore } from '../../store/editor.store';
 import { listQuestions } from '../../api/question';
 import type { INode } from '../../types/editor';
 import styles from './QumlPlayer.module.scss';
+import { useLabels } from '../../hooks/useLabels';
 
 const PLAYER_TAG = 'sunbird-quml-player';
 const DEFAULT_PLAYER_SCRIPT = '/assets/sunbird-quml-player.js';
@@ -68,6 +69,7 @@ function bfsFind(nodes: INode[], id: string): INode | undefined {
 }
 
 const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId, inline = false, onClose }) => {
+  const L = useLabels();
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const rootName = useTreeStore((s) => s.treeData[0]?.name);
@@ -136,6 +138,13 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
           };
         }
 
+        // Set-level "Max Attempts" (Behaviour tab) was authored onto the root
+        // node's metadata but never reached the player's config — it fell
+        // back to the player's own default every time.
+        const maxAttemptsRaw = treeData[0]?.metadata?.maxAttempts;
+        const maxAttemptsNum = Number(maxAttemptsRaw);
+        const maxAttempts = Number.isFinite(maxAttemptsNum) && maxAttemptsNum > 0 ? maxAttemptsNum : undefined;
+
         const ctx = (editorConfig?.context ?? {}) as Record<string, unknown>;
         const playerConfig = {
           context: {
@@ -150,6 +159,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
             // it renders viewport-fixed and escapes the preview container.
             sideMenu: { enable: false, showShare: false, showDownload: false, showExit: false },
             ...(singleQuestionId ? { showLegend: false } : {}),
+            ...(maxAttempts !== undefined ? { maxAttempts } : {}),
           },
           metadata,
           data: {},
@@ -187,12 +197,11 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
   const statusEl = (
     <>
       {status === 'loading' && (
-        <p style={{ textAlign: 'center', color: '#888', padding: 40, margin: 0 }}>Loading preview…</p>
+        <p style={{ textAlign: 'center', color: '#888', padding: 40, margin: 0 }}>{L('ui.loadingPreview', 'Loading preview…')}</p>
       )}
       {status === 'error' && (
         <p style={{ textAlign: 'center', color: '#c33', padding: 40, margin: 0 }}>
-          Could not load the QuML player. Ensure the player script is available
-          (config.playerScriptUrl or /assets/sunbird-quml-player.js).
+          {L('ui.previewUnavailable', 'Could not load the QuML player. Please try again.')}
         </p>
       )}
     </>
@@ -208,16 +217,16 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
   }
 
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Preview">
+    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label={L('button_labels.preview_collection_btn_label', 'Preview')}>
       <div className={styles.header}>
         <span className={styles.title}>
-          Preview — {rootName ?? 'Question Set'}
+          {L('button_labels.preview_collection_btn_label', 'Preview')} — {rootName ?? L('ui.questionSet', 'Question Set')}
         </span>
         <button
           type="button"
           className={styles.closeBtn}
           onClick={() => onClose?.()}
-          aria-label="Close preview"
+          aria-label={L('ui.closePreview', 'Close preview')}
         >
           <X size={20} aria-hidden="true" />
         </button>
