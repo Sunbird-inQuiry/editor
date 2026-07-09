@@ -38,12 +38,14 @@ function getStatusClass(status?: string): string {
 interface ContextMenuProps {
   isRoot: boolean;
   isFolder: boolean;
+  isQuestion: boolean;
   isEditMode: boolean;
   nodeId: string;
   onClose: () => void;
   onAddSection: () => void;
   onAddQuestion: () => void;
   onDelete: () => void;
+  onPreview: () => void;
 }
 
 const ContextMenu: React.FC<ContextMenuProps> = (props) => {
@@ -52,7 +54,7 @@ const ContextMenu: React.FC<ContextMenuProps> = (props) => {
 };
 
 const ContextMenuInner: React.FC<ContextMenuProps & { L: (p: string, f: string) => string }> = ({
-  isRoot, isFolder, isEditMode, onClose, onAddSection, onAddQuestion, onDelete, L,
+  isRoot, isFolder, isQuestion, isEditMode, onClose, onAddSection, onAddQuestion, onDelete, onPreview, L,
 }) => {
   React.useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -72,6 +74,16 @@ const ContextMenuInner: React.FC<ContextMenuProps & { L: (p: string, f: string) 
         boxShadow: 'var(--sb-shadow-deep)', padding: 6, minWidth: 160,
       }}
     >
+      {isQuestion && (
+        <button
+          style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '9px 11px', border: 'none', background: 'transparent', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, textAlign: 'left', color: 'var(--sb-text-2)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-soft)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          onClick={() => { onPreview(); onClose(); }}
+        >
+          <Icon name="play" size={13} /> {L('button_labels.preview_collection_btn_label', 'Preview')}
+        </button>
+      )}
       {isFolder && isEditMode && (
         <button
           style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '9px 11px', border: 'none', background: 'transparent', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, textAlign: 'left', color: 'var(--sb-text-2)' }}
@@ -123,13 +135,15 @@ interface NodeProps {
   onAddSection: (parentId: string) => void;
   onAddQuestion: (parentId: string) => void;
   onDelete: (id: string) => void;
+  onPreview: (id: string) => void;
 }
 
 const TreeNode: React.FC<NodeProps> = ({
   node, selectedId, openIds, contextMenuId, isEditMode,
   onSelect, onToggle, onOpenCtx, onCloseCtx,
-  onAddSection, onAddQuestion, onDelete,
+  onAddSection, onAddQuestion, onDelete, onPreview,
 }) => {
+  const L = useLabels();
   const kind = detectNodeKind(node);
   const isRoot = kind === 'root';
   const isSection = kind === 'section';
@@ -200,7 +214,7 @@ const TreeNode: React.FC<NodeProps> = ({
               }}
               className="ce-ctx-btn"
               onClick={e => { e.stopPropagation(); isCtxOpen ? onCloseCtx() : onOpenCtx(node.id); }}
-              aria-label="Node options"
+              aria-label={L('ui.nodeOptions', 'Node options')}
             >
               <Icon name="more" size={14} />
             </button>
@@ -208,12 +222,14 @@ const TreeNode: React.FC<NodeProps> = ({
               <ContextMenu
                 isRoot={isRoot}
                 isFolder={isSection}
+                isQuestion={isQuestion}
                 isEditMode={isEditMode}
                 nodeId={node.id}
                 onClose={onCloseCtx}
                 onAddSection={() => onAddSection(node.id)}
                 onAddQuestion={() => onAddQuestion(node.id)}
                 onDelete={() => onDelete(node.id)}
+                onPreview={() => onPreview(node.id)}
               />
             )}
           </div>
@@ -238,6 +254,7 @@ const TreeNode: React.FC<NodeProps> = ({
               onAddSection={onAddSection}
               onAddQuestion={onAddQuestion}
               onDelete={onDelete}
+              onPreview={onPreview}
             />
           ))}
         </div>
@@ -293,24 +310,28 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
     const root = useTreeStore.getState().treeData[0];
     const rootSaved = !!useEditorStore.getState().lastSaved || (root?.children?.length ?? 0) > 0;
     if (!rootSaved) {
-      notifyError('Please save the question set before adding a section.');
+      notifyError(L('ui.saveSectionFirst', 'Please save the question set before adding a section.'));
       return;
     }
     addNode(parentId, 'section');
-  }, [addNode]);
+  }, [addNode, L]);
 
   const handleAddQuestion = useCallback((parentId: string) => {
     const parentNode = useTreeStore.getState().getNodeById(parentId);
     if (parentNode?.identifier.startsWith('temp-')) {
-      notifyError('Please save the section before adding a question.');
+      notifyError(L('ui.saveQuestionFirst', 'Please save the section before adding a question.'));
       return;
     }
     openModal('questionTypeSelector', { parentId });
-  }, [openModal]);
+  }, [openModal, L]);
 
   const handleDelete = useCallback((id: string) => {
     openModal('confirmDelete', { nodeId: id });
   }, [openModal]);
+
+  const handlePreview = useCallback((id: string) => {
+    useEditorStore.getState().setShowPreview(true, id);
+  }, []);
 
   const rootId = treeData[0]?.id;
   const lastSaved = useEditorStore((s) => s.lastSaved);
@@ -343,15 +364,15 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
     <>
       <div className="ce-tree-head">
         <span className="lbl">{L('ui.hierarchy', 'Hierarchy')}</span>
-        <button title="Collapse" onClick={onCollapse} aria-label="Collapse outline">
+        <button title={L('ui.collapse', 'Collapse')} onClick={onCollapse} aria-label={L('ui.collapseOutlinePanel', 'Collapse outline panel')}>
           <Icon name="panel-left" size={17} />
         </button>
       </div>
 
-      <div className="ce-tree-scroll" role="tree" aria-label="Question set outline">
+      <div className="ce-tree-scroll" role="tree" aria-label={L('ui.questionSetOutline', 'Question set outline')}>
         {treeData.length === 0 ? (
           <p style={{ padding: '16px 12px', fontSize: 13, color: 'var(--sb-text-faint)', fontStyle: 'italic' }}>
-            No content yet.
+            {L('ui.noContentYet', 'No content yet.')}
           </p>
         ) : (
           treeData.map(node => (
@@ -369,6 +390,7 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
               onAddSection={handleAddSection}
               onAddQuestion={handleAddQuestion}
               onDelete={handleDelete}
+              onPreview={handlePreview}
             />
           ))
         )}

@@ -9,6 +9,8 @@ interface EditorState {
   editorMode: EditorMode;
   buttonLoaders: IButtonLoaders;
   showPreview: boolean;
+  /** Question id to scope the preview to — null previews the whole set. */
+  previewQuestionId: string | null;
   pageId: string;
   isCurrentNodeFolder: boolean;
   isCurrentNodeRoot: boolean;
@@ -49,7 +51,8 @@ interface EditorState {
   setEditorConfig: (config: IEditorConfig) => void;
   setEditorMode: (mode: EditorMode) => void;
   setButtonLoader: (key: keyof IButtonLoaders, value: boolean) => void;
-  setShowPreview: (show: boolean) => void;
+  /** questionId scopes the preview to a single question; omit/null for the whole set. */
+  setShowPreview: (show: boolean, questionId?: string | null) => void;
   setPageId: (pageId: string) => void;
   setNodeFlags: (flags: { isFolder?: boolean; isRoot?: boolean; isQuestion?: boolean }) => void;
   setLastSaved: (ts: string) => void;
@@ -69,6 +72,7 @@ export const useEditorStore = create<EditorState>((set) => ({
     sourcingRejectContent: false,
   },
   showPreview: false,
+  previewQuestionId: null,
   pageId: 'questionset_editor',
   isCurrentNodeFolder: false,
   isCurrentNodeRoot: false,
@@ -99,7 +103,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   setEditorMode: (mode) => set({ editorMode: mode }),
   setButtonLoader: (key, value) =>
     set((state) => ({ buttonLoaders: { ...state.buttonLoaders, [key]: value } })),
-  setShowPreview: (show) => set({ showPreview: show }),
+  setShowPreview: (show, questionId = null) => set({ showPreview: show, previewQuestionId: show ? questionId : null }),
   setPageId: (pageId) => set({ pageId }),
   setNodeFlags: (flags) =>
     set({
