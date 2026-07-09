@@ -5,7 +5,7 @@
  * Mirrors the old editor's two preview flows:
  *  - Full question-set preview (toolbar): fresh hierarchy read → player
  *  - Single-question preview (question editor): threshold 1, no start
- *    page/timer/submit, no legend
+ *    page/timer/submit, no legend, no section intro
  *
  * The player script is loaded dynamically (old editor pattern) from
  * config.playerScriptUrl, defaulting to /assets/sunbird-quml-player.js.
@@ -158,7 +158,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
             // Disable the player's hamburger side menu in editor previews —
             // it renders viewport-fixed and escapes the preview container.
             sideMenu: { enable: false, showShare: false, showDownload: false, showExit: false },
-            ...(singleQuestionId ? { showLegend: false } : {}),
+            ...(singleQuestionId ? { showLegend: false, showSectionIntro: false } : {}),
             ...(maxAttempts !== undefined ? { maxAttempts } : {}),
           },
           metadata,
