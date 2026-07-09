@@ -376,14 +376,14 @@ export const Topbar: React.FC<TopbarProps> = ({
             {L('button_labels.preview_collection_btn_label', 'Preview')}
           </button>
 
-          {/* Save as Draft */}
+          {/* Save as Draft — old editor never gates this on form validity
+              (only visibility/mode); required-field checks belong to
+              Send for Review/Publish, not an in-progress draft save. */}
           {((isEditMode && statusLabel !== 'Review') || reviewerEditAllowed) && (
             <button
               className="ce-btn ghost"
               type="button"
               onClick={() => emit('saveContent')}
-              disabled={!isFormValid}
-              title={!isFormValid ? 'Fill all required fields before saving' : undefined}
             >
               {L('button_labels.save_collection_btn_label', 'Save as Draft')}
             </button>
