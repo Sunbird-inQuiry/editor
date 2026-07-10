@@ -657,7 +657,12 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                       className={`${styles.select} ${error ? styles.inputError : ''}`}
                       value={currentVal}
                       onChange={(e) => {
-                        const newVal = e.target.value;
+                        // Native <select> values are always strings — coerce
+                        // to a number for dataType:"number" fields (e.g.
+                        // maxQuestions, maxAttempts) so the saved metadata
+                        // sends a digit, not a string, to the backend.
+                        const raw = e.target.value;
+                        const newVal = field.dataType === 'number' && raw !== '' ? Number(raw) : raw;
                         rhfField.onChange(newVal);
                         onChange(field.code, newVal);
                         // Reset all fields that depend on this one
