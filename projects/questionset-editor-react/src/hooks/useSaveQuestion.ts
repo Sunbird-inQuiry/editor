@@ -28,6 +28,13 @@ import { v4 as genUuid } from 'uuid';
 // ---------------------------------------------------------------------------
 // body HTML — old editor wraps question in specific template divs
 // ---------------------------------------------------------------------------
+// Old editor's "Grid" MCQ layout button (options.component.html) sets
+// templateId to 'mcq-vertical-split', not 'mcq-grid' — the UI label says
+// "Grid" but the persisted template string doesn't follow the layout name.
+function mcqTemplateId(layout: 'vertical' | 'grid' | 'horizontal'): string {
+  return layout === 'grid' ? 'mcq-vertical-split' : `mcq-${layout}`;
+}
+
 function parseBlanks(questionHtml: string): string[] {
   // Extract from entity-decoded plain text — inline markup (<strong>) or
   // &nbsp; inside [[ ]] would otherwise become part of the correct answer.
@@ -183,6 +190,7 @@ function buildInteractions(type: QuestionType, options: IOption[], questionBody 
 function buildResponseDeclaration(
   type: QuestionType, options: IOption[], questionBody = '',
   matchPairs: IMatchPair[] = [], isPartialScore = true, sequence: string[] = [], sentence = '',
+  evalUnordered = false,
 ): Record<string, unknown> {
   if (type === 'reo') {
     const value = reoOptions(sentence).map((o) => o.value);
@@ -220,17 +228,19 @@ function buildResponseDeclaration(
     return { response1: rd };
   }
   if (type === 'ftb') {
-    // Old editor: one responseN per blank; every response carries the full
-    // mapping of all blank values (score 1 each, caseSensitive false).
+    // Old editor: one responseN per blank. By default each blank's mapping
+    // holds only its own answer; evalUnordered replaces every blank's
+    // mapping with the union of all answers so any blank accepts any
+    // answer, in any order.
     const blanks = parseBlanks(questionBody);
-    const mapping = blanks.map((b) => ({ value: b, score: 1, caseSensitive: false }));
+    const unionMapping = blanks.map((b) => ({ value: b, score: 1, caseSensitive: false }));
     const rd: Record<string, unknown> = {};
     blanks.forEach((b, i) => {
       rd[`response${i + 1}`] = {
         cardinality: 'single',
         type: 'string',
         correctResponse: { value: b },
-        mapping,
+        mapping: evalUnordered ? unionMapping : [{ value: b, score: 1, caseSensitive: false }],
       };
     });
     if (blanks.length) return rd;
@@ -347,17 +357,15 @@ export function useSaveQuestion() {
       ?? (isExisting ? activeQuestion?.name : undefined)
       ?? autoName;
 
-    // FTB scores 1 per blank, MTF 1 per pair (when partial); otherwise Marks
-    // from the details form.
+    // Old editor's real save path (question.component.ts getOutcomeDeclaration)
+    // always uses the Marks form field as outcomeDeclaration.maxScore.defaultValue,
+    // for every question type, regardless of partial scoring — partial scoring
+    // only changes cardinality/mapping, never the marks total itself.
     const blankCount =
       questionType === 'ftb' ? parseBlanks(questionBody).length :
         questionType === 'mtf' ? matchPairs.length : 0;
     const effectiveMaxScore =
-      questionType === 'ftb' && blankCount > 0 ? blankCount :
-        questionType === 'mtf' ? (isPartialScore && blankCount > 0 ? blankCount : 1) :
-          questionType === 'seq' ? (isPartialScore && sequence.length > 0 ? sequence.length : 1) :
-            questionType === 'reo' ? 1 :
-              (Number.isFinite(formMarks) && formMarks > 0 ? formMarks : (maxScore ?? 1));
+      Number.isFinite(formMarks) && formMarks > 0 ? formMarks : (maxScore ?? 1);
 
     // 'multiple' only when the score is actually per-blank — FTB always, MTF
     // only with partial scoring (a scalar defaultValue must stay 'single',
@@ -458,13 +466,13 @@ export function useSaveQuestion() {
           },
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
-          ...(questionType === 'mcq' ? { templateId: `mcq-${layout}` } : {}),
+          ...(questionType === 'mcq' ? { templateId: mcqTemplateId(layout) } : {}),
           ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
           ...(questionType === 'ftb' ? {
             isPartialScore,
             evalUnordered,
             scoringMode: 'responseProcessing',
-            responseProcessing: { template: 'MAP_RESPONSE' },
+            responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
           } : {}),
           ...(questionType === 'mtf' ? {
             pairs: wrapPairs(matchPairs),
@@ -493,7 +501,7 @@ export function useSaveQuestion() {
           // responseDeclaration/hints keys).
           ...(hasInteractions ? {
             interactionTypes: [typeDef?.interactionType ?? 'text'],
-            responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
+            responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence, evalUnordered),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
           // hints key only when a hint actually exists — no empty {} with a
@@ -556,13 +564,13 @@ export function useSaveQuestion() {
           },
           body:        buildBodyHtml(questionType, questionBody),
           answer:      buildAnswerHtml(questionType, options, answerText),
-          ...(questionType === 'mcq' ? { templateId: `mcq-${layout}` } : {}),
+          ...(questionType === 'mcq' ? { templateId: mcqTemplateId(layout) } : {}),
           ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
           ...(questionType === 'ftb' ? {
             isPartialScore,
             evalUnordered,
             scoringMode: 'responseProcessing',
-            responseProcessing: { template: 'MAP_RESPONSE' },
+            responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
           } : {}),
           ...(questionType === 'mtf' ? {
             pairs: wrapPairs(matchPairs),
@@ -591,7 +599,7 @@ export function useSaveQuestion() {
           // responseDeclaration/hints keys).
           ...(hasInteractions ? {
             interactionTypes: [typeDef?.interactionType ?? 'text'],
-            responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence),
+            responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence, evalUnordered),
           } : {}),
           // Old MTF/SEQ payloads carry no hints key unless a hint is set.
           // hints key only when a hint actually exists — no empty {} with a
