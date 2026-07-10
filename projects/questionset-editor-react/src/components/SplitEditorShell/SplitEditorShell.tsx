@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EditorRootContext } from '../shared/EditorRootContext';
-import type { IEditorEvents, ToolbarAction } from '../../types/editor';
+import type { IEditorEvents, ToolbarAction, INode } from '../../types/editor';
 import { useTreeStore } from '../../store/tree.store';
 import { useEditorStore } from '../../store/editor.store';
 import { useSaveHierarchy } from '../../hooks/useSaveHierarchy';
@@ -17,6 +17,7 @@ import MissingRequiredFieldsModal, { type MissingFieldGroup } from '../modals/Mi
 import { QuestionTypeSelectorModal } from '../modals/QuestionTypeSelectorModal';
 import { ConnectedConfirmDialog } from '../modals/ConfirmDialog';
 import { findMissingRequiredFields } from '../SparkMetaForm/SparkMetaForm';
+import { detectNodeKind } from '../../utils/nodeKind';
 
 interface SplitEditorShellProps {
   events: IEditorEvents;
@@ -76,26 +77,57 @@ export function SplitEditorShell({ events }: SplitEditorShellProps) {
         }
         case 'saveContent': {
           // Each tab mounts its own SparkMetaForm, so onFormStatusChange only
-          // ever reflects the currently active tab — check every tab's
-          // required fields against the current node's metadata directly.
-          const { isCurrentNodeRoot, rootFormConfig, unitFormConfig } = useEditorStore.getState();
-          const { activeNodeMeta } = useTreeStore.getState();
-          const fields = isCurrentNodeRoot ? rootFormConfig : unitFormConfig;
-          const missing = findMissingRequiredFields(fields ?? [], activeNodeMeta as Record<string, unknown>);
-          if (missing.length > 0) {
-            const TAB_LABELS: Record<string, string> = {
-              'Audience & Curriculum': label('ui.audience', 'Audience & Curriculum'),
-              Behaviour: label('ui.behaviour', 'Behaviour'),
-            };
-            const detailsLabel = label('ui.details', 'Details');
-            const order: string[] = [];
-            const byTab = new Map<string, string[]>();
-            for (const f of missing) {
+          // ever reflects the currently active tab. Save as Draft saves the
+          // whole hierarchy, not just whatever's currently selected, so check
+          // the root AND every section's required fields regardless of
+          // selection — not just the active node. Questions have their own
+          // required-field checks (QuestionEditor's invalidReason) and are
+          // never included here.
+          const { rootFormConfig, unitFormConfig } = useEditorStore.getState();
+          const { treeData, treeCache } = useTreeStore.getState();
+
+          // updateNode() patches land in treeCache (and the node's top-level
+          // props via deepMergeNode), NOT inside node.metadata — activeNodeMeta
+          // overlays treeCache on top of node.metadata for exactly this reason.
+          // Reading node.metadata alone here saw stale, never-updated values.
+          const liveMeta = (node: INode) =>
+            ({ ...(node.metadata ?? {}), ...(treeCache[node.id] ?? {}) }) as Record<string, unknown>;
+
+          const TAB_LABELS: Record<string, string> = {
+            'Audience & Curriculum': label('ui.audience', 'Audience & Curriculum'),
+            Behaviour: label('ui.behaviour', 'Behaviour'),
+          };
+          const detailsLabel = label('ui.details', 'Details');
+          const order: string[] = [];
+          const byGroup = new Map<string, string[]>();
+          const addMissing = (fields: typeof rootFormConfig, meta: Record<string, unknown>, sectionName?: string) => {
+            for (const f of findMissingRequiredFields(fields ?? [], meta)) {
               const tab = (f.section && TAB_LABELS[f.section]) || detailsLabel;
-              if (!byTab.has(tab)) { byTab.set(tab, []); order.push(tab); }
-              byTab.get(tab)!.push(f.label);
+              const group = sectionName ? `${sectionName} — ${tab}` : tab;
+              if (!byGroup.has(group)) { byGroup.set(group, []); order.push(group); }
+              byGroup.get(group)!.push(f.label);
             }
-            setMissingFieldGroups(order.map((tab) => ({ tab, fields: byTab.get(tab)! })));
+          };
+
+          const rootNode = treeData[0];
+          if (rootNode) addMissing(rootFormConfig, liveMeta(rootNode));
+
+          // isFolder from the API is unreliable for questions (they often
+          // come back with isFolder:true) — detectNodeKind checks
+          // mimeType/objectType/isQuestion/questionType first instead.
+          const sections: typeof treeData = [];
+          const queue = [...(rootNode?.children ?? [])];
+          while (queue.length) {
+            const n = queue.shift()!;
+            if (detectNodeKind(n) === 'section') sections.push(n);
+            if (n.children) queue.push(...n.children);
+          }
+          for (const section of sections) {
+            addMissing(unitFormConfig, liveMeta(section), section.name);
+          }
+
+          if (order.length > 0) {
+            setMissingFieldGroups(order.map((tab) => ({ tab, fields: byGroup.get(tab)! })));
             break;
           }
           if (await save()) notifySuccess(label('messages.success.001', 'Question set saved as draft'));

@@ -51,6 +51,13 @@ function insertAtRange(html: string, range: Range) {
   }
 }
 
+// Resolved against this bundle's own URL (not the host page's domain root) —
+// this package is published to npm and its dist/ assets get consumed from
+// node_modules by the portal, so a root-relative '/assets/...' path resolves
+// against the portal's own origin instead of wherever this package's dist/
+// actually lives, and 404s through to the portal's own SPA fallback page.
+const MATH_MODAL_URL = new URL('./assets/libs/mathEquation/plugin/mathModal/index.html', import.meta.url).href;
+
 export default function MathModal({ anchor, onClose, savedRange }: MathModalProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -137,7 +144,7 @@ export default function MathModal({ anchor, onClose, savedRange }: MathModalProp
       >
         <iframe
           ref={iframeRef}
-          src="/assets/libs/mathEquation/plugin/mathModal/index.html"
+          src={MATH_MODAL_URL}
           onLoad={handleLoad}
           style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
           title="Equation Editor"
