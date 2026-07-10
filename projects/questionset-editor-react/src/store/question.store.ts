@@ -325,8 +325,11 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
       showSolutions: question.showSolutions ?? DEFAULT_META.showSolutions,
       isPartialScore: question.isPartialScore ?? DEFAULT_META.isPartialScore,
       evalUnordered: question.evalUnordered ?? DEFAULT_META.evalUnordered,
-      // Restore the authored MCQ/SEQ layout from the saved templateId
-      layout: question.templateId?.endsWith('-grid') ? 'grid'
+      // Restore the authored MCQ/SEQ layout from the saved templateId.
+      // Old editor's MCQ "Grid" layout persists as 'mcq-vertical-split' (its
+      // UI label doesn't match the templateId string) — '-grid' is also
+      // checked to tolerate content saved by this editor's earlier bug.
+      layout: question.templateId?.endsWith('-vertical-split') || question.templateId?.endsWith('-grid') ? 'grid'
         : question.templateId?.endsWith('-horizontal') ? 'horizontal'
         : 'vertical',
     });
