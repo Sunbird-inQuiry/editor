@@ -1,5 +1,5 @@
-import { cpSync, existsSync, mkdirSync, readdirSync } from 'fs';
-import { resolve, dirname, extname } from 'path';
+import { cpSync, existsSync, mkdirSync } from 'fs';
+import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -57,20 +57,4 @@ if (existsSync(ckeditorSrc)) {
   mkdirSync(ckeditorDest, { recursive: true });
   cpSync(ckeditorSrc, resolve(ckeditorDest, 'ckeditor.js'));
   console.log('[copy-player-assets] Copied CKEditor build');
-}
-
-// KaTeX fonts — needed by @tiptap/extension-mathematics
-const katexFonts = resolve(root, 'node_modules', 'katex', 'dist', 'fonts');
-const katexDest  = resolve(root, 'public', 'fonts');
-if (existsSync(katexFonts)) {
-  mkdirSync(katexDest, { recursive: true });
-  const fontExts = new Set(['.woff', '.woff2', '.ttf']);
-  for (const f of readdirSync(katexFonts)) {
-    if (fontExts.has(extname(f))) {
-      cpSync(resolve(katexFonts, f), resolve(katexDest, f));
-    }
-  }
-  console.log('[copy-player-assets] Copied KaTeX fonts to public/fonts/');
-} else {
-  console.warn('[copy-player-assets] KaTeX fonts not found – skipping');
 }
