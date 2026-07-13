@@ -70,9 +70,5 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: { '@': resolve(__dirname, 'src') },
     },
-
-    optimizeDeps: {
-      include: ['@tiptap/extension-mathematics', 'katex'],
-    },
   };
 });

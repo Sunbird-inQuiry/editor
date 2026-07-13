@@ -737,10 +737,10 @@ const SparkMetaForm: React.FC<SparkMetaFormProps> = ({
                         aria-invalid={!!error}
                         aria-describedby={error ? `${fieldId}-error` : undefined}
                       />
-                      <span className={styles.checkboxLabel}
+                      <label htmlFor={fieldId} className={styles.checkboxLabel}
                         style={isShowTimer ? { fontWeight: 700, fontSize: 15 } : undefined}>
                         {field.label ?? field.placeholder ?? ''}
-                      </span>
+                      </label>
                     </div>
                   );
                 }

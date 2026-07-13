@@ -56,17 +56,29 @@ function loadPlayerScript(src: string): Promise<void> {
   });
 }
 
-/** INode tree → raw hierarchy shape the player expects. `hydrated` overlays
- *  full question content (body/interactions/…) fetched separately, since the
- *  tree only carries that for whichever question is currently being edited. */
-function nodeToHierarchy(node: INode, hydrated?: Map<string, Record<string, unknown>>): Record<string, unknown> {
+/** INode tree → raw hierarchy shape the player expects.
+ *  updateNode() patches land in treeCache (and the node's top-level props via
+ *  deepMergeNode), NOT inside node.metadata — activeNodeMeta overlays
+ *  treeCache on top of node.metadata for exactly this reason (tree.store.ts).
+ *  Reading node.metadata alone here meant live edits (e.g. a section's Show
+ *  Solution/Show Hint toggle) never reached preview until a full reload
+ *  re-hydrated node.metadata from a fresh hierarchy read.
+ *  `hydrated` separately overlays full question content (body/interactions/…)
+ *  fetched via listQuestions, since the tree only carries that for whichever
+ *  question is currently being edited. */
+function nodeToHierarchy(
+  node: INode,
+  treeCache: Record<string, Record<string, unknown>>,
+  hydrated?: Map<string, Record<string, unknown>>,
+): Record<string, unknown> {
   const full = hydrated && (hydrated.get(node.identifier) ?? hydrated.get(node.id));
   return {
     ...(node.metadata ?? {}),
+    ...(treeCache[node.id] ?? treeCache[node.identifier] ?? {}),
     ...(full ?? {}),
     identifier: node.identifier,
     name: node.name,
-    children: (node.children ?? []).map((c) => nodeToHierarchy(c, hydrated)),
+    children: (node.children ?? []).map((c) => nodeToHierarchy(c, treeCache, hydrated)),
   };
 }
 
@@ -109,7 +121,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
           ?? DEFAULT_PLAYER_SCRIPT;
         await loadPlayerScript(scriptUrl);
 
-        const treeData = useTreeStore.getState().treeData;
+        const { treeData, treeCache } = useTreeStore.getState();
 
         // Old editor's full-set preview (qumlplayer-page.component.ts
         // initQumlPlayer) builds the ENTIRE hierarchy from the editor's own
@@ -126,7 +138,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
         let metadata: Record<string, unknown> = {};
         if (treeData[0]) {
           if (singleQuestionId) {
-            metadata = nodeToHierarchy(treeData[0]);
+            metadata = nodeToHierarchy(treeData[0], treeCache);
           } else {
             const questionIds = collectQuestionIds(treeData[0].children ?? []);
             const hydrated = new Map<string, Record<string, unknown>>();
@@ -138,7 +150,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
                 }
               } catch { /* fall back to whatever's already in the tree */ }
             }
-            metadata = nodeToHierarchy(treeData[0], hydrated);
+            metadata = nodeToHierarchy(treeData[0], treeCache, hydrated);
           }
         }
 
@@ -149,7 +161,10 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
           // metadata when a question carries body/interactions; otherwise it
           // re-fetches the full hierarchy and previews the entire set.
           const qNode = bfsFind(treeData, singleQuestionId);
-          let qFull: Record<string, unknown> = { ...(qNode?.metadata ?? {}) };
+          let qFull: Record<string, unknown> = {
+            ...(qNode?.metadata ?? {}),
+            ...(qNode ? (treeCache[qNode.id] ?? treeCache[qNode.identifier] ?? {}) : {}),
+          };
           if (draftQuestionMeta) {
             // Question editor's pre-save preview — live in-memory state
             // (old editor's previewContent()/getQuestionMetadata()), no fetch.
@@ -174,6 +189,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
           const children = parentNode?.isFolder
             ? [{
                 ...(parentNode.metadata ?? {}),
+                ...(treeCache[parentNode.id] ?? treeCache[parentNode.identifier] ?? {}),
                 identifier: parentNode.identifier,
                 name: parentNode.name,
                 childNodes: [singleQuestionId],
