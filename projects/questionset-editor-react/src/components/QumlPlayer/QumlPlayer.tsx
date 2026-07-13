@@ -18,6 +18,7 @@ import { listQuestions } from '../../api/question';
 import type { INode } from '../../types/editor';
 import styles from './QumlPlayer.module.scss';
 import { useLabels } from '../../hooks/useLabels';
+import { detectNodeKind } from '../../utils/nodeKind';
 
 const PLAYER_TAG = 'sunbird-quml-player';
 const DEFAULT_PLAYER_SCRIPT = '/assets/sunbird-quml-player.js';
@@ -55,14 +56,30 @@ function loadPlayerScript(src: string): Promise<void> {
   });
 }
 
-/** INode tree → raw hierarchy shape the player expects. */
-function nodeToHierarchy(node: INode): Record<string, unknown> {
+/** INode tree → raw hierarchy shape the player expects. `hydrated` overlays
+ *  full question content (body/interactions/…) fetched separately, since the
+ *  tree only carries that for whichever question is currently being edited. */
+function nodeToHierarchy(node: INode, hydrated?: Map<string, Record<string, unknown>>): Record<string, unknown> {
+  const full = hydrated && (hydrated.get(node.identifier) ?? hydrated.get(node.id));
   return {
     ...(node.metadata ?? {}),
+    ...(full ?? {}),
     identifier: node.identifier,
     name: node.name,
-    children: (node.children ?? []).map(nodeToHierarchy),
+    children: (node.children ?? []).map((c) => nodeToHierarchy(c, hydrated)),
   };
+}
+
+/** Collect every question node's identifier from the tree, recursively. */
+function collectQuestionIds(nodes: INode[]): string[] {
+  const ids: string[] = [];
+  const queue = [...nodes];
+  while (queue.length) {
+    const n = queue.shift()!;
+    if (detectNodeKind(n) === 'question') ids.push(n.identifier);
+    if (n.children) queue.push(...n.children);
+  }
+  return ids;
 }
 
 function bfsFind(nodes: INode[], id: string): INode | undefined {
@@ -94,12 +111,36 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
 
         const treeData = useTreeStore.getState().treeData;
 
-        // Full-set preview used to re-read the hierarchy here (old
-        // setUpdatedTreeNodeData), but the player web component re-fetches
-        // the hierarchy itself once mounted — that made every full-set
-        // preview fire the read call twice. Seed it from the in-memory tree
-        // instead; the player's own fetch brings it fully up to date.
-        let metadata: Record<string, unknown> = treeData[0] ? nodeToHierarchy(treeData[0]) : {};
+        // Old editor's full-set preview (qumlplayer-page.component.ts
+        // initQumlPlayer) builds the ENTIRE hierarchy from the editor's own
+        // live state and feeds it to the player directly — it never lets the
+        // player do its own fetch. The react player only trusts embedded
+        // question metadata when it carries body/interactions; otherwise it
+        // silently falls back to fetching the hierarchy itself. Only the
+        // currently-open question gets hydrated into the tree (hierarchy
+        // reads don't embed editorState/options/solutions), so every other
+        // question was missing content, forcing that fallback fetch — whose
+        // timing didn't reliably reflect a just-saved edit without a full
+        // editor reload. Bulk-hydrate every question up front instead, so
+        // the player never needs to fetch anything on its own.
+        let metadata: Record<string, unknown> = {};
+        if (treeData[0]) {
+          if (singleQuestionId) {
+            metadata = nodeToHierarchy(treeData[0]);
+          } else {
+            const questionIds = collectQuestionIds(treeData[0].children ?? []);
+            const hydrated = new Map<string, Record<string, unknown>>();
+            if (questionIds.length) {
+              try {
+                for (const q of await listQuestions(questionIds)) {
+                  const id = q.identifier as string | undefined;
+                  if (id) hydrated.set(id, q);
+                }
+              } catch { /* fall back to whatever's already in the tree */ }
+            }
+            metadata = nodeToHierarchy(treeData[0], hydrated);
+          }
+        }
 
         if (singleQuestionId) {
           // Old question.component.previewContent single-question settings.
