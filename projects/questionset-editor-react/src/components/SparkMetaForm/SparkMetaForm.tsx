@@ -186,7 +186,12 @@ function makeFieldValidator(field: ICategoryField) {
       return true;
     }
 
-    const str = value !== undefined && value !== null ? String(value).trim() : '';
+    const str = value !== undefined && value !== null
+      ? (inputType === 'richtext'
+          ? String(value).replace(/<[^>]*>/g, '').replace(/&nbsp;| /g, ' ')
+          : String(value)
+        ).trim()
+      : '';
 
     if (field.required && str.length === 0) {
       return `${field.label} is required`;
