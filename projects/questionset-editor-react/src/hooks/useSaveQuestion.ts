@@ -316,46 +316,44 @@ function buildAnswerHtml(type: QuestionType, options: IOption[], answerText: str
 }
 
 // ---------------------------------------------------------------------------
-// Hook
+// buildLiveQuestionMeta — the same metadata object useSaveQuestion sends to
+// the backend, built purely from live in-memory state (no API call). Used
+// both by save() below and by the question editor's pre-save preview, which
+// (like old editor's previewContent()/getQuestionMetadata()) must reflect
+// unsaved edits rather than the last-persisted version.
 // ---------------------------------------------------------------------------
-export function useSaveQuestion() {
+export function buildLiveQuestionMeta(): { questionName: string; questionMeta: Record<string, unknown> } | null {
   const {
     activeQuestion, questionType, questionBody, options, matchPairs, sequence,
-    hints, hintText, solutionText, solutionType, solutionAsset, solutionUUID,
-    answerText, sentence, difficultyLevel, bloomsLevel, maxScore,
+    hintText, solutionText, solutionType, solutionAsset, solutionUUID,
+    answerText, sentence, maxScore,
     isPartialScore, evalUnordered, layout, contentLang,
-    setIsDirty, setIsSaving,
-  } = useQuestionStore();
+  } = useQuestionStore.getState();
+  const { selectedNodeId, treeData } = useTreeStore.getState();
+  const config = useEditorStore.getState().editorConfig;
 
-  const config = useEditorStore((s) => s.editorConfig);
-  const { selectedNodeId, updateNode, replaceNodeId, treeData } = useTreeStore();
-  const { save: saveHierarchy } = useSaveHierarchy();
+  if (!questionType || !selectedNodeId) return null;
 
-  const save = useCallback(async (): Promise<boolean> => {
-    // In-flight guard (same as useSaveHierarchy) — the Save button disables on
-    // isSaving, but only after React re-renders; block the race window here.
-    if (!questionType || !selectedNodeId || useQuestionStore.getState().isSaving) return false;
+  const channel         = config?.context?.channel   ?? '';
+  const createdBy       = getUserId(config?.context);
+  const framework       = config?.context?.framework ?? '';
+  // qType / category / interaction come from the question type registry.
+  const typeDef = resolveQuestionType(questionType);
+  const primaryCategory = typeDef?.primaryCategory ?? 'Multiple Choice Question';
+  const qTypeValue = typeDef?.qType ?? 'MCQ';
 
-    const channel         = config?.context?.channel   ?? '';
-    const createdBy       = getUserId(config?.context);
-    const framework       = config?.context?.framework ?? '';
-    // qType / category / interaction come from the question type registry.
-    const typeDef = resolveQuestionType(questionType);
-    const primaryCategory = typeDef?.primaryCategory ?? 'Multiple Choice Question';
-    const qTypeValue = typeDef?.qType ?? 'MCQ';
+  // Details-form values (childMetadata: name/Marks/…) live in treeCache —
+  // they take precedence over auto-derived values, like the old editor.
+  const formMeta = (useTreeStore.getState().treeCache[selectedNodeId] ?? {}) as Record<string, unknown>;
+  const formName = typeof formMeta.name === 'string' && formMeta.name.trim() ? formMeta.name.trim() : undefined;
+  const formMarks = Number(formMeta.maxScore);
 
-    // Details-form values (childMetadata: name/Marks/…) live in treeCache —
-    // they take precedence over auto-derived values, like the old editor.
-    const formMeta = (useTreeStore.getState().treeCache[selectedNodeId] ?? {}) as Record<string, unknown>;
-    const formName = typeof formMeta.name === 'string' && formMeta.name.trim() ? formMeta.name.trim() : undefined;
-    const formMarks = Number(formMeta.maxScore);
+  const isExisting = activeQuestion?.identifier && !activeQuestion.identifier.startsWith('temp-');
+  const autoName = ((questionBody || '').replace(/<[^>]+>/g, '').slice(0, 60).trim() || 'Untitled Question');
 
-    const isExisting = activeQuestion?.identifier && !activeQuestion.identifier.startsWith('temp-');
-    const autoName = ((questionBody || '').replace(/<[^>]+>/g, '').slice(0, 60).trim() || 'Untitled Question');
-
-    const questionName = formName
-      ?? (isExisting ? activeQuestion?.name : undefined)
-      ?? autoName;
+  const questionName = formName
+    ?? (isExisting ? activeQuestion?.name : undefined)
+    ?? autoName;
 
     // Old editor's real save path (question.component.ts getOutcomeDeclaration)
     // always uses the Marks form field as outcomeDeclaration.maxScore.defaultValue,
@@ -449,99 +447,120 @@ export function useSaveQuestion() {
       if (typeof defaultLicense === 'string' && defaultLicense) taxonomy.license = defaultLicense;
     }
 
+    const questionMeta: Record<string, unknown> = {
+      mimeType: 'application/vnd.sunbird.question',
+      media: questionMedia,
+      editorState: {
+        ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
+        ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
+        ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
+      },
+      body:        buildBodyHtml(questionType, questionBody),
+      answer:      buildAnswerHtml(questionType, options, answerText),
+      ...(questionType === 'mcq' ? { templateId: mcqTemplateId(layout) } : {}),
+      ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
+      ...(questionType === 'ftb' ? {
+        isPartialScore,
+        evalUnordered,
+        scoringMode: 'responseProcessing',
+        responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
+      } : {}),
+      ...(questionType === 'mtf' ? {
+        pairs: wrapPairs(matchPairs),
+        isPartialScore,
+        scoringMode: 'responseProcessing',
+        responseProcessing: { template: 'MAP_RESPONSE' },
+      } : {}),
+      ...(questionType === 'seq' ? {
+        correctOrder: seqOrder(sequence),
+        templateId: `seq-${layout === 'horizontal' ? 'horizontal' : 'vertical'}`,
+        ...(isPartialScore ? { isPartialScore: true } : {}),
+        scoringMode: 'responseProcessing',
+        responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
+      } : {}),
+      ...(questionType === 'reo' ? {
+        sentence,
+        scoringMode: 'responseProcessing',
+        responseProcessing: { template: 'MATCH_CORRECT' },
+      } : {}),
+      maxScore:    effectiveMaxScore,
+      name:        questionName,
+      qType:       qTypeValue,
+      primaryCategory,
+      // Old editor sends interaction fields only for interactive types —
+      // SA payloads carry just interactions:{} (no interactionTypes/
+      // responseDeclaration/hints keys).
+      ...(hasInteractions ? {
+        interactionTypes: [typeDef?.interactionType ?? 'text'],
+        responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence, evalUnordered),
+      } : {}),
+      // Old MTF/SEQ payloads carry no hints key unless a hint is set.
+      // hints key only when a hint actually exists — no empty {} with a
+      // dangling outcomeDeclaration.hint reference.
+      ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
+      interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
+      outcomeDeclaration: {
+        maxScore: {
+          cardinality: maxScoreCardinality,
+          type: 'integer',
+          defaultValue: effectiveMaxScore,
+        },
+        hint: {
+          cardinality: 'single',
+          type: 'string',
+          defaultValue: Object.keys(metadataHints).length ? hintUuid : '',
+        },
+      },
+      solutions: metadataSolutions,
+      createdBy,
+      channel,
+      framework,
+      ...taxonomy,
+      // difficultyLevel/bloomsLevel are NOT valid Question schema
+      // properties — the old editor never sends them in nodesModified.
+    };
+
+    applyContentI18n(questionMeta, {
+      type: questionType,
+      i18n: i18nSnapshot,
+      options,
+      matchPairs,
+      hintUuid,
+      solutionId,
+      solutionAsset: i18nSnapshot.solutionAsset,
+      assetSolutionHtml,
+      buildBodyHtml,
+      answerWrap,
+    });
+
+    return { questionName, questionMeta };
+}
+
+// ---------------------------------------------------------------------------
+// Hook
+// ---------------------------------------------------------------------------
+export function useSaveQuestion() {
+  const { selectedNodeId, updateNode, replaceNodeId } = useTreeStore();
+  const { save: saveHierarchy } = useSaveHierarchy();
+
+  const save = useCallback(async (): Promise<boolean> => {
+    // In-flight guard (same as useSaveHierarchy) — the Save button disables on
+    // isSaving, but only after React re-renders; block the race window here.
+    if (!selectedNodeId || useQuestionStore.getState().isSaving) return false;
+
+    const { setIsDirty, setIsSaving, activeQuestion } = useQuestionStore.getState();
+    const isExisting = activeQuestion?.identifier && !activeQuestion.identifier.startsWith('temp-');
+
     setIsSaving(true);
     try {
+      const built = buildLiveQuestionMeta();
+      if (!built) return false;
+      const { questionName, questionMeta } = built;
 
       if (isExisting) {
         // ── Update existing question via hierarchy update ───────────────────
         // Old editor always sends full metadata in nodesModified for both new
         // and modified questions — same field set, isNew:false for existing.
-        const questionMeta: Record<string, unknown> = {
-          mimeType: 'application/vnd.sunbird.question',
-          media: questionMedia,
-          editorState: {
-            ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
-            ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
-            ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
-          },
-          body:        buildBodyHtml(questionType, questionBody),
-          answer:      buildAnswerHtml(questionType, options, answerText),
-          ...(questionType === 'mcq' ? { templateId: mcqTemplateId(layout) } : {}),
-          ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
-          ...(questionType === 'ftb' ? {
-            isPartialScore,
-            evalUnordered,
-            scoringMode: 'responseProcessing',
-            responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
-          } : {}),
-          ...(questionType === 'mtf' ? {
-            pairs: wrapPairs(matchPairs),
-            isPartialScore,
-            scoringMode: 'responseProcessing',
-            responseProcessing: { template: 'MAP_RESPONSE' },
-          } : {}),
-          ...(questionType === 'seq' ? {
-            correctOrder: seqOrder(sequence),
-            templateId: `seq-${layout === 'horizontal' ? 'horizontal' : 'vertical'}`,
-            ...(isPartialScore ? { isPartialScore: true } : {}),
-            scoringMode: 'responseProcessing',
-            responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
-          } : {}),
-          ...(questionType === 'reo' ? {
-            sentence,
-            scoringMode: 'responseProcessing',
-            responseProcessing: { template: 'MATCH_CORRECT' },
-          } : {}),
-          maxScore:    effectiveMaxScore,
-          name:        questionName,
-          qType:       qTypeValue,
-          primaryCategory,
-          // Old editor sends interaction fields only for interactive types —
-          // SA payloads carry just interactions:{} (no interactionTypes/
-          // responseDeclaration/hints keys).
-          ...(hasInteractions ? {
-            interactionTypes: [typeDef?.interactionType ?? 'text'],
-            responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence, evalUnordered),
-          } : {}),
-          // Old MTF/SEQ payloads carry no hints key unless a hint is set.
-          // hints key only when a hint actually exists — no empty {} with a
-          // dangling outcomeDeclaration.hint reference.
-          ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
-          interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
-          outcomeDeclaration: {
-            maxScore: {
-              cardinality: maxScoreCardinality,
-              type: 'integer',
-              defaultValue: effectiveMaxScore,
-            },
-            hint: {
-              cardinality: 'single',
-              type: 'string',
-              defaultValue: Object.keys(metadataHints).length ? hintUuid : '',
-            },
-          },
-          solutions: metadataSolutions,
-          createdBy,
-          channel,
-          framework,
-          ...taxonomy,
-          // difficultyLevel/bloomsLevel are NOT valid Question schema
-          // properties — the old editor never sends them in nodesModified.
-        };
-
-        applyContentI18n(questionMeta, {
-          type: questionType,
-          i18n: i18nSnapshot,
-          options,
-          matchPairs,
-          hintUuid,
-          solutionId,
-          solutionAsset: i18nSnapshot.solutionAsset,
-          assetSolutionHtml,
-          buildBodyHtml,
-          answerWrap,
-        });
-
         updateNode(selectedNodeId, { name: questionName, ...questionMeta });
         if (await saveHierarchy()) {
           notifySuccess(label('messages.success.013', 'Question saved'));
@@ -551,95 +570,8 @@ export function useSaveQuestion() {
         }
         return false;
       } else {
-        // ── New question — build UUID + full metadata, create via hierarchy ──
+        // ── New question — build UUID, create via hierarchy ─────────────────
         const questionUuid = genUuid();
-
-        const questionMeta: Record<string, unknown> = {
-          mimeType: 'application/vnd.sunbird.question',
-          media: questionMedia,
-          editorState: {
-            ...buildEditorState(questionType, questionBody, options, answerText, { isPartialScore, evalUnordered }, matchPairs, sequence, sentence),
-            ...(editorStateSolutions ? { solutions: editorStateSolutions } : {}),
-            ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
-          },
-          body:        buildBodyHtml(questionType, questionBody),
-          answer:      buildAnswerHtml(questionType, options, answerText),
-          ...(questionType === 'mcq' ? { templateId: mcqTemplateId(layout) } : {}),
-          ...(questionType === 'boolean' ? { templateId: 'boolean' } : {}),
-          ...(questionType === 'ftb' ? {
-            isPartialScore,
-            evalUnordered,
-            scoringMode: 'responseProcessing',
-            responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
-          } : {}),
-          ...(questionType === 'mtf' ? {
-            pairs: wrapPairs(matchPairs),
-            isPartialScore,
-            scoringMode: 'responseProcessing',
-            responseProcessing: { template: 'MAP_RESPONSE' },
-          } : {}),
-          ...(questionType === 'seq' ? {
-            correctOrder: seqOrder(sequence),
-            templateId: `seq-${layout === 'horizontal' ? 'horizontal' : 'vertical'}`,
-            ...(isPartialScore ? { isPartialScore: true } : {}),
-            scoringMode: 'responseProcessing',
-            responseProcessing: { template: isPartialScore ? 'MAP_RESPONSE' : 'MATCH_CORRECT' },
-          } : {}),
-          ...(questionType === 'reo' ? {
-            sentence,
-            scoringMode: 'responseProcessing',
-            responseProcessing: { template: 'MATCH_CORRECT' },
-          } : {}),
-          maxScore:    effectiveMaxScore,
-          name:        questionName,
-          qType:       qTypeValue,
-          primaryCategory,
-          // Old editor sends interaction fields only for interactive types —
-          // SA payloads carry just interactions:{} (no interactionTypes/
-          // responseDeclaration/hints keys).
-          ...(hasInteractions ? {
-            interactionTypes: [typeDef?.interactionType ?? 'text'],
-            responseDeclaration: buildResponseDeclaration(questionType, options, questionBody, matchPairs, isPartialScore, sequence, sentence, evalUnordered),
-          } : {}),
-          // Old MTF/SEQ payloads carry no hints key unless a hint is set.
-          // hints key only when a hint actually exists — no empty {} with a
-          // dangling outcomeDeclaration.hint reference.
-          ...(Object.keys(metadataHints).length ? { hints: metadataHints } : {}),
-          interactions: buildInteractions(questionType, options, questionBody, matchPairs, sequence, sentence),
-          outcomeDeclaration: {
-            maxScore: {
-              cardinality: maxScoreCardinality,
-              type: 'integer',
-              defaultValue: effectiveMaxScore,
-            },
-            hint: {
-              cardinality: 'single',
-              type: 'string',
-              defaultValue: Object.keys(metadataHints).length ? hintUuid : '',
-            },
-          },
-          solutions: metadataSolutions,
-          createdBy,
-          channel,
-          framework,
-          ...taxonomy,
-          // difficultyLevel/bloomsLevel are NOT valid Question schema
-          // properties — the old editor never sends them in nodesModified.
-        };
-
-        applyContentI18n(questionMeta, {
-          type: questionType,
-          i18n: i18nSnapshot,
-          options,
-          matchPairs,
-          hintUuid,
-          solutionId,
-          solutionAsset: i18nSnapshot.solutionAsset,
-          assetSolutionHtml,
-          buildBodyHtml,
-          answerWrap,
-        });
-
         // Replace temp- node with UUID, store full metadata, trigger hierarchy save
         replaceNodeId(selectedNodeId, questionUuid);
         updateNode(questionUuid, { name: questionName, ...questionMeta });
@@ -658,14 +590,7 @@ export function useSaveQuestion() {
     } finally {
       setIsSaving(false);
     }
-  }, [
-    activeQuestion, questionType, questionBody, options, matchPairs, sequence,
-    solutionText, solutionType, solutionAsset, solutionUUID,
-    answerText, sentence, hints, hintText, difficultyLevel, bloomsLevel, maxScore,
-    isPartialScore, evalUnordered, layout, contentLang,
-    config, selectedNodeId, updateNode, replaceNodeId, treeData, saveHierarchy,
-    setIsDirty, setIsSaving,
-  ]);
+  }, [selectedNodeId, updateNode, replaceNodeId, saveHierarchy]);
 
   return { save };
 }

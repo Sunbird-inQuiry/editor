@@ -27,6 +27,13 @@ interface QumlPlayerProps {
   questionSetId: string;
   /** When set, previews just this question (old editor question preview). */
   singleQuestionId?: string;
+  /**
+   * Pre-built live question metadata (useSaveQuestion's buildLiveQuestionMeta)
+   * — when provided alongside singleQuestionId, this is used directly instead
+   * of fetching the question, so unsaved edits in the question editor show up
+   * in preview (old editor's previewContent()/getQuestionMetadata()).
+   */
+  draftQuestionMeta?: Record<string, unknown>;
   /** Render embedded in the page instead of a full-screen overlay. */
   inline?: boolean;
   onClose?: () => void;
@@ -68,7 +75,7 @@ function bfsFind(nodes: INode[], id: string): INode | undefined {
   return undefined;
 }
 
-const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId, inline = false, onClose }) => {
+const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId, draftQuestionMeta, inline = false, onClose }) => {
   const L = useLabels();
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -102,10 +109,16 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
           // re-fetches the full hierarchy and previews the entire set.
           const qNode = bfsFind(treeData, singleQuestionId);
           let qFull: Record<string, unknown> = { ...(qNode?.metadata ?? {}) };
-          try {
-            const [fetched] = await listQuestions([singleQuestionId]);
-            if (fetched) qFull = { ...qFull, ...fetched };
-          } catch { /* fall back to tree metadata */ }
+          if (draftQuestionMeta) {
+            // Question editor's pre-save preview — live in-memory state
+            // (old editor's previewContent()/getQuestionMetadata()), no fetch.
+            qFull = { ...qFull, ...draftQuestionMeta };
+          } else {
+            try {
+              const [fetched] = await listQuestions([singleQuestionId]);
+              if (fetched) qFull = { ...qFull, ...fetched };
+            } catch { /* fall back to tree metadata */ }
+          }
           const qMeta = {
             ...qFull,
             identifier: singleQuestionId,
@@ -183,7 +196,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
 
     void init();
     return () => { cancelled = true; };
-  }, [questionSetId, singleQuestionId]);
+  }, [questionSetId, singleQuestionId, draftQuestionMeta]);
 
   // Close on Escape key
   useEffect(() => {
