@@ -46,7 +46,13 @@ export default defineConfig(({ mode }) => {
         // Single-file bundle: hosts copy only index.js + style.css. Without
         // this, React.lazy components become separate chunks that 404 when
         // the host doesn't copy them (QuestionEditor-*.js etc.).
-        output: { inlineDynamicImports: true },
+        output: {
+          inlineDynamicImports: true,
+          // Vite's default CSS asset name is derived from the package name —
+          // force it to style.css, matching package.json's exports map
+          // ("./dist/style.css") and the test harness's stylesheet link.
+          assetFileNames: (asset) => (asset.name?.endsWith('.css') ? 'style.css' : '[name][extname]'),
+        },
       },
     },
 
