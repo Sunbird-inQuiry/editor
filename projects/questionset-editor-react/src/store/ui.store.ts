@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { MissingFieldGroup } from '../components/modals/MissingRequiredFieldsModal';
 
 export type ModalType =
   | 'publishChecklist'
@@ -21,6 +22,11 @@ interface UiState {
    *  locked until the question is saved or cancelled. */
   questionEditorOpen: boolean;
   setQuestionEditorOpen: (open: boolean) => void;
+  /** Missing-required-fields groups to show in MissingRequiredFieldsModal.
+   *  Shared so both the toolbar's Save-as-Draft and OutlineTree's auto-save
+   *  (on Add Section / Add Question) can surface it. */
+  missingFieldGroups: MissingFieldGroup[] | null;
+  setMissingFieldGroups: (groups: MissingFieldGroup[] | null) => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -32,4 +38,6 @@ export const useUiStore = create<UiState>((set) => ({
   setPendingEditorOpen: (nodeId) => set({ pendingEditorOpen: nodeId }),
   questionEditorOpen: false,
   setQuestionEditorOpen: (open) => set({ questionEditorOpen: open }),
+  missingFieldGroups: null,
+  setMissingFieldGroups: (groups) => set({ missingFieldGroups: groups }),
 }));

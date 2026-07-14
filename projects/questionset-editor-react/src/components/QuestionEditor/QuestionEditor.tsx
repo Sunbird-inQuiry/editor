@@ -3,7 +3,7 @@ import { Icon } from '../shared/Icon';
 import SharedRichToolbar from '../shared/SharedRichToolbar';
 import ContentEditable from '../shared/ContentEditable';
 import { useQuestionStore } from '../../store/question.store';
-import { useSaveQuestion } from '../../hooks/useSaveQuestion';
+import { useSaveQuestion, buildLiveQuestionMeta } from '../../hooks/useSaveQuestion';
 import { useEditorStore } from '../../store/editor.store';
 import { getUserId, isEditingAllowed } from '../../utils/context';
 import { labelFrom } from '../../utils/labels';
@@ -375,6 +375,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
   const activeQuestion = useQuestionStore((st) => st.activeQuestion);
   const [confirmBackOpen, setConfirmBackOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [draftPreviewMeta, setDraftPreviewMeta] = useState<Record<string, unknown> | undefined>(undefined);
   const selectedNodeId = useTreeStore((st) => st.selectedNodeId);
 
   // Old editor shows a confirmation before leaving an unsaved question.
@@ -484,7 +485,12 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
           <button
             type="button"
             className="ce-btn ghost"
-            onClick={() => setPreviewOpen(true)}
+            onClick={() => {
+              // Live in-memory state (old editor's previewContent()/
+              // getQuestionMetadata()) — reflects unsaved edits, no save needed.
+              setDraftPreviewMeta(buildLiveQuestionMeta()?.questionMeta);
+              setPreviewOpen(true);
+            }}
             disabled={!!invalidReason}
             title={invalidReason ?? L('ui.previewThisQuestion', 'Preview this question')}
           >
@@ -514,6 +520,7 @@ export default function QuestionEditor({ editorMode, onBack }: QuestionEditorPro
           <QumlPlayer
             questionSetId={getContentId(editorConfigCtx)}
             singleQuestionId={selectedNodeId ?? undefined}
+            draftQuestionMeta={draftPreviewMeta}
             onClose={() => setPreviewOpen(false)}
           />
         </Suspense>

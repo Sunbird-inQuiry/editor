@@ -18,6 +18,7 @@ import { listQuestions } from '../../api/question';
 import type { INode } from '../../types/editor';
 import styles from './QumlPlayer.module.scss';
 import { useLabels } from '../../hooks/useLabels';
+import { detectNodeKind } from '../../utils/nodeKind';
 
 const PLAYER_TAG = 'sunbird-quml-player';
 const DEFAULT_PLAYER_SCRIPT = '/assets/sunbird-quml-player.js';
@@ -27,6 +28,13 @@ interface QumlPlayerProps {
   questionSetId: string;
   /** When set, previews just this question (old editor question preview). */
   singleQuestionId?: string;
+  /**
+   * Pre-built live question metadata (useSaveQuestion's buildLiveQuestionMeta)
+   * — when provided alongside singleQuestionId, this is used directly instead
+   * of fetching the question, so unsaved edits in the question editor show up
+   * in preview (old editor's previewContent()/getQuestionMetadata()).
+   */
+  draftQuestionMeta?: Record<string, unknown>;
   /** Render embedded in the page instead of a full-screen overlay. */
   inline?: boolean;
   onClose?: () => void;
@@ -48,14 +56,42 @@ function loadPlayerScript(src: string): Promise<void> {
   });
 }
 
-/** INode tree → raw hierarchy shape the player expects. */
-function nodeToHierarchy(node: INode): Record<string, unknown> {
+/** INode tree → raw hierarchy shape the player expects.
+ *  updateNode() patches land in treeCache (and the node's top-level props via
+ *  deepMergeNode), NOT inside node.metadata — activeNodeMeta overlays
+ *  treeCache on top of node.metadata for exactly this reason (tree.store.ts).
+ *  Reading node.metadata alone here meant live edits (e.g. a section's Show
+ *  Solution/Show Hint toggle) never reached preview until a full reload
+ *  re-hydrated node.metadata from a fresh hierarchy read.
+ *  `hydrated` separately overlays full question content (body/interactions/…)
+ *  fetched via listQuestions, since the tree only carries that for whichever
+ *  question is currently being edited. */
+function nodeToHierarchy(
+  node: INode,
+  treeCache: Record<string, Record<string, unknown>>,
+  hydrated?: Map<string, Record<string, unknown>>,
+): Record<string, unknown> {
+  const full = hydrated && (hydrated.get(node.identifier) ?? hydrated.get(node.id));
   return {
     ...(node.metadata ?? {}),
+    ...(treeCache[node.id] ?? treeCache[node.identifier] ?? {}),
+    ...(full ?? {}),
     identifier: node.identifier,
     name: node.name,
-    children: (node.children ?? []).map(nodeToHierarchy),
+    children: (node.children ?? []).map((c) => nodeToHierarchy(c, treeCache, hydrated)),
   };
+}
+
+/** Collect every question node's identifier from the tree, recursively. */
+function collectQuestionIds(nodes: INode[]): string[] {
+  const ids: string[] = [];
+  const queue = [...nodes];
+  while (queue.length) {
+    const n = queue.shift()!;
+    if (detectNodeKind(n) === 'question') ids.push(n.identifier);
+    if (n.children) queue.push(...n.children);
+  }
+  return ids;
 }
 
 function bfsFind(nodes: INode[], id: string): INode | undefined {
@@ -68,7 +104,7 @@ function bfsFind(nodes: INode[], id: string): INode | undefined {
   return undefined;
 }
 
-const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId, inline = false, onClose }) => {
+const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId, draftQuestionMeta, inline = false, onClose }) => {
   const L = useLabels();
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -85,14 +121,38 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
           ?? DEFAULT_PLAYER_SCRIPT;
         await loadPlayerScript(scriptUrl);
 
-        const treeData = useTreeStore.getState().treeData;
+        const { treeData, treeCache } = useTreeStore.getState();
 
-        // Full-set preview used to re-read the hierarchy here (old
-        // setUpdatedTreeNodeData), but the player web component re-fetches
-        // the hierarchy itself once mounted — that made every full-set
-        // preview fire the read call twice. Seed it from the in-memory tree
-        // instead; the player's own fetch brings it fully up to date.
-        let metadata: Record<string, unknown> = treeData[0] ? nodeToHierarchy(treeData[0]) : {};
+        // Old editor's full-set preview (qumlplayer-page.component.ts
+        // initQumlPlayer) builds the ENTIRE hierarchy from the editor's own
+        // live state and feeds it to the player directly — it never lets the
+        // player do its own fetch. The react player only trusts embedded
+        // question metadata when it carries body/interactions; otherwise it
+        // silently falls back to fetching the hierarchy itself. Only the
+        // currently-open question gets hydrated into the tree (hierarchy
+        // reads don't embed editorState/options/solutions), so every other
+        // question was missing content, forcing that fallback fetch — whose
+        // timing didn't reliably reflect a just-saved edit without a full
+        // editor reload. Bulk-hydrate every question up front instead, so
+        // the player never needs to fetch anything on its own.
+        let metadata: Record<string, unknown> = {};
+        if (treeData[0]) {
+          if (singleQuestionId) {
+            metadata = nodeToHierarchy(treeData[0], treeCache);
+          } else {
+            const questionIds = collectQuestionIds(treeData[0].children ?? []);
+            const hydrated = new Map<string, Record<string, unknown>>();
+            if (questionIds.length) {
+              try {
+                for (const q of await listQuestions(questionIds)) {
+                  const id = q.identifier as string | undefined;
+                  if (id) hydrated.set(id, q);
+                }
+              } catch { /* fall back to whatever's already in the tree */ }
+            }
+            metadata = nodeToHierarchy(treeData[0], treeCache, hydrated);
+          }
+        }
 
         if (singleQuestionId) {
           // Old question.component.previewContent single-question settings.
@@ -101,11 +161,20 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
           // metadata when a question carries body/interactions; otherwise it
           // re-fetches the full hierarchy and previews the entire set.
           const qNode = bfsFind(treeData, singleQuestionId);
-          let qFull: Record<string, unknown> = { ...(qNode?.metadata ?? {}) };
-          try {
-            const [fetched] = await listQuestions([singleQuestionId]);
-            if (fetched) qFull = { ...qFull, ...fetched };
-          } catch { /* fall back to tree metadata */ }
+          let qFull: Record<string, unknown> = {
+            ...(qNode?.metadata ?? {}),
+            ...(qNode ? (treeCache[qNode.id] ?? treeCache[qNode.identifier] ?? {}) : {}),
+          };
+          if (draftQuestionMeta) {
+            // Question editor's pre-save preview — live in-memory state
+            // (old editor's previewContent()/getQuestionMetadata()), no fetch.
+            qFull = { ...qFull, ...draftQuestionMeta };
+          } else {
+            try {
+              const [fetched] = await listQuestions([singleQuestionId]);
+              if (fetched) qFull = { ...qFull, ...fetched };
+            } catch { /* fall back to tree metadata */ }
+          }
           const qMeta = {
             ...qFull,
             identifier: singleQuestionId,
@@ -120,6 +189,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
           const children = parentNode?.isFolder
             ? [{
                 ...(parentNode.metadata ?? {}),
+                ...(treeCache[parentNode.id] ?? treeCache[parentNode.identifier] ?? {}),
                 identifier: parentNode.identifier,
                 name: parentNode.name,
                 childNodes: [singleQuestionId],
@@ -183,7 +253,7 @@ const QumlPlayer: React.FC<QumlPlayerProps> = ({ questionSetId, singleQuestionId
 
     void init();
     return () => { cancelled = true; };
-  }, [questionSetId, singleQuestionId]);
+  }, [questionSetId, singleQuestionId, draftQuestionMeta]);
 
   // Close on Escape key
   useEffect(() => {

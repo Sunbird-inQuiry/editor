@@ -4,10 +4,10 @@ import { useLabels } from '../../hooks/useLabels';
 import { useTreeStore } from '../../store/tree.store';
 import { useEditorStore } from '../../store/editor.store';
 import { useUiStore } from '../../store/ui.store';
+import { useValidateAndSave } from '../../hooks/useValidateAndSave';
 import type { INode } from '../../types/editor';
 import { resolveQuestionType } from '../../registry';
 import { detectNodeKind } from '../../utils/nodeKind';
-import { notifyError } from '../../utils/notify';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -276,6 +276,7 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
   const deleteNode = useTreeStore((s) => s.deleteNode);
   const editorMode = useEditorStore((s) => s.editorMode);
   const { openModal } = useUiStore();
+  const validateAndSave = useValidateAndSave();
 
   const isEditMode = editorMode === 'edit';
 
@@ -306,24 +307,19 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
     selectNode(id);
   }, [selectNode]);
 
-  const handleAddSection = useCallback((parentId: string) => {
-    const root = useTreeStore.getState().treeData[0];
-    const rootSaved = !!useEditorStore.getState().lastSaved || (root?.children?.length ?? 0) > 0;
-    if (!rootSaved) {
-      notifyError(L('ui.saveSectionFirst', 'Please save the question set before adding a section.'));
-      return;
-    }
+  const handleAddSection = useCallback(async (parentId: string) => {
+    if (!(await validateAndSave())) return;
     addNode(parentId, 'section');
-  }, [addNode, L]);
+  }, [addNode, validateAndSave]);
 
-  const handleAddQuestion = useCallback((parentId: string) => {
-    const parentNode = useTreeStore.getState().getNodeById(parentId);
-    if (parentNode?.identifier.startsWith('temp-')) {
-      notifyError(L('ui.saveQuestionFirst', 'Please save the section before adding a question.'));
-      return;
-    }
-    openModal('questionTypeSelector', { parentId });
-  }, [openModal, L]);
+  const handleAddQuestion = useCallback(async (parentId: string) => {
+    if (!(await validateAndSave())) return;
+    // save() swaps any unsaved section's temp- id for the real backend id via
+    // replaceNodeId, which keeps selectedNodeId in sync — re-resolve the
+    // parent from it so we don't open the modal against a now-stale temp id.
+    const finalParentId = useTreeStore.getState().selectedNodeId ?? parentId;
+    openModal('questionTypeSelector', { parentId: finalParentId });
+  }, [openModal, validateAndSave]);
 
   const handleDelete = useCallback((id: string) => {
     openModal('confirmDelete', { nodeId: id });
@@ -334,31 +330,23 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
   }, []);
 
   const rootId = treeData[0]?.id;
-  const lastSaved = useEditorStore((s) => s.lastSaved);
 
   // Determine selected node kind to conditionally disable footer buttons
   const selectedNode = selectedNodeId
     ? useTreeStore.getState().getNodeById(selectedNodeId)
     : null;
   const selectedKind = selectedNode ? detectNodeKind(selectedNode) : null;
-  const addSectionDisabled  = selectedKind === 'section' || selectedKind === 'question';
-  const addQuestionDisabled = selectedKind === 'root'    || selectedKind === 'question';
+  const addSectionDisabled = selectedKind === 'section' || selectedKind === 'question';
 
-  // Resolve parent for "Add Question" (only used when not disabled)
+  // Resolve parent for "Add Question" — only a selected section, or a
+  // selected question's parent section, is a valid parent; never fall back
+  // to rootId, or a question would be added directly under the questionset.
   const questionParentId = selectedKind === 'section'
-    ? (selectedNodeId ?? rootId)
-    : rootId;
-
-  // Dimmed (but still clickable, so the click surfaces the "save first"
-  // toast from handleAddSection/handleAddQuestion) until the prerequisite
-  // is saved: the root questionset for "Add Section", the selected section
-  // for "Add Question". A questionset that already has sections was clearly
-  // saved in a previous session, so it isn't blocked just for lacking a
-  // lastSaved timestamp in THIS one.
-  const rootNeedsSaveFirst = !lastSaved && (treeData[0]?.children?.length ?? 0) === 0;
-  const addSectionNeedsSaveFirst = !addSectionDisabled && rootNeedsSaveFirst;
-  const sectionNeedsSaveFirst = selectedKind === 'section' && !!selectedNode?.identifier.startsWith('temp-');
-  const addQuestionNeedsSaveFirst = !addQuestionDisabled && sectionNeedsSaveFirst;
+    ? selectedNodeId
+    : selectedKind === 'question'
+      ? selectedNode?.parent ?? null
+      : null;
+  const addQuestionDisabled = !questionParentId;
 
   return (
     <>
@@ -401,14 +389,14 @@ const OutlineTree: React.FC<OutlineTreeProps> = ({ onCollapse }) => {
           <button
             onClick={() => handleAddSection(rootId)}
             disabled={addSectionDisabled}
-            style={(addSectionDisabled || addSectionNeedsSaveFirst) ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+            style={addSectionDisabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
           >
             <Icon name="plus" size={15} />{L('ui.addSection', 'Add Section')}
           </button>
           <button
-            onClick={() => handleAddQuestion(questionParentId ?? rootId)}
+            onClick={() => questionParentId && handleAddQuestion(questionParentId)}
             disabled={addQuestionDisabled}
-            style={(addQuestionDisabled || addQuestionNeedsSaveFirst) ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+            style={addQuestionDisabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
           >
             <Icon name="plus" size={15} />{L('ui.addQuestion', 'Add Question')}
           </button>
