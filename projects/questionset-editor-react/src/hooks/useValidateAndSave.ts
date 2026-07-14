@@ -23,7 +23,7 @@ export function useValidateAndSave() {
     const { rootFormConfig, unitFormConfig } = useEditorStore.getState();
     const { treeData, treeCache } = useTreeStore.getState();
 
- const liveMeta = (node: INode) =>
+    const liveMeta = (node: INode) =>
       ({ ...(node.metadata ?? {}), ...(treeCache[node.id] ?? {}) }) as Record<string, unknown>;
 
     const TAB_LABELS: Record<string, string> = {
@@ -45,7 +45,7 @@ export function useValidateAndSave() {
     const rootNode = treeData[0];
     if (rootNode) addMissing(rootFormConfig, liveMeta(rootNode));
 
- const sections: typeof treeData = [];
+    const sections: typeof treeData = [];
     const queue = [...(rootNode?.children ?? [])];
     while (queue.length) {
       const n = queue.shift()!;
@@ -61,6 +61,10 @@ export function useValidateAndSave() {
       setMissingFieldGroups(groups);
       return false;
     }
+
+    // Skip the network round-trip when nothing is actually dirty (e.g.
+    // rapidly adding several sections/questions in a row).
+    if (!useEditorStore.getState().isDirty) return true;
 
     return save();
   }, [save, setMissingFieldGroups]);
